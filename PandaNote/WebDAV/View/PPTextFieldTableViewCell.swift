@@ -42,10 +42,10 @@ class PPTextFieldTableViewCell: PandaFastTableViewCell {
             self.serverNameTF.text = "http://dav.jianguoyun.com/dav"
         }
         else if self.serverNameTF.placeholder == "账号" {
-            self.serverNameTF.text = "948567749@qq.com"
+            self.serverNameTF.text = "9@qq.com"
         }
         else if self.serverNameTF.placeholder == "密码" {
-            self.serverNameTF.text = "a6854vbk7m9n3t8i"
+            self.serverNameTF.text = ""
         }
         else if self.serverNameTF.placeholder == "备注" {
             self.serverNameTF.text = "坚果云"

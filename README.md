@@ -8,7 +8,13 @@
 
 ## What ？
 
-主要用来写markdown笔记，并实现云同步，国内可使用坚果云或自己搭建WebDAV服务，所有文件保存在第三方服务器，Dropbox、GoogleDrive暂不支持
+主要用来写 markdown 笔记，并实现云同步，国内可使用坚果云或自己搭建WebDAV服务，所有文件保存在第三方服务器，Dropbox、GoogleDrive暂不支持
+- [ ] markdown原生渲染
+- [x] markdown网页渲染
+- [x] markdown编辑保存
+- [ ] API请求、所有大文件缓存到磁盘
+- [x] 图片预览、原图分享到微信、以微信表情分享
+- [ ] 读取剪切板查看淘宝京东价格曲线
 
 ##  How ？
 
