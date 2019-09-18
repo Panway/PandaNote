@@ -15,12 +15,12 @@
 ### Build and Run
 
 ```bash
-git clone https://github.com/Panway/WebDAV_iOS.git
+git clone https://github.com/Panway/PandaNote.git
 
-cd WebDAV_iOS/PandaNote
-
+cd PandaNote
+#安装依赖
 pod install
-
+#打开
 open PandaNote.xcworkspace
 ```
 
