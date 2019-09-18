@@ -1,0 +1,79 @@
+PODS:
+  - Alamofire (4.8.2)
+  - Down (0.8.5)
+  - FilesProvider (0.26.0)
+  - FLEX (3.0.0)
+  - Kingfisher (4.10.1)
+  - MBProgressHUD (1.1.0)
+  - MJRefresh (3.2.0)
+  - PINCache (2.3)
+  - PPiOSKit/CommomViews (0.0.1)
+  - PPiOSKit/CrashCatcher (0.0.1):
+    - PPiOSKit/RuntimeTool
+  - PPiOSKit/RuntimeTool (0.0.1)
+  - PPiOSKit/SwipePopGesture (0.0.1)
+  - SKPhotoBrowser (6.1.0)
+  - SnapKit (4.2.0)
+  - WechatOpenSDK (1.8.4)
+  - YYText (1.0.7)
+
+DEPENDENCIES:
+  - Alamofire
+  - Down
+  - FilesProvider
+  - FLEX (~> 3.0.0)
+  - Kingfisher
+  - MBProgressHUD
+  - MJRefresh
+  - PINCache
+  - PPiOSKit/CommomViews (from `https://github.com/Panway/CodeSnipetCollection.git`)
+  - PPiOSKit/CrashCatcher (from `https://github.com/Panway/CodeSnipetCollection.git`)
+  - PPiOSKit/SwipePopGesture (from `https://github.com/Panway/CodeSnipetCollection.git`)
+  - SKPhotoBrowser
+  - SnapKit
+  - WechatOpenSDK
+  - YYText
+
+SPEC REPOS:
+  https://cdn.cocoapods.org/:
+    - FLEX
+    - Kingfisher
+    - MBProgressHUD
+    - MJRefresh
+    - PINCache
+    - SKPhotoBrowser
+    - WechatOpenSDK
+    - YYText
+  https://github.com/cocoapods/specs.git:
+    - Alamofire
+    - Down
+    - FilesProvider
+    - SnapKit
+
+EXTERNAL SOURCES:
+  PPiOSKit:
+    :git: https://github.com/Panway/CodeSnipetCollection.git
+
+CHECKOUT OPTIONS:
+  PPiOSKit:
+    :commit: 64ce6840a60059298410bf8f77a2bca881496012
+    :git: https://github.com/Panway/CodeSnipetCollection.git
+
+SPEC CHECKSUMS:
+  Alamofire: ae5c501addb7afdbb13687d7f2f722c78734c2d3
+  Down: d2554b5006cf45bdb2bc6f19d91ca4fec6a45b31
+  FilesProvider: 2a8ae17d8b9c23a6feadb1308ee638fa31d21065
+  FLEX: d66c759bce0f6ebbbf472c742380874d846f2883
+  Kingfisher: c148cd7b47ebde9989f6bc7c27dcaa79d81279a0
+  MBProgressHUD: e7baa36a220447d8aeb12769bf0585582f3866d9
+  MJRefresh: ed450d6eb9d3346a2cb033ab7eb6de090aeef437
+  PINCache: ce36ed282031b92fc7733ffe831f474ff80fddc2
+  PPiOSKit: 7975ddae232a3c3081bea86c872320026ad116f5
+  SKPhotoBrowser: 343de95d89dc7913763c5dda243cc6e606e4a168
+  SnapKit: fe8a619752f3f27075cc9a90244d75c6c3f27e2a
+  WechatOpenSDK: 9b721089507c895d05f997408c30bb6e6f5f9b60
+  YYText: 5c461d709e24d55a182d1441c41dc639a18a4849
+
+PODFILE CHECKSUM: f1b64c3e526a162d00b213c80c439ea6f535ab8f
+
+COCOAPODS: 1.7.5

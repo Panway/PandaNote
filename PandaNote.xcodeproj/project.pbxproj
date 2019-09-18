@@ -1,0 +1,951 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 51;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		60249C69231D1DB100223F1A /* vue.css in Resources */ = {isa = PBXBuildFile; fileRef = 60249C68231D1DB100223F1A /* vue.css */; };
+		6056015523166CC5000809CD /* PPUserInfoManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6056015423166CC5000809CD /* PPUserInfoManager.swift */; };
+		6056015723166F99000809CD /* PPBaseViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6056015623166F99000809CD /* PPBaseViewController.swift */; };
+		605601FA23176FAE000809CD /* PPTabBarController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 605601F923176FAE000809CD /* PPTabBarController.swift */; };
+		60560224231771E2000809CD /* UIScrollView+XDTool.m in Sources */ = {isa = PBXBuildFile; fileRef = 60560222231771E2000809CD /* UIScrollView+XDTool.m */; };
+		6056022823177274000809CD /* PPBaseTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6056022723177274000809CD /* PPBaseTableViewCell.swift */; };
+		6056022A231772AE000809CD /* PPMarkdownViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60560229231772AE000809CD /* PPMarkdownViewController.swift */; };
+		6056024823177736000809CD /* PPSettingViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6056024723177736000809CD /* PPSettingViewController.swift */; };
+		6056024A231778B5000809CD /* PPFileListTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60560249231778B5000809CD /* PPFileListTableViewCell.swift */; };
+		6056024C231778D0000809CD /* String+Extention.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6056024B231778D0000809CD /* String+Extention.swift */; };
+		60560252231778FF000809CD /* XDRefreshHeader.m in Sources */ = {isa = PBXBuildFile; fileRef = 6056024E231778FF000809CD /* XDRefreshHeader.m */; };
+		60560253231778FF000809CD /* XDRefreshAutoStateFooter.m in Sources */ = {isa = PBXBuildFile; fileRef = 6056024F231778FF000809CD /* XDRefreshAutoStateFooter.m */; };
+		605602562317796F000809CD /* XDWebViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 605602552317796F000809CD /* XDWebViewController.m */; };
+		6056025823177A30000809CD /* PPHomeViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6056025723177A2F000809CD /* PPHomeViewController.swift */; };
+		6056027823177C73000809CD /* markdown.html in Resources */ = {isa = PBXBuildFile; fileRef = 6056027723177C73000809CD /* markdown.html */; };
+		6056027A23178017000809CD /* PPWebDAVConfigViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6056027923178017000809CD /* PPWebDAVConfigViewController.swift */; };
+		6056027D23178B03000809CD /* XDFastTableView.m in Sources */ = {isa = PBXBuildFile; fileRef = 6056027C23178B03000809CD /* XDFastTableView.m */; };
+		6056027F23178C2C000809CD /* PPTextFieldTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6056027E23178C2C000809CD /* PPTextFieldTableViewCell.swift */; };
+		605602822317A0DB000809CD /* PPHUD.swift in Sources */ = {isa = PBXBuildFile; fileRef = 605602812317A0DB000809CD /* PPHUD.swift */; };
+		60F5691122F2ADC700874994 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60F5691022F2ADC700874994 /* AppDelegate.swift */; };
+		60F5691322F2ADC700874994 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60F5691222F2ADC700874994 /* ViewController.swift */; };
+		60F5691622F2ADC700874994 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 60F5691422F2ADC700874994 /* Main.storyboard */; };
+		60F5691822F2ADCA00874994 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 60F5691722F2ADCA00874994 /* Assets.xcassets */; };
+		60F5691B22F2ADCA00874994 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 60F5691922F2ADCA00874994 /* LaunchScreen.storyboard */; };
+		60F5692622F2ADCA00874994 /* PandaNoteTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60F5692522F2ADCA00874994 /* PandaNoteTests.swift */; };
+		60F5693122F2ADCA00874994 /* PandaNoteUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60F5693022F2ADCA00874994 /* PandaNoteUITests.swift */; };
+		60F5D042232751D8004E988B /* PPShareManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 60F5D040232751D7004E988B /* PPShareManager.m */; };
+		60F5D04523275549004E988B /* XDCollectionViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 60F5D04323275548004E988B /* XDCollectionViewCell.m */; };
+		7994CC25F691AAF65DE02B6F /* Pods_PandaNote.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A63EFDBFAF88B7CA5F848DC6 /* Pods_PandaNote.framework */; };
+		A5F39C04BBB25A6A043BF097 /* Pods_PandaNoteUITests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 67D2458649E87818F04AC5C8 /* Pods_PandaNoteUITests.framework */; };
+		AB6D37ACD9D1B79CCAF24F7F /* Pods_PandaNoteTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = EAD3F70F4894A8DA81DA6166 /* Pods_PandaNoteTests.framework */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		60F5692222F2ADCA00874994 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 60F5690522F2ADC700874994 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 60F5690C22F2ADC700874994;
+			remoteInfo = PandaNote;
+		};
+		60F5692D22F2ADCA00874994 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 60F5690522F2ADC700874994 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 60F5690C22F2ADC700874994;
+			remoteInfo = PandaNote;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		445FC61B8328A513BADB990E /* Pods-PandaNoteTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-PandaNoteTests.release.xcconfig"; path = "Target Support Files/Pods-PandaNoteTests/Pods-PandaNoteTests.release.xcconfig"; sourceTree = "<group>"; };
+		5FC90B3D04D0AB60B2DBFED0 /* Pods-PandaNoteUITests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-PandaNoteUITests.release.xcconfig"; path = "Target Support Files/Pods-PandaNoteUITests/Pods-PandaNoteUITests.release.xcconfig"; sourceTree = "<group>"; };
+		60249C68231D1DB100223F1A /* vue.css */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.css; path = vue.css; sourceTree = "<group>"; };
+		6056015423166CC5000809CD /* PPUserInfoManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPUserInfoManager.swift; sourceTree = "<group>"; };
+		6056015623166F99000809CD /* PPBaseViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPBaseViewController.swift; sourceTree = "<group>"; };
+		605601F923176FAE000809CD /* PPTabBarController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PPTabBarController.swift; sourceTree = "<group>"; };
+		60560221231771E2000809CD /* PandaNote-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "PandaNote-Bridging-Header.h"; sourceTree = "<group>"; };
+		60560222231771E2000809CD /* UIScrollView+XDTool.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIScrollView+XDTool.m"; sourceTree = "<group>"; };
+		60560223231771E2000809CD /* UIScrollView+XDTool.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIScrollView+XDTool.h"; sourceTree = "<group>"; };
+		6056022723177274000809CD /* PPBaseTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PPBaseTableViewCell.swift; sourceTree = "<group>"; };
+		60560229231772AE000809CD /* PPMarkdownViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PPMarkdownViewController.swift; sourceTree = "<group>"; };
+		6056024723177736000809CD /* PPSettingViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPSettingViewController.swift; sourceTree = "<group>"; };
+		60560249231778B5000809CD /* PPFileListTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PPFileListTableViewCell.swift; sourceTree = "<group>"; };
+		6056024B231778D0000809CD /* String+Extention.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "String+Extention.swift"; sourceTree = "<group>"; };
+		6056024E231778FF000809CD /* XDRefreshHeader.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XDRefreshHeader.m; sourceTree = "<group>"; };
+		6056024F231778FF000809CD /* XDRefreshAutoStateFooter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XDRefreshAutoStateFooter.m; sourceTree = "<group>"; };
+		60560250231778FF000809CD /* XDRefreshHeader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XDRefreshHeader.h; sourceTree = "<group>"; };
+		60560251231778FF000809CD /* XDRefreshAutoStateFooter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XDRefreshAutoStateFooter.h; sourceTree = "<group>"; };
+		605602542317796F000809CD /* XDWebViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XDWebViewController.h; sourceTree = "<group>"; };
+		605602552317796F000809CD /* XDWebViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XDWebViewController.m; sourceTree = "<group>"; };
+		6056025723177A2F000809CD /* PPHomeViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PPHomeViewController.swift; sourceTree = "<group>"; };
+		6056027723177C73000809CD /* markdown.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = markdown.html; sourceTree = "<group>"; };
+		6056027923178017000809CD /* PPWebDAVConfigViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPWebDAVConfigViewController.swift; sourceTree = "<group>"; };
+		6056027B23178B03000809CD /* XDFastTableView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XDFastTableView.h; sourceTree = "<group>"; };
+		6056027C23178B03000809CD /* XDFastTableView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XDFastTableView.m; sourceTree = "<group>"; };
+		6056027E23178C2C000809CD /* PPTextFieldTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPTextFieldTableViewCell.swift; sourceTree = "<group>"; };
+		605602812317A0DB000809CD /* PPHUD.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPHUD.swift; sourceTree = "<group>"; };
+		60F5690D22F2ADC700874994 /* PandaNote.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PandaNote.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		60F5691022F2ADC700874994 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		60F5691222F2ADC700874994 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
+		60F5691522F2ADC700874994 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
+		60F5691722F2ADCA00874994 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		60F5691A22F2ADCA00874994 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
+		60F5691C22F2ADCA00874994 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		60F5692122F2ADCA00874994 /* PandaNoteTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = PandaNoteTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		60F5692522F2ADCA00874994 /* PandaNoteTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PandaNoteTests.swift; sourceTree = "<group>"; };
+		60F5692722F2ADCA00874994 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		60F5692C22F2ADCA00874994 /* PandaNoteUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = PandaNoteUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		60F5693022F2ADCA00874994 /* PandaNoteUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PandaNoteUITests.swift; sourceTree = "<group>"; };
+		60F5693222F2ADCA00874994 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		60F5D040232751D7004E988B /* PPShareManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PPShareManager.m; sourceTree = "<group>"; };
+		60F5D041232751D7004E988B /* PPShareManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PPShareManager.h; sourceTree = "<group>"; };
+		60F5D04323275548004E988B /* XDCollectionViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XDCollectionViewCell.m; sourceTree = "<group>"; };
+		60F5D04423275549004E988B /* XDCollectionViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XDCollectionViewCell.h; sourceTree = "<group>"; };
+		67D2458649E87818F04AC5C8 /* Pods_PandaNoteUITests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_PandaNoteUITests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		A63EFDBFAF88B7CA5F848DC6 /* Pods_PandaNote.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_PandaNote.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		CF2B9783C8EE2E6EF131B345 /* Pods-PandaNoteTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-PandaNoteTests.debug.xcconfig"; path = "Target Support Files/Pods-PandaNoteTests/Pods-PandaNoteTests.debug.xcconfig"; sourceTree = "<group>"; };
+		EAD3F70F4894A8DA81DA6166 /* Pods_PandaNoteTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_PandaNoteTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		ED86FE0AA4D8252DD43FC221 /* Pods-PandaNote.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-PandaNote.debug.xcconfig"; path = "Target Support Files/Pods-PandaNote/Pods-PandaNote.debug.xcconfig"; sourceTree = "<group>"; };
+		F6942A2F6D12F6169614515B /* Pods-PandaNoteUITests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-PandaNoteUITests.debug.xcconfig"; path = "Target Support Files/Pods-PandaNoteUITests/Pods-PandaNoteUITests.debug.xcconfig"; sourceTree = "<group>"; };
+		FC5DC5FF4B9852BABEA19223 /* Pods-PandaNote.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-PandaNote.release.xcconfig"; path = "Target Support Files/Pods-PandaNote/Pods-PandaNote.release.xcconfig"; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		60F5690A22F2ADC700874994 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				7994CC25F691AAF65DE02B6F /* Pods_PandaNote.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		60F5691E22F2ADCA00874994 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				AB6D37ACD9D1B79CCAF24F7F /* Pods_PandaNoteTests.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		60F5692922F2ADCA00874994 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A5F39C04BBB25A6A043BF097 /* Pods_PandaNoteUITests.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		3D039401EBEA015E67B87EC9 /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				ED86FE0AA4D8252DD43FC221 /* Pods-PandaNote.debug.xcconfig */,
+				FC5DC5FF4B9852BABEA19223 /* Pods-PandaNote.release.xcconfig */,
+				CF2B9783C8EE2E6EF131B345 /* Pods-PandaNoteTests.debug.xcconfig */,
+				445FC61B8328A513BADB990E /* Pods-PandaNoteTests.release.xcconfig */,
+				F6942A2F6D12F6169614515B /* Pods-PandaNoteUITests.debug.xcconfig */,
+				5FC90B3D04D0AB60B2DBFED0 /* Pods-PandaNoteUITests.release.xcconfig */,
+			);
+			path = Pods;
+			sourceTree = "<group>";
+		};
+		6056014923166B70000809CD /* WebDAV */ = {
+			isa = PBXGroup;
+			children = (
+				6056014C23166B92000809CD /* Controller */,
+				6056014B23166B8B000809CD /* View */,
+				6056014A23166B7E000809CD /* Model */,
+			);
+			path = WebDAV;
+			sourceTree = "<group>";
+		};
+		6056014A23166B7E000809CD /* Model */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = Model;
+			sourceTree = "<group>";
+		};
+		6056014B23166B8B000809CD /* View */ = {
+			isa = PBXGroup;
+			children = (
+				60560249231778B5000809CD /* PPFileListTableViewCell.swift */,
+				6056027E23178C2C000809CD /* PPTextFieldTableViewCell.swift */,
+			);
+			path = View;
+			sourceTree = "<group>";
+		};
+		6056014C23166B92000809CD /* Controller */ = {
+			isa = PBXGroup;
+			children = (
+				6056025723177A2F000809CD /* PPHomeViewController.swift */,
+				60560229231772AE000809CD /* PPMarkdownViewController.swift */,
+				6056027923178017000809CD /* PPWebDAVConfigViewController.swift */,
+			);
+			path = Controller;
+			sourceTree = "<group>";
+		};
+		6056014F23166BAE000809CD /* Base */ = {
+			isa = PBXGroup;
+			children = (
+				6056015223166BC5000809CD /* Controller */,
+				6056015123166BC0000809CD /* View */,
+				6056015023166BBA000809CD /* Model */,
+			);
+			path = Base;
+			sourceTree = "<group>";
+		};
+		6056015023166BBA000809CD /* Model */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = Model;
+			sourceTree = "<group>";
+		};
+		6056015123166BC0000809CD /* View */ = {
+			isa = PBXGroup;
+			children = (
+				6056027B23178B03000809CD /* XDFastTableView.h */,
+				6056027C23178B03000809CD /* XDFastTableView.m */,
+				6056022723177274000809CD /* PPBaseTableViewCell.swift */,
+			);
+			path = View;
+			sourceTree = "<group>";
+		};
+		6056015223166BC5000809CD /* Controller */ = {
+			isa = PBXGroup;
+			children = (
+				6056015623166F99000809CD /* PPBaseViewController.swift */,
+				605601F923176FAE000809CD /* PPTabBarController.swift */,
+				605602542317796F000809CD /* XDWebViewController.h */,
+				605602552317796F000809CD /* XDWebViewController.m */,
+			);
+			path = Controller;
+			sourceTree = "<group>";
+		};
+		6056015323166CA6000809CD /* Tool */ = {
+			isa = PBXGroup;
+			children = (
+				60F5D03F232751C8004E988B /* Share */,
+				605602802317A0C4000809CD /* UI */,
+				6056021923177122000809CD /* CategoryAndExtension */,
+				6056015423166CC5000809CD /* PPUserInfoManager.swift */,
+				6056024D231778FF000809CD /* RefreshControl */,
+			);
+			path = Tool;
+			sourceTree = "<group>";
+		};
+		6056021923177122000809CD /* CategoryAndExtension */ = {
+			isa = PBXGroup;
+			children = (
+				60560223231771E2000809CD /* UIScrollView+XDTool.h */,
+				60560222231771E2000809CD /* UIScrollView+XDTool.m */,
+				6056024B231778D0000809CD /* String+Extention.swift */,
+				60560221231771E2000809CD /* PandaNote-Bridging-Header.h */,
+			);
+			path = CategoryAndExtension;
+			sourceTree = "<group>";
+		};
+		60560246231776FC000809CD /* Setting */ = {
+			isa = PBXGroup;
+			children = (
+				6056024723177736000809CD /* PPSettingViewController.swift */,
+			);
+			path = Setting;
+			sourceTree = "<group>";
+		};
+		6056024D231778FF000809CD /* RefreshControl */ = {
+			isa = PBXGroup;
+			children = (
+				60560251231778FF000809CD /* XDRefreshAutoStateFooter.h */,
+				6056024F231778FF000809CD /* XDRefreshAutoStateFooter.m */,
+				60560250231778FF000809CD /* XDRefreshHeader.h */,
+				6056024E231778FF000809CD /* XDRefreshHeader.m */,
+			);
+			path = RefreshControl;
+			sourceTree = "<group>";
+		};
+		6056027623177C4F000809CD /* Resource */ = {
+			isa = PBXGroup;
+			children = (
+				60249C68231D1DB100223F1A /* vue.css */,
+				6056027723177C73000809CD /* markdown.html */,
+			);
+			path = Resource;
+			sourceTree = "<group>";
+		};
+		605602802317A0C4000809CD /* UI */ = {
+			isa = PBXGroup;
+			children = (
+				605602812317A0DB000809CD /* PPHUD.swift */,
+			);
+			path = UI;
+			sourceTree = "<group>";
+		};
+		60F5690422F2ADC700874994 = {
+			isa = PBXGroup;
+			children = (
+				60F5690F22F2ADC700874994 /* PandaNote */,
+				60F5692422F2ADCA00874994 /* PandaNoteTests */,
+				60F5692F22F2ADCA00874994 /* PandaNoteUITests */,
+				60F5690E22F2ADC700874994 /* Products */,
+				3D039401EBEA015E67B87EC9 /* Pods */,
+				F621D5FF0503E3685680B16D /* Frameworks */,
+			);
+			sourceTree = "<group>";
+		};
+		60F5690E22F2ADC700874994 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				60F5690D22F2ADC700874994 /* PandaNote.app */,
+				60F5692122F2ADCA00874994 /* PandaNoteTests.xctest */,
+				60F5692C22F2ADCA00874994 /* PandaNoteUITests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		60F5690F22F2ADC700874994 /* PandaNote */ = {
+			isa = PBXGroup;
+			children = (
+				60F5691022F2ADC700874994 /* AppDelegate.swift */,
+				60F5691222F2ADC700874994 /* ViewController.swift */,
+				6056014F23166BAE000809CD /* Base */,
+				6056014923166B70000809CD /* WebDAV */,
+				60560246231776FC000809CD /* Setting */,
+				6056015323166CA6000809CD /* Tool */,
+				6056027623177C4F000809CD /* Resource */,
+				60F5691422F2ADC700874994 /* Main.storyboard */,
+				60F5691722F2ADCA00874994 /* Assets.xcassets */,
+				60F5691922F2ADCA00874994 /* LaunchScreen.storyboard */,
+				60F5691C22F2ADCA00874994 /* Info.plist */,
+			);
+			path = PandaNote;
+			sourceTree = "<group>";
+		};
+		60F5692422F2ADCA00874994 /* PandaNoteTests */ = {
+			isa = PBXGroup;
+			children = (
+				60F5692522F2ADCA00874994 /* PandaNoteTests.swift */,
+				60F5692722F2ADCA00874994 /* Info.plist */,
+			);
+			path = PandaNoteTests;
+			sourceTree = "<group>";
+		};
+		60F5692F22F2ADCA00874994 /* PandaNoteUITests */ = {
+			isa = PBXGroup;
+			children = (
+				60F5693022F2ADCA00874994 /* PandaNoteUITests.swift */,
+				60F5693222F2ADCA00874994 /* Info.plist */,
+			);
+			path = PandaNoteUITests;
+			sourceTree = "<group>";
+		};
+		60F5D03F232751C8004E988B /* Share */ = {
+			isa = PBXGroup;
+			children = (
+				60F5D04423275549004E988B /* XDCollectionViewCell.h */,
+				60F5D04323275548004E988B /* XDCollectionViewCell.m */,
+				60F5D041232751D7004E988B /* PPShareManager.h */,
+				60F5D040232751D7004E988B /* PPShareManager.m */,
+			);
+			path = Share;
+			sourceTree = "<group>";
+		};
+		F621D5FF0503E3685680B16D /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				A63EFDBFAF88B7CA5F848DC6 /* Pods_PandaNote.framework */,
+				EAD3F70F4894A8DA81DA6166 /* Pods_PandaNoteTests.framework */,
+				67D2458649E87818F04AC5C8 /* Pods_PandaNoteUITests.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		60F5690C22F2ADC700874994 /* PandaNote */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 60F5693522F2ADCA00874994 /* Build configuration list for PBXNativeTarget "PandaNote" */;
+			buildPhases = (
+				598E1D6583B26EDE6163D364 /* [CP] Check Pods Manifest.lock */,
+				60F5690922F2ADC700874994 /* Sources */,
+				60F5690A22F2ADC700874994 /* Frameworks */,
+				60F5690B22F2ADC700874994 /* Resources */,
+				D57A6DA20235D2FE3E70B65A /* [CP] Embed Pods Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = PandaNote;
+			productName = PandaNote;
+			productReference = 60F5690D22F2ADC700874994 /* PandaNote.app */;
+			productType = "com.apple.product-type.application";
+		};
+		60F5692022F2ADCA00874994 /* PandaNoteTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 60F5693822F2ADCA00874994 /* Build configuration list for PBXNativeTarget "PandaNoteTests" */;
+			buildPhases = (
+				87748D8F580DE7426C4A7443 /* [CP] Check Pods Manifest.lock */,
+				60F5691D22F2ADCA00874994 /* Sources */,
+				60F5691E22F2ADCA00874994 /* Frameworks */,
+				60F5691F22F2ADCA00874994 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				60F5692322F2ADCA00874994 /* PBXTargetDependency */,
+			);
+			name = PandaNoteTests;
+			productName = PandaNoteTests;
+			productReference = 60F5692122F2ADCA00874994 /* PandaNoteTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		60F5692B22F2ADCA00874994 /* PandaNoteUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 60F5693B22F2ADCA00874994 /* Build configuration list for PBXNativeTarget "PandaNoteUITests" */;
+			buildPhases = (
+				3390B9C978B5C4840F8593AE /* [CP] Check Pods Manifest.lock */,
+				60F5692822F2ADCA00874994 /* Sources */,
+				60F5692922F2ADCA00874994 /* Frameworks */,
+				60F5692A22F2ADCA00874994 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				60F5692E22F2ADCA00874994 /* PBXTargetDependency */,
+			);
+			name = PandaNoteUITests;
+			productName = PandaNoteUITests;
+			productReference = 60F5692C22F2ADCA00874994 /* PandaNoteUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		60F5690522F2ADC700874994 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastSwiftUpdateCheck = 1020;
+				LastUpgradeCheck = 1020;
+				ORGANIZATIONNAME = WeirdPan;
+				TargetAttributes = {
+					60F5690C22F2ADC700874994 = {
+						CreatedOnToolsVersion = 10.2.1;
+						LastSwiftMigration = 1030;
+					};
+					60F5692022F2ADCA00874994 = {
+						CreatedOnToolsVersion = 10.2.1;
+						TestTargetID = 60F5690C22F2ADC700874994;
+					};
+					60F5692B22F2ADCA00874994 = {
+						CreatedOnToolsVersion = 10.2.1;
+						TestTargetID = 60F5690C22F2ADC700874994;
+					};
+				};
+			};
+			buildConfigurationList = 60F5690822F2ADC700874994 /* Build configuration list for PBXProject "PandaNote" */;
+			compatibilityVersion = "Xcode 9.3";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 60F5690422F2ADC700874994;
+			productRefGroup = 60F5690E22F2ADC700874994 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				60F5690C22F2ADC700874994 /* PandaNote */,
+				60F5692022F2ADCA00874994 /* PandaNoteTests */,
+				60F5692B22F2ADCA00874994 /* PandaNoteUITests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		60F5690B22F2ADC700874994 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				60F5691B22F2ADCA00874994 /* LaunchScreen.storyboard in Resources */,
+				60F5691822F2ADCA00874994 /* Assets.xcassets in Resources */,
+				60F5691622F2ADC700874994 /* Main.storyboard in Resources */,
+				6056027823177C73000809CD /* markdown.html in Resources */,
+				60249C69231D1DB100223F1A /* vue.css in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		60F5691F22F2ADCA00874994 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		60F5692A22F2ADCA00874994 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		3390B9C978B5C4840F8593AE /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-PandaNoteUITests-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+		598E1D6583B26EDE6163D364 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-PandaNote-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+		87748D8F580DE7426C4A7443 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-PandaNoteTests-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+		D57A6DA20235D2FE3E70B65A /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-PandaNote/Pods-PandaNote-frameworks-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-PandaNote/Pods-PandaNote-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-PandaNote/Pods-PandaNote-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		60F5690922F2ADC700874994 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				6056015523166CC5000809CD /* PPUserInfoManager.swift in Sources */,
+				6056024C231778D0000809CD /* String+Extention.swift in Sources */,
+				6056022823177274000809CD /* PPBaseTableViewCell.swift in Sources */,
+				6056024A231778B5000809CD /* PPFileListTableViewCell.swift in Sources */,
+				605602822317A0DB000809CD /* PPHUD.swift in Sources */,
+				605601FA23176FAE000809CD /* PPTabBarController.swift in Sources */,
+				6056015723166F99000809CD /* PPBaseViewController.swift in Sources */,
+				60560253231778FF000809CD /* XDRefreshAutoStateFooter.m in Sources */,
+				6056027A23178017000809CD /* PPWebDAVConfigViewController.swift in Sources */,
+				6056024823177736000809CD /* PPSettingViewController.swift in Sources */,
+				60560224231771E2000809CD /* UIScrollView+XDTool.m in Sources */,
+				605602562317796F000809CD /* XDWebViewController.m in Sources */,
+				6056027F23178C2C000809CD /* PPTextFieldTableViewCell.swift in Sources */,
+				60F5691322F2ADC700874994 /* ViewController.swift in Sources */,
+				60F5D042232751D8004E988B /* PPShareManager.m in Sources */,
+				60F5691122F2ADC700874994 /* AppDelegate.swift in Sources */,
+				6056022A231772AE000809CD /* PPMarkdownViewController.swift in Sources */,
+				6056025823177A30000809CD /* PPHomeViewController.swift in Sources */,
+				60560252231778FF000809CD /* XDRefreshHeader.m in Sources */,
+				60F5D04523275549004E988B /* XDCollectionViewCell.m in Sources */,
+				6056027D23178B03000809CD /* XDFastTableView.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		60F5691D22F2ADCA00874994 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				60F5692622F2ADCA00874994 /* PandaNoteTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		60F5692822F2ADCA00874994 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				60F5693122F2ADCA00874994 /* PandaNoteUITests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		60F5692322F2ADCA00874994 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 60F5690C22F2ADC700874994 /* PandaNote */;
+			targetProxy = 60F5692222F2ADCA00874994 /* PBXContainerItemProxy */;
+		};
+		60F5692E22F2ADCA00874994 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 60F5690C22F2ADC700874994 /* PandaNote */;
+			targetProxy = 60F5692D22F2ADCA00874994 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin PBXVariantGroup section */
+		60F5691422F2ADC700874994 /* Main.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				60F5691522F2ADC700874994 /* Base */,
+			);
+			name = Main.storyboard;
+			sourceTree = "<group>";
+		};
+		60F5691922F2ADCA00874994 /* LaunchScreen.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				60F5691A22F2ADCA00874994 /* Base */,
+			);
+			name = LaunchScreen.storyboard;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		60F5693322F2ADCA00874994 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 12.2;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		60F5693422F2ADCA00874994 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 12.2;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		60F5693622F2ADCA00874994 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = ED86FE0AA4D8252DD43FC221 /* Pods-PandaNote.debug.xcconfig */;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = RCWE4X8J89;
+				INFOPLIST_FILE = PandaNote/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.agolddata.pandanote;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OBJC_BRIDGING_HEADER = "PandaNote/Tool/CategoryAndExtension/PandaNote-Bridging-Header.h";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		60F5693722F2ADCA00874994 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = FC5DC5FF4B9852BABEA19223 /* Pods-PandaNote.release.xcconfig */;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = RCWE4X8J89;
+				INFOPLIST_FILE = PandaNote/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.agolddata.pandanote;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OBJC_BRIDGING_HEADER = "PandaNote/Tool/CategoryAndExtension/PandaNote-Bridging-Header.h";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		60F5693922F2ADCA00874994 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = CF2B9783C8EE2E6EF131B345 /* Pods-PandaNoteTests.debug.xcconfig */;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				INFOPLIST_FILE = PandaNoteTests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.cocoapods.PandaNoteTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/PandaNote.app/PandaNote";
+			};
+			name = Debug;
+		};
+		60F5693A22F2ADCA00874994 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 445FC61B8328A513BADB990E /* Pods-PandaNoteTests.release.xcconfig */;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				INFOPLIST_FILE = PandaNoteTests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.cocoapods.PandaNoteTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/PandaNote.app/PandaNote";
+			};
+			name = Release;
+		};
+		60F5693C22F2ADCA00874994 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = F6942A2F6D12F6169614515B /* Pods-PandaNoteUITests.debug.xcconfig */;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				CODE_SIGN_STYLE = Automatic;
+				INFOPLIST_FILE = PandaNoteUITests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.cocoapods.PandaNoteUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = PandaNote;
+			};
+			name = Debug;
+		};
+		60F5693D22F2ADCA00874994 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 5FC90B3D04D0AB60B2DBFED0 /* Pods-PandaNoteUITests.release.xcconfig */;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				CODE_SIGN_STYLE = Automatic;
+				INFOPLIST_FILE = PandaNoteUITests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.cocoapods.PandaNoteUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = PandaNote;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		60F5690822F2ADC700874994 /* Build configuration list for PBXProject "PandaNote" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				60F5693322F2ADCA00874994 /* Debug */,
+				60F5693422F2ADCA00874994 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		60F5693522F2ADCA00874994 /* Build configuration list for PBXNativeTarget "PandaNote" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				60F5693622F2ADCA00874994 /* Debug */,
+				60F5693722F2ADCA00874994 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		60F5693822F2ADCA00874994 /* Build configuration list for PBXNativeTarget "PandaNoteTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				60F5693922F2ADCA00874994 /* Debug */,
+				60F5693A22F2ADCA00874994 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		60F5693B22F2ADCA00874994 /* Build configuration list for PBXNativeTarget "PandaNoteUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				60F5693C22F2ADCA00874994 /* Debug */,
+				60F5693D22F2ADCA00874994 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 60F5690522F2ADC700874994 /* Project object */;
+}
