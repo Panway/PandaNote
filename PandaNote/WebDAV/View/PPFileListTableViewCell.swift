@@ -67,8 +67,8 @@ class PPFileListTableViewCell: PPBaseTableViewCell {
         self.iconImage.snp.makeConstraints { (make) in
             make.left.equalTo(self.snp.left).offset(15);
             make.centerY.equalTo(self.snp.centerY);
-//            make.width.equalTo(30)
-//            make.height.equalTo(30)
+            make.width.equalTo(50)
+            make.height.equalTo(50)
 
         }
         

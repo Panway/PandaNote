@@ -12,9 +12,14 @@ PODS:
     - PPiOSKit/RuntimeTool
   - PPiOSKit/RuntimeTool (0.0.1)
   - PPiOSKit/SwipePopGesture (0.0.1)
+  - PryntTrimmerView (3.0.0)
   - SKPhotoBrowser (6.1.0)
   - SnapKit (4.2.0)
+  - SteviaLayout (4.4.4)
   - WechatOpenSDK (1.8.4)
+  - YPImagePicker (4.0.0):
+    - PryntTrimmerView (~> 3.0.0)
+    - SteviaLayout (~> 4.4.1)
   - YYText (1.0.7)
 
 DEPENDENCIES:
@@ -32,6 +37,7 @@ DEPENDENCIES:
   - SKPhotoBrowser
   - SnapKit
   - WechatOpenSDK
+  - YPImagePicker
   - YYText
 
 SPEC REPOS:
@@ -41,8 +47,11 @@ SPEC REPOS:
     - MBProgressHUD
     - MJRefresh
     - PINCache
+    - PryntTrimmerView
     - SKPhotoBrowser
+    - SteviaLayout
     - WechatOpenSDK
+    - YPImagePicker
     - YYText
   https://github.com/cocoapods/specs.git:
     - Alamofire
@@ -69,11 +78,14 @@ SPEC CHECKSUMS:
   MJRefresh: ed450d6eb9d3346a2cb033ab7eb6de090aeef437
   PINCache: ce36ed282031b92fc7733ffe831f474ff80fddc2
   PPiOSKit: 7975ddae232a3c3081bea86c872320026ad116f5
+  PryntTrimmerView: 53ac64053c7ce63cb3e27f54090f52da0734891d
   SKPhotoBrowser: 343de95d89dc7913763c5dda243cc6e606e4a168
   SnapKit: fe8a619752f3f27075cc9a90244d75c6c3f27e2a
+  SteviaLayout: 523469269059f2c6da02820bb2ff28a5fe0780aa
   WechatOpenSDK: 9b721089507c895d05f997408c30bb6e6f5f9b60
+  YPImagePicker: 8039f89ad79281545fa868486f32d9bf5d65ede1
   YYText: 5c461d709e24d55a182d1441c41dc639a18a4849
 
-PODFILE CHECKSUM: f1b64c3e526a162d00b213c80c439ea6f535ab8f
+PODFILE CHECKSUM: 10047c1c99ecfe37ade27ad349d42c8028b5d74b
 
 COCOAPODS: 1.7.5

@@ -32,6 +32,7 @@ target 'PandaNote' do
   pod 'YYText'
 #  https://github.com/suzuki-0000/SKPhotoBrowser
   pod 'SKPhotoBrowser'
+  pod 'YPImagePicker'
 #  pod 'SVProgressHUD'
   pod 'MBProgressHUD'
 #  pod 'AFWebDAVManager', :git => 'https://github.com/AFNetworking/AFWebDAVManager.git'
@@ -40,7 +41,9 @@ target 'PandaNote' do
   #0行代码捕获常见数组字典异常，防止闪退
   pod 'PPiOSKit/CrashCatcher', :git=>'https://github.com/Panway/CodeSnipetCollection.git'
   pod 'PPiOSKit/CommomViews', :git=>'https://github.com/Panway/CodeSnipetCollection.git'
-  
+  #快捷AlertView和AlertAction (Block封装)
+  pod 'PPiOSKit/PPAlertAction', :git=>'https://github.com/Panway/CodeSnipetCollection.git'
+
   
   pod 'WechatOpenSDK'
 #  pod 'Weibo_SDK', :git => 'https://github.com/sinaweibosdk/weibo_ios_sdk.git'
@@ -55,4 +58,16 @@ target 'PandaNote' do
     # Pods for testing
   end
 
+end
+
+
+
+
+
+post_install do |installer|
+  puts '如果自己修改了Pods源码，可以在pod install之后覆盖掉'
+#  output = %x( #{"sh ios_tool.sh correct_import"} )# 执行shell脚本文件
+  #    output = %x( #{"cp -f -R -v PodsNew/ZFPlayer Pods"} )# 执行shell脚本
+  #    puts output
+  
 end

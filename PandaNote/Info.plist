@@ -40,6 +40,12 @@
 	</dict>
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>保存图片到您的相册</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>我们需要添加图片到笔记</string>
+	<key>NSCameraUsageDescription</key>
+	<string>我们需要拍摄照片同步到笔记</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>我们需要录制您的音频同步到笔记</string>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>

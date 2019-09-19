@@ -30,6 +30,7 @@ class PPHomeViewController: PPBaseViewController,FileProviderDelegate,UITableVie
     var photoBrowser: SKPhotoBrowser!
     @IBOutlet weak var uploadProgressView: UIProgressView?
     @IBOutlet weak var downloadProgressView: UIProgressView?
+    //MARK:Life Cycle
     override func viewDidAppear(_ animated: Bool) {
         print("===appear")
     }
@@ -40,10 +41,21 @@ class PPHomeViewController: PPBaseViewController,FileProviderDelegate,UITableVie
         
         tableView = UITableView.init(frame: self.view.bounds)
         self.view.addSubview(tableView)
+        tableView.snp.makeConstraints { (make) in
+            make.top.left.right.equalTo(self.view)
+            make.bottom.equalTo(self.view).offset(0);
+        }
         tableView.dataSource = self
         tableView.delegate = self
         self.tableView.register(PPFileListTableViewCell.self, forCellReuseIdentifier: cellReuseIdentifier)
         tableView.tableFooterView = UIView.init()
+        
+        
+        
+        
+        self.navigationItem.rightBarButtonItem = UIBarButtonItem.init(title: "更多", style: UIBarButtonItem.Style.plain, target: self, action: #selector(moreAction))
+        
+        
         
         if (userInfo.webDAVServerURL != nil) {
             self.initWebDAVSetting()
@@ -67,6 +79,17 @@ class PPHomeViewController: PPBaseViewController,FileProviderDelegate,UITableVie
         if fileObj.isDirectory {
             cell.iconImage.image = UIImage.init(named: "ico_folder")
         }
+        else if (isImage(fileName: fileObj.name))  {
+            let imagePath = PPUserInfoManager.sharedManager.pp_mainDirectory + fileObj.path
+            self.currentImageURL = imagePath
+            if FileManager.default.fileExists(atPath: imagePath) {
+                let imageData = try?Data(contentsOf: URL(fileURLWithPath: imagePath))
+                cell.iconImage.image = UIImage.init(data: imageData!)
+            }
+            else {
+                cell.iconImage.image = UIImage.init(named: "ico_jpg")
+            }
+        }
         else {
             cell.iconImage.image = UIImage.init(named: PPUserInfoManager.sharedManager.pp_fileIcon[String(fileObj.name.split(separator: ".").last!)] ?? "ico_jpg")
         }
@@ -87,53 +110,11 @@ class PPHomeViewController: PPBaseViewController,FileProviderDelegate,UITableVie
             vc.filePathStr = fileObj.path
             self.navigationController?.pushViewController(vc, animated: true)
         }
-        else if (fileObj.name.lowercased().hasSuffix("jpg")||fileObj.name.lowercased().hasSuffix("jpeg")||fileObj.name.lowercased().hasSuffix("png")||fileObj.name.lowercased().hasSuffix("gif"))  {
-            let cache = ImageCache.default
-            let imagePath = PPUserInfoManager.sharedManager.pp_mainDirectory + fileObj.path//FileManager.default.contents(atPath: PPUserInfoManager.sharedManager.pp_mainDirectory + fileObj.path)
-            self.currentImageURL = imagePath
-            if FileManager.default.fileExists(atPath: imagePath) {
-//            if (cache.retrieveImageInDiskCache(forKey: fileObj.path) != nil) {
-//                let imagePath = cache.cachePath(forKey: fileObj.path)
-                let imageData = try?Data(contentsOf: URL(fileURLWithPath: imagePath))
-                self.showImage(contents: imageData!, image: nil, imageName: fileObj.name,imageURL:fileObj.path)
+        else if (isImage(fileName: fileObj.name))  {
+            storeImageWithFileManager(imageURL: fileObj.path) { (imageData) in
+                debugPrint(imageData)
+                self.showImage(contents: imageData, image: nil, imageName: fileObj.path,imageURL:fileObj.path)
             }
-            else {
-                webdav?.contents(path: fileObj.path, completionHandler: {
-                    contents, error in
-                    if let contents = contents {
-                        
-                        if !FileManager.default.fileExists(atPath: PPUserInfoManager.sharedManager.pp_mainDirectory + fileObj.path) {
-                            do {
-                                var array = fileObj.path.split(separator: "/")
-                                array.removeLast()
-                                let newStr:String =  array.joined(separator: "/")
-                                try FileManager.default.createDirectory(atPath: PPUserInfoManager.sharedManager.pp_mainDirectory+"/"+newStr, withIntermediateDirectories: true, attributes: nil)
-                            } catch  {
-                                print("====")
-                            }
-                        }
-                        
-                        FileManager.default.createFile(atPath: PPUserInfoManager.sharedManager.pp_mainDirectory + fileObj.path, contents: contents, attributes: nil)
-                        
-                        do {
-                            try contents.write(to: PPUserInfoManager.sharedManager.pp_mainDirectoryURL.appendingPathComponent(fileObj.path), options: Data.WritingOptions.atomic)
-                        } catch {
-                            print("====error")
-                        }
-                        
-                        cache.store(UIImage.init(data: contents)!, original: contents, forKey:fileObj.path )
-                        self.showImage(contents: contents, image: nil, imageName: fileObj.name,imageURL:fileObj.path)
-                        // print(contents)
-                        
-                    }
-                })
-                
-            }
-
-            
-
-            
-            
         }
         else {
             PPHUD.showHUDText(message: "暂不支持ho~", view: self.view)
@@ -215,10 +196,22 @@ class PPHomeViewController: PPBaseViewController,FileProviderDelegate,UITableVie
             }
         }
     }
+    @objc func moreAction()  {
+        debugPrint("======")
+    }
     //MARK:初始化webDAV设置
     func initWebDAVSetting() -> Void {
         let userInfo = PPUserInfoManager.sharedManager
-        let server: URL = URL(string: userInfo.webDAVServerURL!) ?? NSURL.init() as URL
+        var server:URL
+        if let serverTMP: URL = URL(string: userInfo.webDAVServerURL ?? "") {
+            server = serverTMP
+        }
+        else {
+            return
+        }
+        
+        
+//        let server: URL = URL(string: userInfo.webDAVServerURL!) ?? NSURL.init() as URL
         //        }
         //        if let server: URL = URL(string: PPUserInfoManager.sharedManager.webDAVServerURL ?? "") {
         if self.pathStr.length < 1 {
@@ -239,6 +232,66 @@ class PPHomeViewController: PPBaseViewController,FileProviderDelegate,UITableVie
         //            webdav?.useCache = true
         self.perform(Selector(("getData:")), with: self, afterDelay: 1)
 
+    }
+    func isImage(fileName:String) -> Bool { if(fileName.lowercased().hasSuffix("jpg")||fileName.lowercased().hasSuffix("jpeg")||fileName.lowercased().hasSuffix("png")||fileName.lowercased().hasSuffix("gif")||fileName.lowercased().hasSuffix("webp")) {
+            return true
+        }
+        return false
+    }
+    func storeImageWithFileManager(imageURL:String,completionHandler: ((Data) -> Void)? = nil) {
+//        let cache = ImageCache.default//KingFisher用
+        let imagePath = PPUserInfoManager.sharedManager.pp_mainDirectory + imageURL
+        self.currentImageURL = imagePath
+        
+//        let filePath = cache.cachePath(forComputedKey: imageURL)//KingFisher用
+//        let cachedData = try?Data(contentsOf: URL(fileURLWithPath: filePath))//KingFisher用
+        
+        if FileManager.default.fileExists(atPath: imagePath) {
+            let imageData = try?Data(contentsOf: URL(fileURLWithPath: imagePath))
+            if let handler = completionHandler {
+                    handler(imageData!)
+            }
+            
+            /*
+            if ((cachedData) == nil) {//KingFisher用
+                //DefaultCacheSerializer会对大图压缩后缓存，所以这里用自定义序列化类实现缓存原始图片数据
+                cache.store(UIImage.init(data: imageData! )!, original: imageData, forKey: imageURL, processorIdentifier: "", cacheSerializer: PandaCacheSerializer.default, toDisk: true) {
+                }
+                //cache.store(UIImage.init(data: imageData! )!, original: imageData, forKey:fileObj.path )
+            }
+ */
+        }
+        else {
+            webdav?.contents(path: imageURL, completionHandler: {
+                contents, error in
+                if let contents = contents {
+                    
+                    if !FileManager.default.fileExists(atPath: PPUserInfoManager.sharedManager.pp_mainDirectory + imageURL) {
+                        do {
+                            var array = imageURL.split(separator: "/")
+                            array.removeLast()
+                            let newStr:String =  array.joined(separator: "/")
+                            try FileManager.default.createDirectory(atPath: PPUserInfoManager.sharedManager.pp_mainDirectory+"/"+newStr, withIntermediateDirectories: true, attributes: nil)
+                        } catch  {
+                            debugPrint("==FileManager Crash")
+                        }
+                    }
+                    
+                    FileManager.default.createFile(atPath: PPUserInfoManager.sharedManager.pp_mainDirectory + imageURL, contents: contents, attributes: nil)
+                    
+//                    do {
+//                        try contents.write(to: PPUserInfoManager.sharedManager.pp_mainDirectoryURL.appendingPathComponent(fileObj.path), options: Data.WritingOptions.atomic)
+//                    } catch {
+//                        print("====error")
+//                    }
+                    
+                    if let handler = completionHandler {
+                        handler(contents)
+                    }
+                }
+            })
+            
+        }
     }
     //MARK:获取文件列表
     @IBAction func getData(_ sender: Any) {
