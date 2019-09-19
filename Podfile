@@ -34,7 +34,10 @@ target 'PandaNote' do
   pod 'SKPhotoBrowser'
   #https://github.com/Yummypets/YPImagePicker
   pod 'YPImagePicker'
-#  pod 'SVProgressHUD'
+  #https://github.com/SwipeCellKit/SwipeCellKit
+  # If you have NOT upgraded to Xcode 11, use the last Swift Xcode 10.X compatible release
+#  pod 'SwipeCellKit', '2.6.0'
+  #  pod 'SVProgressHUD'
   pod 'MBProgressHUD'
 #  pod 'AFWebDAVManager', :git => 'https://github.com/AFNetworking/AFWebDAVManager.git'
   pod 'WechatOpenSDK'

@@ -12,7 +12,7 @@ import SKPhotoBrowser
 import Kingfisher
 import YPImagePicker
 
-class PPHomeViewController: PPBaseViewController,FileProviderDelegate,UITableViewDataSource,UITableViewDelegate
+class PPHomeViewController: PPBaseViewController,FileProviderDelegate,UITextFieldDelegate,UITableViewDataSource,UITableViewDelegate
     ,SKPhotoBrowserDelegate
 {
     
@@ -29,6 +29,9 @@ class PPHomeViewController: PPBaseViewController,FileProviderDelegate,UITableVie
 //    let documentsProvider = LocalFileProvider()
     var currentImageURL: String?
     var photoBrowser: SKPhotoBrowser!
+    var bottomView:UIButton!
+    var renameTF:UITextField!
+    var currentRenameText:String?
     @IBOutlet weak var uploadProgressView: UIProgressView?
     @IBOutlet weak var downloadProgressView: UIProgressView?
     //MARK:Life Cycle
@@ -52,6 +55,17 @@ class PPHomeViewController: PPBaseViewController,FileProviderDelegate,UITableVie
         tableView.tableFooterView = UIView.init()
         
         
+        bottomView = UIButton(frame: CGRect(x: 0, y:88, width: 414, height: 144))
+        bottomView.backgroundColor = UIColor.lightGray
+        self.view.addSubview(bottomView)
+        bottomView.isHidden = true
+        bottomView.addTarget(self, action: #selector(hiddenRenameView), for: UIControl.Event.touchUpInside)
+        
+        renameTF = UITextField(frame: CGRect(x: 15, y: 15, width: 350, height: 44))
+        renameTF.backgroundColor = UIColor.white
+        renameTF.delegate = self
+        renameTF.returnKeyType = UIReturnKeyType.done
+        bottomView.addSubview(renameTF)
         
         
         self.navigationItem.rightBarButtonItem = UIBarButtonItem.init(title: "更多", style: UIBarButtonItem.Style.plain, target: self, action: #selector(moreAction))
@@ -94,7 +108,9 @@ class PPHomeViewController: PPBaseViewController,FileProviderDelegate,UITableVie
         else {
             cell.iconImage.image = UIImage.init(named: PPUserInfoManager.sharedManager.pp_fileIcon[String(fileObj.name.split(separator: ".").last!)] ?? "ico_jpg")
         }
-        cell.timeLabel.text = String(describing: fileObj.modifiedDate).substring(startIndex: 9, endIndex: 29)
+        let dataStr = String(describing: fileObj.modifiedDate).substring(startIndex: 9, endIndex: 29)
+        let sizeStr = (fileObj.size>0) ? " - "+String(fileObj.size/1000)+"KB":""
+        cell.timeLabel.text = dataStr + sizeStr
         return cell
     }
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
@@ -124,6 +140,56 @@ class PPHomeViewController: PPBaseViewController,FileProviderDelegate,UITableVie
     }
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         return 60.0
+    }
+    func tableView(_ tableView: UITableView, editActionsForRowAt indexPath: IndexPath) -> [UITableViewRowAction]? {
+        
+        let delete = UITableViewRowAction(style: .default, title: "删除") { (action, indexPath) in
+            PPHUD.showHUDText(message: "未完成", view: self.view)
+        }
+        delete.backgroundColor = UIColor.red
+        
+        let complete = UITableViewRowAction(style: .default, title: "重命名") { (action, indexPath) in
+            // Do you complete operation
+            debugPrint("==重命名")
+            PPHUD.showHUDText(message: "点击灰色区域输入框消失，以后优化", view: self.view)
+            //MARK:重命名
+            let fileObj = self.dataSource[indexPath.row]
+            self.bottomView.isHidden = false
+            self.renameTF.text = fileObj.name
+            self.currentRenameText = fileObj.path
+            self.renameTF.becomeFirstResponder()
+//            self.renameTF.selectAll(nil)
+            
+
+        }
+        complete.backgroundColor = UIColor(red:0.27, green:0.68, blue:0.49, alpha:1.00)
+        
+        return [delete, complete]
+    }
+    //https://stackoverflow.com/a/58006735/4493393
+    //here is how I selecte file name `Panda` from `Panda.txt`
+    func textFieldDidBeginEditing(_ textField: UITextField) {
+        // if textField.text is `Panda.txt`, so offset will be 3
+        let offset = String(textField.text!.split(separator: ".").last!).length
+        let from = textField.position(from: textField.beginningOfDocument, offset: 0)
+        let to = textField.position(from: textField.beginningOfDocument,
+                                    offset:textField.text!.length - (offset+1) )
+        //now `Panda` will be selected
+        textField.selectedTextRange = textField.textRange(from: from!, to: to!)//danger! unwrap with `!` is not recommended  危险，不推荐用！解包
+    }
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        debugPrint("=======")
+        
+        if let currentRenameText = currentRenameText,let newName = textField.text {
+            self.webdav?.moveItem(path:currentRenameText, to: self.pathStr + newName, completionHandler: { (error) in
+                DispatchQueue.main.asyncAfter(deadline: .now()+1, execute: {
+                    PPHUD.showHUDText(message: "修改成功！", view: self.view)
+                    self.getWebDAVData()
+                })
+            })
+            
+        }
+        return true
     }
     //MARK:照片分享代理
     func didDismissActionSheetWithButtonIndex(_ buttonIndex: Int, photoIndex: Int) {
@@ -196,6 +262,10 @@ class PPHomeViewController: PPBaseViewController,FileProviderDelegate,UITableVie
                 
             }
         }
+    }
+    @objc func hiddenRenameView()  {
+        self.bottomView.isHidden = true
+        self.renameTF.resignFirstResponder()
     }
     @objc func moreAction()  {
         debugPrint("======")
@@ -325,8 +395,15 @@ class PPHomeViewController: PPBaseViewController,FileProviderDelegate,UITableVie
             
         }
     }
-    //MARK:获取文件列表
+    
+    
     @IBAction func getData(_ sender: Any) {
+        getWebDAVData()
+    }
+    
+    //MARK:获取文件列表
+    func getWebDAVData() -> Void {
+        
         webdav?.contentsOfDirectory(path: self.pathStr, completionHandler: {
             contents, error in
             self.dataSource.removeAll()
@@ -335,27 +412,15 @@ class PPHomeViewController: PPBaseViewController,FileProviderDelegate,UITableVie
                 self.tableView.endRefreshing()
                 self.tableView.reloadData()
             }
-            for file in contents {
-                print("Name: \(file.name)")
-                print("Size: \(file.size)")
-                print("Creation Date: \(String(describing: file.creationDate))")
-                print("Modification Date: \(String(describing: file.modifiedDate))")
-            }
+            /*
+             for file in contents {
+             print("Name: \(file.name)")
+             print("Size: \(file.size)")
+             print("Creation Date: \(String(describing: file.creationDate))")
+             print("Modification Date: \(String(describing: file.modifiedDate))")
+             }
+             */
         })
-        //        webdav?.attributesOfItem(path: "/", completionHandler: { (attributes, error) in
-        //            if let attributes = attributes {
-        //                print("File Size: \(attributes.size)")
-        //                print("Creation Date: \(String(describing: attributes.creationDate))")
-        //                print("Modification Date: \(String(describing: attributes.modifiedDate))")
-        //                print("Is Read Only: \(attributes.isReadOnly)")
-        //            }
-        //        })
-        //        webdav?.contents(path: "/", completionHandler: {
-        //            contents, error in
-        //            if let contents = contents {
-        //                print(String(data: contents, encoding: .utf8) as Any)
-        //            }
-        //        })
     }
     
     
