@@ -12,6 +12,12 @@ class PPTabBarController: UITabBarController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        let barAppearance = UINavigationBar.appearance()
+        barAppearance.barTintColor = UIColor.white
+        barAppearance.tintColor = UIColor(red:0.27, green:0.68, blue:0.49, alpha:1.00)//VUE绿
+        barAppearance.titleTextAttributes = [NSAttributedString.Key.foregroundColor: UIColor.darkGray]
+        
+        
         let firstViewController = PPHomeViewController.init()
         firstViewController.tabBarItem = UITabBarItem(tabBarSystemItem: .featured, tag: 0)
         

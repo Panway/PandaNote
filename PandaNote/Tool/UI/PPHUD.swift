@@ -25,7 +25,7 @@ class PPHUD: NSObject {
         hud.detailsLabel.textColor = UIColor.white
         hud.margin = 13
         hud.removeFromSuperViewOnHide = true
-        hud.hide(animated: true, afterDelay: 1)
+        hud.hide(animated: true, afterDelay: 1.5)
     }
     
     //MARK: 进度条

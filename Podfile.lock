@@ -10,6 +10,7 @@ PODS:
   - PPiOSKit/CommomViews (0.0.1)
   - PPiOSKit/CrashCatcher (0.0.1):
     - PPiOSKit/RuntimeTool
+  - PPiOSKit/PPAlertAction (0.0.1)
   - PPiOSKit/RuntimeTool (0.0.1)
   - PPiOSKit/SwipePopGesture (0.0.1)
   - PryntTrimmerView (3.0.0)
@@ -33,6 +34,7 @@ DEPENDENCIES:
   - PINCache
   - PPiOSKit/CommomViews (from `https://github.com/Panway/CodeSnipetCollection.git`)
   - PPiOSKit/CrashCatcher (from `https://github.com/Panway/CodeSnipetCollection.git`)
+  - PPiOSKit/PPAlertAction (from `https://github.com/Panway/CodeSnipetCollection.git`)
   - PPiOSKit/SwipePopGesture (from `https://github.com/Panway/CodeSnipetCollection.git`)
   - SKPhotoBrowser
   - SnapKit
@@ -86,6 +88,6 @@ SPEC CHECKSUMS:
   YPImagePicker: 8039f89ad79281545fa868486f32d9bf5d65ede1
   YYText: 5c461d709e24d55a182d1441c41dc639a18a4849
 
-PODFILE CHECKSUM: 10047c1c99ecfe37ade27ad349d42c8028b5d74b
+PODFILE CHECKSUM: 62ba1591360efb12f58923a0c457aafdc90ffced
 
 COCOAPODS: 1.7.5

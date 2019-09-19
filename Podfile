@@ -32,10 +32,17 @@ target 'PandaNote' do
   pod 'YYText'
 #  https://github.com/suzuki-0000/SKPhotoBrowser
   pod 'SKPhotoBrowser'
+  #https://github.com/Yummypets/YPImagePicker
   pod 'YPImagePicker'
 #  pod 'SVProgressHUD'
   pod 'MBProgressHUD'
 #  pod 'AFWebDAVManager', :git => 'https://github.com/AFNetworking/AFWebDAVManager.git'
+  pod 'WechatOpenSDK'
+#  pod 'Weibo_SDK', :git => 'https://github.com/sinaweibosdk/weibo_ios_sdk.git'
+
+
+
+  #----------私有----------
   #0行代码实现右滑pop返回
   pod 'PPiOSKit/SwipePopGesture', :git=>'https://github.com/Panway/CodeSnipetCollection.git'
   #0行代码捕获常见数组字典异常，防止闪退
@@ -43,10 +50,10 @@ target 'PandaNote' do
   pod 'PPiOSKit/CommomViews', :git=>'https://github.com/Panway/CodeSnipetCollection.git'
   #快捷AlertView和AlertAction (Block封装)
   pod 'PPiOSKit/PPAlertAction', :git=>'https://github.com/Panway/CodeSnipetCollection.git'
-
+  #----------私有----------
   
-  pod 'WechatOpenSDK'
-#  pod 'Weibo_SDK', :git => 'https://github.com/sinaweibosdk/weibo_ios_sdk.git'
+  
+  
   
   target 'PandaNoteTests' do
     inherit! :search_paths

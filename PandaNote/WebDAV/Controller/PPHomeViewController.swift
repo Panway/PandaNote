@@ -10,6 +10,7 @@ import UIKit
 import FilesProvider
 import SKPhotoBrowser
 import Kingfisher
+import YPImagePicker
 
 class PPHomeViewController: PPBaseViewController,FileProviderDelegate,UITableViewDataSource,UITableViewDelegate
     ,SKPhotoBrowserDelegate
@@ -198,6 +199,37 @@ class PPHomeViewController: PPBaseViewController,FileProviderDelegate,UITableVie
     }
     @objc func moreAction()  {
         debugPrint("======")
+        //MARK:上传照片
+        PPAlertAction.showSheet(withTitle: "更多操作", message: nil, cancelButtonTitle: "取消", destructiveButtonTitle: nil, otherButtonTitle: ["从🏞添加照骗"]) { (index) in
+            debugPrint(index)
+            if index == 1 {
+                var config = YPImagePickerConfiguration()
+                config.library.maxNumberOfItems = 1
+                config.showsPhotoFilters = false
+                config.startOnScreen = YPPickerScreen.library
+                let picker = YPImagePicker(configuration: config)
+//                let picker = YPImagePicker()
+                picker.didFinishPicking { [unowned picker] items, _ in
+                    if let photo = items.singlePhoto {
+                            PPFileManager.sharedManager.getImageDataFromAsset(asset: photo.asset!, completion: { (imageData,imageLocalURL) in
+                                if let imageLocalURL = imageLocalURL {
+                                    let remotePath = self.pathStr + "PP_"+imageLocalURL.lastPathComponent
+                                    self.webdav?.copyItem(localFile: imageLocalURL, to: remotePath, completionHandler: { (error) in
+                                        if error == nil {
+                                            DispatchQueue.main.async {
+                                                PPHUD.showHUDText(message: "上传成功🦄", view: self.view)                                                
+                                            }
+                                        }
+                                    })
+                                }
+
+                        })
+                    }
+                    picker.dismiss(animated: true, completion: nil)
+                }
+                self.present(picker, animated: true, completion: nil)
+            }
+        }
     }
     //MARK:初始化webDAV设置
     func initWebDAVSetting() -> Void {
