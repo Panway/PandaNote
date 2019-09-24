@@ -15,6 +15,10 @@ class PPBaseViewController: UIViewController {
         super.viewDidLoad()
         // Do any additional setup after loading the view.
         self.view.backgroundColor = UIColor.white
+        if #available(iOS 13.0, *) {
+            // Always adopt a light interface style.
+//            overrideUserInterfaceStyle = .light
+        }
     }
     
     override func viewWillAppear(_ animated: Bool) {

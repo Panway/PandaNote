@@ -17,25 +17,7 @@
 
 
 @implementation XDFastTableView
-- (void)threadTest{
-    dispatch_queue_t queue = dispatch_queue_create("队列1", DISPATCH_QUEUE_SERIAL);
-    //同步 不开启新线程，所以在主线程执行
-    dispatch_sync(queue, ^{
-        NSLog(@"任务1");
-        [self getCurrentThread];
-    });
-    //异步 开启新线程
-    dispatch_async(queue, ^{
-        NSLog(@"任务2");//2️⃣
-        [self getCurrentThread];
-    });
-//    sleep(3);//如果没有这个方法，2️⃣3️⃣的执行先后顺序是不确定的，因为是两个线程，执行先后没有一毛钱关系
-    NSLog(@"方法执行结束");//3️⃣
-}
-- (void)getCurrentThread{
-    NSThread *currentThread = [NSThread currentThread];
-    NSLog(@"currentThread == %@",currentThread);
-}
+
 
 
 - (instancetype)init {

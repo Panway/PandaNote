@@ -26,23 +26,15 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         #if DEBUG
         Bundle(path: "/Applications/InjectionIII.app/Contents/Resources/iOSInjection.bundle")?.load()
         #endif
-        test()
+        
+        //disable dark mode globally
+        if #available(iOS 13.0, *) {
+            self.window?.overrideUserInterfaceStyle = .light
+        }
+        
         return true
     }
-    func test() -> Void {
-//        let concurrentQueue = DispatchQueue(label: "panda", attributes: .concurrent)
-        let serialQueue = DispatchQueue(label: "queuename")
-        // 串行异步中嵌套同步
-//        print(1)
-//        serialQueue.async {
-//            print(2)
-//            serialQueue.sync {
-//                print(3)
-//            }
-//            print(4)
-//        }
-//        print(5)
-    }
+
     func applicationWillResignActive(_ application: UIApplication) {
         // Sent when the application is about to move from active to inactive state. This can occur for certain types of temporary interruptions (such as an incoming phone call or SMS message) or when the user quits the application and it begins the transition to the background state.
         // Use this method to pause ongoing tasks, disable timers, and invalidate graphics rendering callbacks. Games should use this method to pause the game.
