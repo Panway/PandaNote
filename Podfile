@@ -17,6 +17,8 @@ target 'PandaNote' do
   use_frameworks!
 
   # Pods for PandaNote
+  
+#  https://github.com/Alamofire/Alamofire/blob/master/Documentation/Usage.md#response-validation
   pod 'Alamofire'
 #  https://github.com/onevcat/Kingfisher
   pod 'Kingfisher'

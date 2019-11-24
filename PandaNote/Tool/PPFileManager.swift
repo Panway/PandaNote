@@ -8,11 +8,74 @@
 
 import Foundation
 import Photos
+import FilesProvider
 
-class PPFileManager: NSObject {
+class PPFileManager: NSObject,FileProviderDelegate {
+    
+    
     static let sharedManager = PPFileManager()
+    var webdav: WebDAVFileProvider?
 
     override init() {
+        super.init()
+        initWebDAVSetting()
+    }
+    func getWebDAVData(path:String,completionHander:@escaping(_ data:[AnyObject],_ error:Error?) -> Void) {
+        webdav?.contentsOfDirectory(path: path, completionHandler: {
+            contents, error in
+            
+            DispatchQueue.main.async {
+                completionHander(contents,error)
+            }
+            /*
+             for file in contents {
+             print("Name: \(file.name)")
+             print("Size: \(file.size)")
+             print("Creation Date: \(String(describing: file.creationDate))")
+             print("Modification Date: \(String(describing: file.modifiedDate))")
+             }
+             */
+        })
+
+    }
+    func fileproviderSucceed(_ fileProvider: FileProviderOperations, operation: FileOperationType) {
+        
+    }
+    
+    func fileproviderFailed(_ fileProvider: FileProviderOperations, operation: FileOperationType, error: Error) {
+        
+    }
+    
+    func fileproviderProgress(_ fileProvider: FileProviderOperations, operation: FileOperationType, progress: Float) {
+        
+    }
+    //MARK:初始化webDAV设置
+    func initWebDAVSetting() -> Void {
+        let userInfo = PPUserInfoManager.sharedManager
+        var server:URL
+        if let serverTMP: URL = URL(string: userInfo.webDAVServerURL ?? "") {
+            server = serverTMP
+        }
+        else {
+            return
+        }
+        
+        
+        //        let server: URL = URL(string: userInfo.webDAVServerURL!) ?? NSURL.init() as URL
+        //        }
+        //        if let server: URL = URL(string: PPUserInfoManager.sharedManager.webDAVServerURL ?? "") {
+        
+        let userCredential = URLCredential(user: userInfo.webDAVUserName ?? "",
+                                           password: userInfo.webDAVPassword ?? "",
+                                           persistence: .permanent)
+        //            let protectionSpace = URLProtectionSpace.init(host: "dav.jianguoyun.com", port: 443, protocol: "https", realm: "Restricted", authenticationMethod: NSURLAuthenticationMethodHTTPBasic)
+        //            URLCredentialStorage.shared.setDefaultCredential(userCredential, for: protectionSpace)
+        webdav = WebDAVFileProvider(baseURL: server, credential: userCredential)!
+        webdav?.delegate = self as FileProviderDelegate
+        //注意：不修改鉴权方式，会导致每次请求两次，一次401失败，一次带token成功
+        webdav?.credentialType = URLRequest.AuthenticationType.basic
+        //            webdav?.useCache = true
+//        self.perform(Selector(("getData:")), with: self, afterDelay: 1)
         
     }
     /// 获取NSData

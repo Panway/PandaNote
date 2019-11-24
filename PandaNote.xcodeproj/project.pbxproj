@@ -28,6 +28,7 @@
 		605602822317A0DB000809CD /* PPHUD.swift in Sources */ = {isa = PBXBuildFile; fileRef = 605602812317A0DB000809CD /* PPHUD.swift */; };
 		6080D3AB233315B900F582B1 /* CacheSerializer+Panda.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6080D3AA233315B900F582B1 /* CacheSerializer+Panda.swift */; };
 		6080D3F323333C3500F582B1 /* PPFileManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6080D3F223333C3500F582B1 /* PPFileManager.swift */; };
+		60D27791238AA52C00D8BA0C /* PPCacheManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60D27790238AA52C00D8BA0C /* PPCacheManager.swift */; };
 		60F5691122F2ADC700874994 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60F5691022F2ADC700874994 /* AppDelegate.swift */; };
 		60F5691322F2ADC700874994 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60F5691222F2ADC700874994 /* ViewController.swift */; };
 		60F5691622F2ADC700874994 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 60F5691422F2ADC700874994 /* Main.storyboard */; };
@@ -89,6 +90,7 @@
 		605602812317A0DB000809CD /* PPHUD.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPHUD.swift; sourceTree = "<group>"; };
 		6080D3AA233315B900F582B1 /* CacheSerializer+Panda.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CacheSerializer+Panda.swift"; sourceTree = "<group>"; };
 		6080D3F223333C3500F582B1 /* PPFileManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPFileManager.swift; sourceTree = "<group>"; };
+		60D27790238AA52C00D8BA0C /* PPCacheManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPCacheManager.swift; sourceTree = "<group>"; };
 		60F5690D22F2ADC700874994 /* PandaNote.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PandaNote.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		60F5691022F2ADC700874994 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		60F5691222F2ADC700874994 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -238,6 +240,7 @@
 				6056021923177122000809CD /* CategoryAndExtension */,
 				6056015423166CC5000809CD /* PPUserInfoManager.swift */,
 				6080D3F223333C3500F582B1 /* PPFileManager.swift */,
+				60D27790238AA52C00D8BA0C /* PPCacheManager.swift */,
 				6056024D231778FF000809CD /* RefreshControl */,
 			);
 			path = Tool;
@@ -608,6 +611,7 @@
 				60560224231771E2000809CD /* UIScrollView+XDTool.m in Sources */,
 				605602562317796F000809CD /* XDWebViewController.m in Sources */,
 				6056027F23178C2C000809CD /* PPTextFieldTableViewCell.swift in Sources */,
+				60D27791238AA52C00D8BA0C /* PPCacheManager.swift in Sources */,
 				60F5691322F2ADC700874994 /* ViewController.swift in Sources */,
 				60F5D042232751D8004E988B /* PPShareManager.m in Sources */,
 				60F5691122F2ADC700874994 /* AppDelegate.swift in Sources */,

@@ -22,7 +22,6 @@ class PPHomeViewController: PPBaseViewController,FileProviderDelegate,UITextFiel
 //    let username = "XXXXX@qq.com"
 //    let password = "XXXXXXXX"
     
-    var webdav: WebDAVFileProvider?
     var dataSource:Array<FileObject> = []
     var tableView = UITableView()
     let cellReuseIdentifier = "cell"
@@ -73,11 +72,12 @@ class PPHomeViewController: PPBaseViewController,FileProviderDelegate,UITextFiel
         
         
         if (userInfo.webDAVServerURL != nil) {
-            self.initWebDAVSetting()
+//            PPFileManager.sharedManager.initWebDAVSetting()
+            getWebDAVData()
         }
         self.tableView.addRefreshHeader {
-            if (self.webdav == nil && PPUserInfoManager.sharedManager.webDAVServerURL != nil) {
-                self.initWebDAVSetting()
+            if (PPUserInfoManager.sharedManager.webDAVServerURL != nil) {
+                PPFileManager.sharedManager.initWebDAVSetting()
             }
             self.getData((Any).self)
         }
@@ -92,6 +92,7 @@ class PPHomeViewController: PPBaseViewController,FileProviderDelegate,UITextFiel
         let fileObj = self.dataSource[indexPath.row]
         cell.titleLabel.text = fileObj.name
         if fileObj.isDirectory {
+//            cell.iconImage.kf.setImage(with: "" as! Resource)
             cell.iconImage.image = UIImage.init(named: "ico_folder")
         }
         else if (isImage(fileName: fileObj.name))  {
@@ -122,7 +123,7 @@ class PPHomeViewController: PPBaseViewController,FileProviderDelegate,UITextFiel
             vc.pathStr = fileObj.path + "/"
             self.navigationController?.pushViewController(vc, animated: true)
         }
-        else if (fileObj.name.hasSuffix("md")||fileObj.name.hasSuffix("txt"))  {
+        else if (fileObj.name.hasSuffix("md")||fileObj.name.hasSuffix("txt")||fileObj.name.hasSuffix("js")||fileObj.name.hasSuffix("html"))  {
             let vc = PPMarkdownViewController.init()
             vc.filePathStr = fileObj.path
             self.navigationController?.pushViewController(vc, animated: true)
@@ -181,7 +182,7 @@ class PPHomeViewController: PPBaseViewController,FileProviderDelegate,UITextFiel
         debugPrint("=======")
         
         if let currentRenameText = currentRenameText,let newName = textField.text {
-            self.webdav?.moveItem(path:currentRenameText, to: self.pathStr + newName, completionHandler: { (error) in
+            PPFileManager.sharedManager.webdav?.moveItem(path:currentRenameText, to: self.pathStr + newName, completionHandler: { (error) in
                 DispatchQueue.main.asyncAfter(deadline: .now()+1, execute: {
                     PPHUD.showHUDText(message: "修改成功！", view: self.view)
                     self.getWebDAVData()
@@ -284,7 +285,7 @@ class PPHomeViewController: PPBaseViewController,FileProviderDelegate,UITextFiel
                             PPFileManager.sharedManager.getImageDataFromAsset(asset: photo.asset!, completion: { (imageData,imageLocalURL) in
                                 if let imageLocalURL = imageLocalURL {
                                     let remotePath = self.pathStr + "PP_"+imageLocalURL.lastPathComponent
-                                    self.webdav?.copyItem(localFile: imageLocalURL, to: remotePath, completionHandler: { (error) in
+                                    PPFileManager.sharedManager.webdav?.copyItem(localFile: imageLocalURL, to: remotePath, completionHandler: { (error) in
                                         if error == nil {
                                             DispatchQueue.main.async {
                                                 PPHUD.showHUDText(message: "上传成功🦄", view: self.view)                                                
@@ -301,40 +302,7 @@ class PPHomeViewController: PPBaseViewController,FileProviderDelegate,UITextFiel
             }
         }
     }
-    //MARK:初始化webDAV设置
-    func initWebDAVSetting() -> Void {
-        let userInfo = PPUserInfoManager.sharedManager
-        var server:URL
-        if let serverTMP: URL = URL(string: userInfo.webDAVServerURL ?? "") {
-            server = serverTMP
-        }
-        else {
-            return
-        }
-        
-        
-//        let server: URL = URL(string: userInfo.webDAVServerURL!) ?? NSURL.init() as URL
-        //        }
-        //        if let server: URL = URL(string: PPUserInfoManager.sharedManager.webDAVServerURL ?? "") {
-        if self.pathStr.length < 1 {
-            self.pathStr = "/"
-        }
-        else {
-            self.title = String(self.pathStr.split(separator: "/").last ?? "File")
-        }
-        let userCredential = URLCredential(user: userInfo.webDAVUserName ?? "",
-                                           password: userInfo.webDAVPassword ?? "",
-                                           persistence: .permanent)
-        //            let protectionSpace = URLProtectionSpace.init(host: "dav.jianguoyun.com", port: 443, protocol: "https", realm: "Restricted", authenticationMethod: NSURLAuthenticationMethodHTTPBasic)
-        //            URLCredentialStorage.shared.setDefaultCredential(userCredential, for: protectionSpace)
-        webdav = WebDAVFileProvider(baseURL: server, credential: userCredential)!
-        webdav?.delegate = self as FileProviderDelegate
-        //注意：不修改鉴权方式，会导致每次请求两次，一次401失败，一次带token成功
-        webdav?.credentialType = URLRequest.AuthenticationType.basic
-        //            webdav?.useCache = true
-        self.perform(Selector(("getData:")), with: self, afterDelay: 1)
-
-    }
+    
     func isImage(fileName:String) -> Bool { if(fileName.lowercased().hasSuffix("jpg")||fileName.lowercased().hasSuffix("jpeg")||fileName.lowercased().hasSuffix("png")||fileName.lowercased().hasSuffix("gif")||fileName.lowercased().hasSuffix("webp")) {
             return true
         }
@@ -364,7 +332,7 @@ class PPHomeViewController: PPBaseViewController,FileProviderDelegate,UITextFiel
  */
         }
         else {
-            webdav?.contents(path: imageURL, completionHandler: {
+            PPFileManager.sharedManager.webdav?.contents(path: imageURL, completionHandler: {
                 contents, error in
                 if let contents = contents {
                     
@@ -403,24 +371,19 @@ class PPHomeViewController: PPBaseViewController,FileProviderDelegate,UITextFiel
     
     //MARK:获取文件列表
     func getWebDAVData() -> Void {
-        
-        webdav?.contentsOfDirectory(path: self.pathStr, completionHandler: {
-            contents, error in
-            self.dataSource.removeAll()
-            self.dataSource.append(contentsOf: contents)
-            DispatchQueue.main.async {
+        PPFileManager.sharedManager.getWebDAVData(path: self.pathStr) { (contents, error) in
+            if let objects = contents as? [FileObject] {
+                self.dataSource.removeAll()
+                self.dataSource.append(contentsOf: objects)
                 self.tableView.endRefreshing()
                 self.tableView.reloadData()
+
             }
-            /*
-             for file in contents {
-             print("Name: \(file.name)")
-             print("Size: \(file.size)")
-             print("Creation Date: \(String(describing: file.creationDate))")
-             print("Modification Date: \(String(describing: file.modifiedDate))")
-             }
-             */
-        })
+//            let objects:[FileObject] = contents as? [FileObject]
+            
+
+        }
+        
     }
     
     
@@ -434,34 +397,42 @@ class PPHomeViewController: PPBaseViewController,FileProviderDelegate,UITextFiel
     }
     
     @IBAction func createFolder(_ sender: Any) {
+        /*
         webdav?.create(folder: "new folder", at: "/", completionHandler: nil)
+ */
     }
     
     @IBAction func createFile(_ sender: Any) {
+        /*
         let data = "Hello world from sample.txt!".data(using: .utf8, allowLossyConversion: false)
         webdav?.writeContents(path: "sample.txt", contents: data, atomically: true, completionHandler: nil)//?.writeContents(path: "sample.txt", content: data, atomically: true, completionHandler: nil)
+ */
     }
     
     
     
     @IBAction func remove(_ sender: Any) {
-        webdav?.removeItem(path: "sample.txt", completionHandler: nil)
+//        webdav?.removeItem(path: "sample.txt", completionHandler: nil)
     }
     
     @IBAction func download(_ sender: Any) {
+        /*
         let localURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!.appendingPathComponent("fileprovider.png")
         let remotePath = "fileprovider.png"
         
         let progress = webdav?.copyItem(path: remotePath, toLocalURL: localURL, completionHandler: nil)
         downloadProgressView?.observedProgress = progress
+ */
     }
     
     @IBAction func upload(_ sender: Any) {
+        /*
         let localURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!.appendingPathComponent("fileprovider.png")
         let remotePath = "/fileprovider.png"
         
         let progress = webdav?.copyItem(localFile: localURL, to: remotePath, completionHandler: nil)
         uploadProgressView?.observedProgress = progress
+ */
     }
     
     func fileproviderSucceed(_ fileProvider: FileProviderOperations, operation: FileOperationType) {
