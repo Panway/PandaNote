@@ -1,8 +1,17 @@
 PODS:
   - Alamofire (4.8.2)
+  - BSBacktraceLogger (0.0.1)
+  - DoraemonKit/Core (1.2.4):
+    - BSBacktraceLogger
+    - fishhook
   - Down (0.8.5)
   - FilesProvider (0.26.0)
+  - fishhook (0.2)
   - FLEX (3.0.0)
+  - FMDB (2.7.5):
+    - FMDB/standard (= 2.7.5)
+  - FMDB/standard (2.7.5)
+  - IQKeyboardManager (6.5.5)
   - Kingfisher (4.10.1)
   - MBProgressHUD (1.1.0)
   - MJRefresh (3.2.0)
@@ -25,9 +34,12 @@ PODS:
 
 DEPENDENCIES:
   - Alamofire
+  - DoraemonKit/Core (~> 1.2.0)
   - Down
   - FilesProvider
   - FLEX (~> 3.0.0)
+  - FMDB
+  - IQKeyboardManager
   - Kingfisher
   - MBProgressHUD
   - MJRefresh
@@ -44,7 +56,12 @@ DEPENDENCIES:
 
 SPEC REPOS:
   https://cdn.cocoapods.org/:
+    - BSBacktraceLogger
+    - DoraemonKit
+    - fishhook
     - FLEX
+    - FMDB
+    - IQKeyboardManager
     - Kingfisher
     - MBProgressHUD
     - MJRefresh
@@ -55,7 +72,7 @@ SPEC REPOS:
     - WechatOpenSDK
     - YPImagePicker
     - YYText
-  https://github.com/cocoapods/specs.git:
+  https://github.com/CocoaPods/Specs.git:
     - Alamofire
     - Down
     - FilesProvider
@@ -72,9 +89,14 @@ CHECKOUT OPTIONS:
 
 SPEC CHECKSUMS:
   Alamofire: ae5c501addb7afdbb13687d7f2f722c78734c2d3
+  BSBacktraceLogger: 06b983ee93a9f87d957960e9c73d660d5966b447
+  DoraemonKit: 5328b8b57cd900f6a24f7f66051346dd4409437d
   Down: d2554b5006cf45bdb2bc6f19d91ca4fec6a45b31
   FilesProvider: 2a8ae17d8b9c23a6feadb1308ee638fa31d21065
+  fishhook: ea19933abfe8f2f52c55fd8b6e2718467d3ebc89
   FLEX: d66c759bce0f6ebbbf472c742380874d846f2883
+  FMDB: 2ce00b547f966261cd18927a3ddb07cb6f3db82a
+  IQKeyboardManager: 3a8b9e603f8b0eeaf5f096a1f2b2cfcf121992ef
   Kingfisher: c148cd7b47ebde9989f6bc7c27dcaa79d81279a0
   MBProgressHUD: e7baa36a220447d8aeb12769bf0585582f3866d9
   MJRefresh: ed450d6eb9d3346a2cb033ab7eb6de090aeef437
@@ -88,6 +110,6 @@ SPEC CHECKSUMS:
   YPImagePicker: 8039f89ad79281545fa868486f32d9bf5d65ede1
   YYText: 5c461d709e24d55a182d1441c41dc639a18a4849
 
-PODFILE CHECKSUM: 1c8f0e73a86fcb231f268f7590212f3a8f683494
+PODFILE CHECKSUM: ae12f7b650e7a2b0eb46839d1c8e55039975a177
 
-COCOAPODS: 1.7.5
+COCOAPODS: 1.8.4

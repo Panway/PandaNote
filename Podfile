@@ -43,8 +43,12 @@ target 'PandaNote' do
   pod 'MBProgressHUD'
 #  pod 'AFWebDAVManager', :git => 'https://github.com/AFNetworking/AFWebDAVManager.git'
   pod 'WechatOpenSDK'
+  pod 'FMDB'
+  pod 'IQKeyboardManager'
+  #滴滴开源的应用内调试工具，界面比较美观 https://github.com/didi/DoraemonKit
+  pod 'DoraemonKit/Core', '~> 1.2.0', :configurations => ['Debug']
 #  pod 'Weibo_SDK', :git => 'https://github.com/sinaweibosdk/weibo_ios_sdk.git'
-
+  
 
 
   #----------私有----------

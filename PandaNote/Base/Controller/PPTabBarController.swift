@@ -24,10 +24,13 @@ class PPTabBarController: UITabBarController {
         let recentsVC = PPHomeViewController.init()
         recentsVC.tabBarItem = UITabBarItem(tabBarSystemItem: .recents, tag: 1)
         
-        let secondViewController = PPSettingViewController.init()
-        secondViewController.tabBarItem = UITabBarItem(tabBarSystemItem: .more, tag: 2)
+        let testVC = PPPriceTagViewController.init()
+        testVC.tabBarItem = UITabBarItem(tabBarSystemItem: .search, tag: 1)
         
-        let tabBarList = [firstViewController,recentsVC, secondViewController]
+        let settingVC = PPSettingViewController.init()
+        settingVC.tabBarItem = UITabBarItem(tabBarSystemItem: .more, tag: 2)
+        
+        let tabBarList = [recentsVC, testVC, firstViewController, settingVC]
         
         viewControllers = tabBarList
     }

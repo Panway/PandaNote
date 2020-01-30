@@ -9,6 +9,7 @@
 import Foundation
 import Photos
 import FilesProvider
+import PINCache
 
 class PPFileManager: NSObject,FileProviderDelegate {
     
@@ -27,6 +28,11 @@ class PPFileManager: NSObject,FileProviderDelegate {
             DispatchQueue.main.async {
                 completionHander(contents,error)
             }
+//            PINCache.shared().setObject(contents, forKey: "img")
+
+//            let key = (PPUserInfoManager.sharedManager.webDAVServerURL ?? " ") + path
+//            let cacheData = Data.init(contents)
+//            PPDiskCache.shared.setData(cacheData, key: key)
             /*
              for file in contents {
              print("Name: \(file.name)")
@@ -71,7 +77,7 @@ class PPFileManager: NSObject,FileProviderDelegate {
         //            let protectionSpace = URLProtectionSpace.init(host: "dav.jianguoyun.com", port: 443, protocol: "https", realm: "Restricted", authenticationMethod: NSURLAuthenticationMethodHTTPBasic)
         //            URLCredentialStorage.shared.setDefaultCredential(userCredential, for: protectionSpace)
         webdav = WebDAVFileProvider(baseURL: server, credential: userCredential)!
-        webdav?.delegate = self as FileProviderDelegate
+        webdav?.delegate = self
         //注意：不修改鉴权方式，会导致每次请求两次，一次401失败，一次带token成功
         webdav?.credentialType = URLRequest.AuthenticationType.basic
         //            webdav?.useCache = true

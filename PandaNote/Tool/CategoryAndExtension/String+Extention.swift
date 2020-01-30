@@ -8,10 +8,25 @@
 
 import Foundation
 import UIKit
+import CommonCrypto
 
 //MARK: 字符串扩展工具
 extension String {
-
+    var pp_md5: String {
+        let data = Data(self.utf8)
+        let hash = data.withUnsafeBytes { (bytes: UnsafeRawBufferPointer) -> [UInt8] in
+            var hash = [UInt8](repeating: 0, count: Int(CC_MD5_DIGEST_LENGTH))
+            CC_MD5(bytes.baseAddress, CC_LONG(data.count), &hash)
+            return hash
+        }
+        return hash.map { String(format: "%02x", $0) }.joined()
+    }
+    func substring(_ r: Range<Int>) -> String {
+        let fromIndex = self.index(self.startIndex, offsetBy: r.lowerBound)
+        let toIndex = self.index(self.startIndex, offsetBy: r.upperBound)
+        let indexRange = Range<String.Index>(uncheckedBounds: (lower: fromIndex, upper: toIndex))
+        return String(self[indexRange])
+    }
     //MARK: 密码
     func isVaildPassword() -> Bool {
         return self.count > 5
@@ -196,7 +211,7 @@ extension String {
      - Parameter endIndex:   结束索引点（最终字符串中不会包含该字符）
      - Returns: 返回指定截取的字符串
      */
-    func slice(startIndex: Int = 0, endIndex: Int = Int.max) -> String {
+    func slice2333(startIndex: Int = 0, endIndex: Int = Int.max) -> String {
         var str = ""
         var start = startIndex, end = endIndex
         let count = self.length
@@ -225,7 +240,7 @@ extension String {
      - Parameter len:   截取的字符串长度
      - Returns: 返回指定截取的字符串
      */
-    func substr(startIndex: Int = 0, len: Int = Int.max) -> String {
+    func substr2333(startIndex: Int = 0, len: Int = Int.max) -> String {
         var str = ""
         var start = startIndex, end = len
         let count = self.length
@@ -255,7 +270,7 @@ extension String {
      - Parameter endIndex:   结束索引点（最终字符串中不会包含该字符）
      - Returns: 返回指定截取的字符串
      */
-    func substring(startIndex: Int = 0, endIndex: Int = Int.max) -> String {
+    func substring2333(startIndex: Int = 0, endIndex: Int = Int.max) -> String {
         var str = ""
         var start = startIndex, end = endIndex
         let count = self.length

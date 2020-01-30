@@ -109,7 +109,7 @@ class PPHomeViewController: PPBaseViewController,FileProviderDelegate,UITextFiel
         else {
             cell.iconImage.image = UIImage.init(named: PPUserInfoManager.sharedManager.pp_fileIcon[String(fileObj.name.split(separator: ".").last!)] ?? "ico_jpg")
         }
-        let dataStr = String(describing: fileObj.modifiedDate).substring(startIndex: 9, endIndex: 29)
+        let dataStr = String(describing: fileObj.modifiedDate).substring(9..<23)
         let sizeStr = (fileObj.size>0) ? " - "+String(fileObj.size/1000)+"KB":""
         cell.timeLabel.text = dataStr + sizeStr
         return cell

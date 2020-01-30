@@ -10,6 +10,10 @@
 
 import UIKit
 
+#if DEBUG
+import DoraemonKit
+#endif
+
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
@@ -25,6 +29,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         PPShareManager.initWeixinAppId("wx37af47629351b5c0", appKey: "")
         #if DEBUG
         Bundle(path: "/Applications/InjectionIII.app/Contents/Resources/iOSInjection.bundle")?.load()
+        DoraemonManager.shareInstance().install()
         #endif
         
         //disable dark mode globally
@@ -32,6 +37,15 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             self.window?.overrideUserInterfaceStyle = .light
         }
         
+        
+        let dbModel = PPPriceDBModel()
+        let sqliteManager = PPSQLiteManager(delegate: dbModel)
+//        let sqliteManager = PPSQLiteManager.shared
+        sqliteManager.createDB()
+        let sql = "create table if not exists pp_price(id integer primary key autoincrement,code varchar(20) not null,price varchar(20) default 0,name varchar(50), whole_price varchar(20) ,remark varchar(20),category varchar(20) )"
+        
+        sqliteManager.operation(process: sql, value: [])
+//        test()
         return true
     }
 
