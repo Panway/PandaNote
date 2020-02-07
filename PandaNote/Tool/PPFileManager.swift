@@ -90,15 +90,41 @@ class PPFileManager: NSObject,FileProviderDelegate {
         let options = PHImageRequestOptions()
         options.isNetworkAccessAllowed = true
         options.isSynchronous = false
-        manager.requestImageData(for: asset, options: options) { (result, string, orientation, info) -> Void in
-            let url = info?["PHImageFileURLKey"] as! URL
-
-            if let imageData = result {
+//        if #available(iOS 13, *) {
+//            manager.requestImageDataAndOrientation(for: asset, options: options) { (imgData, string, orientation, info) in
+//                var url : URL
+//                if ((info?["PHImageFileURLKey"]) != nil) {
+//                    url = info?["PHImageFileURLKey"] as! URL
+//                }
+//                else {
+//                    url = URL(fileURLWithPath: info?["PHImageFileUTIKey"] as! String)
+//                }
+//
+//                if let imageData = imgData {
+//                    completion(imageData as NSData,url)
+//                } else {
+//                    completion(nil,url)
+//                }
+//            }
+//        } else {
+        manager.requestImageData(for: asset, options: options) { (imgData, string, orientation, info) -> Void in
+            var url : URL
+            if ((info?["PHImageFileURLKey"]) != nil) {
+                url = info?["PHImageFileURLKey"] as! URL
+            }
+            else {
+                url = URL(fileURLWithPath: asset.value(forKey: "filename") as! String)
+            }
+            
+            if let imageData = imgData {
                 completion(imageData as NSData,url)
             } else {
                 completion(nil,url)
             }
         }
+//        }
+        
+        
     }
     
     func getImageDataFromPHAsset(asset: PHAsset) -> Data {

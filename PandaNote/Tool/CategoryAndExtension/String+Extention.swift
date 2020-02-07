@@ -27,6 +27,19 @@ extension String {
         let indexRange = Range<String.Index>(uncheckedBounds: (lower: fromIndex, upper: toIndex))
         return String(self[indexRange])
     }
+    func pp_isImageFile() -> Bool { if(self.lowercased().hasSuffix("jpg")||self.lowercased().hasSuffix("jpeg")||self.lowercased().hasSuffix("png")||self.lowercased().hasSuffix("gif")||self.lowercased().hasSuffix("webp")) {
+        return true
+        }
+        return false
+    }
+    
+    
+    
+    
+    
+    
+    
+    
     //MARK: 密码
     func isVaildPassword() -> Bool {
         return self.count > 5

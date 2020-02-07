@@ -90,28 +90,7 @@ class PPHomeViewController: PPBaseViewController,FileProviderDelegate,UITextFiel
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: cellReuseIdentifier, for: indexPath) as! PPFileListTableViewCell
         let fileObj = self.dataSource[indexPath.row]
-        cell.titleLabel.text = fileObj.name
-        if fileObj.isDirectory {
-//            cell.iconImage.kf.setImage(with: "" as! Resource)
-            cell.iconImage.image = UIImage.init(named: "ico_folder")
-        }
-        else if (isImage(fileName: fileObj.name))  {
-            let imagePath = PPUserInfoManager.sharedManager.pp_mainDirectory + fileObj.path
-            self.currentImageURL = imagePath
-            if FileManager.default.fileExists(atPath: imagePath) {
-                let imageData = try?Data(contentsOf: URL(fileURLWithPath: imagePath))
-                cell.iconImage.image = UIImage.init(data: imageData!)
-            }
-            else {
-                cell.iconImage.image = UIImage.init(named: "ico_jpg")
-            }
-        }
-        else {
-            cell.iconImage.image = UIImage.init(named: PPUserInfoManager.sharedManager.pp_fileIcon[String(fileObj.name.split(separator: ".").last!)] ?? "ico_jpg")
-        }
-        let dataStr = String(describing: fileObj.modifiedDate).substring(9..<23)
-        let sizeStr = (fileObj.size>0) ? " - "+String(fileObj.size/1000)+"KB":""
-        cell.timeLabel.text = dataStr + sizeStr
+        cell.updateUIWithData(fileObj)
         return cell
     }
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
@@ -128,7 +107,7 @@ class PPHomeViewController: PPBaseViewController,FileProviderDelegate,UITextFiel
             vc.filePathStr = fileObj.path
             self.navigationController?.pushViewController(vc, animated: true)
         }
-        else if (isImage(fileName: fileObj.name))  {
+        else if (fileObj.name.pp_isImageFile())  {
             storeImageWithFileManager(imageURL: fileObj.path) { (imageData) in
                 debugPrint(imageData)
                 self.showImage(contents: imageData, image: nil, imageName: fileObj.path,imageURL:fileObj.path)
@@ -145,7 +124,14 @@ class PPHomeViewController: PPBaseViewController,FileProviderDelegate,UITextFiel
     func tableView(_ tableView: UITableView, editActionsForRowAt indexPath: IndexPath) -> [UITableViewRowAction]? {
         
         let delete = UITableViewRowAction(style: .default, title: "删除") { (action, indexPath) in
-            PPHUD.showHUDText(message: "未完成", view: self.view)
+            let fileObj = self.dataSource[indexPath.row]
+            //相对路径
+            PPFileManager.sharedManager.webdav?.removeItem(path:fileObj.path, completionHandler: { (error) in
+                DispatchQueue.main.async {
+                    PPHUD.showHUDText(message: "删除成功哟！", view: self.view)
+                    self.getWebDAVData()
+                }
+            })
         }
         delete.backgroundColor = UIColor.red
         
@@ -281,21 +267,28 @@ class PPHomeViewController: PPBaseViewController,FileProviderDelegate,UITextFiel
                 let picker = YPImagePicker(configuration: config)
 //                let picker = YPImagePicker()
                 picker.didFinishPicking { [unowned picker] items, _ in
-                    if let photo = items.singlePhoto {
-                            PPFileManager.sharedManager.getImageDataFromAsset(asset: photo.asset!, completion: { (imageData,imageLocalURL) in
-                                if let imageLocalURL = imageLocalURL {
-                                    let remotePath = self.pathStr + "PP_"+imageLocalURL.lastPathComponent
-                                    PPFileManager.sharedManager.webdav?.copyItem(localFile: imageLocalURL, to: remotePath, completionHandler: { (error) in
-                                        if error == nil {
-                                            DispatchQueue.main.async {
-                                                PPHUD.showHUDText(message: "上传成功🦄", view: self.view)                                                
-                                            }
-                                        }
-                                    })
-                                }
-
-                        })
+                    guard let photo = items.singlePhoto else {
+                        return
                     }
+                    PPFileManager.sharedManager.getImageDataFromAsset(asset: photo.asset!, completion: { (imageData,imageLocalURL) in
+                        guard let imageLocalURL = imageLocalURL else {
+                            return
+                        }
+                        let remotePath = self.pathStr + "PP_"+imageLocalURL.lastPathComponent
+                        debugPrint(imageLocalURL)
+                        
+                        PPFileManager.sharedManager.webdav?.writeContents(path: remotePath, contents: imageData as Data?, completionHandler: { (error) in
+                            if error == nil {
+                                DispatchQueue.main.async {
+                                    PPHUD.showHUDText(message: "上传成功🦄", view: self.view)
+                                    self.getWebDAVData()
+                                }
+                            }
+                        })
+//                        PPFileManager.sharedManager.webdav?.copyItem(localFile: imageLocalURL, to: remotePath, completionHandler: { (error) in
+//                        })
+                        
+                    })
                     picker.dismiss(animated: true, completion: nil)
                 }
                 self.present(picker, animated: true, completion: nil)
@@ -303,11 +296,6 @@ class PPHomeViewController: PPBaseViewController,FileProviderDelegate,UITextFiel
         }
     }
     
-    func isImage(fileName:String) -> Bool { if(fileName.lowercased().hasSuffix("jpg")||fileName.lowercased().hasSuffix("jpeg")||fileName.lowercased().hasSuffix("png")||fileName.lowercased().hasSuffix("gif")||fileName.lowercased().hasSuffix("webp")) {
-            return true
-        }
-        return false
-    }
     func storeImageWithFileManager(imageURL:String,completionHandler: ((Data) -> Void)? = nil) {
 //        let cache = ImageCache.default//KingFisher用
         let imagePath = PPUserInfoManager.sharedManager.pp_mainDirectory + imageURL
@@ -477,16 +465,5 @@ class PPHomeViewController: PPBaseViewController,FileProviderDelegate,UITextFiel
             break
         }
     }
-    
-
-    /*
-    // MARK: - Navigation
-
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        // Get the new view controller using segue.destination.
-        // Pass the selected object to the new view controller.
-    }
-    */
 
 }

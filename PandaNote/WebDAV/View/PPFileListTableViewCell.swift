@@ -51,17 +51,38 @@ class PPFileListTableViewCell: PPBaseTableViewCell {
     }
     
     override func updateUIWithData(_ model: AnyObject?) {
-        let portTmp: FileObject = model as! FileObject
-        self.titleLabel.text = portTmp.name
-        //        self.couponNumLabel.text = "券码 " + formatCouponNum(model.qrCode ?? "")
-        //        self.timeLabel.text = Date.getDateFormatter("yyyy/MM/dd HH:mm:ss", (model.time?.toDouble())!)
+        let fileObj: FileObject = model as! FileObject
+//        self.titleLabel.text = fileObj.name
         
-        //1544514588
-        //        self.titleLabel.text = "老凤祥黄金券名称"
-        //        self.couponNumLabel.text = "券码 " + formatCouponNum("145673443768778")
-        //        self.timeLabel.text = Date.getDateFormatter("yyyy/MM/dd HH:mm:ss", 1544514588)
+        self.titleLabel.text = fileObj.name
+        if fileObj.isDirectory {
+            //            cell.iconImage.kf.setImage(with: "" as! Resource)
+            self.iconImage.image = UIImage.init(named: "ico_folder")
+        }
+        else if (fileObj.name.pp_isImageFile())  {
+            let imagePath = PPUserInfoManager.sharedManager.pp_mainDirectory + fileObj.path
+//            self.currentImageURL = imagePath
+            if FileManager.default.fileExists(atPath: imagePath) {
+                let imageData = try?Data(contentsOf: URL(fileURLWithPath: imagePath))
+                self.iconImage.image = UIImage.init(data: imageData!)
+            }
+            else {
+                self.iconImage.image = UIImage.init(named: "ico_jpg")
+            }
+        }
+        else {
+            self.iconImage.image = UIImage.init(named: PPUserInfoManager.sharedManager.pp_fileIcon[String(fileObj.name.split(separator: ".").last!)] ?? "ico_jpg")
+        }
+        let dataStr = String(describing: fileObj.modifiedDate).substring(9..<25)
+        let sizeStr = (fileObj.size>0) ? " - "+String(fileObj.size/1000)+"KB":""
+        self.timeLabel.text = dataStr + sizeStr
+        
+        
+        
 
     }
+    
+    
     func configureView()  {
         self.addSubview(self.iconImage)
         self.iconImage.snp.makeConstraints { (make) in
