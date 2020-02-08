@@ -74,9 +74,7 @@ class PPFileListTableViewCell: PPBaseTableViewCell {
             self.iconImage.image = UIImage.init(named: PPUserInfo.shared.pp_fileIcon[String(fileObj.name.split(separator: ".").last!)] ?? "ico_jpg")
         }
         let localDate = fileObj.modifiedDate?.addingTimeInterval(TimeInterval(PPUserInfo.shared.pp_timezoneOffset))
-        var dataStr = String(describing: localDate).substring(9..<25)
-        let newDate = serverToLocal(date: dataStr)
-        dataStr = String(describing: newDate).substring(9..<25)
+        let dataStr = String(describing: localDate).substring(9..<25)
         let sizeStr = (fileObj.size>0) ? " - "+String(fileObj.size/1000)+"KB":""
         self.timeLabel.text = dataStr + sizeStr
         

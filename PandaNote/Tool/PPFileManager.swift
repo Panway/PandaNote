@@ -44,6 +44,22 @@ class PPFileManager: NSObject,FileProviderDelegate {
         })
 
     }
+    func uploadFileViaWebDAV(path: String, contents: Data?, completionHander:@escaping(_ error:Error?) -> Void) {
+        PPFileManager.sharedManager.webdav?.writeContents(path: path, contents: contents, completionHandler: { (error) in
+            if error == nil {
+                DispatchQueue.main.async {
+                    completionHander(error)
+                }
+            }
+            else {
+                debugPrint(error ?? "")
+            }
+        })
+//        PPFileManager.sharedManager.webdav?.copyItem(localFile: imageLocalURL, to: remotePath, completionHandler: { (error) in
+//        })
+
+        
+    }
     func fileproviderSucceed(_ fileProvider: FileProviderOperations, operation: FileOperationType) {
         
     }

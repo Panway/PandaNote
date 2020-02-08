@@ -14,7 +14,7 @@ class PPUserInfo: NSObject {
     var webDAVServerURL:String?
     var webDAVUserName:String?
     var webDAVPassword:String?
-    var webDAVRemark:String?
+    var webDAVRemark:String = ""
     var pp_mainDirectory:String!
     var pp_mainDirectoryURL:URL!
     var pp_fileIcon = [String:String]()
@@ -50,7 +50,7 @@ class PPUserInfo: NSObject {
         self.webDAVServerURL = UserDefaults.standard.string(forKey: "PPWebDAVServerURL")
         self.webDAVUserName = UserDefaults.standard.string(forKey: "PPWebDAVUserName")
         self.webDAVPassword = UserDefaults.standard.string(forKey: "PPWebDAVPassword")
-        self.webDAVRemark = UserDefaults.standard.string(forKey: "PPWebDAVRemark")
+        self.webDAVRemark = UserDefaults.standard.string(forKey: "PPWebDAVRemark") ?? "文件"
         self.pp_timezoneOffset = TimeZone.current.secondsFromGMT()
 
     }

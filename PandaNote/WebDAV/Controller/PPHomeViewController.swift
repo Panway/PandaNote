@@ -40,7 +40,7 @@ class PPHomeViewController: PPBaseViewController,FileProviderDelegate,UITextFiel
     override func viewDidLoad() {
         super.viewDidLoad()
         let userInfo = PPUserInfo.shared
-        self.title = userInfo.webDAVRemark ?? "文件（未配置）"
+        self.title = String(self.pathStr.split(separator: "/").last ?? "") ?? userInfo.webDAVRemark
         
         tableView = UITableView.init(frame: self.view.bounds)
         self.view.addSubview(tableView)
@@ -156,11 +156,15 @@ class PPHomeViewController: PPBaseViewController,FileProviderDelegate,UITextFiel
     //https://stackoverflow.com/a/58006735/4493393
     //here is how I selecte file name `Panda` from `Panda.txt`
     func textFieldDidBeginEditing(_ textField: UITextField) {
-        // if textField.text is `Panda.txt`, so offset will be 3
-        let offset = String(textField.text!.split(separator: ".").last!).length
+        let nameParts = textField.text!.split(separator: ".")
+        var offset = 0
+        if nameParts.count > 1 {
+            // if textField.text is `Panda.txt`, so offset will be 3+1=4
+            offset = String(textField.text!.split(separator: ".").last!).length + 1
+        }
         let from = textField.position(from: textField.beginningOfDocument, offset: 0)
         let to = textField.position(from: textField.beginningOfDocument,
-                                    offset:textField.text!.length - (offset+1) )
+                                    offset:textField.text!.length - offset)
         //now `Panda` will be selected
         textField.selectedTextRange = textField.textRange(from: from!, to: to!)//danger! unwrap with `!` is not recommended  危险，不推荐用！解包
     }
@@ -276,17 +280,10 @@ class PPHomeViewController: PPBaseViewController,FileProviderDelegate,UITextFiel
                         }
                         let remotePath = self.pathStr + "PP_"+imageLocalURL.lastPathComponent
                         debugPrint(imageLocalURL)
-                        
-                        PPFileManager.sharedManager.webdav?.writeContents(path: remotePath, contents: imageData as Data?, completionHandler: { (error) in
-                            if error == nil {
-                                DispatchQueue.main.async {
-                                    PPHUD.showHUDText(message: "上传成功🦄", view: self.view)
-                                    self.getWebDAVData()
-                                }
-                            }
-                        })
-//                        PPFileManager.sharedManager.webdav?.copyItem(localFile: imageLocalURL, to: remotePath, completionHandler: { (error) in
-//                        })
+                        PPFileManager.sharedManager.uploadFileViaWebDAV(path: remotePath, contents: imageData as Data?) { (error) in
+                            PPHUD.showHUDText(message: "上传成功🦄", view: self.view)
+                            self.getWebDAVData()
+                        }
                         
                     })
                     picker.dismiss(animated: true, completion: nil)
