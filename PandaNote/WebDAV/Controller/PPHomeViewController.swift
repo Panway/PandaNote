@@ -39,7 +39,7 @@ class PPHomeViewController: PPBaseViewController,FileProviderDelegate,UITextFiel
     }
     override func viewDidLoad() {
         super.viewDidLoad()
-        let userInfo = PPUserInfoManager.sharedManager
+        let userInfo = PPUserInfo.shared
         self.title = userInfo.webDAVRemark ?? "文件（未配置）"
         
         tableView = UITableView.init(frame: self.view.bounds)
@@ -76,7 +76,7 @@ class PPHomeViewController: PPBaseViewController,FileProviderDelegate,UITextFiel
             getWebDAVData()
         }
         self.tableView.addRefreshHeader {
-            if (PPUserInfoManager.sharedManager.webDAVServerURL != nil) {
+            if (PPUserInfo.shared.webDAVServerURL != nil) {
                 PPFileManager.sharedManager.initWebDAVSetting()
             }
             self.getData((Any).self)
@@ -108,7 +108,7 @@ class PPHomeViewController: PPBaseViewController,FileProviderDelegate,UITextFiel
             self.navigationController?.pushViewController(vc, animated: true)
         }
         else if (fileObj.name.pp_isImageFile())  {
-            storeImageWithFileManager(imageURL: fileObj.path) { (imageData) in
+            loadAndSaveImage(imageURL: fileObj.path) { (imageData) in
                 debugPrint(imageData)
                 self.showImage(contents: imageData, image: nil, imageName: fileObj.path,imageURL:fileObj.path)
             }
@@ -296,9 +296,9 @@ class PPHomeViewController: PPBaseViewController,FileProviderDelegate,UITextFiel
         }
     }
     
-    func storeImageWithFileManager(imageURL:String,completionHandler: ((Data) -> Void)? = nil) {
+    func loadAndSaveImage(imageURL:String,completionHandler: ((Data) -> Void)? = nil) {
 //        let cache = ImageCache.default//KingFisher用
-        let imagePath = PPUserInfoManager.sharedManager.pp_mainDirectory + imageURL
+        let imagePath = PPUserInfo.shared.pp_mainDirectory + imageURL
         self.currentImageURL = imagePath
         
 //        let filePath = cache.cachePath(forComputedKey: imageURL)//KingFisher用
@@ -322,31 +322,26 @@ class PPHomeViewController: PPBaseViewController,FileProviderDelegate,UITextFiel
         else {
             PPFileManager.sharedManager.webdav?.contents(path: imageURL, completionHandler: {
                 contents, error in
-                if let contents = contents {
-                    
-                    if !FileManager.default.fileExists(atPath: PPUserInfoManager.sharedManager.pp_mainDirectory + imageURL) {
-                        do {
-                            var array = imageURL.split(separator: "/")
-                            array.removeLast()
-                            let newStr:String =  array.joined(separator: "/")
-                            try FileManager.default.createDirectory(atPath: PPUserInfoManager.sharedManager.pp_mainDirectory+"/"+newStr, withIntermediateDirectories: true, attributes: nil)
-                        } catch  {
-                            debugPrint("==FileManager Crash")
-                        }
-                    }
-                    
-                    FileManager.default.createFile(atPath: PPUserInfoManager.sharedManager.pp_mainDirectory + imageURL, contents: contents, attributes: nil)
-                    
-//                    do {
-//                        try contents.write(to: PPUserInfoManager.sharedManager.pp_mainDirectoryURL.appendingPathComponent(fileObj.path), options: Data.WritingOptions.atomic)
-//                    } catch {
-//                        print("====error")
-//                    }
-                    
-                    if let handler = completionHandler {
-                        handler(contents)
+                guard let contents = contents else {
+                    return
+                }
+                if !FileManager.default.fileExists(atPath: PPUserInfo.shared.pp_mainDirectory + imageURL) {
+                    do {
+                        var array = imageURL.split(separator: "/")
+                        array.removeLast()
+                        let newStr:String = array.joined(separator: "/")
+                        try FileManager.default.createDirectory(atPath: PPUserInfo.shared.pp_mainDirectory+"/"+newStr, withIntermediateDirectories: true, attributes: nil)
+                    } catch  {
+                        debugPrint("==FileManager Crash")
                     }
                 }
+                
+                FileManager.default.createFile(atPath: PPUserInfo.shared.pp_mainDirectory + imageURL, contents: contents, attributes: nil)
+                
+                if let handler = completionHandler {
+                    handler(contents)
+                }
+                
             })
             
         }

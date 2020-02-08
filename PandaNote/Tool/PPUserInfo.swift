@@ -10,7 +10,7 @@ import Foundation
 
 
 
-class PPUserInfoManager: NSObject {
+class PPUserInfo: NSObject {
     var webDAVServerURL:String?
     var webDAVUserName:String?
     var webDAVPassword:String?
@@ -18,7 +18,9 @@ class PPUserInfoManager: NSObject {
     var pp_mainDirectory:String!
     var pp_mainDirectoryURL:URL!
     var pp_fileIcon = [String:String]()
-    static let sharedManager = PPUserInfoManager()
+    var pp_timezoneOffset:Int!
+    var pp_Pref:Dictionary<String, Any>!
+    static let shared = PPUserInfo()
     
     func initConfig() -> Void {
         self.pp_mainDirectory = NSSearchPathForDirectoriesInDomains(.libraryDirectory, .userDomainMask, true)[0]//documentDirectory
@@ -49,7 +51,8 @@ class PPUserInfoManager: NSObject {
         self.webDAVUserName = UserDefaults.standard.string(forKey: "PPWebDAVUserName")
         self.webDAVPassword = UserDefaults.standard.string(forKey: "PPWebDAVPassword")
         self.webDAVRemark = UserDefaults.standard.string(forKey: "PPWebDAVRemark")
-        
+        self.pp_timezoneOffset = TimeZone.current.secondsFromGMT()
+
     }
     
     

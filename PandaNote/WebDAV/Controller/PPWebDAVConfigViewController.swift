@@ -67,12 +67,12 @@ class PPWebDAVConfigViewController: PPBaseViewController {
             PPHUD.showHUDText(message: "请填写备注", view: self.view)
             return
         }
-        PPUserInfoManager.sharedManager.save(cell1.serverNameTF.text!, forKey: "PPWebDAVServerURL")
-        PPUserInfoManager.sharedManager.save(cell2.serverNameTF.text!, forKey: "PPWebDAVUserName")
-        PPUserInfoManager.sharedManager.save(cell3.serverNameTF.text!, forKey: "PPWebDAVPassword")
-        PPUserInfoManager.sharedManager.save(cell4.serverNameTF.text!, forKey: "PPWebDAVRemark")
+        PPUserInfo.shared.save(cell1.serverNameTF.text!, forKey: "PPWebDAVServerURL")
+        PPUserInfo.shared.save(cell2.serverNameTF.text!, forKey: "PPWebDAVUserName")
+        PPUserInfo.shared.save(cell3.serverNameTF.text!, forKey: "PPWebDAVPassword")
+        PPUserInfo.shared.save(cell4.serverNameTF.text!, forKey: "PPWebDAVRemark")
         PPHUD.showHUDText(message: "保存成功", view: self.view)
-        PPUserInfoManager.sharedManager.initConfig()
+        PPUserInfo.shared.initConfig()
 
     }
 

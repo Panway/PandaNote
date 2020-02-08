@@ -30,7 +30,7 @@ class PPFileManager: NSObject,FileProviderDelegate {
             }
 //            PINCache.shared().setObject(contents, forKey: "img")
 
-//            let key = (PPUserInfoManager.sharedManager.webDAVServerURL ?? " ") + path
+//            let key = (PPUserInfo.shared.webDAVServerURL ?? " ") + path
 //            let cacheData = Data.init(contents)
 //            PPDiskCache.shared.setData(cacheData, key: key)
             /*
@@ -57,7 +57,7 @@ class PPFileManager: NSObject,FileProviderDelegate {
     }
     //MARK:初始化webDAV设置
     func initWebDAVSetting() -> Void {
-        let userInfo = PPUserInfoManager.sharedManager
+        let userInfo = PPUserInfo.shared
         var server:URL
         if let serverTMP: URL = URL(string: userInfo.webDAVServerURL ?? "") {
             server = serverTMP
@@ -69,7 +69,7 @@ class PPFileManager: NSObject,FileProviderDelegate {
         
         //        let server: URL = URL(string: userInfo.webDAVServerURL!) ?? NSURL.init() as URL
         //        }
-        //        if let server: URL = URL(string: PPUserInfoManager.sharedManager.webDAVServerURL ?? "") {
+        //        if let server: URL = URL(string: PPUserInfo.shared.webDAVServerURL ?? "") {
         
         let userCredential = URLCredential(user: userInfo.webDAVUserName ?? "",
                                            password: userInfo.webDAVPassword ?? "",

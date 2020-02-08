@@ -25,10 +25,10 @@ class PPMarkdownViewController: PPBaseViewController,UITextViewDelegate {
     
     override func viewDidLoad() {
         pp_initView()
-        let server: URL = URL(string: PPUserInfoManager.sharedManager.webDAVServerURL ?? "")!
+        let server: URL = URL(string: PPUserInfo.shared.webDAVServerURL ?? "")!
 
-        let credential = URLCredential(user: PPUserInfoManager.sharedManager.webDAVUserName ?? "",
-                                       password: PPUserInfoManager.sharedManager.webDAVPassword ?? "",
+        let credential = URLCredential(user: PPUserInfo.shared.webDAVUserName ?? "",
+                                       password: PPUserInfo.shared.webDAVPassword ?? "",
                                        persistence: .permanent)
         
         webdav = WebDAVFileProvider(baseURL: server, credential: credential)!
@@ -146,7 +146,7 @@ class PPMarkdownViewController: PPBaseViewController,UITextViewDelegate {
         }
     }
     @objc func button2Action(sender:UIButton)  {
-        let item1 = PPUserInfoManager.sharedManager
+        let item1 = PPUserInfo.shared
         print(item1.webDAVServerURL!)
         let stringToUpload:String = textView?.text ?? ""
         if stringToUpload.length < 1 {
@@ -166,10 +166,10 @@ class PPMarkdownViewController: PPBaseViewController,UITextViewDelegate {
         })
 /*
         let parameters: Parameters = ["rawString": stringToUpload]
-        let filePath : String = (PPUserInfoManager.sharedManager.webDAVServerURL ?? "") + self.filePathStr
+        let filePath : String = (PPUserInfo.shared.webDAVServerURL ?? "") + self.filePathStr
 
         Alamofire.request(filePath, method: .put, parameters: parameters, encoding: PandaStringArrayEncoding(array: [textView!.text]))
-            .authenticate(user: PPUserInfoManager.sharedManager.webDAVUserName ?? "", password: PPUserInfoManager.sharedManager.webDAVPassword ?? "")
+            .authenticate(user: PPUserInfo.shared.webDAVUserName ?? "", password: PPUserInfo.shared.webDAVPassword ?? "")
             .responseData { response in
             debugPrint("All Response Info: \(response)")
             
