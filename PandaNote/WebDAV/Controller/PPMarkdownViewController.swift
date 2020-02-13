@@ -22,7 +22,7 @@ class PPMarkdownViewController: PPBaseViewController,UITextViewDelegate {
     var textView : PPPTextView?
     open var filePathStr: String = ""//相对路径
     var webdav: WebDAVFileProvider?
-    
+    var closeAfterSave : Bool = false
     override func viewDidLoad() {
         pp_initView()
         let server: URL = URL(string: PPUserInfo.shared.webDAVServerURL ?? "")!
@@ -87,8 +87,22 @@ class PPMarkdownViewController: PPBaseViewController,UITextViewDelegate {
         self.setLeftBarButton()
     }
     override func pp_backAction() {
-        print("666666")
-        self.navigationController?.popViewController(animated: true)
+        if (PPUserInfo.pp_valueForSettingDict(key: "saveMarkdownWhenClose")) {
+            self.closeAfterSave = true
+            self.button2Action(sender: nil)
+        } else {
+            PPAlertAction.showAlert(withTitle: "是否保存已修改的文字", msg: "", buttonsStatement: ["不保存","要保存"]) { (index) in
+                debugPrint("\(index)")
+                if (index == 0) {
+                    self.navigationController?.popViewController(animated: true)
+                }
+                else {
+                    self.closeAfterSave = true
+                    self.button2Action(sender: nil)
+                }
+            }
+            
+        }
     }
     
     func textViewDidChange(_ textView: PPPTextView) {
@@ -145,7 +159,7 @@ class PPMarkdownViewController: PPBaseViewController,UITextViewDelegate {
             return urlRequest
         }
     }
-    @objc func button2Action(sender:UIButton)  {
+    @objc func button2Action(sender:UIButton?)  {
         let item1 = PPUserInfo.shared
         print(item1.webDAVServerURL!)
         let stringToUpload:String = textView?.text ?? ""
@@ -161,6 +175,9 @@ class PPMarkdownViewController: PPBaseViewController,UITextViewDelegate {
             if error == nil {
                 DispatchQueue.main.async {
                     PPHUD.showHUDText(message: "保存成功", view: self.view)
+                    if (self.closeAfterSave) {
+                        self.navigationController?.popViewController(animated: true)
+                    }
                 }
             }
         })

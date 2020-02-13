@@ -18,8 +18,21 @@ class PPUserInfo: NSObject {
     var pp_mainDirectory:String!
     var pp_mainDirectoryURL:URL!
     var pp_fileIcon = [String:String]()
+    /// 本地时间相对于格林尼治时间的差距
     var pp_timezoneOffset:Int!
-    var pp_Pref:Dictionary<String, Any>!
+//    var pp_Setting:Dictionary<String, Any>!
+    /// The repeat count.
+    public var pp_Setting:Dictionary<String, Any> = [:] {
+        didSet {
+            debugPrint("\(String(describing: oldValue)) --> \(String(describing: pp_Setting))")
+            let data:NSData = NSKeyedArchiver.archivedData(withRootObject: pp_Setting) as NSData
+            data.write(toFile: self.pp_mainDirectory+"/PP_UserPreference", atomically: true)
+//            if oldValue != pp_Setting {
+                //save to disk
+                
+//            }
+        }
+    }
     static let shared = PPUserInfo()
     
     func initConfig() -> Void {
@@ -52,10 +65,24 @@ class PPUserInfo: NSObject {
         self.webDAVPassword = UserDefaults.standard.string(forKey: "PPWebDAVPassword")
         self.webDAVRemark = UserDefaults.standard.string(forKey: "PPWebDAVRemark") ?? "文件"
         self.pp_timezoneOffset = TimeZone.current.secondsFromGMT()
+        
+        if let data = try? Data(contentsOf: URL(fileURLWithPath: self.pp_mainDirectory+"/PP_UserPreference")) {
+            let dict2 = NSKeyedUnarchiver.unarchiveObject(with: data)
+//            debugPrint("\(String(describing: dict2))")
+            self.pp_Setting = dict2 as! Dictionary<String, Any>
+        }
 
+//        self.pp_Setting = ["saveDocWhenClose":"1"]
+//        self.pp_Setting.updateValue(<#T##value: Any##Any#>, forKey: <#T##String#>)
+        
     }
     
-    
+    class func pp_valueForSettingDict(key : String) -> Bool {
+        if let string : String = PPUserInfo.shared.pp_Setting[key] as? String {
+            return string.bool
+        }
+        return false
+    }
     func save(_ value: String, forKey defaultName: String) -> Void {
         UserDefaults.standard.setValue(value, forKey: defaultName)
 

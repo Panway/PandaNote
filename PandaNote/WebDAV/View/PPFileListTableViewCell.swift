@@ -41,14 +41,7 @@ class PPFileListTableViewCell: PPBaseTableViewCell {
     
     
     
-    override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
-        super.init(style: style, reuseIdentifier: reuseIdentifier)
-        configureView()
-    }
     
-    required init?(coder aDecoder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
     
     override func updateUIWithData(_ model: AnyObject?) {
         let fileObj: FileObject = model as! FileObject
@@ -75,7 +68,7 @@ class PPFileListTableViewCell: PPBaseTableViewCell {
         }
         let localDate = fileObj.modifiedDate?.addingTimeInterval(TimeInterval(PPUserInfo.shared.pp_timezoneOffset))
         let dataStr = String(describing: localDate).substring(9..<25)
-        let sizeStr = (fileObj.size>0) ? " - "+String(fileObj.size/1000)+"KB":""
+        let sizeStr = (fileObj.size>0) ? " - \(Int(fileObj.size).pp_SizeString())" :""
         self.timeLabel.text = dataStr + sizeStr
         
         
@@ -84,7 +77,7 @@ class PPFileListTableViewCell: PPBaseTableViewCell {
     }
     
     
-    func configureView()  {
+    override func pp_addSubViews() {
         self.addSubview(self.iconImage)
         self.iconImage.snp.makeConstraints { (make) in
             make.left.equalTo(self.snp.left).offset(15);

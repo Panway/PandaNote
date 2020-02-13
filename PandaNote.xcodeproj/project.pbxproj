@@ -28,6 +28,7 @@
 		6056027D23178B03000809CD /* XDFastTableView.m in Sources */ = {isa = PBXBuildFile; fileRef = 6056027C23178B03000809CD /* XDFastTableView.m */; };
 		6056027F23178C2C000809CD /* PPTextFieldTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6056027E23178C2C000809CD /* PPTextFieldTableViewCell.swift */; };
 		605602822317A0DB000809CD /* PPHUD.swift in Sources */ = {isa = PBXBuildFile; fileRef = 605602812317A0DB000809CD /* PPHUD.swift */; };
+		60766BCB23F2A81700D24CEA /* PPSettingCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60766BCA23F2A81700D24CEA /* PPSettingCell.swift */; };
 		6080D3AB233315B900F582B1 /* CacheSerializer+Panda.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6080D3AA233315B900F582B1 /* CacheSerializer+Panda.swift */; };
 		6080D3F323333C3500F582B1 /* PPFileManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6080D3F223333C3500F582B1 /* PPFileManager.swift */; };
 		60AA154E23DEBAC900A68FAA /* PPSQLiteManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60AA154D23DEBAC900A68FAA /* PPSQLiteManager.swift */; };
@@ -93,6 +94,7 @@
 		6056027C23178B03000809CD /* XDFastTableView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XDFastTableView.m; sourceTree = "<group>"; };
 		6056027E23178C2C000809CD /* PPTextFieldTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPTextFieldTableViewCell.swift; sourceTree = "<group>"; };
 		605602812317A0DB000809CD /* PPHUD.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPHUD.swift; sourceTree = "<group>"; };
+		60766BCA23F2A81700D24CEA /* PPSettingCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPSettingCell.swift; sourceTree = "<group>"; };
 		6080D3AA233315B900F582B1 /* CacheSerializer+Panda.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CacheSerializer+Panda.swift"; sourceTree = "<group>"; };
 		6080D3F223333C3500F582B1 /* PPFileManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPFileManager.swift; sourceTree = "<group>"; };
 		60AA154D23DEBAC900A68FAA /* PPSQLiteManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPSQLiteManager.swift; sourceTree = "<group>"; };
@@ -268,6 +270,7 @@
 		60560246231776FC000809CD /* Setting */ = {
 			isa = PBXGroup;
 			children = (
+				60766BC923F2A7A800D24CEA /* View */,
 				6056024723177736000809CD /* PPSettingViewController.swift */,
 				604FFA4523DDE77B0059BBC9 /* PPPriceTagViewController.swift */,
 				604FFA4723DDEBCF0059BBC9 /* PPScanViewController.swift */,
@@ -301,6 +304,14 @@
 				605602812317A0DB000809CD /* PPHUD.swift */,
 			);
 			path = UI;
+			sourceTree = "<group>";
+		};
+		60766BC923F2A7A800D24CEA /* View */ = {
+			isa = PBXGroup;
+			children = (
+				60766BCA23F2A81700D24CEA /* PPSettingCell.swift */,
+			);
+			path = View;
 			sourceTree = "<group>";
 		};
 		60F5690422F2ADC700874994 = {
@@ -618,6 +629,7 @@
 				60AA154E23DEBAC900A68FAA /* PPSQLiteManager.swift in Sources */,
 				60560253231778FF000809CD /* XDRefreshAutoStateFooter.m in Sources */,
 				6056027A23178017000809CD /* PPWebDAVConfigViewController.swift in Sources */,
+				60766BCB23F2A81700D24CEA /* PPSettingCell.swift in Sources */,
 				6056024823177736000809CD /* PPSettingViewController.swift in Sources */,
 				60560224231771E2000809CD /* UIScrollView+XDTool.m in Sources */,
 				605602562317796F000809CD /* XDWebViewController.m in Sources */,

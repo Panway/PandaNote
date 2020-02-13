@@ -9,16 +9,16 @@
 import UIKit
 
 class PPSettingViewController: PPBaseViewController,UITableViewDataSource,UITableViewDelegate {
-    var dataSource:Array<String> = ["WebDAV Setting","FLEX Debug Enable"]
+    var dataSource:Array<String> = ["WebDAV Setting","自动保存","FLEX Debug Enable"]
     var tableView = UITableView()
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        tableView = UITableView.init(frame: self.view.bounds)
+        tableView = UITableView.init(frame: self.view.bounds,style: UITableView.Style.grouped)
         self.view.addSubview(tableView)
         tableView.dataSource = self
         tableView.delegate = self
-        self.tableView.register(PPFileListTableViewCell.self, forCellReuseIdentifier: kPPBaseTableViewCellCellIdentifier)
+        self.tableView.register(PPSettingCell.self, forCellReuseIdentifier: kPPBaseTableViewCellCellIdentifier)
         tableView.tableFooterView = UIView.init()
         
         
@@ -28,17 +28,23 @@ class PPSettingViewController: PPBaseViewController,UITableViewDataSource,UITabl
         dataSource = ["WebDAV Setting","Web"]
         self.tableView.reloadData()
     }
-    
+    @objc func saveMarkdownWhenClose(_ sender:UISwitch) {
+        debugPrint("======\(sender.isOn)")
+        PPUserInfo.shared.pp_Setting.updateValue(sender.isOn ? "1" : "0", forKey: "saveMarkdownWhenClose")
+
+    }
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return dataSource.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: kPPBaseTableViewCellCellIdentifier, for: indexPath) as! PPFileListTableViewCell
-        cell.textLabel?.text = self.dataSource[indexPath.row]
-//        let fileObj = self.dataSource[indexPath.row]
-//        cell.titleLabel.text = fileObj.name
-//        cell.timeLabel.text = String(describing: fileObj.modifiedDate).substring(startIndex: 9, endIndex: 29)
+        let cell = tableView.dequeueReusableCell(withIdentifier: kPPBaseTableViewCellCellIdentifier, for: indexPath) as! PPSettingCell
+        cell.titleLB.text = self.dataSource[indexPath.row]
+        let obj = self.dataSource[indexPath.row]
+        if obj == "自动保存" {
+            cell.switchBtn.isOn = PPUserInfo.pp_valueForSettingDict(key: "saveMarkdownWhenClose")
+            cell.switchBtn.addTarget(self, action: #selector(saveMarkdownWhenClose(_:)), for: UIControl.Event.touchUpInside)
+        }
         return cell
     }
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
@@ -54,7 +60,10 @@ class PPSettingViewController: PPBaseViewController,UITableViewDataSource,UITabl
             #endif
 
         }
-        
+        else if obj == "自动保存" {
+            PPUserInfo.shared.pp_Setting.updateValue("1", forKey: "saveMarkdownWhenClose")
+            
+        }
         
     }
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {

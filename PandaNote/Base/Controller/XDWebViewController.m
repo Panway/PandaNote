@@ -61,11 +61,37 @@
 #pragma mark - Public
 
 #pragma mark - Private
+- (BOOL)shouldStartLoadWithRequest:(NSURLRequest *)request {
+    //获取当前调转页面的URL
+    NSString *requestUrl = [[request URL] absoluteString];
+    //    NSLog(@"requestUrl==%@",requestUrl);
+//    NSString *actionName = [requestUrl lastPathComponent];
+//    actionName = [actionName stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+    if ([request.URL.scheme caseInsensitiveCompare:@"yijianapp"] == NSOrderedSame) {
+        [self.wkWebView evaluateJavaScript:@"jsReceiveData('loginSucceed', 'success')" completionHandler:^(id response, NSError *error) {
+            
+        }];
+        return NO;
+    }
+    else if (self.markdownStr.length > 1 && ![requestUrl hasPrefix:@"file://"] ) {
+        XDWebViewController *vc = [[XDWebViewController alloc] init];
+        vc.urlString = requestUrl;
+        [self.navigationController pushViewController:vc animated:YES];
+        return NO;
+    }
+    return YES;
+}
 /// MARK: Delegate
 #pragma mark - WKNavigationDelegate
 //WKNavigationDelegate
 - (void)webView:(WKWebView *)webView decidePolicyForNavigationAction:(WKNavigationAction *)navigationAction decisionHandler:(void (^)(WKNavigationActionPolicy))decisionHandler {
-    decisionHandler(WKNavigationActionPolicyAllow);
+//    decisionHandler(WKNavigationActionPolicyAllow);
+    BOOL should = [self shouldStartLoadWithRequest:navigationAction.request];
+    if (should) {
+        decisionHandler(WKNavigationActionPolicyAllow);
+    } else {
+        decisionHandler(WKNavigationActionPolicyCancel);
+    }
 }
 - (void)webView:(WKWebView *)webView didFinishNavigation:(null_unspecified WKNavigation *)navigation {
 //    XDLog(@"==%@",navigation);

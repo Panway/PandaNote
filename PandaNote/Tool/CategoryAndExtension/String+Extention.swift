@@ -32,7 +32,18 @@ extension String {
         }
         return false
     }
-    
+    //MARK: 布尔值
+    var bool: Bool {
+        switch self.lowercased() {
+        case "true", "t", "yes", "y", "1":
+            return true
+        case "false", "f", "no", "n", "0":
+            return false
+        default:
+            return false
+        }
+    }
+
     
     
     
@@ -535,6 +546,27 @@ extension String{
         let rect = text.boundingRect(with: size, options:.usesLineFragmentOrigin, attributes: [NSAttributedString.Key.font : font], context:nil)
         
         return rect.size.width
+    }
+    
+}
+
+
+
+
+extension Int {
+    func pp_SizeString() -> String {
+        if(self>0) {
+            if self < 1024 {
+                return String(format: "%dByte",self )
+            }
+            else if self < 1024*1024 {
+                return String(format: "%dKB",self/1024 )
+            }
+            else if self < 1024*1024*1024 {
+                return String(format: "%.2fMB",Float(self)/1024.0/1024.0 )
+            }
+        }
+        return ""
     }
     
 }

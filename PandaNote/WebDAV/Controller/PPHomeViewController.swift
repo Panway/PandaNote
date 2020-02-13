@@ -40,7 +40,7 @@ class PPHomeViewController: PPBaseViewController,FileProviderDelegate,UITextFiel
     override func viewDidLoad() {
         super.viewDidLoad()
         let userInfo = PPUserInfo.shared
-        self.title = String(self.pathStr.split(separator: "/").last ?? "") ?? userInfo.webDAVRemark
+        self.title = String(self.pathStr.split(separator: "/").last ?? "")
         
         tableView = UITableView.init(frame: self.view.bounds)
         self.view.addSubview(tableView)
