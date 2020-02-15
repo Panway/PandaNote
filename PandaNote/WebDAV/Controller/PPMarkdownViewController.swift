@@ -21,32 +21,25 @@ class PPMarkdownViewController: PPBaseViewController,UITextViewDelegate {
     var historyList = [String]()
     var textView : PPPTextView?
     open var filePathStr: String = ""//相对路径
-    var webdav: WebDAVFileProvider?
+//    var webdav: WebDAVFileProvider?
     var closeAfterSave : Bool = false
+    
     override func viewDidLoad() {
         pp_initView()
-        let server: URL = URL(string: PPUserInfo.shared.webDAVServerURL ?? "")!
-
-        let credential = URLCredential(user: PPUserInfo.shared.webDAVUserName ?? "",
-                                       password: PPUserInfo.shared.webDAVPassword ?? "",
-                                       persistence: .permanent)
-        
-        webdav = WebDAVFileProvider(baseURL: server, credential: credential)!
-        webdav?.contents(path: self.filePathStr, completionHandler: {
-            contents, error in
-            if let contents = contents {
-                print(String(data: contents, encoding: .utf8)!) // "hello world!"
-                self.markdown = String.init(data: contents as Data, encoding: String.Encoding.utf8)!
-//                let down = Down(markdownString: self.markdown)
-//                let attributedString = try? down.toAttributedString()
-
-                DispatchQueue.main.async {
-                    self.textView?.text = self.markdown
-                    //MARK:渲染
-//                    self.textView?.attributedText = attributedString
-                }
+        PPFileManager.sharedManager.downloadFileViaWebDAV(path: self.filePathStr) { (contents, error) in
+            guard let contents = contents else {
+                return
             }
-        })
+            print(String(data: contents, encoding: .utf8)!) // "hello world!"
+            self.markdown = String.init(data: contents as Data, encoding: String.Encoding.utf8)!
+            self.textView?.text = self.markdown
+            //MARK:Down渲染
+//            let down = Down(markdownString: self.markdown)
+//            let attributedString = try? down.toAttributedString(DownOptions.default, stylesheet: "* {font-family: Helvetica } code, pre { font-family: Menlo } code {position: relative;background-color: #282c34;border-radius: 6px;}")
+//            self.textView?.attributedText = attributedString
+            
+
+        }
 
         
         
@@ -167,18 +160,13 @@ class PPMarkdownViewController: PPBaseViewController,UITextViewDelegate {
             PPHUD.showHUDText(message: "不支持保存空文件", view: self.view)
             return
         }
+        debugPrint("===\(stringToUpload)")
         //MARK:保存
         textView?.resignFirstResponder()
-//        Alamofire.request(self.item.href, method: .put, parameters: parameters, encoding: URLEncoding(destination: .httpBody))
-        webdav?.writeContents(path: self.filePathStr, contents: stringToUpload.data(using: .utf8), completionHandler: { (error) in
-//            print("Data: \(error)")
-            if error == nil {
-                DispatchQueue.main.async {
-                    PPHUD.showHUDText(message: "保存成功", view: self.view)
-                    if (self.closeAfterSave) {
-                        self.navigationController?.popViewController(animated: true)
-                    }
-                }
+        PPFileManager.sharedManager.uploadFileViaWebDAV(path: self.filePathStr, contents: stringToUpload.data(using: .utf8), completionHander: { (error) in
+            PPHUD.showHUDText(message: "保存成功", view: self.view)
+            if (self.closeAfterSave) {
+                self.navigationController?.popViewController(animated: true)
             }
         })
 /*
