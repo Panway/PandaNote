@@ -31,6 +31,7 @@
 		60766BCB23F2A81700D24CEA /* PPSettingCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60766BCA23F2A81700D24CEA /* PPSettingCell.swift */; };
 		6080D3AB233315B900F582B1 /* CacheSerializer+Panda.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6080D3AA233315B900F582B1 /* CacheSerializer+Panda.swift */; };
 		6080D3F323333C3500F582B1 /* PPFileManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6080D3F223333C3500F582B1 /* PPFileManager.swift */; };
+		60A1F8D824349581009E390C /* NSAttributedString+Markdown.m in Sources */ = {isa = PBXBuildFile; fileRef = 60A1F8D724349581009E390C /* NSAttributedString+Markdown.m */; };
 		60AA154E23DEBAC900A68FAA /* PPSQLiteManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60AA154D23DEBAC900A68FAA /* PPSQLiteManager.swift */; };
 		60D27791238AA52C00D8BA0C /* PPCacheManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60D27790238AA52C00D8BA0C /* PPCacheManager.swift */; };
 		60F5691122F2ADC700874994 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60F5691022F2ADC700874994 /* AppDelegate.swift */; };
@@ -97,6 +98,8 @@
 		60766BCA23F2A81700D24CEA /* PPSettingCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPSettingCell.swift; sourceTree = "<group>"; };
 		6080D3AA233315B900F582B1 /* CacheSerializer+Panda.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CacheSerializer+Panda.swift"; sourceTree = "<group>"; };
 		6080D3F223333C3500F582B1 /* PPFileManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPFileManager.swift; sourceTree = "<group>"; };
+		60A1F8D624349580009E390C /* NSAttributedString+Markdown.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSAttributedString+Markdown.h"; sourceTree = "<group>"; };
+		60A1F8D724349581009E390C /* NSAttributedString+Markdown.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSAttributedString+Markdown.m"; sourceTree = "<group>"; };
 		60AA154D23DEBAC900A68FAA /* PPSQLiteManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPSQLiteManager.swift; sourceTree = "<group>"; };
 		60D27790238AA52C00D8BA0C /* PPCacheManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPCacheManager.swift; sourceTree = "<group>"; };
 		60F5690D22F2ADC700874994 /* PandaNote.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PandaNote.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -258,10 +261,12 @@
 		6056021923177122000809CD /* CategoryAndExtension */ = {
 			isa = PBXGroup;
 			children = (
-				60560223231771E2000809CD /* UIScrollView+XDTool.h */,
-				60560222231771E2000809CD /* UIScrollView+XDTool.m */,
 				6056024B231778D0000809CD /* String+Extention.swift */,
 				6080D3AA233315B900F582B1 /* CacheSerializer+Panda.swift */,
+				60560223231771E2000809CD /* UIScrollView+XDTool.h */,
+				60560222231771E2000809CD /* UIScrollView+XDTool.m */,
+				60A1F8D624349580009E390C /* NSAttributedString+Markdown.h */,
+				60A1F8D724349581009E390C /* NSAttributedString+Markdown.m */,
 				60560221231771E2000809CD /* PandaNote-Bridging-Header.h */,
 			);
 			path = CategoryAndExtension;
@@ -644,6 +649,7 @@
 				60560252231778FF000809CD /* XDRefreshHeader.m in Sources */,
 				60F5D04523275549004E988B /* XDCollectionViewCell.m in Sources */,
 				6056027D23178B03000809CD /* XDFastTableView.m in Sources */,
+				60A1F8D824349581009E390C /* NSAttributedString+Markdown.m in Sources */,
 				6080D3F323333C3500F582B1 /* PPFileManager.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
