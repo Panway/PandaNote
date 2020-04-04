@@ -5,7 +5,7 @@
 #import "YYText.h"
 
 #import "UIScrollView+XDTool.h"
-#import "XDWebViewController.h"
+//#import "XDWebViewController.h"
 //#import <SVProgressHUD/SVProgressHUD.h>
 #import "XDFastTableView.h"
 //#import "AFWebDAVManager.h"

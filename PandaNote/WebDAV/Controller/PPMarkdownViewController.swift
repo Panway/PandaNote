@@ -17,10 +17,10 @@ typealias PPPTextView = UITextView
 //UITextViewDelegate
 class PPMarkdownViewController: PPBaseViewController,UITextViewDelegate {
 //    let markdownParser = MarkdownParser()
-    var markdown = "I support a *lot* of custom Markdown **Elements**, even `code`!"
+    var markdownStr = "I support a *lot* of custom Markdown **Elements**, even `code`!"
     var historyList = [String]()
     var textView = PPPTextView()
-    open var filePathStr: String = ""//相对路径
+    open var filePathStr: String = ""//文件相对路径
 //    var webdav: WebDAVFileProvider?
     var closeAfterSave : Bool = false
     
@@ -30,15 +30,16 @@ class PPMarkdownViewController: PPBaseViewController,UITextViewDelegate {
             guard let contents = contents else {
                 return
             }
-            print(String(data: contents, encoding: .utf8)!) // "hello world!"
-            self.markdown = String.init(data: contents as Data, encoding: String.Encoding.utf8)!
-            self.textView?.text = self.markdown
+            debugPrint(String(data: contents, encoding: .utf8)!) // "hello world!"
+            self.markdownStr = String.init(data: contents as Data, encoding: String.Encoding.utf8)!
+            self.textView.text = self.markdownStr
             //NSAttributedString+Markdown 渲染
-//            self.textView?.attributedText = NSAttributedString(markdownRepresentation: self.markdown, attributes: [.font : UIFont.systemFont(ofSize: 17.0), .foregroundColor: UIColor.darkText ])
+//            self.textView.attributedText = NSAttributedString(markdownRepresentation: self.markdownStr, attributes: [.font : UIFont.systemFont(ofSize: 17.0), .foregroundColor: UIColor.darkText ])
             
             //MARK:Down渲染
-//            let down = Down(markdownString: self.markdown)
-//            let attributedString = try? down.toAttributedString(DownOptions.default, stylesheet: "* {font-family: Helvetica } code, pre { font-family: Menlo } code {position: relative;background-color: #282c34;border-radius: 6px;}")
+//            let down = Down(markdownString: self.markdownStr)
+//            //DownAttributedStringRenderable 31行
+//            let attributedString = try? down.toAttributedString(DownOptions.default, stylesheet: "* {font-family: Helvetica } code, pre { font-family: Menlo } code {position: relative;background-color: #f6f8fa;border-radius: 6px;} img {max-width: 100%;display: block;margin-left: auto;margin-right: auto;}")
 //            self.textView.attributedText = attributedString
             
         }
@@ -49,8 +50,10 @@ class PPMarkdownViewController: PPBaseViewController,UITextViewDelegate {
 
     }
     func pp_initView() {
-        textView.frame = self.view.bounds
         self.view.addSubview(textView)
+        textView.textContainerInset = UIEdgeInsets(top: 0, left: 8, bottom: 0, right: 8)
+//        textView.frame = self.view.bounds
+        self.pp_viewEdgeEqualToSafeArea(textView)
         textView.backgroundColor = UIColor.white
         textView.font = UIFont.systemFont(ofSize: 16.0)
 //        textView.attributedText = markdownParser.parse(markdown)
@@ -101,39 +104,46 @@ class PPMarkdownViewController: PPBaseViewController,UITextViewDelegate {
     }
     
     func textViewDidChange(_ textView: PPPTextView) {
-//        print(textView.text)
+//        debugPrint(textView.text)
     }
     func textViewShouldBeginEditing(_ textView: PPPTextView) -> Bool {
-        print("====Start")
+        debugPrint("====Start")
         return true
     }
     func textView(_ textView: PPPTextView, shouldChangeTextIn range: NSRange, replacementText text: String) -> Bool {
         let newRange = Range(range, in: textView.text)!
         let mySubstring = textView.text![newRange]
         let myString = String(mySubstring)
-        print("===shouldChangeTextIn \(myString)")
+        debugPrint("===shouldChangeTextIn \(myString)")
         return true
     }
     func textViewDidEndEditing(_ textView: PPPTextView) {
-        print("===textViewDidEndEditing \(textView.attributedText.markdownRepresentation ?? "")")
+        debugPrint("===textViewDidEndEditing \(textView.attributedText.markdownRepresentation)")
         historyList.append(self.textView.text)
-        print("historyList= \(historyList.count)")
+        debugPrint("historyList= \(historyList.count)")
     }
     @objc func button1Action(sender:UIButton)  {
         self.textView.resignFirstResponder()
-        let webVC = XDWebViewController.init()
-        let path = Bundle.main.url(forResource: "markdown", withExtension:"html")
+        let webVC = PPWebViewController.init()
+        var path = ""
+        if self.filePathStr.hasSuffix("html") {
+            path = PPDiskCache.shared.path + String(self.filePathStr.dropFirst())
+            webVC.fileURLStr = path
+        }
+        else {
+            path = Bundle.main.url(forResource: "markdown", withExtension:"html")?.absoluteString ?? ""
+            webVC.markdownStr = self.textView.text
+            webVC.urlString = path // file:///....
+        }
         
 //        let fileURL = URL.init(fileURLWithPath: <#T##String#>)
-        webVC.urlString = path!.absoluteString
-        webVC.markdownStr = self.textView.text
         self.navigationController?.pushViewController(webVC, animated: true)
         
     }
     
     @objc func button2Action(sender:UIButton?)  {
         let item1 = PPUserInfo.shared
-        print(item1.webDAVServerURL!)
+        debugPrint(item1.webDAVServerURL!)
         let stringToUpload:String = self.textView.text ?? ""
         if stringToUpload.length < 1 {
             PPHUD.showHUDText(message: "不支持保存空文件", view: self.view)

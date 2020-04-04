@@ -13,6 +13,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface XDWebViewController : UIViewController
 @property (nonatomic, strong) WKWebView  *wkWebView;
+@property (nonatomic, copy) NSString *fileURLStr;
 @property (nonatomic, copy) NSString *urlString;
 @property (nonatomic, copy) NSString *fileName;
 @property (nonatomic, copy) NSString *xd_titleStr;

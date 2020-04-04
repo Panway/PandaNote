@@ -11,7 +11,8 @@ import Foundation
 class PPDiskCache {
     static let shared = PPDiskCache()
     
-    public let path = NSSearchPathForDirectoriesInDomains(.cachesDirectory, .userDomainMask, true).first! + "/twAPICache/"
+    
+    public let path = NSSearchPathForDirectoriesInDomains(.cachesDirectory, .userDomainMask, true).first! + "/PPAPICache/"
 
 
     open lazy var cacheQueue : DispatchQueue = {
@@ -114,6 +115,12 @@ class PPDiskCache {
     
     fileprivate func setDataSync(_ data: Data, key: String) {
         let path = self.path(forKey: key)
+        
+        if !FileManager.default.fileExists(atPath: path) {
+            do {
+                try FileManager.default.createDirectory(atPath: (path as NSString).deletingLastPathComponent, withIntermediateDirectories: true, attributes: nil)
+            } catch _ {}
+        }
         
         do {
             try data.write(to: URL(fileURLWithPath: path), options: Data.WritingOptions.atomicWrite)

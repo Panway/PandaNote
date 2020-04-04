@@ -42,13 +42,28 @@ class PPFileManager: NSObject,FileProviderDelegate {
              }
              */
         })
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
     }
 
-    func downloadFileViaWebDAV(path: String, completionHandler: @escaping ((_ contents: Data?, _ error: Error?) -> Void)) {
+    func downloadFileViaWebDAV(path: String, cacheFile: Bool? = false,completionHandler: @escaping ((_ contents: Data?, _ error: Error?) -> Void)) {
         PPFileManager.sharedManager.webdav?.contents(path: path, completionHandler: { (data, error) in
             if error == nil {
                 DispatchQueue.main.async {
                     completionHandler(data,error)
+                    if let shouldCache = cacheFile {
+                        if shouldCache {
+                            PPDiskCache.shared.setData(data, key: path)
+                        }
+                    }
                 }
             }
             else {
@@ -56,6 +71,39 @@ class PPFileManager: NSObject,FileProviderDelegate {
             }
         })
             
+            
+    }
+    
+    /// 加载文件，如果本地存在就取本地的，负责下载远程的
+    /// - Parameters:
+    ///   - path: 远程文件路径
+    ///   - completionHandler: 完成回调
+    func loadFile(path: String, downloadIfExist:Bool?=false ,completionHandler: @escaping ((_ contents: Data?, _ error: Error?) -> Void)) {
+        PPDiskCache.shared.fetchData(key: path, failure: { (error) in
+            
+            PPFileManager.sharedManager.webdav?.contents(path: path, completionHandler: { (data, error) in
+                if error == nil {
+                    DispatchQueue.main.async {
+                        completionHandler(data,error)
+                        PPDiskCache.shared.setData(data, key: path)
+                    }
+                }
+                else {
+                    debugPrint(error ?? "downloadFileViaWebDAV Error")
+                }
+            })
+            
+        }) { (data) in
+            debugPrint("loading local file success")
+            completionHandler(data,nil)
+            if let down = downloadIfExist {
+                if down {
+                    self.downloadFileViaWebDAV(path: path, cacheFile: true, completionHandler: completionHandler)
+                }
+                
+            }
+        }
+
     }
     func uploadFileViaWebDAV(path: String, contents: Data?, completionHander:@escaping(_ error:Error?) -> Void) {
         PPFileManager.sharedManager.webdav?.writeContents(path: path, contents: contents, completionHandler: { (error) in

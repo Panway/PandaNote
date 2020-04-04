@@ -46,6 +46,11 @@
     if (self.urlString && self.urlString.length > 0) {
         [self.wkWebView loadRequest:[NSURLRequest requestWithURL:[NSURL URLWithString:self.urlString]]];
     }
+    else if (self.fileURLStr && self.fileURLStr.length > 0) {
+        NSURL *fileURL = [NSURL fileURLWithPath:self.fileURLStr];
+        [self.wkWebView loadRequest:[NSURLRequest requestWithURL:fileURL]];
+//        [self.wkWebView loadFileURL:fileURL allowingReadAccessToURL:fileURL];
+    }
     else if (self.fileName.length > 0) {
         NSURL *fileUrl = [[NSBundle mainBundle] URLForResource:self.fileName withExtension:nil];
         [self.wkWebView loadRequest:[NSURLRequest requestWithURL:fileUrl]];

@@ -25,7 +25,9 @@ target 'PandaNote' do
   pod 'PINCache'
   # https://github.com/amosavian/FileProvider
   pod 'FilesProvider'
+  #布局 https://github.com/SnapKit/SnapKit
   pod 'SnapKit'
+  # https://github.com/iwasrobbed/Down
   pod 'Down'
 #  pod 'DoraemonKit/Core'
   # https://github.com/Flipboard/FLEX

@@ -32,6 +32,8 @@
 		6080D3AB233315B900F582B1 /* CacheSerializer+Panda.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6080D3AA233315B900F582B1 /* CacheSerializer+Panda.swift */; };
 		6080D3F323333C3500F582B1 /* PPFileManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6080D3F223333C3500F582B1 /* PPFileManager.swift */; };
 		60A1F8D824349581009E390C /* NSAttributedString+Markdown.m in Sources */ = {isa = PBXBuildFile; fileRef = 60A1F8D724349581009E390C /* NSAttributedString+Markdown.m */; };
+		60A1F8DA24388391009E390C /* PPWebViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60A1F8D924388391009E390C /* PPWebViewController.swift */; };
+		60A1F8DC24388C98009E390C /* ViewController+PPTool.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60A1F8DB24388C98009E390C /* ViewController+PPTool.swift */; };
 		60AA154E23DEBAC900A68FAA /* PPSQLiteManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60AA154D23DEBAC900A68FAA /* PPSQLiteManager.swift */; };
 		60D27791238AA52C00D8BA0C /* PPCacheManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60D27790238AA52C00D8BA0C /* PPCacheManager.swift */; };
 		60F5691122F2ADC700874994 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60F5691022F2ADC700874994 /* AppDelegate.swift */; };
@@ -100,6 +102,8 @@
 		6080D3F223333C3500F582B1 /* PPFileManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPFileManager.swift; sourceTree = "<group>"; };
 		60A1F8D624349580009E390C /* NSAttributedString+Markdown.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSAttributedString+Markdown.h"; sourceTree = "<group>"; };
 		60A1F8D724349581009E390C /* NSAttributedString+Markdown.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSAttributedString+Markdown.m"; sourceTree = "<group>"; };
+		60A1F8D924388391009E390C /* PPWebViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPWebViewController.swift; sourceTree = "<group>"; };
+		60A1F8DB24388C98009E390C /* ViewController+PPTool.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ViewController+PPTool.swift"; sourceTree = "<group>"; };
 		60AA154D23DEBAC900A68FAA /* PPSQLiteManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPSQLiteManager.swift; sourceTree = "<group>"; };
 		60D27790238AA52C00D8BA0C /* PPCacheManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPCacheManager.swift; sourceTree = "<group>"; };
 		60F5690D22F2ADC700874994 /* PandaNote.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PandaNote.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -237,6 +241,7 @@
 			children = (
 				6056015623166F99000809CD /* PPBaseViewController.swift */,
 				605601F923176FAE000809CD /* PPTabBarController.swift */,
+				60A1F8D924388391009E390C /* PPWebViewController.swift */,
 				605602542317796F000809CD /* XDWebViewController.h */,
 				605602552317796F000809CD /* XDWebViewController.m */,
 			);
@@ -263,6 +268,7 @@
 			children = (
 				6056024B231778D0000809CD /* String+Extention.swift */,
 				6080D3AA233315B900F582B1 /* CacheSerializer+Panda.swift */,
+				60A1F8DB24388C98009E390C /* ViewController+PPTool.swift */,
 				60560223231771E2000809CD /* UIScrollView+XDTool.h */,
 				60560222231771E2000809CD /* UIScrollView+XDTool.m */,
 				60A1F8D624349580009E390C /* NSAttributedString+Markdown.h */,
@@ -625,6 +631,7 @@
 				6056015523166CC5000809CD /* PPUserInfo.swift in Sources */,
 				6080D3AB233315B900F582B1 /* CacheSerializer+Panda.swift in Sources */,
 				6056024C231778D0000809CD /* String+Extention.swift in Sources */,
+				60A1F8DA24388391009E390C /* PPWebViewController.swift in Sources */,
 				6056022823177274000809CD /* PPBaseTableViewCell.swift in Sources */,
 				6056024A231778B5000809CD /* PPFileListTableViewCell.swift in Sources */,
 				604FFA4823DDEBCF0059BBC9 /* PPScanViewController.swift in Sources */,
@@ -644,6 +651,7 @@
 				60F5D042232751D8004E988B /* PPShareManager.m in Sources */,
 				60F5691122F2ADC700874994 /* AppDelegate.swift in Sources */,
 				6056022A231772AE000809CD /* PPMarkdownViewController.swift in Sources */,
+				60A1F8DC24388C98009E390C /* ViewController+PPTool.swift in Sources */,
 				604FFA4623DDE77B0059BBC9 /* PPPriceTagViewController.swift in Sources */,
 				6056025823177A30000809CD /* PPHomeViewController.swift in Sources */,
 				60560252231778FF000809CD /* XDRefreshHeader.m in Sources */,
