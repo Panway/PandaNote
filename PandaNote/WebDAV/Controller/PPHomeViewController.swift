@@ -12,7 +12,7 @@ import SKPhotoBrowser
 import Kingfisher
 import YPImagePicker
 
-class PPHomeViewController: PPBaseViewController,FileProviderDelegate,UITextFieldDelegate,UITableViewDataSource,UITableViewDelegate
+class PPHomeViewController: PPBaseViewController,UITextFieldDelegate,UITableViewDataSource,UITableViewDelegate
     ,SKPhotoBrowserDelegate
 {
     
@@ -102,7 +102,7 @@ class PPHomeViewController: PPBaseViewController,FileProviderDelegate,UITextFiel
             vc.pathStr = fileObj.path + "/"
             self.navigationController?.pushViewController(vc, animated: true)
         }
-        else if (fileObj.name.hasSuffix("md")||fileObj.name.hasSuffix("txt")||fileObj.name.hasSuffix("js")||fileObj.name.hasSuffix("html"))  {
+        else if (self.isTextFile(fileObj.name))  {
             let vc = PPMarkdownViewController.init()
             vc.filePathStr = fileObj.path
             self.navigationController?.pushViewController(vc, animated: true)
@@ -111,6 +111,21 @@ class PPHomeViewController: PPBaseViewController,FileProviderDelegate,UITextFiel
             loadAndSaveImage(imageURL: fileObj.path) { (imageData) in
                 debugPrint(imageData)
                 self.showImage(contents: imageData, image: nil, imageName: fileObj.path,imageURL:fileObj.path)
+            }
+        }
+        else if (fileObj.name.hasSuffix("mp3")||fileObj.name.lowercased().hasSuffix("mp4"))  {
+//            let vc = PlayerViewController()
+//            vc.filePathStr = fileObj.path
+//            self.navigationController?.pushViewController(vc, animated: true)
+            PPFileManager.sharedManager.loadFile(path: fileObj.path, downloadIfExist: false) { (contents, error) in
+                
+                if error != nil {
+                    return
+                }
+                let vc = PlayerViewController()
+                vc.localFileURL = URL(fileURLWithPath: PPDiskCache.shared.path + fileObj.path)
+//                vc.filePathStr = fileObj.path
+                self.navigationController?.pushViewController(vc, animated: true)
             }
         }
         else {
@@ -292,7 +307,7 @@ class PPHomeViewController: PPBaseViewController,FileProviderDelegate,UITextFiel
             }
         }
     }
-    
+    /// 加载图片并保存，如果本地不存在就从服务器获取
     func loadAndSaveImage(imageURL:String,completionHandler: ((Data) -> Void)? = nil) {
 //        let cache = ImageCache.default//KingFisher用
         let imagePath = PPUserInfo.shared.pp_mainDirectory + imageURL
@@ -354,7 +369,18 @@ class PPHomeViewController: PPBaseViewController,FileProviderDelegate,UITextFiel
         PPFileManager.sharedManager.getWebDAVData(path: self.pathStr) { (contents, error) in
             if let objects = contents as? [FileObject] {
                 self.dataSource.removeAll()
-                self.dataSource.append(contentsOf: objects)
+                var dirCount = 0
+                //文件夹排在前面
+                for item in objects {
+                    if item.isDirectory {
+                        self.dataSource.insert(item, at: dirCount)
+                        dirCount += 1
+                    }
+                    else {
+                        self.dataSource.append(item)
+                    }
+                }
+//                self.dataSource.append(contentsOf: objects)
                 self.tableView.endRefreshing()
                 self.tableView.reloadData()
 
@@ -369,93 +395,17 @@ class PPHomeViewController: PPBaseViewController,FileProviderDelegate,UITextFiel
     
     
     
-    
+    func isTextFile(_ fileName:String) -> Bool {
+        return fileName.hasSuffix("md")||fileName.hasSuffix("txt")||fileName.hasSuffix("js")||fileName.hasSuffix("html")||fileName.hasSuffix("json")||fileName.hasSuffix("py")||fileName.hasSuffix("c")||fileName.hasSuffix("m")||fileName.hasSuffix("swift")
+    }
     
     
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
     }
     
-    @IBAction func createFolder(_ sender: Any) {
-        /*
-        webdav?.create(folder: "new folder", at: "/", completionHandler: nil)
- */
-    }
-    
-    @IBAction func createFile(_ sender: Any) {
-        /*
-        let data = "Hello world from sample.txt!".data(using: .utf8, allowLossyConversion: false)
-        webdav?.writeContents(path: "sample.txt", contents: data, atomically: true, completionHandler: nil)//?.writeContents(path: "sample.txt", content: data, atomically: true, completionHandler: nil)
- */
-    }
     
     
     
-    @IBAction func remove(_ sender: Any) {
-//        webdav?.removeItem(path: "sample.txt", completionHandler: nil)
-    }
-    
-    @IBAction func download(_ sender: Any) {
-        /*
-        let localURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!.appendingPathComponent("fileprovider.png")
-        let remotePath = "fileprovider.png"
-        
-        let progress = webdav?.copyItem(path: remotePath, toLocalURL: localURL, completionHandler: nil)
-        downloadProgressView?.observedProgress = progress
- */
-    }
-    
-    @IBAction func upload(_ sender: Any) {
-        /*
-        let localURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!.appendingPathComponent("fileprovider.png")
-        let remotePath = "/fileprovider.png"
-        
-        let progress = webdav?.copyItem(localFile: localURL, to: remotePath, completionHandler: nil)
-        uploadProgressView?.observedProgress = progress
- */
-    }
-    
-    func fileproviderSucceed(_ fileProvider: FileProviderOperations, operation: FileOperationType) {
-        switch operation {
-        case .copy(source: let source, destination: let dest):
-            print("\(source) copied to \(dest).")
-        case .remove(path: let path):
-            print("\(path) has been deleted.")
-        default:
-            if let destination = operation.destination {
-                print("\(operation.actionDescription) from \(operation.source) to \(destination) succeed.")
-            } else {
-                print("\(operation.actionDescription) on \(operation.source) succeed.")
-            }
-        }
-    }
-    
-    func fileproviderFailed(_ fileProvider: FileProviderOperations, operation: FileOperationType, error: Error) {
-        switch operation {
-        case .copy(source: let source, destination: let dest):
-            print("copying \(source) to \(dest) has been failed.")
-        case .remove:
-            print("file can't be deleted.")
-        default:
-            if let destination = operation.destination {
-                print("\(operation.actionDescription) from \(operation.source) to \(destination) failed.")
-            } else {
-                print("\(operation.actionDescription) on \(operation.source) failed.")
-            }
-        }
-    }
-    
-    func fileproviderProgress(_ fileProvider: FileProviderOperations, operation: FileOperationType, progress: Float) {
-        switch operation {
-        case .copy(source: let source, destination: let dest) where dest.hasPrefix("file://"):
-            print("Downloading \(source) to \((dest as NSString).lastPathComponent): \(progress * 100) completed.")
-        case .copy(source: let source, destination: let dest) where source.hasPrefix("file://"):
-            print("Uploading \((source as NSString).lastPathComponent) to \(dest): \(progress * 100) completed.")
-        case .copy(source: let source, destination: let dest):
-            print("Copy \(source) to \(dest): \(progress * 100) completed.")
-        default:
-            break
-        }
-    }
 
 }

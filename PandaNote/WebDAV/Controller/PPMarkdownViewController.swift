@@ -26,6 +26,7 @@ class PPMarkdownViewController: PPBaseViewController,UITextViewDelegate {
     
     override func viewDidLoad() {
         pp_initView()
+        self.title = self.filePathStr.split(string: "/").last
         PPFileManager.sharedManager.downloadFileViaWebDAV(path: self.filePathStr) { (contents, error) in
             guard let contents = contents else {
                 return
@@ -127,7 +128,7 @@ class PPMarkdownViewController: PPBaseViewController,UITextViewDelegate {
         let webVC = PPWebViewController.init()
         var path = ""
         if self.filePathStr.hasSuffix("html") {
-            path = PPDiskCache.shared.path + String(self.filePathStr.dropFirst())
+            path = PPDiskCache.shared.path + self.filePathStr
             webVC.fileURLStr = path
         }
         else {

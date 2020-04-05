@@ -28,6 +28,7 @@ class PPFileManager: NSObject,FileProviderDelegate {
             DispatchQueue.main.async {
                 completionHander(contents,error)
             }
+//            PPDiskCache.shared.setData(contents, key: path)
 //            PINCache.shared().setObject(contents, forKey: "img")
 
 //            let key = (PPUserInfo.shared.webDAVServerURL ?? " ") + path
@@ -84,8 +85,8 @@ class PPFileManager: NSObject,FileProviderDelegate {
             PPFileManager.sharedManager.webdav?.contents(path: path, completionHandler: { (data, error) in
                 if error == nil {
                     DispatchQueue.main.async {
+                        PPDiskCache.shared.setDataSynchronously(data, key: path)
                         completionHandler(data,error)
-                        PPDiskCache.shared.setData(data, key: path)
                     }
                 }
                 else {
@@ -121,17 +122,7 @@ class PPFileManager: NSObject,FileProviderDelegate {
 
         
     }
-    func fileproviderSucceed(_ fileProvider: FileProviderOperations, operation: FileOperationType) {
-        
-    }
     
-    func fileproviderFailed(_ fileProvider: FileProviderOperations, operation: FileOperationType, error: Error) {
-        
-    }
-    
-    func fileproviderProgress(_ fileProvider: FileProviderOperations, operation: FileOperationType, progress: Float) {
-        
-    }
     //MARK:初始化webDAV设置
     func initWebDAVSetting() -> Void {
         let userInfo = PPUserInfo.shared
@@ -147,17 +138,18 @@ class PPFileManager: NSObject,FileProviderDelegate {
         //        let server: URL = URL(string: userInfo.webDAVServerURL!) ?? NSURL.init() as URL
         //        }
         //        if let server: URL = URL(string: PPUserInfo.shared.webDAVServerURL ?? "") {
-        
+//        let cache = URLCache(memoryCapacity: 5 * 1024 * 1024, diskCapacity: 3 * 1024 * 1024, diskPath: nil)
+//        URLCache.shared = cache
         let userCredential = URLCredential(user: userInfo.webDAVUserName ?? "",
                                            password: userInfo.webDAVPassword ?? "",
                                            persistence: .permanent)
         //            let protectionSpace = URLProtectionSpace.init(host: "dav.jianguoyun.com", port: 443, protocol: "https", realm: "Restricted", authenticationMethod: NSURLAuthenticationMethodHTTPBasic)
         //            URLCredentialStorage.shared.setDefaultCredential(userCredential, for: protectionSpace)
-        webdav = WebDAVFileProvider(baseURL: server, credential: userCredential)!
+        webdav = WebDAVFileProvider(baseURL: server, credential: userCredential,cache: URLCache.shared)!
+        webdav?.useCache = true
         webdav?.delegate = self
         //注意：不修改鉴权方式，会导致每次请求两次，一次401失败，一次带token成功
         webdav?.credentialType = URLRequest.AuthenticationType.basic
-        //            webdav?.useCache = true
 //        self.perform(Selector(("getData:")), with: self, afterDelay: 1)
         
     }
@@ -212,4 +204,89 @@ class PPFileManager: NSObject,FileProviderDelegate {
         
         return Data()
     }
+    //MARK:FileProviderDelegate
+    func fileproviderSucceed(_ fileProvider: FileProviderOperations, operation: FileOperationType) {
+        switch operation {
+        case .copy(source: let source, destination: let dest):
+            print("\(source) copied to \(dest).")
+        case .remove(path: let path):
+            print("\(path) has been deleted.")
+        default:
+            if let destination = operation.destination {
+                print("\(operation.actionDescription) from \(operation.source) to \(destination) succeed.")
+            } else {
+                print("\(operation.actionDescription) on \(operation.source) succeed.")
+            }
+        }
+    }
+    
+    func fileproviderFailed(_ fileProvider: FileProviderOperations, operation: FileOperationType, error: Error) {
+        switch operation {
+        case .copy(source: let source, destination: let dest):
+            print("copying \(source) to \(dest) has been failed.")
+        case .remove:
+            print("file can't be deleted.")
+        default:
+            if let destination = operation.destination {
+                print("\(operation.actionDescription) from \(operation.source) to \(destination) failed.")
+            } else {
+                print("\(operation.actionDescription) on \(operation.source) failed.")
+            }
+        }
+    }
+    
+    func fileproviderProgress(_ fileProvider: FileProviderOperations, operation: FileOperationType, progress: Float) {
+        switch operation {
+        case .copy(source: let source, destination: let dest) where dest.hasPrefix("file://"):
+            print("Downloading \(source) to \((dest as NSString).lastPathComponent): \(progress * 100) completed.")
+        case .copy(source: let source, destination: let dest) where source.hasPrefix("file://"):
+            print("Uploading \((source as NSString).lastPathComponent) to \(dest): \(progress * 100) completed.")
+        case .copy(source: let source, destination: let dest):
+            print("Copy \(source) to \(dest): \(progress * 100) completed.")
+        default:
+            break
+        }
+    }
+    @IBAction func createFolder(_ sender: Any) {
+        /*
+         webdav?.create(folder: "new folder", at: "/", completionHandler: nil)
+         */
+    }
+    
+    @IBAction func createFile(_ sender: Any) {
+        /*
+         let data = "Hello world from sample.txt!".data(using: .utf8, allowLossyConversion: false)
+         webdav?.writeContents(path: "sample.txt", contents: data, atomically: true, completionHandler: nil)//?.writeContents(path: "sample.txt", content: data, atomically: true, completionHandler: nil)
+         */
+    }
+    
+    
+    
+    @IBAction func remove(_ sender: Any) {
+        //        webdav?.removeItem(path: "sample.txt", completionHandler: nil)
+    }
+    
+    @IBAction func download(_ sender: Any) {
+        /*
+         let localURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!.appendingPathComponent("fileprovider.png")
+         let remotePath = "fileprovider.png"
+         
+         let progress = webdav?.copyItem(path: remotePath, toLocalURL: localURL, completionHandler: nil)
+         downloadProgressView?.observedProgress = progress
+         */
+    }
+    
+    @IBAction func upload(_ sender: Any) {
+        /*
+         let localURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!.appendingPathComponent("fileprovider.png")
+         let remotePath = "/fileprovider.png"
+         
+         let progress = webdav?.copyItem(localFile: localURL, to: remotePath, completionHandler: nil)
+         uploadProgressView?.observedProgress = progress
+         */
+    }
+    
+    
+    
+    
 }

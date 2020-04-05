@@ -4,7 +4,7 @@
 //
 //  Created by panwei on 2019/11/24.
 //  Copyright © 2019 WeirdPan. All rights reserved.
-//
+//  https://github.com/Haneke/HanekeSwift/blob/master/Haneke/DiskCache.swift
 
 import Foundation
 
@@ -12,7 +12,7 @@ class PPDiskCache {
     static let shared = PPDiskCache()
     
     
-    public let path = NSSearchPathForDirectoriesInDomains(.cachesDirectory, .userDomainMask, true).first! + "/PPAPICache/"
+    public let path = NSSearchPathForDirectoriesInDomains(.cachesDirectory, .userDomainMask, true).first! + "/PPAPICache"
 
 
     open lazy var cacheQueue : DispatchQueue = {
@@ -40,7 +40,13 @@ class PPDiskCache {
             }
         })
     }
-    
+    open func setDataSynchronously( _ getData: @autoclosure @escaping () -> Data?, key: String) {
+        if let data = getData() {
+            self.setDataSync(data, key: key)
+        } else {
+            debugPrint("Failed to get data for key \(key)")
+        }
+    }
     open func fetchData(key: String, failure fail: ((Error?) -> ())? = nil, success succeed: @escaping (Data) -> ()) {
         cacheQueue.async {
             let path = self.path(forKey: key)
