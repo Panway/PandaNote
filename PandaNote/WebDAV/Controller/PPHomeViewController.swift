@@ -96,8 +96,8 @@ class PPHomeViewController: PPBaseViewController,UITextFieldDelegate,UITableView
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
         let fileObj = self.dataSource[indexPath.row]
+        debugPrint("You tapped cell  \(fileObj.path)")
         if fileObj.isDirectory {
-            print("You tapped cell number \(fileObj.path).")
             let vc = PPHomeViewController.init()
             vc.pathStr = fileObj.path + "/"
             self.navigationController?.pushViewController(vc, animated: true)
@@ -117,7 +117,7 @@ class PPHomeViewController: PPBaseViewController,UITextFieldDelegate,UITableView
 //            let vc = PlayerViewController()
 //            vc.filePathStr = fileObj.path
 //            self.navigationController?.pushViewController(vc, animated: true)
-            PPFileManager.sharedManager.loadFile(path: fileObj.path, downloadIfExist: false) { (contents, error) in
+            PPFileManager.sharedManager.loadFileFromWebDAV(path: fileObj.path, downloadIfExist: false) { (contents,isFromCache, error) in
                 
                 if error != nil {
                     return

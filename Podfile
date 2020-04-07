@@ -39,6 +39,7 @@ target 'PandaNote' do
   #https://github.com/Yummypets/YPImagePicker
   pod 'YPImagePicker'
   #https://github.com/SwipeCellKit/SwipeCellKit
+#  pod 'FRadioPlayer'
   # If you have NOT upgraded to Xcode 11, use the last Swift Xcode 10.X compatible release
 #  pod 'SwipeCellKit', '2.6.0'
   #  pod 'SVProgressHUD'

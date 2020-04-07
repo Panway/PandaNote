@@ -55,11 +55,11 @@ class PPFileManager: NSObject,FileProviderDelegate {
         
     }
 
-    func downloadFileViaWebDAV(path: String, cacheFile: Bool? = false,completionHandler: @escaping ((_ contents: Data?, _ error: Error?) -> Void)) {
+    func downloadFileFromWebDAV(path: String, cacheFile: Bool? = false,completionHandler: @escaping ((_ contents: Data?, _ isFromCache:Bool, _ error: Error?) -> Void)) {
         PPFileManager.sharedManager.webdav?.contents(path: path, completionHandler: { (data, error) in
             if error == nil {
                 DispatchQueue.main.async {
-                    completionHandler(data,error)
+                    completionHandler(data,false,error)
                     if let shouldCache = cacheFile {
                         if shouldCache {
                             PPDiskCache.shared.setData(data, key: path)
@@ -68,7 +68,7 @@ class PPFileManager: NSObject,FileProviderDelegate {
                 }
             }
             else {
-                debugPrint(error ?? "downloadFileViaWebDAV Error")
+                debugPrint(error ?? "downloadFileFromWebDAV Error")
             }
         })
             
@@ -79,27 +79,27 @@ class PPFileManager: NSObject,FileProviderDelegate {
     /// - Parameters:
     ///   - path: 远程文件路径
     ///   - completionHandler: 完成回调
-    func loadFile(path: String, downloadIfExist:Bool?=false ,completionHandler: @escaping ((_ contents: Data?, _ error: Error?) -> Void)) {
+    func loadFileFromWebDAV(path: String, downloadIfExist:Bool?=false ,completionHandler: @escaping ((_ contents: Data?, _ isFromCache:Bool, _ error: Error?) -> Void)) {
         PPDiskCache.shared.fetchData(key: path, failure: { (error) in
             
             PPFileManager.sharedManager.webdav?.contents(path: path, completionHandler: { (data, error) in
                 if error == nil {
                     DispatchQueue.main.async {
                         PPDiskCache.shared.setDataSynchronously(data, key: path)
-                        completionHandler(data,error)
+                        completionHandler(data,false,error)
                     }
                 }
                 else {
-                    debugPrint(error ?? "downloadFileViaWebDAV Error")
+                    debugPrint(error ?? "downloadFileFromWebDAV Error")
                 }
             })
             
         }) { (data) in
             debugPrint("loading local file success")
-            completionHandler(data,nil)
+            completionHandler(data,true,nil)
             if let down = downloadIfExist {
                 if down {
-                    self.downloadFileViaWebDAV(path: path, cacheFile: true, completionHandler: completionHandler)
+                    self.downloadFileFromWebDAV(path: path, cacheFile: true, completionHandler: completionHandler)
                 }
                 
             }
@@ -117,8 +117,6 @@ class PPFileManager: NSObject,FileProviderDelegate {
                 debugPrint(error ?? "uploadFileViaWebDAV Error")
             }
         })
-//        PPFileManager.sharedManager.webdav?.copyItem(localFile: imageLocalURL, to: remotePath, completionHandler: { (error) in
-//        })
 
         
     }
@@ -145,8 +143,8 @@ class PPFileManager: NSObject,FileProviderDelegate {
                                            persistence: .permanent)
         //            let protectionSpace = URLProtectionSpace.init(host: "dav.jianguoyun.com", port: 443, protocol: "https", realm: "Restricted", authenticationMethod: NSURLAuthenticationMethodHTTPBasic)
         //            URLCredentialStorage.shared.setDefaultCredential(userCredential, for: protectionSpace)
-        webdav = WebDAVFileProvider(baseURL: server, credential: userCredential,cache: URLCache.shared)!
-        webdav?.useCache = true
+        webdav = WebDAVFileProvider(baseURL: server, credential: userCredential)!//不能加`,cache: URLCache.shared`,要不然无法保存markdown！！！
+//        webdav?.useCache = true
         webdav?.delegate = self
         //注意：不修改鉴权方式，会导致每次请求两次，一次401失败，一次带token成功
         webdav?.credentialType = URLRequest.AuthenticationType.basic

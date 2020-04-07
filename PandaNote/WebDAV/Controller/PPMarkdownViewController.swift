@@ -23,15 +23,17 @@ class PPMarkdownViewController: PPBaseViewController,UITextViewDelegate {
     open var filePathStr: String = ""//文件相对路径
 //    var webdav: WebDAVFileProvider?
     var closeAfterSave : Bool = false
+    var textChanged : Bool = false//文本改变的话就不需要再比较字符串了
     
     override func viewDidLoad() {
         pp_initView()
         self.title = self.filePathStr.split(string: "/").last
-        PPFileManager.sharedManager.downloadFileViaWebDAV(path: self.filePathStr) { (contents, error) in
+        PPFileManager.sharedManager.loadFileFromWebDAV(path: self.filePathStr,downloadIfExist: true) { (contents,isFromCache, error) in
             guard let contents = contents else {
                 return
             }
-            debugPrint(String(data: contents, encoding: .utf8)!) // "hello world!"
+            PPHUD.showHUDFromTop(isFromCache ? "已加载缓存文件":"下载成功")
+//            debugPrint(String(data: contents, encoding: .utf8)!) // "hello world!"
             self.markdownStr = String.init(data: contents as Data, encoding: String.Encoding.utf8)!
             self.textView.text = self.markdownStr
             //NSAttributedString+Markdown 渲染
@@ -85,7 +87,17 @@ class PPMarkdownViewController: PPBaseViewController,UITextViewDelegate {
         
         self.setLeftBarButton()
     }
+    func changed() -> Bool {
+        return self.textView.text == self.markdownStr
+    }
     override func pp_backAction() {
+        self.textView.resignFirstResponder()
+        //心疼CPU，文本有修改的话就不全部比较了>_<
+        if !self.textChanged || changed() {
+            debugPrint("未修改,直接退出")
+            self.navigationController?.popViewController(animated: true)
+            return
+        }
         if (PPUserInfo.pp_valueForSettingDict(key: "saveMarkdownWhenClose")) {
             self.closeAfterSave = true
             self.button2Action(sender: nil)
@@ -112,6 +124,7 @@ class PPMarkdownViewController: PPBaseViewController,UITextViewDelegate {
         return true
     }
     func textView(_ textView: PPPTextView, shouldChangeTextIn range: NSRange, replacementText text: String) -> Bool {
+        textChanged = true
         let newRange = Range(range, in: textView.text)!
         let mySubstring = textView.text![newRange]
         let myString = String(mySubstring)
@@ -145,16 +158,17 @@ class PPMarkdownViewController: PPBaseViewController,UITextViewDelegate {
     @objc func button2Action(sender:UIButton?)  {
         let item1 = PPUserInfo.shared
         debugPrint(item1.webDAVServerURL!)
-        let stringToUpload:String = self.textView.text ?? ""
+        let stringToUpload = self.textView.text ?? ""
         if stringToUpload.length < 1 {
             PPHUD.showHUDText(message: "不支持保存空文件", view: self.view)
             return
         }
-        debugPrint("===\(stringToUpload)")
+        debugPrint("保存的是===\(stringToUpload)")
         //MARK:保存
         self.textView.resignFirstResponder()
         PPFileManager.sharedManager.uploadFileViaWebDAV(path: self.filePathStr, contents: stringToUpload.data(using: .utf8), completionHander: { (error) in
             PPHUD.showHUDText(message: "保存成功", view: self.view)
+            self.textChanged = false
             if (self.closeAfterSave) {
                 self.navigationController?.popViewController(animated: true)
             }

@@ -400,8 +400,8 @@ class PlayerViewController: UIViewController {
         rewindButton.setTitle("⏪", for: UIControl.State.normal)
         rewindButton.addTarget(self, action: #selector(rewindButtonWasPressed(_:)), for: UIControl.Event.touchUpInside)
         rewindButton.snp.makeConstraints { (make) in
-            make.top.equalToSuperview().offset(40)
-            make.left.equalToSuperview()
+            make.top.equalToSuperview().offset(50)
+            make.right.equalTo(bottomView.snp.centerX).offset(-35)
             make.width.equalTo(70)
             make.height.equalTo(30)
         }
@@ -424,7 +424,7 @@ class PlayerViewController: UIViewController {
         fastForwardButton.frame = CGRect.init(x: 40, y: 0, width: 40, height: 40)
         //        rewindButton.setImage(UIImage.init(named: "share"), for: UIControl.State.normal)
         fastForwardButton.setTitle("⏩", for: UIControl.State.normal)
-        fastForwardButton.addTarget(self, action: #selector(playPauseButtonWasPressed(_:)), for: UIControl.Event.touchUpInside)
+        fastForwardButton.addTarget(self, action: #selector(fastForwardButtonWasPressed(_:)), for: UIControl.Event.touchUpInside)
         fastForwardButton.snp.makeConstraints { (make) in
             make.top.equalTo(rewindButton)
             make.left.equalTo(playPauseButton.snp.right)
@@ -438,9 +438,10 @@ class PlayerViewController: UIViewController {
             make.top.left.equalToSuperview().offset(8)
             make.right.equalToSuperview().offset(8)
         }
+        timeSlider.tintColor = UIColor(red:0.27, green:0.68, blue:0.49, alpha:1.00)//VUE绿
         timeSlider.addTarget(self, action: #selector(timeSliderDidChange(_:)), for: UIControl.Event.valueChanged)
         
-        startTimeLabel = UILabel(frame: CGRect(x: 110, y: 0, width: 100, height: 40))
+        startTimeLabel = UILabel(frame: CGRect(x: 15, y: 16, width: 100, height: 40))
         //        aLB.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         //        aLB.backgroundColor = UIColor.white
         startTimeLabel.textColor = UIColor.gray
@@ -450,7 +451,7 @@ class PlayerViewController: UIViewController {
         bottomView.addSubview(startTimeLabel)
         
         
-        durationLabel = UILabel(frame: CGRect(x: 300, y: 0, width: 100, height: 40))
+        durationLabel = UILabel(frame: CGRect(x: 300, y: 16, width: 100, height: 40))
         //        aLB.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         //        aLB.backgroundColor = UIColor.white
         durationLabel.textColor = UIColor.gray
@@ -458,6 +459,10 @@ class PlayerViewController: UIViewController {
         durationLabel.font = UIFont.systemFont(ofSize: 16)
         durationLabel.text = "-:--"
         bottomView.addSubview(durationLabel)
+        durationLabel.snp.makeConstraints { (make) in
+            make.right.equalToSuperview().offset(-8)
+            make.top.equalToSuperview().offset(26)
+        }
         
     }
 }
