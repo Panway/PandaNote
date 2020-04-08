@@ -7,7 +7,7 @@
 //
 
 import UIKit
-import FilesProvider
+//import FilesProvider
 import SKPhotoBrowser
 import Kingfisher
 import YPImagePicker
@@ -22,7 +22,7 @@ class PPHomeViewController: PPBaseViewController,UITextFieldDelegate,UITableView
 //    let username = "XXXXX@qq.com"
 //    let password = "XXXXXXXX"
     
-    var dataSource:Array<FileObject> = []
+    var dataSource:Array<PPFileObject> = []
     var tableView = UITableView()
     let cellReuseIdentifier = "cell"
 //    let documentsProvider = LocalFileProvider()
@@ -35,7 +35,7 @@ class PPHomeViewController: PPBaseViewController,UITextFieldDelegate,UITableView
     @IBOutlet weak var downloadProgressView: UIProgressView?
     //MARK:Life Cycle
     override func viewDidAppear(_ animated: Bool) {
-        print("===appear")
+        super.viewDidAppear(animated)
     }
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -90,7 +90,7 @@ class PPHomeViewController: PPBaseViewController,UITextFieldDelegate,UITableView
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: cellReuseIdentifier, for: indexPath) as! PPFileListTableViewCell
         let fileObj = self.dataSource[indexPath.row]
-        cell.updateUIWithData(fileObj)
+        cell.updateUIWithData(fileObj as AnyObject)
         return cell
     }
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
@@ -366,26 +366,15 @@ class PPHomeViewController: PPBaseViewController,UITextFieldDelegate,UITableView
     
     //MARK:获取文件列表
     func getWebDAVData() -> Void {
-        PPFileManager.sharedManager.getWebDAVData(path: self.pathStr) { (contents, error) in
-            if let objects = contents as? [FileObject] {
+        PPFileManager.sharedManager.getWebDAVFileList(path: self.pathStr) { (contents,isFromCache, error) in
+            PPHUD.showHUDFromTop(isFromCache ? "已加载缓存":"现在是最新的")
+
+            if let objects = contents as? [PPFileObject] {
                 self.dataSource.removeAll()
-                var dirCount = 0
-                //文件夹排在前面
-                for item in objects {
-                    if item.isDirectory {
-                        self.dataSource.insert(item, at: dirCount)
-                        dirCount += 1
-                    }
-                    else {
-                        self.dataSource.append(item)
-                    }
-                }
-//                self.dataSource.append(contentsOf: objects)
+                self.dataSource.append(contentsOf: objects)
                 self.tableView.endRefreshing()
                 self.tableView.reloadData()
-
             }
-//            let objects:[FileObject] = contents as? [FileObject]
             
 
         }

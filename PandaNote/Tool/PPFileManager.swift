@@ -12,7 +12,7 @@ import FilesProvider
 import PINCache
 
 class PPFileManager: NSObject,FileProviderDelegate {
-    
+    let apiCacheDir = "WebDAV/api_"
     
     static let sharedManager = PPFileManager()
     var webdav: WebDAVFileProvider?
@@ -21,19 +21,53 @@ class PPFileManager: NSObject,FileProviderDelegate {
         super.init()
         initWebDAVSetting()
     }
-    func getWebDAVData(path:String,completionHander:@escaping(_ data:[AnyObject],_ error:Error?) -> Void) {
+    
+    func getWebDAVFileList(path:String,completionHander:@escaping(_ data:[AnyObject],_ isFromCache:Bool,_ error:Error?) -> Void) {
+        PPDiskCache.shared.fetchData(key: apiCacheDir + path.pp_md5, failure: { (error) in
+            self.getWebDAVData(path: path, completionHander: completionHander)
+        }) { (data) in
+            do {
+                let archieveArray = try JSONDecoder().decode([PPFileObject].self, from: data)
+                debugPrint(archieveArray)
+                DispatchQueue.main.async {
+                    completionHander(archieveArray as [AnyObject],true,nil)
+                }
+                self.getWebDAVData(path: path, completionHander: completionHander)
+            } catch {
+                debugPrint(error.localizedDescription)
+            }
+        }
+    }
+    func getWebDAVData(path:String,completionHander:@escaping(_ data:[AnyObject],_ isFromCache:Bool,_ error:Error?) -> Void) {
         webdav?.contentsOfDirectory(path: path, completionHandler: {
             contents, error in
-            
-            DispatchQueue.main.async {
-                completionHander(contents,error)
+            var archieveArray = [PPFileObject]()
+            var dirCount = 0
+            //文件夹排在前面
+            for item in contents {
+                let localDate = item.modifiedDate?.addingTimeInterval(TimeInterval(PPUserInfo.shared.pp_timezoneOffset))
+                let dateStr = String(describing: localDate).substring(9..<25)
+                
+                let ppFile = PPFileObject(name: item.name,path: item.path,size: item.size,isDirectory: item.isDirectory,modifiedDate: dateStr)
+                if item.isDirectory {
+                    archieveArray.insert(ppFile, at: dirCount)
+                    dirCount += 1
+                }
+                else {
+                    archieveArray.append(ppFile)
+                }
             }
-//            PPDiskCache.shared.setData(contents, key: path)
-//            PINCache.shared().setObject(contents, forKey: "img")
-
-//            let key = (PPUserInfo.shared.webDAVServerURL ?? " ") + path
-//            let cacheData = Data.init(contents)
-//            PPDiskCache.shared.setData(cacheData, key: key)
+            do {
+                let encoded = try JSONEncoder().encode(archieveArray)
+                debugPrint(String(decoding: encoded, as: UTF8.self))
+                PPDiskCache.shared.setData(encoded, key: self.apiCacheDir + path.pp_md5)
+            } catch {
+                debugPrint(error.localizedDescription)
+            }
+            DispatchQueue.main.async {
+                completionHander(archieveArray as [AnyObject],false,error)
+            }
+//            PINCache.shared().setObject(archieveArray, forKey: "img")
             /*
              for file in contents {
              print("Name: \(file.name)")
@@ -43,15 +77,6 @@ class PPFileManager: NSObject,FileProviderDelegate {
              }
              */
         })
-        
-        
-        
-        
-        
-        
-        
-        
-        
         
     }
 

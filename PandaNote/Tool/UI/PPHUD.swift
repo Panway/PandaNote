@@ -17,24 +17,26 @@ class PPHUD: NSObject {
     //MARK: 顶部提示信息框
     class func showHUDFromTop(_ message:String) -> Void {
         let lastView = UIApplication.shared.keyWindow?.viewWithTag(9999)
+        var lastViewExist = false
         if lastView != nil {
-            lastView?.removeFromSuperview()
+            lastViewExist = true
+//            lastView?.removeFromSuperview()
         }
         let width = UIApplication.shared.keyWindow!.frame.width
-        let aLB = UILabel(frame: CGRect(x: 64, y: -40.0, width: width-128, height: 140.0))
+        let aLB = UILabel(frame: CGRect(x: 80, y: -40.0, width: width-160, height: 140.0))
 //        aLB.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         aLB.backgroundColor = UIColor(red:0.27, green:0.68, blue:0.49, alpha:1.00)//VUE绿
         aLB.textColor = UIColor.white
         aLB.textAlignment = NSTextAlignment.center
         aLB.numberOfLines = 3
-        aLB.font = UIFont.systemFont(ofSize: 22)
+        aLB.font = UIFont.systemFont(ofSize: 20)
         aLB.text = "\(message)"
         aLB.tag = 9999
         aLB.layer.masksToBounds = true
         aLB.layer.cornerRadius = 8
         UIApplication.shared.keyWindow?.addSubview(aLB)
-        UIView.animate(withDuration: 0.8, delay: 0, usingSpringWithDamping: 0.5, initialSpringVelocity: 16, options: [UIView.AnimationOptions.curveEaseInOut,UIView.AnimationOptions.beginFromCurrentState], animations: {
-            aLB.frame = CGRect(x: 64, y: 44.0, width: width-128, height: 50.0)
+        UIView.animate(withDuration: 0.8, delay: 0, usingSpringWithDamping: 0.76, initialSpringVelocity: 25, options: [.curveEaseInOut,.beginFromCurrentState], animations: {
+            aLB.frame = CGRect(x: 80, y: lastViewExist ? 84 : 44.0, width: width-160, height: 40.0)
 
         }) { (complete) in
             

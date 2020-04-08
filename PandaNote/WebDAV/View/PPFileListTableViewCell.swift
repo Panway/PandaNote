@@ -42,9 +42,9 @@ class PPFileListTableViewCell: PPBaseTableViewCell {
     
     
     
-    
+    ///更新文件列表数据
     override func updateUIWithData(_ model: AnyObject?) {
-        let fileObj: FileObject = model as! FileObject
+        let fileObj: PPFileObject = model as! PPFileObject
 //        self.titleLabel.text = fileObj.name
         
         self.titleLabel.text = fileObj.name
@@ -66,10 +66,9 @@ class PPFileListTableViewCell: PPBaseTableViewCell {
         else {
             self.iconImage.image = UIImage.init(named: PPUserInfo.shared.pp_fileIcon[String(fileObj.name.split(separator: ".").last!)] ?? "ico_jpg")
         }
-        let localDate = fileObj.modifiedDate?.addingTimeInterval(TimeInterval(PPUserInfo.shared.pp_timezoneOffset))
-        let dataStr = String(describing: localDate).substring(9..<25)
+        
         let sizeStr = (fileObj.size>0) ? " - \(Int(fileObj.size).pp_SizeString())" :""
-        self.timeLabel.text = dataStr + sizeStr
+        self.timeLabel.text = fileObj.modifiedDate + sizeStr
         
         
         

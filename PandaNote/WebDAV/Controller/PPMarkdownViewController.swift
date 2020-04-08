@@ -32,7 +32,7 @@ class PPMarkdownViewController: PPBaseViewController,UITextViewDelegate {
             guard let contents = contents else {
                 return
             }
-            PPHUD.showHUDFromTop(isFromCache ? "已加载缓存文件":"下载成功")
+            PPHUD.showHUDFromTop(isFromCache ? "已加载缓存文件":"已加载最新的")
 //            debugPrint(String(data: contents, encoding: .utf8)!) // "hello world!"
             self.markdownStr = String.init(data: contents as Data, encoding: String.Encoding.utf8)!
             self.textView.text = self.markdownStr
@@ -160,14 +160,14 @@ class PPMarkdownViewController: PPBaseViewController,UITextViewDelegate {
         debugPrint(item1.webDAVServerURL!)
         let stringToUpload = self.textView.text ?? ""
         if stringToUpload.length < 1 {
-            PPHUD.showHUDText(message: "不支持保存空文件", view: self.view)
+            PPHUD.showHUDFromTop("不支持保存空文件")
             return
         }
         debugPrint("保存的是===\(stringToUpload)")
         //MARK:保存
         self.textView.resignFirstResponder()
         PPFileManager.sharedManager.uploadFileViaWebDAV(path: self.filePathStr, contents: stringToUpload.data(using: .utf8), completionHander: { (error) in
-            PPHUD.showHUDText(message: "保存成功", view: self.view)
+            PPHUD.showHUDFromTop("保存成功")
             self.textChanged = false
             if (self.closeAfterSave) {
                 self.navigationController?.popViewController(animated: true)

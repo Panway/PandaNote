@@ -1,4 +1,4 @@
-# 基于WebDav的iOS客户端
+# 基于WebDAV的iOS客户端
 
 ## Why ？
 
@@ -8,10 +8,10 @@
 ## What ？
 
 主要用来写 markdown 笔记，并实现云同步，国内可使用坚果云或自己搭建WebDAV服务，所有文件保存在第三方服务器，Dropbox、GoogleDrive暂不支持
-- [ ] markdown原生渲染
-- [x] markdown网页渲染
-- [x] markdown编辑保存
-- [ ] API请求、所有大文件缓存到磁盘
+- [ ] markdown 原生渲染
+- [x] markdown 网页js渲染
+- [x] markdown 编辑保存
+- [x] WebDAV 请求响应和下载的文件缓存到磁盘，无网状态也可以查看文件
 - [x] 文件重命名
 - [x] 上传相册原始图片到指定目录
 - [x] 图片预览、原图分享到微信、以微信表情分享

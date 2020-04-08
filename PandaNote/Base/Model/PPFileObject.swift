@@ -9,25 +9,115 @@
 import UIKit
 import FilesProvider
 
-class PPFileObject: FileObject,NSCoding {
+//class Person: Codable {
+//}
+
+
+struct PPFileObject {
+    var name: String
+    var path: String
+    var size: Int64
+    var isDirectory: Bool
+    var modifiedDate: String
+//    var favoriteColor: UIColor
+}
+
+
+extension PPFileObject: Codable {
+    enum CodingKeys: String, CodingKey {
+        case name
+        case path
+        case size
+        case modifiedDate
+        case isDirectory
+    }
+    
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        name = try container.decode(String.self, forKey: .name)
+        size = try container.decode(Int64.self, forKey: .size)
+        isDirectory = try container.decode(Bool.self, forKey: .isDirectory)
+        modifiedDate = try container.decode(String.self, forKey: .modifiedDate)
+        path = try container.decode(String.self, forKey: .path)
+        // 获取到原始数据
+//        let colorData = try container.decode(Data.self, forKey: .favoriteColor)
+        // 进行解码
+//        favoriteColor = try NSKeyedUnarchiver.unarchiveTopLevelObjectWithData(colorData) as? UIColor ?? UIColor.black
+    }
+        
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(name, forKey: .name)
+        try container.encode(path, forKey: .path)
+        try container.encode(isDirectory, forKey: .isDirectory)
+        try container.encode(modifiedDate, forKey: .modifiedDate)
+        try container.encode(size, forKey: .size)
+        // 转化为 原始数据
+//        let colorData = try NSKeyedArchiver.archivedData(withRootObject: favoriteColor, requiringSecureCoding: false)
+        // 进行编码
+//        try container.encode(colorData, forKey: .favoriteColor)
+    }
+    
+    
+}
+//MARK: 测试代码
+class PPPFileObject: NSObject {
+    var name: String
+    init(name: String) {
+        self.name = name
+    }
+    //    func encode(with coder: NSCoder) {
+    //        coder.encode(name, forKey: "name")
+    //    }
+    //    required convenience init(coder aDecoder: NSCoder) {
+    //        let name = aDecoder.decodeObject(forKey: "name") as! String
+    //        self.init(name: name)
+    //    }
+}
+//MARK: extension 对象
+
+//extension FileObject: Codable {
+//    enum CodingKeys: String, CodingKey {
+//        case name
+//    }
+//
+//    public convenience init(from decoder: Decoder) throws {
+//        let container = try decoder.container(keyedBy: CodingKeys.self)
+//        name = try container.decode(String.self, forKey: .name)
+//        self.init(url: nil, name: "String", path: "String")
+//
+//    }
+//
+//    public func encode(to encoder: Encoder) throws {
+//        var container = encoder.container(keyedBy: CodingKeys.self)
+//        try container.encode(name, forKey: .name)
+//    }
+//}
+
+
+
+
+
+//MARK:NSCoding
+class PFileObject: FileObject, NSCoding {
     func encode(with coder: NSCoder) {
         coder.encode(name, forKey: "name")
         coder.encode(modifiedDate, forKey: "modifiedDate")
         coder.encode(size, forKey: "size")
         coder.encode(isDirectory, forKey: "isDirectory")
     }
-    
-    required init?(coder: NSCoder) {
-//        super.init(coder: coder)
+    public required convenience init?(coder : NSCoder) {
         let name : String = coder.decodeObject(forKey: "name") as? String ?? ""
-//        let modifiedDate = coder.decodeObject(forKey: "modifiedDate") as? Date ?? ""
-//        self.size = coder.decodeInt64(forKey: "size") as? String ?? ""
-//        self.isDirectory = coder.decodeBool(forKey: "isDirectory")
-//        coder.encode(name, forKey: "name")
+        //        let modifiedDate = coder.decodeObject(forKey: "modifiedDate") as? Date ?? ""
+        //        self.size = coder.decodeInt64(forKey: "size") as? String ?? ""
+        //        self.isDirectory = coder.decodeBool(forKey: "isDirectory")
+        //        coder.encode(name, forKey: "name")
         //        coder.encode(image, forKey: "image")
-        super.init(url: nil, name: name, path: "")
-
+        self.init(url: nil, name: name, path: "")
     }
+//    required init?(coder: NSCoder) {
+//        super.init(coder: coder)
+    //        super.init(url: nil, name: name, path: "")
     
     
 }
