@@ -10,7 +10,7 @@
 主要用来写 markdown 笔记，并实现云同步，国内可使用坚果云或自己搭建WebDAV服务，所有文件保存在第三方服务器，Dropbox、GoogleDrive暂不支持
 - [ ] markdown 原生渲染
 - [x] markdown 网页js渲染
-- [x] markdown 编辑保存
+- [x] markdown 等纯文本的新建、编辑、保存、删除
 - [x] WebDAV 请求响应和下载的文件缓存到磁盘，无网状态也可以查看文件
 - [x] 文件重命名
 - [x] 上传相册原始图片到指定目录
@@ -36,3 +36,13 @@ open PandaNote.xcworkspace
 # 预览
 
 ![preview](https://i.loli.net/2019/09/03/ClPQ842ZIzpXUrc.gif)
+
+
+
+# markdown渲染相关
+
+AFNetworking作者的： https://github.com/mattt/CommonMarkAttributedString
+
+Cmark的Swift封装：https://github.com/iwasrobbed/Down
+
+markdown与AttributeString互转： https://github.com/chockenberry/MarkdownAttributedString.git

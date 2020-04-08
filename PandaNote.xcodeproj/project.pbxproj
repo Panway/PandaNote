@@ -39,6 +39,9 @@
 		60A1F92C24398B23009E390C /* PPFileObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60A1F92B24398B23009E390C /* PPFileObject.swift */; };
 		60AA154E23DEBAC900A68FAA /* PPSQLiteManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60AA154D23DEBAC900A68FAA /* PPSQLiteManager.swift */; };
 		60D27791238AA52C00D8BA0C /* PPCacheManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60D27790238AA52C00D8BA0C /* PPCacheManager.swift */; };
+		60E6141E243DA27700630B4B /* PPBaseView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60E6141D243DA27700630B4B /* PPBaseView.swift */; };
+		60E61420243DA3B500630B4B /* PPBottomToolBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60E6141F243DA3B500630B4B /* PPBottomToolBarView.swift */; };
+		60E61422243DAF2800630B4B /* UIColor+PPTool.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60E61421243DAF2800630B4B /* UIColor+PPTool.swift */; };
 		60F5691122F2ADC700874994 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60F5691022F2ADC700874994 /* AppDelegate.swift */; };
 		60F5691322F2ADC700874994 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60F5691222F2ADC700874994 /* ViewController.swift */; };
 		60F5691622F2ADC700874994 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 60F5691422F2ADC700874994 /* Main.storyboard */; };
@@ -112,6 +115,9 @@
 		60A1F92B24398B23009E390C /* PPFileObject.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPFileObject.swift; sourceTree = "<group>"; };
 		60AA154D23DEBAC900A68FAA /* PPSQLiteManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPSQLiteManager.swift; sourceTree = "<group>"; };
 		60D27790238AA52C00D8BA0C /* PPCacheManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPCacheManager.swift; sourceTree = "<group>"; };
+		60E6141D243DA27700630B4B /* PPBaseView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPBaseView.swift; sourceTree = "<group>"; };
+		60E6141F243DA3B500630B4B /* PPBottomToolBarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPBottomToolBarView.swift; sourceTree = "<group>"; };
+		60E61421243DAF2800630B4B /* UIColor+PPTool.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIColor+PPTool.swift"; sourceTree = "<group>"; };
 		60F5690D22F2ADC700874994 /* PandaNote.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PandaNote.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		60F5691022F2ADC700874994 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		60F5691222F2ADC700874994 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -201,6 +207,7 @@
 			children = (
 				60560249231778B5000809CD /* PPFileListTableViewCell.swift */,
 				6056027E23178C2C000809CD /* PPTextFieldTableViewCell.swift */,
+				60E6141F243DA3B500630B4B /* PPBottomToolBarView.swift */,
 			);
 			path = View;
 			sourceTree = "<group>";
@@ -239,6 +246,7 @@
 				6056027B23178B03000809CD /* XDFastTableView.h */,
 				6056027C23178B03000809CD /* XDFastTableView.m */,
 				6056022723177274000809CD /* PPBaseTableViewCell.swift */,
+				60E6141D243DA27700630B4B /* PPBaseView.swift */,
 			);
 			path = View;
 			sourceTree = "<group>";
@@ -278,6 +286,7 @@
 				6056024B231778D0000809CD /* String+Extention.swift */,
 				6080D3AA233315B900F582B1 /* CacheSerializer+Panda.swift */,
 				60A1F8DB24388C98009E390C /* ViewController+PPTool.swift */,
+				60E61421243DAF2800630B4B /* UIColor+PPTool.swift */,
 				60560223231771E2000809CD /* UIScrollView+XDTool.h */,
 				60560222231771E2000809CD /* UIScrollView+XDTool.m */,
 				60A1F8D624349580009E390C /* NSAttributedString+Markdown.h */,
@@ -643,6 +652,7 @@
 				60A1F8DA24388391009E390C /* PPWebViewController.swift in Sources */,
 				60A1F92C24398B23009E390C /* PPFileObject.swift in Sources */,
 				6056022823177274000809CD /* PPBaseTableViewCell.swift in Sources */,
+				60E6141E243DA27700630B4B /* PPBaseView.swift in Sources */,
 				6056024A231778B5000809CD /* PPFileListTableViewCell.swift in Sources */,
 				604FFA4823DDEBCF0059BBC9 /* PPScanViewController.swift in Sources */,
 				605602822317A0DB000809CD /* PPHUD.swift in Sources */,
@@ -655,7 +665,9 @@
 				6056024823177736000809CD /* PPSettingViewController.swift in Sources */,
 				60560224231771E2000809CD /* UIScrollView+XDTool.m in Sources */,
 				605602562317796F000809CD /* XDWebViewController.m in Sources */,
+				60E61420243DA3B500630B4B /* PPBottomToolBarView.swift in Sources */,
 				6056027F23178C2C000809CD /* PPTextFieldTableViewCell.swift in Sources */,
+				60E61422243DAF2800630B4B /* UIColor+PPTool.swift in Sources */,
 				60D27791238AA52C00D8BA0C /* PPCacheManager.swift in Sources */,
 				60F5691322F2ADC700874994 /* ViewController.swift in Sources */,
 				60F5D042232751D8004E988B /* PPShareManager.m in Sources */,

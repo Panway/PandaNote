@@ -15,7 +15,7 @@ class PPHUD: NSObject {
     
     var waitHUb:MBProgressHUD?
     //MARK: 顶部提示信息框
-    class func showHUDFromTop(_ message:String) -> Void {
+    class func showHUDFromTop(_ message:String, isError:Bool?=false) -> Void {
         let lastView = UIApplication.shared.keyWindow?.viewWithTag(9999)
         var lastViewExist = false
         if lastView != nil {
@@ -25,7 +25,12 @@ class PPHUD: NSObject {
         let width = UIApplication.shared.keyWindow!.frame.width
         let aLB = UILabel(frame: CGRect(x: 80, y: -40.0, width: width-160, height: 140.0))
 //        aLB.autoresizingMask = [.flexibleWidth, .flexibleHeight]
-        aLB.backgroundColor = UIColor(red:0.27, green:0.68, blue:0.49, alpha:1.00)//VUE绿
+        if let isError = isError, isError {//isError存在且值为true
+            aLB.backgroundColor = UIColor(hexRGBValue: 0xf75356)
+        }
+        else {
+            aLB.backgroundColor = UIColor(red:0.27, green:0.68, blue:0.49, alpha:1.00)//VUE绿            
+        }
         aLB.textColor = UIColor.white
         aLB.textAlignment = NSTextAlignment.center
         aLB.numberOfLines = 3

@@ -4,7 +4,7 @@
 //
 //  Created by panwei on 2020/4/4.
 //  Copyright © 2020 WeirdPan. All rights reserved.
-//
+//  bug:https://stackoverflow.com/a/28676439/4493393
 
 import UIKit
 import WebKit.WKWebView

@@ -15,7 +15,7 @@ class PPFileManager: NSObject,FileProviderDelegate {
     let apiCacheDir = "WebDAV/api_"
     
     static let sharedManager = PPFileManager()
-    var webdav: WebDAVFileProvider?
+    var webdav: WebDAVFileProvider!
 
     override init() {
         super.init()
@@ -39,7 +39,7 @@ class PPFileManager: NSObject,FileProviderDelegate {
         }
     }
     func getWebDAVData(path:String,completionHander:@escaping(_ data:[AnyObject],_ isFromCache:Bool,_ error:Error?) -> Void) {
-        webdav?.contentsOfDirectory(path: path, completionHandler: {
+        webdav.contentsOfDirectory(path: path, completionHandler: {
             contents, error in
             var archieveArray = [PPFileObject]()
             var dirCount = 0
@@ -81,7 +81,7 @@ class PPFileManager: NSObject,FileProviderDelegate {
     }
 
     func downloadFileFromWebDAV(path: String, cacheFile: Bool? = false,completionHandler: @escaping ((_ contents: Data?, _ isFromCache:Bool, _ error: Error?) -> Void)) {
-        PPFileManager.sharedManager.webdav?.contents(path: path, completionHandler: { (data, error) in
+        PPFileManager.sharedManager.webdav.contents(path: path, completionHandler: { (data, error) in
             if error == nil {
                 DispatchQueue.main.async {
                     completionHandler(data,false,error)
@@ -107,7 +107,7 @@ class PPFileManager: NSObject,FileProviderDelegate {
     func loadFileFromWebDAV(path: String, downloadIfExist:Bool?=false ,completionHandler: @escaping ((_ contents: Data?, _ isFromCache:Bool, _ error: Error?) -> Void)) {
         PPDiskCache.shared.fetchData(key: path, failure: { (error) in
             
-            PPFileManager.sharedManager.webdav?.contents(path: path, completionHandler: { (data, error) in
+            PPFileManager.sharedManager.webdav.contents(path: path, completionHandler: { (data, error) in
                 if error == nil {
                     DispatchQueue.main.async {
                         PPDiskCache.shared.setDataSynchronously(data, key: path)
@@ -132,7 +132,7 @@ class PPFileManager: NSObject,FileProviderDelegate {
 
     }
     func uploadFileViaWebDAV(path: String, contents: Data?, completionHander:@escaping(_ error:Error?) -> Void) {
-        PPFileManager.sharedManager.webdav?.writeContents(path: path, contents: contents, completionHandler: { (error) in
+        PPFileManager.sharedManager.webdav.writeContents(path: path, contents: contents, completionHandler: { (error) in
             if error == nil {
                 DispatchQueue.main.async {
                     completionHander(error)
@@ -169,10 +169,10 @@ class PPFileManager: NSObject,FileProviderDelegate {
         //            let protectionSpace = URLProtectionSpace.init(host: "dav.jianguoyun.com", port: 443, protocol: "https", realm: "Restricted", authenticationMethod: NSURLAuthenticationMethodHTTPBasic)
         //            URLCredentialStorage.shared.setDefaultCredential(userCredential, for: protectionSpace)
         webdav = WebDAVFileProvider(baseURL: server, credential: userCredential)!//不能加`,cache: URLCache.shared`,要不然无法保存markdown！！！
-//        webdav?.useCache = true
-        webdav?.delegate = self
+//        webdav.useCache = true
+        webdav.delegate = self
         //注意：不修改鉴权方式，会导致每次请求两次，一次401失败，一次带token成功
-        webdav?.credentialType = URLRequest.AuthenticationType.basic
+        webdav.credentialType = URLRequest.AuthenticationType.basic
 //        self.perform(Selector(("getData:")), with: self, afterDelay: 1)
         
     }
@@ -272,21 +272,21 @@ class PPFileManager: NSObject,FileProviderDelegate {
     }
     @IBAction func createFolder(_ sender: Any) {
         /*
-         webdav?.create(folder: "new folder", at: "/", completionHandler: nil)
+         webdav.create(folder: "new folder", at: "/", completionHandler: nil)
          */
     }
     
     @IBAction func createFile(_ sender: Any) {
         /*
          let data = "Hello world from sample.txt!".data(using: .utf8, allowLossyConversion: false)
-         webdav?.writeContents(path: "sample.txt", contents: data, atomically: true, completionHandler: nil)//?.writeContents(path: "sample.txt", content: data, atomically: true, completionHandler: nil)
+         webdav.writeContents(path: "sample.txt", contents: data, atomically: true, completionHandler: nil)//?.writeContents(path: "sample.txt", content: data, atomically: true, completionHandler: nil)
          */
     }
     
     
     
     @IBAction func remove(_ sender: Any) {
-        //        webdav?.removeItem(path: "sample.txt", completionHandler: nil)
+        //        webdav.removeItem(path: "sample.txt", completionHandler: nil)
     }
     
     @IBAction func download(_ sender: Any) {
@@ -294,7 +294,7 @@ class PPFileManager: NSObject,FileProviderDelegate {
          let localURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!.appendingPathComponent("fileprovider.png")
          let remotePath = "fileprovider.png"
          
-         let progress = webdav?.copyItem(path: remotePath, toLocalURL: localURL, completionHandler: nil)
+         let progress = webdav.copyItem(path: remotePath, toLocalURL: localURL, completionHandler: nil)
          downloadProgressView?.observedProgress = progress
          */
     }
@@ -304,7 +304,7 @@ class PPFileManager: NSObject,FileProviderDelegate {
          let localURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!.appendingPathComponent("fileprovider.png")
          let remotePath = "/fileprovider.png"
          
-         let progress = webdav?.copyItem(localFile: localURL, to: remotePath, completionHandler: nil)
+         let progress = webdav.copyItem(localFile: localURL, to: remotePath, completionHandler: nil)
          uploadProgressView?.observedProgress = progress
          */
     }
