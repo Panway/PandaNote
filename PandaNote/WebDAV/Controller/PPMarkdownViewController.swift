@@ -7,7 +7,6 @@
 //
 import UIKit
 import Foundation
-import Alamofire
 import FilesProvider
 import Down
 
@@ -24,7 +23,7 @@ class PPMarkdownViewController: PPBaseViewController,UITextViewDelegate {
 //    var webdav: WebDAVFileProvider?
     var closeAfterSave : Bool = false
     var textChanged : Bool = false//文本改变的话就不需要再比较字符串了
-    
+    //MARK: Life Cycle
     override func viewDidLoad() {
         pp_initView()
         self.title = self.filePathStr.split(string: "/").last

@@ -18,8 +18,6 @@ class PPTabBarController: UITabBarController {
         barAppearance.titleTextAttributes = [NSAttributedString.Key.foregroundColor: UIColor.darkGray]
         
         
-        let firstViewController = PPHomeViewController.init()
-        firstViewController.tabBarItem = UITabBarItem(tabBarSystemItem: .featured, tag: 0)
         
         let recentsVC = PPHomeViewController.init()
         recentsVC.tabBarItem = UITabBarItem(tabBarSystemItem: .recents, tag: 1)
@@ -27,10 +25,14 @@ class PPTabBarController: UITabBarController {
         let testVC = PPPriceTagViewController.init()
         testVC.tabBarItem = UITabBarItem(tabBarSystemItem: .search, tag: 1)
         
+        let webVC = PPWebViewController()
+        webVC.urlString = "https://tophub.today"
+        webVC.tabBarItem = UITabBarItem(tabBarSystemItem: .bookmarks, tag: 0)
+
         let settingVC = PPSettingViewController.init()
         settingVC.tabBarItem = UITabBarItem(tabBarSystemItem: .more, tag: 2)
         
-        let tabBarList = [recentsVC, testVC, firstViewController, settingVC]
+        let tabBarList = [recentsVC, testVC, webVC, settingVC]
         
         viewControllers = tabBarList
     }

@@ -1,5 +1,5 @@
 PODS:
-  - Alamofire (4.8.2)
+  - Alamofire (4.9.1)
   - BSBacktraceLogger (0.0.1)
   - DoraemonKit/Core (1.2.4):
     - BSBacktraceLogger
@@ -12,6 +12,7 @@ PODS:
     - FMDB/standard (= 2.7.5)
   - FMDB/standard (2.7.5)
   - IQKeyboardManager (6.5.5)
+  - Kanna (5.2.2)
   - Kingfisher (4.10.1)
   - MBProgressHUD (1.1.0)
   - MJRefresh (3.2.0)
@@ -40,6 +41,7 @@ DEPENDENCIES:
   - FLEX (~> 3.0.0)
   - FMDB
   - IQKeyboardManager
+  - Kanna (~> 5.2.2)
   - Kingfisher
   - MBProgressHUD
   - MJRefresh
@@ -56,12 +58,14 @@ DEPENDENCIES:
 
 SPEC REPOS:
   https://cdn.cocoapods.org/:
+    - Alamofire
     - BSBacktraceLogger
     - DoraemonKit
     - fishhook
     - FLEX
     - FMDB
     - IQKeyboardManager
+    - Kanna
     - Kingfisher
     - MBProgressHUD
     - MJRefresh
@@ -73,7 +77,6 @@ SPEC REPOS:
     - YPImagePicker
     - YYText
   https://github.com/CocoaPods/Specs.git:
-    - Alamofire
     - Down
     - FilesProvider
     - SnapKit
@@ -88,7 +91,7 @@ CHECKOUT OPTIONS:
     :git: https://github.com/Panway/CodeSnipetCollection.git
 
 SPEC CHECKSUMS:
-  Alamofire: ae5c501addb7afdbb13687d7f2f722c78734c2d3
+  Alamofire: 85e8a02c69d6020a0d734f6054870d7ecb75cf18
   BSBacktraceLogger: 06b983ee93a9f87d957960e9c73d660d5966b447
   DoraemonKit: 5328b8b57cd900f6a24f7f66051346dd4409437d
   Down: d2554b5006cf45bdb2bc6f19d91ca4fec6a45b31
@@ -97,6 +100,7 @@ SPEC CHECKSUMS:
   FLEX: d66c759bce0f6ebbbf472c742380874d846f2883
   FMDB: 2ce00b547f966261cd18927a3ddb07cb6f3db82a
   IQKeyboardManager: 3a8b9e603f8b0eeaf5f096a1f2b2cfcf121992ef
+  Kanna: 2c4eddaaa4bfb9a1ed19e53c0b3d42ef02838046
   Kingfisher: c148cd7b47ebde9989f6bc7c27dcaa79d81279a0
   MBProgressHUD: e7baa36a220447d8aeb12769bf0585582f3866d9
   MJRefresh: ed450d6eb9d3346a2cb033ab7eb6de090aeef437
@@ -110,6 +114,6 @@ SPEC CHECKSUMS:
   YPImagePicker: 8039f89ad79281545fa868486f32d9bf5d65ede1
   YYText: 5c461d709e24d55a182d1441c41dc639a18a4849
 
-PODFILE CHECKSUM: 63196379e1b09fa6672fe7ad22efab46e604e9c7
+PODFILE CHECKSUM: cf178d8d412ae2efe236207a7786210904b46c4b
 
 COCOAPODS: 1.9.1

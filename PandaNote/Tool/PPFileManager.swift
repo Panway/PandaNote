@@ -28,7 +28,7 @@ class PPFileManager: NSObject,FileProviderDelegate {
         }) { (data) in
             do {
                 let archieveArray = try JSONDecoder().decode([PPFileObject].self, from: data)
-                debugPrint(archieveArray)
+//                debugPrint(archieveArray)
                 DispatchQueue.main.async {
                     completionHander(archieveArray as [AnyObject],true,nil)
                 }

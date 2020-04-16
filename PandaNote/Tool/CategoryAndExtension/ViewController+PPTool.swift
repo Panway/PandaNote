@@ -20,6 +20,15 @@ extension UIViewController {
         //self.leftAnchor
         return self.topLayoutGuide.snp.bottom
     }
+    func pp_safeLayoutGuideBottom() -> ConstraintItem {
+        if #available(iOS 11.0, *){
+            //iOS11用安全区来当上边界
+            return self.view.safeAreaLayoutGuide.snp.bottom
+            //self.safeAreaLayoutGuide.leftAnchor
+        }
+        //self.leftAnchor
+        return self.bottomLayoutGuide.snp.top
+    }
     // 来源：https://stackoverflow.com/a/47094235/4493393
     /// 设置self.view的子视图挨着安全区
     /// - Parameter yourView: 子视图

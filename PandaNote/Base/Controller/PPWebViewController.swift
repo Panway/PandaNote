@@ -53,7 +53,22 @@ class PPWebViewController: UIViewController,WKUIDelegate,WKNavigationDelegate,WK
         wkWebView.uiDelegate = self
         //    self.bridge = [WebViewJavascriptBridge bridgeForWebView:self.wkWebView];
         //    [self.bridge setWebViewDelegate:self];
-        
+        let bottomView = PPWebViewBottomToolbar()
+//        bottomView.backgroundColor = UIColor.green
+        self.view.addSubview(bottomView)
+        bottomView.snp.makeConstraints { (make) in
+            make.left.right.equalTo(self.view)
+            make.bottom.equalTo(self.pp_safeLayoutGuideBottom())
+            make.height.equalTo(44)
+        }
+        bottomView.backButton.addTarget(self, action: #selector(goBack), for: .touchUpInside)
+        bottomView.forwardButton.addTarget(self, action: #selector(goForward), for: .touchUpInside)
+        self.wkWebView.scrollView.addRefreshHeader {
+            self.loadURL()
+        }
+        loadURL()
+    }
+    func loadURL() {
         if let urlString = self.urlString {
             if let url = URL(string: urlString) {
                 wkWebView.load(URLRequest(url: url))
@@ -93,6 +108,7 @@ class PPWebViewController: UIViewController,WKUIDelegate,WKNavigationDelegate,WK
 //            self.title = result
 //
 //        }
+        self.wkWebView.scrollView.endRefreshing()
         webView.evaluateJavaScript("document.title") { (result:Any?, error) in
             self.title = result as? String
         }
@@ -118,25 +134,84 @@ class PPWebViewController: UIViewController,WKUIDelegate,WKNavigationDelegate,WK
     }
 
     //MARK:Private
-    func shouldStartLoad(with request: URLRequest?) -> Bool {
+    func shouldStartLoad(with request: URLRequest) -> Bool {
         //获取当前调转页面的URL
 //        let requestUrl = request?.url?.absoluteString
-        guard let requestUrl = request?.url?.absoluteString else { return false }
+        guard let urlString = request.url?.absoluteString else { return false }
         //    NSLog(@"requestUrl==%@",requestUrl);
         //    NSString *actionName = [requestUrl lastPathComponent];
         //    actionName = [actionName stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
-        if request?.url?.scheme?.caseInsensitiveCompare("pppanda") == .orderedSame {
+        if request.url?.scheme?.caseInsensitiveCompare("pppanda") == .orderedSame {
             wkWebView.evaluateJavaScript("jsReceiveData('loginSucceed', 'success')", completionHandler: { response, error in
                 
             })
             return false
         }
-        else if let _ = self.markdownStr, !requestUrl.hasPrefix("file://") {
-            let vc = PPWebViewController()
-            vc.urlString = requestUrl
-            navigationController?.pushViewController(vc, animated: true)
-            return false
+        else if let markdown = self.markdownStr {
+            if markdown.length>1 && !urlString.hasPrefix("file://") {
+                let vc = PPWebViewController()
+                vc.urlString = urlString
+                navigationController?.pushViewController(vc, animated: true)
+                return false
+            }
+        }
+        else if urlString.contains("www.zhihu.com") {
+            let path = Bundle.main.path(forResource: "zhihu_unfold", ofType:"js")
+            var consolejs: String? = ""
+            do {
+                consolejs = try String(contentsOfFile: path ?? "", encoding: .utf8)
+            } catch {
+            }
+            wkWebView.evaluateJavaScript(consolejs ?? "", completionHandler: { response, error in
+                
+            })
         }
         return true
+    }
+    @objc func goBack() {
+        if self.wkWebView.canGoBack {
+            self.wkWebView.goBack()
+        }
+    }
+    @objc func goForward() {
+        if self.wkWebView.canGoForward {
+            self.wkWebView.goForward()
+        }
+    }
+}
+
+
+
+class PPWebViewBottomToolbar: UIView {
+    var backButton : UIButton!
+    var forwardButton : UIButton!
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        pp_addSubviews()
+    }
+    func pp_addSubviews() {
+        backButton = UIButton.init(type: UIButton.ButtonType.custom)
+        self.addSubview(backButton)
+        backButton.frame = CGRect.init(x: 40, y: 0, width: 40, height: 40)
+        backButton.setTitle("⬅️", for: UIControl.State.normal)
+        backButton.snp.makeConstraints { (make) in
+            make.top.equalTo(self)
+            make.right.equalTo(self.snp.centerX).offset(-5)
+            make.width.equalTo(44)
+            make.height.equalTo(44)
+        }
+        
+        forwardButton = UIButton.init(type: UIButton.ButtonType.custom)
+        self.addSubview(forwardButton)
+        forwardButton.frame = CGRect.init(x: 40, y: 0, width: 40, height: 40)
+        forwardButton.setTitle("➡️", for: UIControl.State.normal)
+        forwardButton.snp.makeConstraints { (make) in
+            make.top.equalTo(self)
+            make.left.equalTo(self.snp.centerX).offset(5)
+            make.size.equalTo(backButton)
+        }
+    }
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
     }
 }

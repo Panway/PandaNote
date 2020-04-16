@@ -18,8 +18,9 @@ target 'PandaNote' do
 
   # Pods for PandaNote
   
-#  https://github.com/Alamofire/Alamofire/blob/master/Documentation/Usage.md#response-validation
-  pod 'Alamofire'
+  # 最新文档 https://github.com/Alamofire/Alamofire/blob/master/Documentation/Usage.md
+  # 4.9版本文档 https://github.com/Alamofire/Alamofire/blob/4.9.1/Documentation/Usage.md
+  pod 'Alamofire','~> 5.0'
 #  https://github.com/onevcat/Kingfisher
   pod 'Kingfisher'
   pod 'PINCache'
@@ -51,7 +52,8 @@ target 'PandaNote' do
   #滴滴开源的应用内调试工具，界面比较美观 https://github.com/didi/DoraemonKit
   pod 'DoraemonKit/Core', '~> 1.2.0', :configurations => ['Debug']
 #  pod 'Weibo_SDK', :git => 'https://github.com/sinaweibosdk/weibo_ios_sdk.git'
-  
+  # XML解析 https://github.com/tid-kijyun/Kanna
+  pod 'Kanna', '~> 5.2.2'
 
 
   #----------私有----------

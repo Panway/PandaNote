@@ -113,6 +113,15 @@ class PPHomeViewController: PPBaseViewController,UITextFieldDelegate,UITableView
                 self.showImage(contents: imageData, image: nil, imageName: fileObj.path,imageURL:fileObj.path)
             }
         }
+        else if (fileObj.name.hasSuffix("pdf"))  {
+            if #available(iOS 11.0, *) {
+                let vc = PPPDFViewController()
+                vc.filePathStr = fileObj.path
+                self.navigationController?.pushViewController(vc, animated: true)
+            } else {
+                PPHUD.showHUDFromTop("抱歉，暂不支持iOS11以下系统预览PDF哟")
+            }
+        }
         else if (fileObj.name.hasSuffix("mp3")||fileObj.name.lowercased().hasSuffix("mp4"))  {
 //            let vc = PlayerViewController()
 //            vc.filePathStr = fileObj.path
