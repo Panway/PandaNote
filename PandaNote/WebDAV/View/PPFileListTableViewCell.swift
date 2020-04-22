@@ -14,6 +14,7 @@ class PPFileListTableViewCell: PPBaseTableViewCell {
         let label = UILabel();
         label.textColor = "333333".HEXColor()
         label.font = UIFont.boldSystemFont(ofSize: 15)
+        label.lineBreakMode = .byTruncatingMiddle
         return label
     }()
     
@@ -94,7 +95,7 @@ class PPFileListTableViewCell: PPBaseTableViewCell {
         self.titleLabel.snp.makeConstraints { (make) in
             make.left.equalTo(self.iconImage.snp.right).offset(12)
             make.top.equalTo(self.snp.top).offset(15)
-//            make.right.equalTo(self.timeLabel.snp.left).offset(-5)
+            make.right.equalTo(self).offset(-15)
 //            make.height.equalTo(21)
         }
         

@@ -11,7 +11,7 @@ import Foundation
 
 
 class PPUserInfo: NSObject {
-    var webDAVServerURL:String?
+    var webDAVServerURL = ""
     var webDAVUserName:String?
     var webDAVPassword:String?
     var webDAVRemark:String = ""
@@ -20,6 +20,7 @@ class PPUserInfo: NSObject {
     var pp_fileIcon = [String:String]()
     /// 本地时间相对于格林尼治时间的差距
     var pp_timezoneOffset:Int!
+    var pp_JSONConfig:String!
 //    var pp_Setting:Dictionary<String, Any>!
     /// The repeat count.
     public var pp_Setting:Dictionary<String, Any> = [:] {
@@ -27,6 +28,14 @@ class PPUserInfo: NSObject {
             debugPrint("\(String(describing: oldValue)) --> \(String(describing: pp_Setting))")
             let data:NSData = NSKeyedArchiver.archivedData(withRootObject: pp_Setting) as NSData
             data.write(toFile: self.pp_mainDirectory+"/PP_UserPreference", atomically: true)
+            if let jsonData = try? JSONSerialization.data(withJSONObject: pp_Setting, options: JSONSerialization.WritingOptions.prettyPrinted) {
+                do {
+                    try jsonData.write(to: URL(fileURLWithPath: self.pp_mainDirectory + "/PP_JSONConfig.json"), options: .atomic)
+                } catch {
+                    debugPrint(error)
+                }
+                                
+            }
 //            if oldValue != pp_Setting {
                 //save to disk
                 
@@ -60,16 +69,13 @@ class PPUserInfo: NSObject {
             }
         }
         catch {}
-        self.webDAVServerURL = UserDefaults.standard.string(forKey: "PPWebDAVServerURL")
-        self.webDAVUserName = UserDefaults.standard.string(forKey: "PPWebDAVUserName")
-        self.webDAVPassword = UserDefaults.standard.string(forKey: "PPWebDAVPassword")
-        self.webDAVRemark = UserDefaults.standard.string(forKey: "PPWebDAVRemark") ?? "文件"
         self.pp_timezoneOffset = TimeZone.current.secondsFromGMT()
         
         if let data = try? Data(contentsOf: URL(fileURLWithPath: self.pp_mainDirectory+"/PP_UserPreference")) {
             let dict2 = NSKeyedUnarchiver.unarchiveObject(with: data)
 //            debugPrint("\(String(describing: dict2))")
             self.pp_Setting = dict2 as! Dictionary<String, Any>
+//            self.pp_JSONConfig = JSONSerialization.
         }
 
 //        self.pp_Setting = ["saveDocWhenClose":"1"]
@@ -83,9 +89,12 @@ class PPUserInfo: NSObject {
         }
         return false
     }
-    func save(_ value: String, forKey defaultName: String) -> Void {
-        UserDefaults.standard.setValue(value, forKey: defaultName)
-
+    class func saveObject(_ objcet:Any) {
+        
     }
+//    func save(_ value: String, forKey defaultName: String) -> Void {
+//        UserDefaults.standard.setValue(value, forKey: defaultName)
+//
+//    }
     
 }

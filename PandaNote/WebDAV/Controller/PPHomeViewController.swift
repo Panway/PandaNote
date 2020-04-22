@@ -34,9 +34,9 @@ class PPHomeViewController: PPBaseViewController,UITextFieldDelegate,UITableView
     @IBOutlet weak var uploadProgressView: UIProgressView?
     @IBOutlet weak var downloadProgressView: UIProgressView?
     //MARK:Life Cycle
-    override func viewDidAppear(_ animated: Bool) {
-        super.viewDidAppear(animated)
-    }
+//    override func viewDidAppear(_ animated: Bool) {
+//        super.viewDidAppear(animated)
+//    }
     override func viewDidLoad() {
         super.viewDidLoad()
         let userInfo = PPUserInfo.shared
@@ -71,15 +71,14 @@ class PPHomeViewController: PPBaseViewController,UITextFieldDelegate,UITableView
         
         
         
-        if (userInfo.webDAVServerURL != nil) {
-//            PPFileManager.sharedManager.initWebDAVSetting()
+        if (userInfo.webDAVServerURL.length > 1) {
             getWebDAVData()
         }
         self.tableView.addRefreshHeader {
-            if (PPUserInfo.shared.webDAVServerURL != nil) {
+            if (PPUserInfo.shared.webDAVServerURL.length < 1) {
                 PPFileManager.sharedManager.initWebDAVSetting()
             }
-            self.getData((Any).self)
+            self.getWebDAVData()
         }
 //        let server: URL = URL(string: PPUserInfoManager.shared().webDAVServerURL)
     }
@@ -150,7 +149,7 @@ class PPHomeViewController: PPBaseViewController,UITextFieldDelegate,UITableView
         let delete = UITableViewRowAction(style: .default, title: "删除") { (action, indexPath) in
             let fileObj = self.dataSource[indexPath.row]
             //相对路径
-            PPFileManager.sharedManager.webdav.removeItem(path:fileObj.path, completionHandler: { (error) in
+            PPFileManager.sharedManager.webdav?.removeItem(path:fileObj.path, completionHandler: { (error) in
                 DispatchQueue.main.async {
                     PPHUD.showHUDText(message: "删除成功哟！", view: self.view)
                     self.getWebDAVData()
@@ -197,7 +196,7 @@ class PPHomeViewController: PPBaseViewController,UITextFieldDelegate,UITableView
             return true
         }
         if let currentRenameText = currentRenameText,let newName = textField.text {
-            PPFileManager.sharedManager.webdav.moveItem(path:currentRenameText, to: self.pathStr + newName, completionHandler: { (error) in
+            PPFileManager.sharedManager.webdav?.moveItem(path:currentRenameText, to: self.pathStr + newName, completionHandler: { (error) in
                 DispatchQueue.main.asyncAfter(deadline: .now()+1, execute: {
                     PPHUD.showHUDText(message: "修改成功！", view: self.view)
                     self.getWebDAVData()
@@ -395,7 +394,7 @@ class PPHomeViewController: PPBaseViewController,UITextFieldDelegate,UITableView
  */
         }
         else {
-            PPFileManager.sharedManager.webdav.contents(path: imageURL, completionHandler: {
+            PPFileManager.sharedManager.webdav?.contents(path: imageURL, completionHandler: {
                 contents, error in
                 guard let contents = contents else {
                     return
@@ -423,14 +422,16 @@ class PPHomeViewController: PPBaseViewController,UITextFieldDelegate,UITableView
     }
     
     
-    @IBAction func getData(_ sender: Any) {
-        getWebDAVData()
-    }
     
     //MARK:获取文件列表
     func getWebDAVData() -> Void {
         PPFileManager.sharedManager.getWebDAVFileList(path: self.pathStr) { (contents,isFromCache, error) in
-            PPHUD.showHUDFromTop(isFromCache ? "已加载缓存":"现在是最新的")
+            if error != nil {
+                PPHUD.showHUDFromTop("加载失败，请配置服务器", isError: true)
+                self.tableView.endRefreshing()
+                return
+            }
+            PPHUD.showHUDFromTop(isFromCache ? "已加载缓存":"已加载最新")
 
             if let objects = contents as? [PPFileObject] {
                 self.dataSource.removeAll()

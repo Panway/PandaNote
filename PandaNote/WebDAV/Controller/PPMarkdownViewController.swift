@@ -155,8 +155,6 @@ class PPMarkdownViewController: PPBaseViewController,UITextViewDelegate {
     }
     
     @objc func button2Action(sender:UIButton?)  {
-        let item1 = PPUserInfo.shared
-        debugPrint(item1.webDAVServerURL!)
         let stringToUpload = self.textView.text ?? ""
         if stringToUpload.length < 1 {
             PPHUD.showHUDFromTop("不支持保存空文件")

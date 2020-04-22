@@ -67,23 +67,29 @@ class PPWebDAVConfigViewController: PPBaseViewController {
             PPHUD.showHUDText(message: "请填写备注", view: self.view)
             return
         }
-        PPUserInfo.shared.save(cell1.serverNameTF.text!, forKey: "PPWebDAVServerURL")
-        PPUserInfo.shared.save(cell2.serverNameTF.text!, forKey: "PPWebDAVUserName")
-        PPUserInfo.shared.save(cell3.serverNameTF.text!, forKey: "PPWebDAVPassword")
-        PPUserInfo.shared.save(cell4.serverNameTF.text!, forKey: "PPWebDAVRemark")
+        var serverList : Array = PPUserInfo.shared.pp_Setting["PPWebDAVServerList"] as? Array<Any> ?? []
+//        if serverList == nil {
+//            serverList = []
+//        }
+            let newServer = ["PPWebDAVServerURL":cell1.serverNameTF.text!,
+            "PPWebDAVUserName":cell2.serverNameTF.text!,
+            "PPWebDAVPassword":cell3.serverNameTF.text!,
+            "PPWebDAVRemark":cell4.serverNameTF.text!]
+            serverList.append(newServer)
+            PPUserInfo.shared.pp_Setting["PPWebDAVServerList"] = serverList
+        
+        
+//        PPUserInfo.shared.save(cell1.serverNameTF.text!, forKey: "PPWebDAVServerURL")
+//        PPUserInfo.shared.save(cell2.serverNameTF.text!, forKey: "PPWebDAVUserName")
+//        PPUserInfo.shared.save(cell3.serverNameTF.text!, forKey: "PPWebDAVPassword")
+//        PPUserInfo.shared.save(cell4.serverNameTF.text!, forKey: "PPWebDAVRemark")
         PPHUD.showHUDText(message: "保存成功", view: self.view)
         PPUserInfo.shared.initConfig()
-
+        DispatchQueue.main.asyncAfter(deadline: .now()+1) {
+            self.navigationController?.popViewController(animated: true)
+        }
     }
 
-    /*
-    // MARK: - Navigation
-
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        // Get the new view controller using segue.destination.
-        // Pass the selected object to the new view controller.
-    }
-    */
+    
 
 }

@@ -9,7 +9,7 @@
 import UIKit
 import WebKit.WKWebView
 
-class PPWebViewController: UIViewController,WKUIDelegate,WKNavigationDelegate,WKScriptMessageHandler {
+class PPWebViewController: UIViewController,WKUIDelegate,WKNavigationDelegate,WKScriptMessageHandler, UIScrollViewDelegate {
     
     
     var wkWebView: WKWebView!
@@ -20,8 +20,8 @@ class PPWebViewController: UIViewController,WKUIDelegate,WKNavigationDelegate,WK
     var markdownStr: String?
     ///预加载的Bundle里的自定义js
     var jsNameInBundle: String?
-    
-    
+    var lasOffsetY : CGFloat = 0.0
+    var bottomView : PPWebViewBottomToolbar!
     override func viewDidLoad() {
         super.viewDidLoad()
         self.view.backgroundColor = UIColor.white
@@ -53,7 +53,7 @@ class PPWebViewController: UIViewController,WKUIDelegate,WKNavigationDelegate,WK
         wkWebView.uiDelegate = self
         //    self.bridge = [WebViewJavascriptBridge bridgeForWebView:self.wkWebView];
         //    [self.bridge setWebViewDelegate:self];
-        let bottomView = PPWebViewBottomToolbar()
+        bottomView = PPWebViewBottomToolbar()
 //        bottomView.backgroundColor = UIColor.green
         self.view.addSubview(bottomView)
         bottomView.snp.makeConstraints { (make) in
@@ -61,8 +61,10 @@ class PPWebViewController: UIViewController,WKUIDelegate,WKNavigationDelegate,WK
             make.bottom.equalTo(self.pp_safeLayoutGuideBottom())
             make.height.equalTo(44)
         }
+        bottomView.isHidden = true
         bottomView.backButton.addTarget(self, action: #selector(goBack), for: .touchUpInside)
         bottomView.forwardButton.addTarget(self, action: #selector(goForward), for: .touchUpInside)
+        self.wkWebView.scrollView.delegate = self
         self.wkWebView.scrollView.addRefreshHeader {
             self.loadURL()
         }
@@ -90,8 +92,7 @@ class PPWebViewController: UIViewController,WKUIDelegate,WKNavigationDelegate,WK
     }
     
 
-    //MARK: Delegate
-    //WKNavigationDelegate
+    //MARK: WKNavigationDelegate
     
     func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction, decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
         //    decisionHandler(WKNavigationActionPolicyAllow);
@@ -109,6 +110,12 @@ class PPWebViewController: UIViewController,WKUIDelegate,WKNavigationDelegate,WK
 //
 //        }
         self.wkWebView.scrollView.endRefreshing()
+        debugPrint(self.wkWebView.canGoBack)
+        self.bottomView.backButton.isEnabled = self.wkWebView.canGoBack
+        self.bottomView.forwardButton.isEnabled = self.wkWebView.canGoForward
+        if self.bottomView.backButton.isEnabled || self.bottomView.forwardButton.isEnabled {
+            self.bottomView.isHidden = false
+        }
         webView.evaluateJavaScript("document.title") { (result:Any?, error) in
             self.title = result as? String
         }
@@ -132,7 +139,23 @@ class PPWebViewController: UIViewController,WKUIDelegate,WKNavigationDelegate,WK
     func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
         
     }
-
+    //MARK:UIScrollViewDelegate
+//    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+//    }
+    func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {
+        let offsetY = scrollView.contentOffset.y
+        //    debugPrint("SSSSS\(offsetY)")
+        lasOffsetY = offsetY
+    }
+    func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
+        let offsetY = scrollView.contentOffset.y
+        if lasOffsetY < offsetY {
+            self.bottomView.isHidden = true
+        }
+        else {
+            self.bottomView.isHidden = false
+        }
+    }
     //MARK:Private
     func shouldStartLoad(with request: URLRequest) -> Bool {
         //获取当前调转页面的URL
@@ -147,14 +170,14 @@ class PPWebViewController: UIViewController,WKUIDelegate,WKNavigationDelegate,WK
             })
             return false
         }
-        else if let markdown = self.markdownStr {
-            if markdown.length>1 && !urlString.hasPrefix("file://") {
-                let vc = PPWebViewController()
-                vc.urlString = urlString
-                navigationController?.pushViewController(vc, animated: true)
-                return false
-            }
-        }
+//        else if let markdown = self.markdownStr {
+//            if markdown.length>1 && !urlString.hasPrefix("file://") {
+//                let vc = PPWebViewController()
+//                vc.urlString = urlString
+//                navigationController?.pushViewController(vc, animated: true)
+//                return false
+//            }
+//        }
         else if urlString.contains("www.zhihu.com") {
             let path = Bundle.main.path(forResource: "zhihu_unfold", ofType:"js")
             var consolejs: String? = ""
@@ -194,6 +217,7 @@ class PPWebViewBottomToolbar: UIView {
         self.addSubview(backButton)
         backButton.frame = CGRect.init(x: 40, y: 0, width: 40, height: 40)
         backButton.setTitle("⬅️", for: UIControl.State.normal)
+        backButton.setTitle("", for: .disabled)
         backButton.snp.makeConstraints { (make) in
             make.top.equalTo(self)
             make.right.equalTo(self.snp.centerX).offset(-5)
@@ -205,6 +229,7 @@ class PPWebViewBottomToolbar: UIView {
         self.addSubview(forwardButton)
         forwardButton.frame = CGRect.init(x: 40, y: 0, width: 40, height: 40)
         forwardButton.setTitle("➡️", for: UIControl.State.normal)
+        forwardButton.setTitle("", for: .disabled)
         forwardButton.snp.makeConstraints { (make) in
             make.top.equalTo(self)
             make.left.equalTo(self.snp.centerX).offset(5)

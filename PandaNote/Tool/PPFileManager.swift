@@ -15,7 +15,7 @@ class PPFileManager: NSObject,FileProviderDelegate {
     let apiCacheDir = "WebDAV/api_"
     
     static let sharedManager = PPFileManager()
-    var webdav: WebDAVFileProvider!
+    var webdav: WebDAVFileProvider?//未配置服务器地址时刷新可能为空
 
     override init() {
         super.init()
@@ -24,6 +24,11 @@ class PPFileManager: NSObject,FileProviderDelegate {
     
     func getWebDAVFileList(path:String,completionHander:@escaping(_ data:[AnyObject],_ isFromCache:Bool,_ error:Error?) -> Void) {
         PPDiskCache.shared.fetchData(key: apiCacheDir + path.pp_md5, failure: { (error) in
+            if error != nil {
+                DispatchQueue.main.async {
+                    completionHander([],false,error)
+                }
+            }
             self.getWebDAVData(path: path, completionHander: completionHander)
         }) { (data) in
             do {
@@ -39,7 +44,7 @@ class PPFileManager: NSObject,FileProviderDelegate {
         }
     }
     func getWebDAVData(path:String,completionHander:@escaping(_ data:[AnyObject],_ isFromCache:Bool,_ error:Error?) -> Void) {
-        webdav.contentsOfDirectory(path: path, completionHandler: {
+        webdav?.contentsOfDirectory(path: path, completionHandler: {
             contents, error in
             var archieveArray = [PPFileObject]()
             var dirCount = 0
@@ -59,7 +64,7 @@ class PPFileManager: NSObject,FileProviderDelegate {
             }
             do {
                 let encoded = try JSONEncoder().encode(archieveArray)
-                debugPrint(String(decoding: encoded, as: UTF8.self))
+//                debugPrint(String(decoding: encoded, as: UTF8.self))
                 PPDiskCache.shared.setData(encoded, key: self.apiCacheDir + path.pp_md5)
             } catch {
                 debugPrint(error.localizedDescription)
@@ -81,7 +86,7 @@ class PPFileManager: NSObject,FileProviderDelegate {
     }
 
     func downloadFileFromWebDAV(path: String, cacheFile: Bool? = false,completionHandler: @escaping ((_ contents: Data?, _ isFromCache:Bool, _ error: Error?) -> Void)) {
-        PPFileManager.sharedManager.webdav.contents(path: path, completionHandler: { (data, error) in
+        PPFileManager.sharedManager.webdav?.contents(path: path, completionHandler: { (data, error) in
             if error == nil {
                 DispatchQueue.main.async {
                     completionHandler(data,false,error)
@@ -107,7 +112,7 @@ class PPFileManager: NSObject,FileProviderDelegate {
     func loadFileFromWebDAV(path: String, downloadIfExist:Bool?=false ,completionHandler: @escaping ((_ contents: Data?, _ isFromCache:Bool, _ error: Error?) -> Void)) {
         PPDiskCache.shared.fetchData(key: path, failure: { (error) in
             
-            PPFileManager.sharedManager.webdav.contents(path: path, completionHandler: { (data, error) in
+            PPFileManager.sharedManager.webdav?.contents(path: path, completionHandler: { (data, error) in
                 if error == nil {
                     DispatchQueue.main.async {
                         PPDiskCache.shared.setDataSynchronously(data, key: path)
@@ -132,7 +137,7 @@ class PPFileManager: NSObject,FileProviderDelegate {
 
     }
     func uploadFileViaWebDAV(path: String, contents: Data?, completionHander:@escaping(_ error:Error?) -> Void) {
-        PPFileManager.sharedManager.webdav.writeContents(path: path, contents: contents, completionHandler: { (error) in
+        PPFileManager.sharedManager.webdav?.writeContents(path: path, contents: contents, completionHandler: { (error) in
             if error == nil {
                 DispatchQueue.main.async {
                     completionHander(error)
@@ -148,31 +153,30 @@ class PPFileManager: NSObject,FileProviderDelegate {
     
     //MARK:初始化webDAV设置
     func initWebDAVSetting() -> Void {
-        let userInfo = PPUserInfo.shared
-        var server:URL
-        if let serverTMP: URL = URL(string: userInfo.webDAVServerURL ?? "") {
-            server = serverTMP
-        }
-        else {
-            return
-        }
+        guard let webDAVInfoArray:Array = PPUserInfo.shared.pp_Setting["PPWebDAVServerList"] as? Array<Any> else { return }
+        
+        let webDAVInfo:[String:String] = webDAVInfoArray[0] as! [String : String]
+        let webDAVServerURL = webDAVInfo["PPWebDAVServerURL"] ?? ""
+        let webDAVUserName:String = webDAVInfo["PPWebDAVUserName"] ?? ""
+        let webDAVPassword:String = webDAVInfo["PPWebDAVPassword"] ?? ""
+//        let webDAVRemark:String = webDAVInfo["PPWebDAVRemark"] ?? ""
+        PPUserInfo.shared.webDAVServerURL = webDAVServerURL
+        let server = URL(string: webDAVServerURL)!
+
         
         
-        //        let server: URL = URL(string: userInfo.webDAVServerURL!) ?? NSURL.init() as URL
-        //        }
-        //        if let server: URL = URL(string: PPUserInfo.shared.webDAVServerURL ?? "") {
 //        let cache = URLCache(memoryCapacity: 5 * 1024 * 1024, diskCapacity: 3 * 1024 * 1024, diskPath: nil)
 //        URLCache.shared = cache
-        let userCredential = URLCredential(user: userInfo.webDAVUserName ?? "",
-                                           password: userInfo.webDAVPassword ?? "",
+        let userCredential = URLCredential(user: webDAVUserName ,
+                                           password: webDAVPassword ,
                                            persistence: .permanent)
         //            let protectionSpace = URLProtectionSpace.init(host: "dav.jianguoyun.com", port: 443, protocol: "https", realm: "Restricted", authenticationMethod: NSURLAuthenticationMethodHTTPBasic)
         //            URLCredentialStorage.shared.setDefaultCredential(userCredential, for: protectionSpace)
         webdav = WebDAVFileProvider(baseURL: server, credential: userCredential)!//不能加`,cache: URLCache.shared`,要不然无法保存markdown！！！
 //        webdav.useCache = true
-        webdav.delegate = self
+        webdav?.delegate = self
         //注意：不修改鉴权方式，会导致每次请求两次，一次401失败，一次带token成功
-        webdav.credentialType = URLRequest.AuthenticationType.basic
+        webdav?.credentialType = URLRequest.AuthenticationType.basic
 //        self.perform(Selector(("getData:")), with: self, afterDelay: 1)
         
     }
