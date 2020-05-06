@@ -34,12 +34,13 @@ class PPHomeViewController: PPBaseViewController,UITextFieldDelegate,UITableView
     @IBOutlet weak var uploadProgressView: UIProgressView?
     @IBOutlet weak var downloadProgressView: UIProgressView?
     //MARK:Life Cycle
-//    override func viewDidAppear(_ animated: Bool) {
-//        super.viewDidAppear(animated)
+//    convenience init() {
+//        self.init(nibName:nil, bundle:nil)
 //    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-        let userInfo = PPUserInfo.shared
+        
         self.title = String(self.pathStr.split(separator: "/").last ?? "")
         
         tableView = UITableView.init(frame: self.view.bounds)
@@ -66,21 +67,16 @@ class PPHomeViewController: PPBaseViewController,UITextFieldDelegate,UITableView
         renameTF.returnKeyType = UIReturnKeyType.done
         bottomView.addSubview(renameTF)
         
-        
+        if self.navigationController?.viewControllers.count ?? 0 > 1 {
         self.navigationItem.rightBarButtonItem = UIBarButtonItem.init(title: "更多", style: UIBarButtonItem.Style.plain, target: self, action: #selector(moreAction))
-        
-        
-        
-        if (userInfo.webDAVServerURL.length > 1) {
-            getWebDAVData()
         }
+        
+        
+        
+        getWebDAVData()
         self.tableView.addRefreshHeader {
-            if (PPUserInfo.shared.webDAVServerURL.length < 1) {
-                PPFileManager.sharedManager.initWebDAVSetting()
-            }
             self.getWebDAVData()
         }
-//        let server: URL = URL(string: PPUserInfoManager.shared().webDAVServerURL)
     }
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return dataSource.count
@@ -122,9 +118,6 @@ class PPHomeViewController: PPBaseViewController,UITextFieldDelegate,UITableView
             }
         }
         else if (fileObj.name.hasSuffix("mp3")||fileObj.name.lowercased().hasSuffix("mp4"))  {
-//            let vc = PlayerViewController()
-//            vc.filePathStr = fileObj.path
-//            self.navigationController?.pushViewController(vc, animated: true)
             PPFileManager.sharedManager.loadFileFromWebDAV(path: fileObj.path, downloadIfExist: false) { (contents,isFromCache, error) in
                 
                 if error != nil {
@@ -132,7 +125,6 @@ class PPHomeViewController: PPBaseViewController,UITextFieldDelegate,UITableView
                 }
                 let vc = PlayerViewController()
                 vc.localFileURL = URL(fileURLWithPath: PPDiskCache.shared.path + fileObj.path)
-//                vc.filePathStr = fileObj.path
                 self.navigationController?.pushViewController(vc, animated: true)
             }
         }
@@ -425,6 +417,9 @@ class PPHomeViewController: PPBaseViewController,UITextFieldDelegate,UITableView
     
     //MARK:获取文件列表
     func getWebDAVData() -> Void {
+        if (PPUserInfo.shared.webDAVServerURL.length < 1) {
+            PPFileManager.sharedManager.initWebDAVSetting()
+        }
         PPFileManager.sharedManager.getWebDAVFileList(path: self.pathStr) { (contents,isFromCache, error) in
             if error != nil {
                 PPHUD.showHUDFromTop("加载失败，请配置服务器", isError: true)

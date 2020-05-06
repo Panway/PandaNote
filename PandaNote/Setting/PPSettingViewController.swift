@@ -18,7 +18,7 @@ class PPSettingViewController: PPBaseViewController,UITableViewDataSource,UITabl
         self.view.addSubview(tableView)
         tableView.dataSource = self
         tableView.delegate = self
-        self.tableView.register(PPSettingCell.self, forCellReuseIdentifier: kPPBaseTableViewCellCellIdentifier)
+        self.tableView.register(PPSettingCell.self, forCellReuseIdentifier: kPPBaseCellIdentifier)
         tableView.tableFooterView = UIView.init()
         
         
@@ -38,7 +38,7 @@ class PPSettingViewController: PPBaseViewController,UITableViewDataSource,UITabl
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: kPPBaseTableViewCellCellIdentifier, for: indexPath) as! PPSettingCell
+        let cell = tableView.dequeueReusableCell(withIdentifier: kPPBaseCellIdentifier, for: indexPath) as! PPSettingCell
         cell.titleLB.text = self.dataSource[indexPath.row]
         let obj = self.dataSource[indexPath.row]
         if obj == "自动保存" {

@@ -24,12 +24,21 @@ class PPWebViewController: UIViewController,WKUIDelegate,WKNavigationDelegate,WK
     var bottomView : PPWebViewBottomToolbar!
     override func viewDidLoad() {
         super.viewDidLoad()
+        DispatchQueue.main.asyncAfter(deadline: .now()+22) {
+            let types = WKWebsiteDataStore.allWebsiteDataTypes()
+            let sinceDate = Date(timeIntervalSince1970: 0)
+            WKWebsiteDataStore.default().removeData(ofTypes: types, modifiedSince: sinceDate) {
+                debugPrint("清除record完成")
+            }
+        }
         self.view.backgroundColor = UIColor.white
         if let xd_titleStr = self.xd_titleStr {
             self.title = xd_titleStr
         }
         let config = WKWebViewConfiguration()
         config.userContentController.add(self, name: "pppanda")
+        //不允许任何web资源写入文件系统
+//        config.websiteDataStore = WKWebsiteDataStore.nonPersistent()
         //预加载的Bundle里的自定义js
         if let jsNameInBundle = self.jsNameInBundle {
             let path = Bundle.main.path(forResource: jsNameInBundle, ofType: nil, inDirectory: "web")
@@ -69,6 +78,7 @@ class PPWebViewController: UIViewController,WKUIDelegate,WKNavigationDelegate,WK
             self.loadURL()
         }
         loadURL()
+        self.navigationItem.rightBarButtonItem = UIBarButtonItem.init(title: "更多", style: UIBarButtonItem.Style.plain, target: self, action: #selector(moreAction))
     }
     func loadURL() {
         if let urlString = self.urlString {
@@ -96,6 +106,7 @@ class PPWebViewController: UIViewController,WKUIDelegate,WKNavigationDelegate,WK
     
     func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction, decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
         //    decisionHandler(WKNavigationActionPolicyAllow);
+        PPUserInfo.shared.pp_WebViewResource.removeAll()//资源提取
         let should = shouldStartLoad(with: navigationAction.request)
         if should {
             decisionHandler(WKNavigationActionPolicy.allow)
@@ -156,6 +167,26 @@ class PPWebViewController: UIViewController,WKUIDelegate,WKNavigationDelegate,WK
             self.bottomView.isHidden = false
         }
     }
+    //MARK:Public
+    //清除所有的WebView缓存数据 /Library/Webkit/com.xxx.xxx/WebsiteData 和/Library/Caches/com.xxx.xxx/Webkit
+    //可以调用fetchDataRecordsOfTypes方法获取浏览记录,然后通过对域名的筛选决定如何删除缓存
+    class func clearAllWebsiteData() {
+        let types = WKWebsiteDataStore.allWebsiteDataTypes()
+        let sinceDate = Date(timeIntervalSince1970: 0)
+        WKWebsiteDataStore.default().removeData(ofTypes: types, modifiedSince: sinceDate) {
+            debugPrint("清除record完成")
+        }
+    }
+    class func registerHTTPScheme() {
+        for scheme in ["http", "https"] {
+            URLProtocol.self.wk_registerScheme(scheme)
+        }
+    }
+    class func unregisterHTTPScheme() {
+        for scheme in ["http", "https"] {
+            URLProtocol.self.wk_registerScheme(scheme)
+        }
+    }
     //MARK:Private
     func shouldStartLoad(with request: URLRequest) -> Bool {
         //获取当前调转页面的URL
@@ -201,6 +232,19 @@ class PPWebViewController: UIViewController,WKUIDelegate,WKNavigationDelegate,WK
             self.wkWebView.goForward()
         }
     }
+    @objc func moreAction()  {
+        PPAlertAction.showSheet(withTitle: "更多操作", message: nil, cancelButtonTitle: "取消", destructiveButtonTitle: nil, otherButtonTitle: ["提取本页面资源","2"]) { (index) in
+            debugPrint(index)
+            if index == 1 {
+                let vc = PPWebFileViewController()
+                self.navigationController?.pushViewController(vc, animated: true)
+            }
+            else if index == 2 {
+                
+            }
+        }
+    }
+
 }
 
 

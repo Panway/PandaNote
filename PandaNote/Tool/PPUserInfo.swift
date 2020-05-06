@@ -21,6 +21,7 @@ class PPUserInfo: NSObject {
     /// 本地时间相对于格林尼治时间的差距
     var pp_timezoneOffset:Int!
     var pp_JSONConfig:String!
+    var pp_WebViewResource = [String]()///< webview资源
 //    var pp_Setting:Dictionary<String, Any>!
     /// The repeat count.
     public var pp_Setting:Dictionary<String, Any> = [:] {

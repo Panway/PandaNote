@@ -24,7 +24,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // Override point for customization after application launch.
         PPUserInfo.shared.initConfig()
         window = UIWindow(frame: UIScreen.main.bounds)
-        window?.rootViewController = UINavigationController(rootViewController: PPTabBarController())
+        window?.rootViewController = PPTabBarController.ppTabBar()
         window?.makeKeyAndVisible()
         PPShareManager.initWeixinAppId("wx37af47629351b5c0", appKey: "")
         #if DEBUG
@@ -46,6 +46,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         
         sqliteManager.operation(process: sql, value: [])
 //        test()
+        URLProtocol.registerClass(PPReplacingImageURLProtocol.self)
+        PPWebViewController.registerHTTPScheme()
         return true
     }
 

@@ -9,6 +9,8 @@
 /* Begin PBXBuildFile section */
 		60011E40243A29E000BC6458 /* PlayerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60011E3E243A29E000BC6458 /* PlayerViewController.swift */; };
 		60011E41243A29E000BC6458 /* PlayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60011E3F243A29E000BC6458 /* PlayerView.swift */; };
+		6001B6342461A82400A40593 /* PPWebFileViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6001B6332461A82400A40593 /* PPWebFileViewController.swift */; };
+		6001B6362462BF3400A40593 /* UIImage+PPTool.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6001B6352462BF3400A40593 /* UIImage+PPTool.swift */; };
 		60249C69231D1DB100223F1A /* vue.css in Resources */ = {isa = PBXBuildFile; fileRef = 60249C68231D1DB100223F1A /* vue.css */; };
 		604FFA4623DDE77B0059BBC9 /* PPPriceTagViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 604FFA4523DDE77B0059BBC9 /* PPPriceTagViewController.swift */; };
 		604FFA4823DDEBCF0059BBC9 /* PPScanViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 604FFA4723DDEBCF0059BBC9 /* PPScanViewController.swift */; };
@@ -30,6 +32,8 @@
 		6056027D23178B03000809CD /* XDFastTableView.m in Sources */ = {isa = PBXBuildFile; fileRef = 6056027C23178B03000809CD /* XDFastTableView.m */; };
 		6056027F23178C2C000809CD /* PPTextFieldTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6056027E23178C2C000809CD /* PPTextFieldTableViewCell.swift */; };
 		605602822317A0DB000809CD /* PPHUD.swift in Sources */ = {isa = PBXBuildFile; fileRef = 605602812317A0DB000809CD /* PPHUD.swift */; };
+		607150CA2459ABE900E2FDEB /* NSURLProtocol+WebKitSupport.m in Sources */ = {isa = PBXBuildFile; fileRef = 607150C82459ABE900E2FDEB /* NSURLProtocol+WebKitSupport.m */; };
+		607150CC2459ACF300E2FDEB /* PPWebResourceProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 607150CB2459ACF200E2FDEB /* PPWebResourceProtocol.swift */; };
 		60766BCB23F2A81700D24CEA /* PPSettingCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60766BCA23F2A81700D24CEA /* PPSettingCell.swift */; };
 		6080D3AB233315B900F582B1 /* CacheSerializer+Panda.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6080D3AA233315B900F582B1 /* CacheSerializer+Panda.swift */; };
 		6080D3F323333C3500F582B1 /* PPFileManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6080D3F223333C3500F582B1 /* PPFileManager.swift */; };
@@ -80,6 +84,8 @@
 		5FC90B3D04D0AB60B2DBFED0 /* Pods-PandaNoteUITests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-PandaNoteUITests.release.xcconfig"; path = "Target Support Files/Pods-PandaNoteUITests/Pods-PandaNoteUITests.release.xcconfig"; sourceTree = "<group>"; };
 		60011E3E243A29E000BC6458 /* PlayerViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PlayerViewController.swift; sourceTree = "<group>"; };
 		60011E3F243A29E000BC6458 /* PlayerView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PlayerView.swift; sourceTree = "<group>"; };
+		6001B6332461A82400A40593 /* PPWebFileViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPWebFileViewController.swift; sourceTree = "<group>"; };
+		6001B6352462BF3400A40593 /* UIImage+PPTool.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIImage+PPTool.swift"; sourceTree = "<group>"; };
 		60249C68231D1DB100223F1A /* vue.css */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.css; path = vue.css; sourceTree = "<group>"; };
 		604FFA4523DDE77B0059BBC9 /* PPPriceTagViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PPPriceTagViewController.swift; path = ../WebDAV/Controller/PPPriceTagViewController.swift; sourceTree = "<group>"; };
 		604FFA4723DDEBCF0059BBC9 /* PPScanViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPScanViewController.swift; sourceTree = "<group>"; };
@@ -107,6 +113,9 @@
 		6056027C23178B03000809CD /* XDFastTableView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XDFastTableView.m; sourceTree = "<group>"; };
 		6056027E23178C2C000809CD /* PPTextFieldTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPTextFieldTableViewCell.swift; sourceTree = "<group>"; };
 		605602812317A0DB000809CD /* PPHUD.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPHUD.swift; sourceTree = "<group>"; };
+		607150C82459ABE900E2FDEB /* NSURLProtocol+WebKitSupport.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSURLProtocol+WebKitSupport.m"; sourceTree = "<group>"; };
+		607150C92459ABE900E2FDEB /* NSURLProtocol+WebKitSupport.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSURLProtocol+WebKitSupport.h"; sourceTree = "<group>"; };
+		607150CB2459ACF200E2FDEB /* PPWebResourceProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPWebResourceProtocol.swift; sourceTree = "<group>"; };
 		60766BCA23F2A81700D24CEA /* PPSettingCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPSettingCell.swift; sourceTree = "<group>"; };
 		6080D3AA233315B900F582B1 /* CacheSerializer+Panda.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CacheSerializer+Panda.swift"; sourceTree = "<group>"; };
 		6080D3F223333C3500F582B1 /* PPFileManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPFileManager.swift; sourceTree = "<group>"; };
@@ -223,6 +232,7 @@
 				60560229231772AE000809CD /* PPMarkdownViewController.swift */,
 				6056027923178017000809CD /* PPWebDAVConfigViewController.swift */,
 				60E61425243DC16E00630B4B /* PPPDFViewController.swift */,
+				6001B6332461A82400A40593 /* PPWebFileViewController.swift */,
 			);
 			path = Controller;
 			sourceTree = "<group>";
@@ -281,6 +291,7 @@
 				60D27790238AA52C00D8BA0C /* PPCacheManager.swift */,
 				60AA154D23DEBAC900A68FAA /* PPSQLiteManager.swift */,
 				60A4CD322447325700367DA7 /* PPPasteboardTool.swift */,
+				607150CB2459ACF200E2FDEB /* PPWebResourceProtocol.swift */,
 				6056024D231778FF000809CD /* RefreshControl */,
 			);
 			path = Tool;
@@ -293,10 +304,13 @@
 				6080D3AA233315B900F582B1 /* CacheSerializer+Panda.swift */,
 				60A1F8DB24388C98009E390C /* ViewController+PPTool.swift */,
 				60E61421243DAF2800630B4B /* UIColor+PPTool.swift */,
+				6001B6352462BF3400A40593 /* UIImage+PPTool.swift */,
 				60560223231771E2000809CD /* UIScrollView+XDTool.h */,
 				60560222231771E2000809CD /* UIScrollView+XDTool.m */,
 				60A1F8D624349580009E390C /* NSAttributedString+Markdown.h */,
 				60A1F8D724349581009E390C /* NSAttributedString+Markdown.m */,
+				607150C92459ABE900E2FDEB /* NSURLProtocol+WebKitSupport.h */,
+				607150C82459ABE900E2FDEB /* NSURLProtocol+WebKitSupport.m */,
 				60560221231771E2000809CD /* PandaNote-Bridging-Header.h */,
 			);
 			path = CategoryAndExtension;
@@ -661,9 +675,12 @@
 				60E6141E243DA27700630B4B /* PPBaseView.swift in Sources */,
 				6056024A231778B5000809CD /* PPFileListTableViewCell.swift in Sources */,
 				604FFA4823DDEBCF0059BBC9 /* PPScanViewController.swift in Sources */,
+				6001B6342461A82400A40593 /* PPWebFileViewController.swift in Sources */,
+				607150CC2459ACF300E2FDEB /* PPWebResourceProtocol.swift in Sources */,
 				605602822317A0DB000809CD /* PPHUD.swift in Sources */,
 				605601FA23176FAE000809CD /* PPTabBarController.swift in Sources */,
 				6056015723166F99000809CD /* PPBaseViewController.swift in Sources */,
+				607150CA2459ABE900E2FDEB /* NSURLProtocol+WebKitSupport.m in Sources */,
 				60AA154E23DEBAC900A68FAA /* PPSQLiteManager.swift in Sources */,
 				60560253231778FF000809CD /* XDRefreshAutoStateFooter.m in Sources */,
 				6056027A23178017000809CD /* PPWebDAVConfigViewController.swift in Sources */,
@@ -671,6 +688,7 @@
 				6056024823177736000809CD /* PPSettingViewController.swift in Sources */,
 				60560224231771E2000809CD /* UIScrollView+XDTool.m in Sources */,
 				605602562317796F000809CD /* XDWebViewController.m in Sources */,
+				6001B6362462BF3400A40593 /* UIImage+PPTool.swift in Sources */,
 				60E61420243DA3B500630B4B /* PPBottomToolBarView.swift in Sources */,
 				6056027F23178C2C000809CD /* PPTextFieldTableViewCell.swift in Sources */,
 				60E61422243DAF2800630B4B /* UIColor+PPTool.swift in Sources */,

@@ -10,7 +10,7 @@ import UIKit
 import SnapKit
 
 
-let kPPBaseTableViewCellCellIdentifier = "kPPBaseTableViewCellCellIdentifier"
+let kPPBaseCellIdentifier = "kPPBaseCellIdentifier"
 
 class PPBaseTableViewCell: UITableViewCell {
     
