@@ -46,7 +46,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         
         sqliteManager.operation(process: sql, value: [])
 //        test()
-        URLProtocol.registerClass(PPReplacingImageURLProtocol.self)
+        URLProtocol.registerClass(PPReplacingImageURLProtocol.self)//当你的应用程序启动时，它会向 URL 加载系统注册协议。 这意味着它将有机会处理每个发送到 URL加载系统的请求。
         PPWebViewController.registerHTTPScheme()
         return true
     }

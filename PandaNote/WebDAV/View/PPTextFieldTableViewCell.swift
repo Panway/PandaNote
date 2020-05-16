@@ -46,6 +46,7 @@ class PPTextFieldTableViewCell: PandaFastTableViewCell {
         }
         else if self.serverNameTF.placeholder == "密码" {
             self.serverNameTF.text = ""
+            self.serverNameTF.isSecureTextEntry = true
         }
         else if self.serverNameTF.placeholder == "备注" {
             self.serverNameTF.text = "坚果云"

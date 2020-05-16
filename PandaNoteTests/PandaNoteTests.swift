@@ -7,7 +7,7 @@
 //
 
 import XCTest
-@testable import PandaNote
+//@testable import PandaNote
 
 class PandaNoteTests: XCTestCase {
 

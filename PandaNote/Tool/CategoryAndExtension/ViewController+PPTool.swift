@@ -10,7 +10,26 @@ import Foundation
 import SnapKit
 
 extension UIViewController {
+    class func topViewControllerForKeyWindow() -> UIViewController? {
+        let rootVC = UIApplication.shared.delegate?.window??.rootViewController
+        var resultVC = self._topViewController(rootVC)
+        while ((resultVC?.presentedViewController) != nil) {
+            resultVC = self._topViewController(resultVC?.presentedViewController)
+        }
+        return resultVC
+    }
     
+    fileprivate class func _topViewController(_ vc: UIViewController?) -> UIViewController? {
+        if (vc is UINavigationController) {
+            return self._topViewController((vc as? UINavigationController)?.topViewController)
+        } else if (vc is UITabBarController) {
+            return self._topViewController((vc as? UITabBarController)?.selectedViewController)
+        } else {
+            return vc
+        }
+    }
+
+    //MARK: Layout
     func pp_safeLayoutGuideTop() -> ConstraintItem {
         if #available(iOS 11.0, *){
             //iOS11用安全区来当上边界

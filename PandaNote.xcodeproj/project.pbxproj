@@ -11,6 +11,7 @@
 		60011E41243A29E000BC6458 /* PlayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60011E3F243A29E000BC6458 /* PlayerView.swift */; };
 		6001B6342461A82400A40593 /* PPWebFileViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6001B6332461A82400A40593 /* PPWebFileViewController.swift */; };
 		6001B6362462BF3400A40593 /* UIImage+PPTool.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6001B6352462BF3400A40593 /* UIImage+PPTool.swift */; };
+		6001B63C2465804100A40593 /* MyURLProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6001B63B2465804000A40593 /* MyURLProtocol.swift */; };
 		60249C69231D1DB100223F1A /* vue.css in Resources */ = {isa = PBXBuildFile; fileRef = 60249C68231D1DB100223F1A /* vue.css */; };
 		604FFA4623DDE77B0059BBC9 /* PPPriceTagViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 604FFA4523DDE77B0059BBC9 /* PPPriceTagViewController.swift */; };
 		604FFA4823DDEBCF0059BBC9 /* PPScanViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 604FFA4723DDEBCF0059BBC9 /* PPScanViewController.swift */; };
@@ -86,6 +87,7 @@
 		60011E3F243A29E000BC6458 /* PlayerView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PlayerView.swift; sourceTree = "<group>"; };
 		6001B6332461A82400A40593 /* PPWebFileViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPWebFileViewController.swift; sourceTree = "<group>"; };
 		6001B6352462BF3400A40593 /* UIImage+PPTool.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIImage+PPTool.swift"; sourceTree = "<group>"; };
+		6001B63B2465804000A40593 /* MyURLProtocol.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MyURLProtocol.swift; sourceTree = "<group>"; };
 		60249C68231D1DB100223F1A /* vue.css */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.css; path = vue.css; sourceTree = "<group>"; };
 		604FFA4523DDE77B0059BBC9 /* PPPriceTagViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PPPriceTagViewController.swift; path = ../WebDAV/Controller/PPPriceTagViewController.swift; sourceTree = "<group>"; };
 		604FFA4723DDEBCF0059BBC9 /* PPScanViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPScanViewController.swift; sourceTree = "<group>"; };
@@ -291,6 +293,7 @@
 				60D27790238AA52C00D8BA0C /* PPCacheManager.swift */,
 				60AA154D23DEBAC900A68FAA /* PPSQLiteManager.swift */,
 				60A4CD322447325700367DA7 /* PPPasteboardTool.swift */,
+				6001B63B2465804000A40593 /* MyURLProtocol.swift */,
 				607150CB2459ACF200E2FDEB /* PPWebResourceProtocol.swift */,
 				6056024D231778FF000809CD /* RefreshControl */,
 			);
@@ -667,6 +670,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				6056015523166CC5000809CD /* PPUserInfo.swift in Sources */,
+				6001B63C2465804100A40593 /* MyURLProtocol.swift in Sources */,
 				6080D3AB233315B900F582B1 /* CacheSerializer+Panda.swift in Sources */,
 				6056024C231778D0000809CD /* String+Extention.swift in Sources */,
 				60A1F8DA24388391009E390C /* PPWebViewController.swift in Sources */,
