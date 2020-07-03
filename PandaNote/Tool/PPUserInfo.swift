@@ -93,6 +93,12 @@ class PPUserInfo: NSObject {
     class func saveObject(_ objcet:Any) {
         
     }
+    ///共享的网页，提高网页显示速度
+    lazy var webViewController: PPWebViewController = {
+        let webVC = PPWebViewController()
+        webVC.urlString = "https://tophub.today"
+        return webVC
+    }()
 //    func save(_ value: String, forKey defaultName: String) -> Void {
 //        UserDefaults.standard.setValue(value, forKey: defaultName)
 //

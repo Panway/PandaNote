@@ -174,7 +174,38 @@
   </script>
   <script>
   //滚动时保存滚动位置
-  
+  window.addEventListener('scroll', function(e) {
+    // document.documentElement.scrollTop || document.body.scrollTop
+    
+    last_known_scroll_position = window.scrollY;
+    // console.log('last_known_scroll_position=' + last_known_scroll_position);
+    if (!localStorage.pageoffsetY)
+      localStorage.pageoffsetY = 0;
+
+    localStorage.pageoffsetY = parseInt(last_known_scroll_position);
+    
+  });
+
+  // ？？？
+  window.addEventListener("beforeunload", function(e) {
+    console.log('unload')
+    var confirmationMessage = "\o/";
+    alert('offset')
+    (e || window.event).returnValue = confirmationMessage; //Gecko + IE
+    return confirmationMessage; //Webkit, Safari, Chrome
+  });
+
+  //onload时，取出并滚动到上次保存位置
+  window.onload = function() {
+    // console.log('window.onload')
+    var offset = localStorage.getItem("pageoffsetY");
+    // alert(offset)
+    //https://stackoverflow.com/a/28488360
+    setTimeout(function(){ 
+    document.documentElement.scrollTop = document.body.scrollTop = parseInt(offset);
+  }, 100);
+
+  };
   </script>
 </body>
 

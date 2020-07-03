@@ -25,13 +25,7 @@ class PPWebViewController: UIViewController,WKUIDelegate,WKNavigationDelegate,WK
     var bottomView : PPWebViewBottomToolbar!
     override func viewDidLoad() {
         super.viewDidLoad()
-        DispatchQueue.main.asyncAfter(deadline: .now()+22) {
-            let types = WKWebsiteDataStore.allWebsiteDataTypes()
-            let sinceDate = Date(timeIntervalSince1970: 0)
-            WKWebsiteDataStore.default().removeData(ofTypes: types, modifiedSince: sinceDate) {
-                debugPrint("清除record完成")
-            }
-        }
+        
         self.view.backgroundColor = UIColor.white
         if let xd_titleStr = self.xd_titleStr {
             self.title = xd_titleStr
@@ -80,6 +74,12 @@ class PPWebViewController: UIViewController,WKUIDelegate,WKNavigationDelegate,WK
         }
         loadURL()
         self.navigationItem.rightBarButtonItem = UIBarButtonItem.init(title: "更多", style: UIBarButtonItem.Style.plain, target: self, action: #selector(moreAction))
+    }
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        if let _ = self.markdownStr {
+            self.wkWebView.reload()
+        }
     }
     func loadURL() {
         if let urlString = self.urlString {

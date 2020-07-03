@@ -67,7 +67,7 @@ class PPMarkdownViewController: PPBaseViewController,UITextViewDelegate {
 
         let keyboardDown = UIButton.init(frame: CGRect.init(x: self.view.frame.width-25, y: 0, width: 25, height: 25))
         keyboardDown.setImage(UIImage.init(named: "btn_down"), for: UIControl.State.normal)
-        keyboardDown.addTarget(self, action: #selector(doneButtonAction(sender:)), for: UIControl.Event.touchUpInside)
+        keyboardDown.addTarget(self, action: #selector(keyboardDownAction(sender:)), for: UIControl.Event.touchUpInside)
         keyboardDown.backgroundColor = UIColor.white
         inputAccessoryView.addSubview(keyboardDown)
         
@@ -137,9 +137,9 @@ class PPMarkdownViewController: PPBaseViewController,UITextViewDelegate {
     }
     @objc func button1Action(sender:UIButton)  {
         self.textView.resignFirstResponder()
-        let webVC = PPWebViewController.init()
+        let webVC = PPUserInfo.shared.webViewController//PPWebViewController()
         var path = ""
-        if self.filePathStr.hasSuffix("html") {
+        if self.filePathStr.hasSuffix("html") {//HTML文件直接显示
             path = PPDiskCache.shared.path + self.filePathStr
             webVC.fileURLStr = path
         }
@@ -174,7 +174,7 @@ class PPMarkdownViewController: PPBaseViewController,UITextViewDelegate {
         
 
     }
-    @objc func doneButtonAction(sender:UIButton)  {
+    @objc func keyboardDownAction(sender:UIButton)  {
         //保存
         self.textView.resignFirstResponder()
     }
