@@ -24,9 +24,11 @@ class PPFileManager: NSObject,FileProviderDelegate {
     
     func getWebDAVFileList(path:String,completionHander:@escaping(_ data:[AnyObject],_ isFromCache:Bool,_ error:Error?) -> Void) {
         PPDiskCache.shared.fetchData(key: apiCacheDir + path.pp_md5, failure: { (error) in
-            if error != nil {
-                DispatchQueue.main.async {
-                    completionHander([],false,error)
+            if let error = error {
+                if (error as NSError).code != NSFileReadNoSuchFileError {
+                    DispatchQueue.main.async {
+                        completionHander([],false,error)
+                    }
                 }
             }
             self.getWebDAVData(path: path, completionHander: completionHander)

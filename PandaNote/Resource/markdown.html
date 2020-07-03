@@ -25,20 +25,156 @@
     padding: 1em;
   }
 
+  #content code {
+    /*小块区域左右滑动，整体禁止左右滑动*/
+    overflow-x: auto;
+    display: block;
+  }
+
   div[class*=language-] {
     position: relative;
     background-color: #282c34;
     border-radius: 6px;
   }
+
+  .sidebar-button {
+    display: block;
+    width: 1.25rem;
+    height: 1.25rem;
+    position: absolute;
+    padding: .6rem;
+    top: .6rem;
+    left: 1rem;
+    cursor: pointer;
+    /*我加的*/
+    z-index: 15;
+  }
+
+  .sidebar-button .icon {
+    display: block;
+    width: 1.25rem;
+    height: 1.25rem;
+  }
+
+  #ppTOCContent {
+    position: fixed;
+    top: 44px;
+    bottom: 0;
+    overflow-y: auto;
+    background-color: #fff;
+    font-size: 13px;
+    z-index: 10;
+    /*width: 16.4rem;*/
+    /*这三行是抄github的*/
+    border: 1px solid #e1e4e8;
+    border-radius: 6px;
+    box-shadow: 0 8px 24px rgba(149, 157, 165, .2);
+  }
   </style>
 </head>
 
 <body>
-  <div id="content"></div>
-  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <div class="sidebar-button" onclick="displayTOC()" style="position: fixed;">
+    <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" role="img" viewBox="0 0 448 512" class="icon">
+      <path fill="currentColor" d="M436 124H12c-6.627 0-12-5.373-12-12V80c0-6.627 5.373-12 12-12h424c6.627 0 12 5.373 12 12v32c0 6.627-5.373 12-12 12zm0 160H12c-6.627 0-12-5.373-12-12v-32c0-6.627 5.373-12 12-12h424c6.627 0 12 5.373 12 12v32c0 6.627-5.373 12-12 12zm0 160H12c-6.627 0-12-5.373-12-12v-32c0-6.627 5.373-12 12-12h424c6.627 0 12 5.373 12 12v32c0 6.627-5.373 12-12 12z"></path>
+    </svg>
+  </div>
+  <div id="ppTOCContent"></div>
+  <div id="content">
+  </div>
+  <!-- <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script> -->
+  <!-- <script src="https://cdn.jsdelivr.net/npm/marked@1.1.0/lib/marked.min.js"></script> -->
+  <script src="https://cdn.jsdelivr.net/npm/marked@1.1.0/lib/marked.js"></script>
   <script>
-  document.getElementById('content').innerHTML =
-    marked('# 正在渲染中...\n\nRendered by **marked**.');
+  var showTOC = false;
+  let string = '渲染中...\n\nRendered by **marked**.'
+  // document.getElementById('content').innerHTML = marked(string);
+
+
+
+  var toc = [];
+  var renderer = (function() {
+    var renderer = new marked.Renderer();
+    renderer.heading = function(text, level, raw) {
+      var anchor = this.options.headerPrefix + raw.toLowerCase().replace(/[^\w\\u4e00-\\u9fa5]]+/g, '-');
+      toc.push({
+        anchor: anchor,
+        level: level,
+        text: text
+      });
+      return '<h' +
+        level +
+        ' id="' +
+        anchor +
+        '">' +
+        text +
+        '</h' +
+        level +
+        '>\n';
+      // '>\n' +
+      // '<a href="#table-of-contents">TOC👆<a>\n';
+    };
+    return renderer;
+  })();
+
+  marked.setOptions({
+    renderer: renderer,
+    gfm: true,
+    tables: true,
+    breaks: false,
+    pedantic: false,
+    sanitize: true,
+    smartLists: true,
+    smartypants: false
+  });
+
+  function build(coll, k, level, ctx) {
+    if (k >= coll.length || coll[k].level <= level) { return k; }
+    var node = coll[k];
+    ctx.push("<li><a href='#" + node.anchor + "'>" + node.text + "</a>");
+    k++;
+    var childCtx = [];
+    k = build(coll, k, node.level, childCtx);
+    if (childCtx.length > 0) {
+      ctx.push("<ul>");
+      childCtx.forEach(function(idm) {
+        ctx.push(idm);
+      });
+      ctx.push("</ul>");
+    }
+    ctx.push("</li>");
+    k = build(coll, k, level, ctx);
+    return k;
+  }
+
+  function generateTOC(string) {
+    // var html = marked(string);
+    var ctx = [];
+    ctx.push('<h3 id="table-of-contents">目录TOC</h3>\n<ul>');
+    build(toc, 0, 0, ctx);
+    ctx.push("</ul>");
+    let final = ctx.join("");
+    return final;
+  }
+  var tocHTML = generateTOC(string);
+
+  function displayTOC() {
+    console.log('显示目录');
+    if (!showTOC) {
+      document.querySelector('#ppTOCContent').innerHTML = generateTOC(string);
+      showTOC = true
+    } else {
+      showTOC = false
+      document.querySelector('#ppTOCContent').innerHTML = "";
+    }
+  }
+  // document.querySelector('#content').innerHTML = final;
+  // document.getElementById('content').innerHTML = generateTOC(string) + marked(string);
+  document.getElementById('content').innerHTML = marked(string);
+  </script>
+  <script>
+  //滚动时保存滚动位置
+  
   </script>
 </body>
 

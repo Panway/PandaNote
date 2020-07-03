@@ -5,6 +5,7 @@
 //  Created by panwei on 2020/4/4.
 //  Copyright © 2020 WeirdPan. All rights reserved.
 //  bug:https://stackoverflow.com/a/28676439/4493393
+//  WKWebView时序图  https://www.jianshu.com/p/55f5ac1ab817
 
 import UIKit
 import WebKit.WKWebView
@@ -188,10 +189,12 @@ class PPWebViewController: UIViewController,WKUIDelegate,WKNavigationDelegate,WK
         }
     }
     //MARK:Private
+    //MARK: 是否可以跳转
     func shouldStartLoad(with request: URLRequest) -> Bool {
         //获取当前调转页面的URL
 //        let requestUrl = request?.url?.absoluteString
         guard let urlString = request.url?.absoluteString else { return false }
+        debugPrint("shouldStartLoad==\(urlString)")
         //    NSLog(@"requestUrl==%@",requestUrl);
         //    NSString *actionName = [requestUrl lastPathComponent];
         //    actionName = [actionName stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
@@ -220,6 +223,16 @@ class PPWebViewController: UIViewController,WKUIDelegate,WKNavigationDelegate,WK
                 
             })
         }
+        else if urlString.contains("m.weibo.cn") && !self.urlString!.contains("m.weibo.cn") {
+            let vc = PPWebViewController()
+            vc.urlString = urlString
+            navigationController?.pushViewController(vc, animated: true)
+            return false
+        }
+        else if urlString.contains("markdown.html#") {
+            //跳转到目录的某个位置后隐藏
+            wkWebView.evaluateJavaScript("displayTOC()", completionHandler: nil)
+        }
         return true
     }
     @objc func goBack() {
@@ -233,14 +246,14 @@ class PPWebViewController: UIViewController,WKUIDelegate,WKNavigationDelegate,WK
         }
     }
     @objc func moreAction()  {
-        PPAlertAction.showSheet(withTitle: "更多操作", message: nil, cancelButtonTitle: "取消", destructiveButtonTitle: nil, otherButtonTitle: ["提取本页面资源","2"]) { (index) in
+        PPAlertAction.showSheet(withTitle: "更多操作", message: nil, cancelButtonTitle: "取消", destructiveButtonTitle: nil, otherButtonTitle: ["提取本页面资源","刷新"]) { (index) in
             debugPrint(index)
             if index == 1 {
                 let vc = PPWebFileViewController()
                 self.navigationController?.pushViewController(vc, animated: true)
             }
             else if index == 2 {
-                
+                self.wkWebView.reload()
             }
         }
     }
