@@ -38,7 +38,7 @@ class PPPasteboardTool: NSObject {
         }
         
         debugPrint(urlString)
-        Alamofire.request(urlString).responseJSON { response in
+        AF.request(urlString).responseJSON { response in
             if let data = response.data, let utf8Text = String(data: data, encoding: .utf8) {
 //                debugPrint("Data: \(utf8Text)")
                 var title = PPPasteboardTool.getHTMLTitle(html: utf8Text,originURL: urlString)

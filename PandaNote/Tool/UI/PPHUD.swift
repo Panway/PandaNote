@@ -84,11 +84,11 @@ class PPHUD: NSObject {
         //        waitHUb?.label.text = "Loading...";
         waitHUb?.label.textColor = UIColor.white;
         waitHUb?.bezelView.color = UIColor.black
-        if #available(iOS 9.0, *) {
-            UIActivityIndicatorView.appearance(whenContainedInInstancesOf: [MBProgressHUD.self]).color = UIColor.white
-        } else {
-            waitHUb?.activityIndicatorColor = UIColor.white
-        }
+//        if #available(iOS 9.0, *) {
+        UIActivityIndicatorView.appearance(whenContainedInInstancesOf: [MBProgressHUD.self]).color = UIColor.white
+//        } else {
+//            waitHUb?.activityIndicatorColor = UIColor.white
+//        }
         view.addSubview(waitHUb!)
         waitHUb?.show(animated: true)
     }

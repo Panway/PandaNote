@@ -16,7 +16,7 @@ import UIKit
 */
 private var playerViewControllerKVOContext = 0
 
-class PlayerViewController: UIViewController {
+class PlayerViewController: PPBaseViewController {
     // MARK: Properties
     
     // Attempt load and test these asset keys before playing.
@@ -389,7 +389,7 @@ class PlayerViewController: UIViewController {
         bottomView.backgroundColor = UIColor.white
         bottomView.snp.makeConstraints { (make) in
             make.leading.trailing.equalToSuperview()
-            make.bottom.equalToSuperview()
+            make.bottom.equalTo(self.pp_safeLayoutGuideBottom())
             make.height.equalTo(100)
         }
         

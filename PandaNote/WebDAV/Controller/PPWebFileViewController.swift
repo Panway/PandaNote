@@ -67,17 +67,17 @@ class PPWebFileViewController: PPBaseViewController,UITableViewDataSource,UITabl
             PPAlertAction.showAlert(withTitle: "是否保存到相册", msg: "", buttonsStatement: ["好的👌","不了"]) { (index) in
                 if (index == 0) {
                     
-                    let destination: DownloadRequest.DownloadFileDestination = { _, _ in
+                    let destination: DownloadRequest.Destination = { _, _ in
                         let documentsURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
                         let fileURL = documentsURL.appendingPathComponent(currentDate+".mp4")
                         
                         return (fileURL, [.removePreviousFile, .createIntermediateDirectories])
                     }
                     
-                    Alamofire.download(fileObj.path, to: destination).response { response in
-                        print(response)
+                    AF.download(fileObj.path, to: destination).response { response in
+                        debugPrint(response)
                         
-                        if response.error == nil, let imagePath = response.destinationURL {
+                        if response.error == nil, let imagePath = response.fileURL {
                             PHPhotoLibrary.shared().performChanges({
                                 PHAssetChangeRequest.creationRequestForAssetFromVideo(atFileURL: imagePath)
                             }) { saved, error in

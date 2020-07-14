@@ -2,7 +2,7 @@
 #source 'https://cdn.jsdelivr.net/cocoa/'
 source 'https://cdn.cocoapods.org/'
 # Uncomment the next line to define a global platform for your project
-platform :ios, 9.0
+platform :ios, 10.0
 #禁止所有来自CocoaPods的警告
 inhibit_all_warnings!
 
@@ -50,7 +50,7 @@ target 'PandaNote' do
   pod 'FMDB'
   pod 'IQKeyboardManager'
   #滴滴开源的应用内调试工具，界面比较美观 https://github.com/didi/DoraemonKit
-  pod 'DoraemonKit/Core', '~> 1.2.0', :configurations => ['Debug']
+  pod 'DoraemonKit/Core', '~> 3.0.2', :configurations => ['Debug']
 #  pod 'Weibo_SDK', :git => 'https://github.com/sinaweibosdk/weibo_ios_sdk.git'
   # XML解析 https://github.com/tid-kijyun/Kanna
   pod 'Kanna', '~> 5.2.2'

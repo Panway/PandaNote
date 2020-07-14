@@ -383,7 +383,7 @@ static inline BOOL isiPhoneXSeries() {
 #if PP_USE_WECHAT_SHARE
 
 + (void)initWeixinAppId:(NSString *)appId appKey:(NSString *)appKey {
-    [WXApi registerApp:appId];
+    [WXApi registerApp:appId universalLink:@""];
     //    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(5 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
     //        //构造SendAuthReq结构体
     //        SendAuthReq* req = [[SendAuthReq alloc]init];
@@ -408,7 +408,9 @@ static inline BOOL isiPhoneXSeries() {
     req.bText = NO;
     req.message = message;
     req.scene = type == PPSharePlatformWeixinSession?WXSceneSession:WXSceneTimeline;
-    [WXApi sendReq:req];
+    [WXApi sendReq:req completion:^(BOOL success) {
+        
+    }];
 }
 - (void)weixinShareImage:(UIImage *)image type:(NSInteger)type {
     NSData *imageData = UIImageJPEGRepresentation(image, 0.9);
@@ -424,7 +426,9 @@ static inline BOOL isiPhoneXSeries() {
     req.bText = NO;
     req.message = message;
     req.scene = type == PPSharePlatformWeixinSession?WXSceneSession:WXSceneTimeline;
-    [WXApi sendReq:req];
+    [WXApi sendReq:req completion:^(BOOL success) {
+        
+    }];
 }
 - (void)weixinShareEmoji:(NSData *)emoji type:(NSInteger)type {
     WXMediaMessage *message = [WXMediaMessage message];
@@ -441,7 +445,9 @@ static inline BOOL isiPhoneXSeries() {
     req.message = message;
     req.scene = type == PPSharePlatformWeixinSession?WXSceneSession:WXSceneTimeline;
     
-    [WXApi sendReq:req];
+    [WXApi sendReq:req completion:^(BOOL success) {
+        
+    }];
 }
 -(void)onReq:(BaseReq*)req {
     // just leave it here, WeChat will not call our app

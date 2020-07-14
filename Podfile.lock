@@ -1,12 +1,8 @@
 PODS:
-  - Alamofire (4.9.1)
-  - BSBacktraceLogger (0.0.1)
-  - DoraemonKit/Core (1.2.4):
-    - BSBacktraceLogger
-    - fishhook
-  - Down (0.8.5)
+  - Alamofire (5.2.1)
+  - DoraemonKit/Core (3.0.2)
+  - Down (0.9.3)
   - FilesProvider (0.26.0)
-  - fishhook (0.2)
   - FLEX (3.0.0)
   - FMDB (2.7.5):
     - FMDB/standard (= 2.7.5)
@@ -14,8 +10,8 @@ PODS:
   - IQKeyboardManager (6.5.5)
   - Kanna (5.2.2)
   - Kingfisher (4.10.1)
-  - MBProgressHUD (1.1.0)
-  - MJRefresh (3.2.0)
+  - MBProgressHUD (1.2.0)
+  - MJRefresh (3.4.3)
   - PINCache (2.3)
   - PPiOSKit/CommomViews (0.0.1)
   - PPiOSKit/CrashCatcher (0.0.1):
@@ -23,19 +19,19 @@ PODS:
   - PPiOSKit/PPAlertAction (0.0.1)
   - PPiOSKit/RuntimeTool (0.0.1)
   - PPiOSKit/SwipePopGesture (0.0.1)
-  - PryntTrimmerView (3.0.0)
+  - PryntTrimmerView (4.0.0)
   - SKPhotoBrowser (6.1.0)
   - SnapKit (4.2.0)
-  - SteviaLayout (4.4.4)
-  - WechatOpenSDK (1.8.4)
-  - YPImagePicker (4.0.0):
-    - PryntTrimmerView (~> 3.0.0)
-    - SteviaLayout (~> 4.4.1)
+  - SteviaLayout (4.7.3)
+  - WechatOpenSDK (1.8.7.1)
+  - YPImagePicker (4.2.1):
+    - PryntTrimmerView (~> 4.0.0)
+    - SteviaLayout (~> 4.7.3)
   - YYText (1.0.7)
 
 DEPENDENCIES:
-  - Alamofire
-  - DoraemonKit/Core (~> 1.2.0)
+  - Alamofire (~> 5.0)
+  - DoraemonKit/Core (~> 3.0.2)
   - Down
   - FilesProvider
   - FLEX (~> 3.0.0)
@@ -59,9 +55,9 @@ DEPENDENCIES:
 SPEC REPOS:
   https://cdn.cocoapods.org/:
     - Alamofire
-    - BSBacktraceLogger
     - DoraemonKit
-    - fishhook
+    - Down
+    - FilesProvider
     - FLEX
     - FMDB
     - IQKeyboardManager
@@ -72,14 +68,11 @@ SPEC REPOS:
     - PINCache
     - PryntTrimmerView
     - SKPhotoBrowser
+    - SnapKit
     - SteviaLayout
     - WechatOpenSDK
     - YPImagePicker
     - YYText
-  https://github.com/CocoaPods/Specs.git:
-    - Down
-    - FilesProvider
-    - SnapKit
 
 EXTERNAL SOURCES:
   PPiOSKit:
@@ -87,33 +80,31 @@ EXTERNAL SOURCES:
 
 CHECKOUT OPTIONS:
   PPiOSKit:
-    :commit: 64ce6840a60059298410bf8f77a2bca881496012
+    :commit: 075a44ad1167bcf6b209ebd4f96f53a4b23d8ff2
     :git: https://github.com/Panway/CodeSnipetCollection.git
 
 SPEC CHECKSUMS:
-  Alamofire: 85e8a02c69d6020a0d734f6054870d7ecb75cf18
-  BSBacktraceLogger: 06b983ee93a9f87d957960e9c73d660d5966b447
-  DoraemonKit: 5328b8b57cd900f6a24f7f66051346dd4409437d
-  Down: d2554b5006cf45bdb2bc6f19d91ca4fec6a45b31
+  Alamofire: e911732990610fe89af59ac0077f923d72dc3dfd
+  DoraemonKit: 8587e7a9aae0773dfc96707d2369d89d2a21b3d2
+  Down: 4553b984236807e384fa0ef7c7e360ef9f7c425d
   FilesProvider: 2a8ae17d8b9c23a6feadb1308ee638fa31d21065
-  fishhook: ea19933abfe8f2f52c55fd8b6e2718467d3ebc89
   FLEX: d66c759bce0f6ebbbf472c742380874d846f2883
   FMDB: 2ce00b547f966261cd18927a3ddb07cb6f3db82a
   IQKeyboardManager: 3a8b9e603f8b0eeaf5f096a1f2b2cfcf121992ef
   Kanna: 2c4eddaaa4bfb9a1ed19e53c0b3d42ef02838046
   Kingfisher: c148cd7b47ebde9989f6bc7c27dcaa79d81279a0
-  MBProgressHUD: e7baa36a220447d8aeb12769bf0585582f3866d9
-  MJRefresh: ed450d6eb9d3346a2cb033ab7eb6de090aeef437
+  MBProgressHUD: 3ee5efcc380f6a79a7cc9b363dd669c5e1ae7406
+  MJRefresh: 53e3e3219f204425ee6d3e62e8733d3295944cd6
   PINCache: ce36ed282031b92fc7733ffe831f474ff80fddc2
-  PPiOSKit: 7975ddae232a3c3081bea86c872320026ad116f5
-  PryntTrimmerView: 53ac64053c7ce63cb3e27f54090f52da0734891d
+  PPiOSKit: 9f049cf7ff47cefda7f747a404254ee1a5ae7f85
+  PryntTrimmerView: 67e67573ffd4c073f1308effa66aefd0cfa667a0
   SKPhotoBrowser: 343de95d89dc7913763c5dda243cc6e606e4a168
   SnapKit: fe8a619752f3f27075cc9a90244d75c6c3f27e2a
-  SteviaLayout: 523469269059f2c6da02820bb2ff28a5fe0780aa
-  WechatOpenSDK: 9b721089507c895d05f997408c30bb6e6f5f9b60
-  YPImagePicker: 8039f89ad79281545fa868486f32d9bf5d65ede1
+  SteviaLayout: c2ecdcff57d44e38fd2f65e54ad52aeae28ca0c4
+  WechatOpenSDK: 6a4d1436c15b3b5fe2a0bd383f3046010186da44
+  YPImagePicker: 3b88ca0c50134af2856c48c481572c98a8b8b65b
   YYText: 5c461d709e24d55a182d1441c41dc639a18a4849
 
-PODFILE CHECKSUM: cf178d8d412ae2efe236207a7786210904b46c4b
+PODFILE CHECKSUM: e6b8c8a2a89473b661440782c20bea4efe43f2d6
 
-COCOAPODS: 1.9.1
+COCOAPODS: 1.9.3

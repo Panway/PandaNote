@@ -20,7 +20,7 @@ class PPTabBarController: UITabBarController {
         barAppearance.titleTextAttributes = [NSAttributedString.Key.foregroundColor: UIColor.darkGray]
         
         let destination = DownloadRequest.suggestedDownloadDestination(for: .documentDirectory)
-        Alamofire.download("https://is3-ssl.mzstatic.com/image/thumb/Purple113/v4/06/c7/6a/06c76afc-7276-8cf6-be38-4cb30cebb8e3/AppIcon-1-0-0-1x_U007emarketing-0-0-0-7-0-0-85-220.png/246x0w.png", to: destination)
+        let _ = AF.download("https://is3-ssl.mzstatic.com/image/thumb/Purple113/v4/06/c7/6a/06c76afc-7276-8cf6-be38-4cb30cebb8e3/AppIcon-1-0-0-1x_U007emarketing-0-0-0-7-0-0-85-220.png/246x0w.png", to: destination)
     }
     class func ppTabBar() -> PPTabBarController {
         let recentsVC = PPHomeViewController()
