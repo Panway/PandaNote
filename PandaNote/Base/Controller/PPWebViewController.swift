@@ -246,7 +246,7 @@ class PPWebViewController: UIViewController,WKUIDelegate,WKNavigationDelegate,WK
         }
     }
     @objc func moreAction()  {
-        PPAlertAction.showSheet(withTitle: "更多操作", message: nil, cancelButtonTitle: "取消", destructiveButtonTitle: nil, otherButtonTitle: ["提取本页面资源","刷新"]) { (index) in
+        PPAlertAction.showSheet(withTitle: "更多操作", message: nil, cancelButtonTitle: "取消", destructiveButtonTitle: nil, otherButtonTitle: ["提取本页面资源","刷新","复制当前网址URL"]) { (index) in
             debugPrint(index)
             if index == 1 {
                 let vc = PPWebFileViewController()
@@ -254,6 +254,9 @@ class PPWebViewController: UIViewController,WKUIDelegate,WKNavigationDelegate,WK
             }
             else if index == 2 {
                 self.wkWebView.reload()
+            }
+            else if index == 3 {
+                UIPasteboard.general.string = self.wkWebView.url?.absoluteString
             }
         }
     }

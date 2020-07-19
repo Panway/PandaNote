@@ -41,7 +41,6 @@ class PPHomeViewController: PPBaseViewController,UITextFieldDelegate,UITableView
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        self.title = String(self.pathStr.split(separator: "/").last ?? "")
         
         tableView = UITableView.init(frame: self.view.bounds)
         self.view.addSubview(tableView)
@@ -74,6 +73,8 @@ class PPHomeViewController: PPBaseViewController,UITextFieldDelegate,UITableView
         
         
         getWebDAVData()
+        self.title = String(self.pathStr.split(separator: "/").last ?? "" + PPUserInfo.shared.webDAVRemark)
+
         self.tableView.addRefreshHeader {
             self.getWebDAVData()
         }

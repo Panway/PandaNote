@@ -155,14 +155,15 @@ class PPFileManager: NSObject,FileProviderDelegate {
     
     //MARK:初始化webDAV设置
     func initWebDAVSetting() -> Void {
-        guard let webDAVInfoArray:Array = PPUserInfo.shared.pp_Setting["PPWebDAVServerList"] as? Array<Any> else { return }
+        guard let webDAVInfoArray = PPUserInfo.shared.pp_Setting["PPWebDAVServerList"] as? Array<Any> else { return }
         
         let webDAVInfo:[String:String] = webDAVInfoArray[0] as! [String : String]
         let webDAVServerURL = webDAVInfo["PPWebDAVServerURL"] ?? ""
         let webDAVUserName:String = webDAVInfo["PPWebDAVUserName"] ?? ""
         let webDAVPassword:String = webDAVInfo["PPWebDAVPassword"] ?? ""
-//        let webDAVRemark:String = webDAVInfo["PPWebDAVRemark"] ?? ""
+        let webDAVRemark:String = webDAVInfo["PPWebDAVRemark"] ?? ""
         PPUserInfo.shared.webDAVServerURL = webDAVServerURL
+        PPUserInfo.shared.webDAVRemark = webDAVRemark
         let server = URL(string: webDAVServerURL)!
 
         

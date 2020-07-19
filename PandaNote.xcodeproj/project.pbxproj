@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		1EDF714D24C3F1E600A12EC9 /* NSRegularExpression+PPTool.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1EDF714C24C3F1E600A12EC9 /* NSRegularExpression+PPTool.swift */; };
 		60011E40243A29E000BC6458 /* PlayerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60011E3E243A29E000BC6458 /* PlayerViewController.swift */; };
 		60011E41243A29E000BC6458 /* PlayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60011E3F243A29E000BC6458 /* PlayerView.swift */; };
 		6001B6342461A82400A40593 /* PPWebFileViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6001B6332461A82400A40593 /* PPWebFileViewController.swift */; };
@@ -81,6 +82,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		1EDF714C24C3F1E600A12EC9 /* NSRegularExpression+PPTool.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NSRegularExpression+PPTool.swift"; sourceTree = "<group>"; };
 		445FC61B8328A513BADB990E /* Pods-PandaNoteTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-PandaNoteTests.release.xcconfig"; path = "Target Support Files/Pods-PandaNoteTests/Pods-PandaNoteTests.release.xcconfig"; sourceTree = "<group>"; };
 		5FC90B3D04D0AB60B2DBFED0 /* Pods-PandaNoteUITests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-PandaNoteUITests.release.xcconfig"; path = "Target Support Files/Pods-PandaNoteUITests/Pods-PandaNoteUITests.release.xcconfig"; sourceTree = "<group>"; };
 		60011E3E243A29E000BC6458 /* PlayerViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PlayerViewController.swift; sourceTree = "<group>"; };
@@ -308,6 +310,7 @@
 				60A1F8DB24388C98009E390C /* ViewController+PPTool.swift */,
 				60E61421243DAF2800630B4B /* UIColor+PPTool.swift */,
 				6001B6352462BF3400A40593 /* UIImage+PPTool.swift */,
+				1EDF714C24C3F1E600A12EC9 /* NSRegularExpression+PPTool.swift */,
 				60560223231771E2000809CD /* UIScrollView+XDTool.h */,
 				60560222231771E2000809CD /* UIScrollView+XDTool.m */,
 				60A1F8D624349580009E390C /* NSAttributedString+Markdown.h */,
@@ -697,6 +700,7 @@
 				6056027F23178C2C000809CD /* PPTextFieldTableViewCell.swift in Sources */,
 				60E61422243DAF2800630B4B /* UIColor+PPTool.swift in Sources */,
 				60D27791238AA52C00D8BA0C /* PPCacheManager.swift in Sources */,
+				1EDF714D24C3F1E600A12EC9 /* NSRegularExpression+PPTool.swift in Sources */,
 				60F5691322F2ADC700874994 /* ViewController.swift in Sources */,
 				60F5D042232751D8004E988B /* PPShareManager.m in Sources */,
 				60011E41243A29E000BC6458 /* PlayerView.swift in Sources */,

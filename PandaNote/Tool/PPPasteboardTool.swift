@@ -13,6 +13,7 @@ import Alamofire
 class PPPasteboardTool: NSObject {
     class func getMoreInfomationOfURL() {
 //        UIPasteboard.general.string = "https://www.smzdm.com/p/20405394/?send_by=3716913905&from=other"
+        UIPasteboard.general.string = "https://m.weibo.cn/detail/4528143413288297"
         guard let input = UIPasteboard.general.string else { return }
         if let lastPasteContent : String = PPUserInfo.shared.pp_Setting["PPLastPasteBoardContent"] as? String {
             if input == lastPasteContent {
@@ -33,13 +34,18 @@ class PPPasteboardTool: NSObject {
         }
         
         //去掉URL问号后面的参数
-        if urlString.contains("smzdm.com") {
+        if urlString.contains("smzdm.com") || urlString.contains("okjike.com") {
             urlString = urlString.split(string: "?")[0]
         }
         
         debugPrint(urlString)
         AF.request(urlString).responseJSON { response in
             if let data = response.data, let utf8Text = String(data: data, encoding: .utf8) {
+                try? data.write(to: URL(fileURLWithPath: "/Users/topcheer/Downloads/PP_TEST.html", isDirectory: false))
+                #if DEBUG
+                try? data.write(to: URL(fileURLWithPath: "/Users/topcheer/Downloads/PP_TEST.html", isDirectory: false))
+                #endif
+                
 //                debugPrint("Data: \(utf8Text)")
                 var title = PPPasteboardTool.getHTMLTitle(html: utf8Text,originURL: urlString)
                 title = title + "\n" + urlString
@@ -57,7 +63,6 @@ class PPPasteboardTool: NSObject {
                         let vc = PPWebViewController()
                         vc.urlString = urlString
                         UIViewController.topViewControllerForKeyWindow()?.navigationController?.pushViewController(vc, animated: true)
-
                     }
                 }
                 
@@ -68,10 +73,33 @@ class PPPasteboardTool: NSObject {
     }
     
     class func getHTMLTitle(html:String,originURL:String) -> String {
+        var result = ""
         if let doc = try? HTML(html: html, encoding: .utf8) {
-            return doc.title ?? ""
+            if originURL.contains("mp.weixin.qq.com/s") {
+                for link in doc.css("#activity-name") {
+                    result = link.text ?? ""
+                }
+            }
+            else {
+                result = doc.title ?? ""
+            }
         }
-        return ""
+        result = result.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
+        result = result.replacingOccurrences(of: "\n", with: "")
+        if originURL.contains("b23.tv") || originURL.contains("bilibili.com") {
+            result = result.split(string: "_哔哩哔哩").first ?? ""
+        }
+        if originURL.contains("m.weibo.cn") {
+            let results = html.pp_matches(for: "text(.*),\n")
+            guard let res0 = results.first else { return "" }
+            var weiboString = res0.replacingOccurrences(of: "text\": \"", with: "")
+            weiboString = weiboString.replacingOccurrences(of: "\",\n", with: "")
+            if let doc = try? HTML(html: weiboString, encoding: .utf8) {
+                result = doc.text ?? ""
+            }
+        }
+        debugPrint(result)
+        return result
     }
     
     
