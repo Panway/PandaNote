@@ -13,7 +13,6 @@ import Alamofire
 class PPPasteboardTool: NSObject {
     class func getMoreInfomationOfURL() {
 //        UIPasteboard.general.string = "https://www.smzdm.com/p/20405394/?send_by=3716913905&from=other"
-        UIPasteboard.general.string = "https://m.weibo.cn/detail/4528143413288297"
         guard let input = UIPasteboard.general.string else { return }
         if let lastPasteContent : String = PPUserInfo.shared.pp_Setting["PPLastPasteBoardContent"] as? String {
             if input == lastPasteContent {
@@ -41,9 +40,9 @@ class PPPasteboardTool: NSObject {
         debugPrint(urlString)
         AF.request(urlString).responseJSON { response in
             if let data = response.data, let utf8Text = String(data: data, encoding: .utf8) {
-                try? data.write(to: URL(fileURLWithPath: "/Users/topcheer/Downloads/PP_TEST.html", isDirectory: false))
+                //保存到自己电脑某个位置查看（topcheer是当前电脑用户名）
                 #if DEBUG
-                try? data.write(to: URL(fileURLWithPath: "/Users/topcheer/Downloads/PP_TEST.html", isDirectory: false))
+                try? data.write(to: URL(fileURLWithPath: "/Users/pan/Downloads/PP_TEST.html", isDirectory: false))
                 #endif
                 
 //                debugPrint("Data: \(utf8Text)")
