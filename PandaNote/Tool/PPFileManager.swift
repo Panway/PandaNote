@@ -149,9 +149,23 @@ class PPFileManager: NSObject,FileProviderDelegate {
                 debugPrint(error ?? "uploadFileViaWebDAV Error")
             }
         })
-
-        
     }
+    func moveFileViaWebDAV(pathOld: String, pathNew: String, completionHander:@escaping(_ error:Error?) -> Void) {
+        PPFileManager.sharedManager.webdav?.moveItem(path:pathOld, to: pathNew, completionHandler: { (error) in
+            if error == nil {
+                DispatchQueue.main.async {
+                    completionHander(error)
+                }
+            }
+            else {
+                DispatchQueue.main.async {
+                    PPHUD.showHUDFromTop("移动文件",isError: true)
+                }
+            }
+            
+        })
+    }
+    
     
     //MARK:初始化webDAV设置
     func initWebDAVSetting() -> Void {

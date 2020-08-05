@@ -8,7 +8,11 @@
 
 import UIKit
 import MBProgressHUD
-
+extension UILabel {
+    func getSize(constrainedWidth: CGFloat) -> CGSize {
+        return systemLayoutSizeFitting(CGSize(width: constrainedWidth, height: UIView.layoutFittingCompressedSize.height), withHorizontalFittingPriority: .required, verticalFittingPriority: .fittingSizeLevel)
+    }
+}
 class PPHUD: NSObject {
     
     static let shareInstance = PPHUD()
@@ -34,14 +38,16 @@ class PPHUD: NSObject {
         aLB.textColor = UIColor.white
         aLB.textAlignment = NSTextAlignment.center
         aLB.numberOfLines = 3
-        aLB.font = UIFont.systemFont(ofSize: 20)
+        aLB.font = UIFont.systemFont(ofSize: 22)
         aLB.text = "\(message)"
         aLB.tag = 9999
         aLB.layer.masksToBounds = true
         aLB.layer.cornerRadius = 8
         UIApplication.shared.keyWindow?.addSubview(aLB)
+        let size = aLB.getSize(constrainedWidth: width - 160)
+        
         UIView.animate(withDuration: 0.8, delay: 0, usingSpringWithDamping: 0.76, initialSpringVelocity: 25, options: [.curveEaseInOut,.beginFromCurrentState], animations: {
-            aLB.frame = CGRect(x: 80, y: lastViewExist ? 84 : 44.0, width: width-160, height: 40.0)
+            aLB.frame = CGRect(x: 80, y: lastViewExist ? 84 : 44.0, width: width-140, height: size.height + 20)
 
         }) { (complete) in
             

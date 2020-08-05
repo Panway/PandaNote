@@ -28,9 +28,6 @@ class PPHomeViewController: PPBaseViewController,UITextFieldDelegate,UITableView
 //    let documentsProvider = LocalFileProvider()
     var currentImageURL: String?
     var photoBrowser: SKPhotoBrowser!
-    var bottomView:UIButton!
-    var renameTF:UITextField!
-    var currentRenameText:String?
     @IBOutlet weak var uploadProgressView: UIProgressView?
     @IBOutlet weak var downloadProgressView: UIProgressView?
     //MARK:Life Cycle
@@ -54,17 +51,7 @@ class PPHomeViewController: PPBaseViewController,UITextFieldDelegate,UITableView
         tableView.tableFooterView = UIView.init()
         
         
-        bottomView = UIButton(frame: CGRect(x: 0, y:88, width: 414, height: 144))
-        bottomView.backgroundColor = UIColor.lightGray
-        self.view.addSubview(bottomView)
-        bottomView.isHidden = true
-        bottomView.addTarget(self, action: #selector(hiddenRenameView), for: UIControl.Event.touchUpInside)
         
-        renameTF = UITextField(frame: CGRect(x: 15, y: 15, width: 350, height: 44))
-        renameTF.backgroundColor = UIColor.white
-        renameTF.delegate = self
-        renameTF.returnKeyType = UIReturnKeyType.done
-        bottomView.addSubview(renameTF)
         
         if self.navigationController?.viewControllers.count ?? 0 > 1 {
         self.navigationItem.rightBarButtonItem = UIBarButtonItem.init(title: "更多", style: UIBarButtonItem.Style.plain, target: self, action: #selector(moreAction))
@@ -143,10 +130,18 @@ class PPHomeViewController: PPBaseViewController,UITextFieldDelegate,UITableView
             let fileObj = self.dataSource[indexPath.row]
             //相对路径
             PPFileManager.sharedManager.webdav?.removeItem(path:fileObj.path, completionHandler: { (error) in
-                DispatchQueue.main.async {
-                    PPHUD.showHUDText(message: "删除成功哟！", view: self.view)
-                    self.getWebDAVData()
+                if let errorNew = error {
+                    DispatchQueue.main.async {
+                        PPHUD.showHUDFromTop("删除失败: \(String(describing: errorNew))", isError: true)
+                    }
                 }
+                else {
+                    DispatchQueue.main.async {
+                        PPHUD.showHUDText(message: "删除成功哟！", view: self.view)
+                        self.getWebDAVData()
+                    }
+                }
+                
             })
         }
         delete.backgroundColor = UIColor.red
@@ -154,15 +149,9 @@ class PPHomeViewController: PPBaseViewController,UITextFieldDelegate,UITableView
         let complete = UITableViewRowAction(style: .default, title: "重命名") { (action, indexPath) in
             // Do you complete operation
             debugPrint("==重命名")
-            PPHUD.showHUDText(message: "点击灰色区域输入框消失，以后优化", view: self.view)
             //MARK:重命名
             let fileObj = self.dataSource[indexPath.row]
-            self.bottomView.isHidden = false
-            self.renameTF.text = fileObj.name
-            self.currentRenameText = fileObj.path
-            self.renameTF.becomeFirstResponder()
-//            self.renameTF.selectAll(nil)
-            
+            self.renameFile(oldFileName: fileObj.name)
 
         }
         complete.backgroundColor = UIColor(red:0.27, green:0.68, blue:0.49, alpha:1.00)
@@ -187,15 +176,6 @@ class PPHomeViewController: PPBaseViewController,UITextFieldDelegate,UITableView
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         if textField.tag == 2333 {//区分新建文本TextField
             return true
-        }
-        if let currentRenameText = currentRenameText,let newName = textField.text {
-            PPFileManager.sharedManager.webdav?.moveItem(path:currentRenameText, to: self.pathStr + newName, completionHandler: { (error) in
-                DispatchQueue.main.asyncAfter(deadline: .now()+1, execute: {
-                    PPHUD.showHUDText(message: "修改成功！", view: self.view)
-                    self.getWebDAVData()
-                })
-            })
-            
         }
         return true
     }
@@ -271,10 +251,36 @@ class PPHomeViewController: PPBaseViewController,UITextFieldDelegate,UITableView
             }
         }
     }
-    @objc func hiddenRenameView()  {
-        self.bottomView.isHidden = true
-        self.renameTF.resignFirstResponder()
+    
+    /// 重命名文件
+    func renameFile(oldFileName:String) {
+        let alertController = UIAlertController(title: "修改文件（夹）名", message: "", preferredStyle: UIAlertController.Style.alert)
+        alertController.addTextField { (textField : UITextField!) -> Void in
+            textField.placeholder = "输入文件名"
+            textField.text = oldFileName
+            textField.delegate = self
+            textField.tag = 2333
+        }
+        let saveAction = UIAlertAction(title: "保存", style: UIAlertAction.Style.default, handler: { alert -> Void in
+            let firstTextField = alertController.textFields![0] as UITextField
+            //let secondTextField = alertController.textFields![1] as UITextField
+            if let tips = self.fileNameInvalidResult(firstTextField.text) {
+                PPHUD.showHUDFromTop(tips, isError: true)
+                return
+            }
+            
+            PPFileManager.sharedManager.moveFileViaWebDAV(pathOld: self.pathStr+oldFileName, pathNew: self.pathStr + firstTextField.text!) { (error) in
+                PPHUD.showHUDFromTop("修改成功")
+                self.getWebDAVData()
+            }
+        })
+        let cancelAction = UIAlertAction(title: "取消", style: UIAlertAction.Style.default, handler: {(action : UIAlertAction!) -> Void in })
+        alertController.addAction(saveAction)
+        alertController.addAction(cancelAction)
+        self.present(alertController, animated: true, completion: nil)
     }
+    
+    
     @objc func moreAction()  {
         PPAlertAction.showSheet(withTitle: "更多操作", message: nil, cancelButtonTitle: "取消", destructiveButtonTitle: nil, otherButtonTitle: ["从🏞添加照骗","新建文本文档"]) { (index) in
             debugPrint(index)
@@ -302,31 +308,17 @@ class PPHomeViewController: PPBaseViewController,UITextFieldDelegate,UITableView
         let saveAction = UIAlertAction(title: "保存", style: UIAlertAction.Style.default, handler: { alert -> Void in
             let firstTextField = alertController.textFields![0] as UITextField
 //            let secondTextField = alertController.textFields![1] as UITextField
-            guard let fileName = firstTextField.text else {
-                PPHUD.showHUDFromTop("亲，名字不能为空", isError: true)
+            if let tips = self.fileNameInvalidResult(firstTextField.text) {
+                PPHUD.showHUDFromTop(tips, isError: true)
                 return
             }
-            if fileName.length < 1 {
-                PPHUD.showHUDFromTop("亲，名字不能为空", isError: true)
-                return
-            }
-            var fileAlreadyExist = false
-            for file in self.dataSource {
-                if file.name == fileName {
-                    fileAlreadyExist = true
-                    break
-                }
-            }
-            if fileAlreadyExist {
-                PPHUD.showHUDFromTop("亲，文件已存在哦", isError: true)
-                return
-            }
-            PPFileManager.sharedManager.uploadFileViaWebDAV(path: self.pathStr+fileName, contents: "# 标题".data(using:.utf8)) { (error) in
+            PPFileManager.sharedManager.uploadFileViaWebDAV(path: self.pathStr+firstTextField.text!, contents: "# 标题".data(using:.utf8)) { (error) in
                 if error != nil {
                     PPHUD.showHUDFromTop("新建失败", isError: true)
                 }
                 else {
                     PPHUD.showHUDFromTop("新建成功")
+                    self.getWebDAVData()
                 }
             }
         })
@@ -415,7 +407,19 @@ class PPHomeViewController: PPBaseViewController,UITextFieldDelegate,UITableView
     }
     
     
-    
+    func fileNameInvalidResult(_ fileName:String?) -> String? {
+        guard let fileName = fileName else {
+            return "亲，名字不能为空"
+        }
+        if fileName.length < 1 {
+            return "亲，名字不能为空"
+        }
+        let existedFile = self.dataSource.filter{$0.name == fileName}
+        if existedFile.count > 0 {
+            return "亲，文件已存在哦"
+        }
+        return nil
+    }
     //MARK:获取文件列表
     func getWebDAVData() -> Void {
         if (PPUserInfo.shared.webDAVServerURL.length < 1) {
