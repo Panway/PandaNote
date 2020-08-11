@@ -12,31 +12,31 @@ import WebKit.WKWebView
 
 class PPWebViewController: UIViewController,WKUIDelegate,WKNavigationDelegate,WKScriptMessageHandler, UIScrollViewDelegate {
     
+    let Show_BottomToolbar = true
     
     var wkWebView: WKWebView!
     var fileURLStr: String?
     var urlString: String?
     var fileName: String?
-    var xd_titleStr: String?
+    var titleStr: String?
     var markdownStr: String?
-    ///预加载的Bundle里的自定义js
-    var jsNameInBundle: String?
-    var lasOffsetY : CGFloat = 0.0
+    ///Main Bundle里预加载的js
+    var preloadJSNameInBundle: String?
+    var lastOffsetY : CGFloat = 0.0
     var bottomView : PPWebViewBottomToolbar!
     override func viewDidLoad() {
         super.viewDidLoad()
         
         self.view.backgroundColor = UIColor.white
-        if let xd_titleStr = self.xd_titleStr {
-            self.title = xd_titleStr
+        if let titleStr = self.titleStr {
+            self.title = titleStr
         }
         let config = WKWebViewConfiguration()
         config.userContentController.add(self, name: "pppanda")
         //不允许任何web资源写入文件系统
 //        config.websiteDataStore = WKWebsiteDataStore.nonPersistent()
-        //预加载的Bundle里的自定义js
-        if let jsNameInBundle = self.jsNameInBundle {
-            let path = Bundle.main.path(forResource: jsNameInBundle, ofType: nil, inDirectory: "web")
+        if let preloadJSNameInBundle = self.preloadJSNameInBundle {
+            let path = Bundle.main.path(forResource: preloadJSNameInBundle, ofType: nil, inDirectory: "web")
             var consolejs: String? = nil
             do {
                 consolejs = try String(contentsOfFile: path ?? "", encoding: .utf8)
@@ -50,13 +50,13 @@ class PPWebViewController: UIViewController,WKUIDelegate,WKNavigationDelegate,WK
         view.addSubview(wkWebView)
         wkWebView.frame = view.bounds
         self.pp_viewEdgeEqualToSafeArea(wkWebView)
-        //    [self.wkWebView mas_makeConstraints:^(MASConstraintMaker *make) {
-        //        make.edges.equalTo(self.view);
-        //    }];
+        
+        
         wkWebView.navigationDelegate = self
         wkWebView.uiDelegate = self
         //    self.bridge = [WebViewJavascriptBridge bridgeForWebView:self.wkWebView];
         //    [self.bridge setWebViewDelegate:self];
+        
         bottomView = PPWebViewBottomToolbar()
 //        bottomView.backgroundColor = UIColor.green
         self.view.addSubview(bottomView)
@@ -68,6 +68,7 @@ class PPWebViewController: UIViewController,WKUIDelegate,WKNavigationDelegate,WK
         bottomView.isHidden = true
         bottomView.backButton.addTarget(self, action: #selector(goBack), for: .touchUpInside)
         bottomView.forwardButton.addTarget(self, action: #selector(goForward), for: .touchUpInside)
+        
         self.wkWebView.scrollView.delegate = self
         self.wkWebView.scrollView.addRefreshHeader {
             self.loadURL()
@@ -117,10 +118,6 @@ class PPWebViewController: UIViewController,WKUIDelegate,WKNavigationDelegate,WK
     }
     
     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
-//        webView.evaluateJavaScript("document.title") { (result, error) in
-//            self.title = result
-//
-//        }
         self.wkWebView.scrollView.endRefreshing()
         debugPrint(self.wkWebView.canGoBack)
         self.bottomView.backButton.isEnabled = self.wkWebView.canGoBack
@@ -134,7 +131,7 @@ class PPWebViewController: UIViewController,WKUIDelegate,WKNavigationDelegate,WK
         if let markdown = self.markdownStr {
             var markdownStr = markdown.replacingOccurrences(of: "\\", with: "\\\\")
             markdownStr = markdownStr.replacingOccurrences(of: "`", with: "\\`")
-            let js = "document.getElementById('content').innerHTML = marked(`\(markdownStr)`);"
+            let js = "document.getElementById('content').innerHTML = ppmarked(`\(markdownStr)`);"
             webView.evaluateJavaScript(js, completionHandler: { result, error in
                 debugPrint("\(String(describing: result))")
             })
@@ -148,8 +145,9 @@ class PPWebViewController: UIViewController,WKUIDelegate,WKNavigationDelegate,WK
         present(alertController, animated: true) {
         }
     }
+    ///接收的js发来的消息
     func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
-        
+        debugPrint("didReceive JS message = \n \(message.name)\n \(message.body)")
     }
     //MARK:UIScrollViewDelegate
 //    func scrollViewDidScroll(_ scrollView: UIScrollView) {
@@ -157,11 +155,11 @@ class PPWebViewController: UIViewController,WKUIDelegate,WKNavigationDelegate,WK
     func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {
         let offsetY = scrollView.contentOffset.y
         //    debugPrint("SSSSS\(offsetY)")
-        lasOffsetY = offsetY
+        lastOffsetY = offsetY
     }
     func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
         let offsetY = scrollView.contentOffset.y
-        if lasOffsetY < offsetY {
+        if lastOffsetY < offsetY {
             self.bottomView.isHidden = true
         }
         else {
@@ -265,38 +263,3 @@ class PPWebViewController: UIViewController,WKUIDelegate,WKNavigationDelegate,WK
 
 
 
-class PPWebViewBottomToolbar: UIView {
-    var backButton : UIButton!
-    var forwardButton : UIButton!
-    override init(frame: CGRect) {
-        super.init(frame: frame)
-        pp_addSubviews()
-    }
-    func pp_addSubviews() {
-        backButton = UIButton.init(type: UIButton.ButtonType.custom)
-        self.addSubview(backButton)
-        backButton.frame = CGRect.init(x: 40, y: 0, width: 40, height: 40)
-        backButton.setTitle("⬅️", for: UIControl.State.normal)
-        backButton.setTitle("", for: .disabled)
-        backButton.snp.makeConstraints { (make) in
-            make.top.equalTo(self)
-            make.right.equalTo(self.snp.centerX).offset(-5)
-            make.width.equalTo(44)
-            make.height.equalTo(44)
-        }
-        
-        forwardButton = UIButton.init(type: UIButton.ButtonType.custom)
-        self.addSubview(forwardButton)
-        forwardButton.frame = CGRect.init(x: 40, y: 0, width: 40, height: 40)
-        forwardButton.setTitle("➡️", for: UIControl.State.normal)
-        forwardButton.setTitle("", for: .disabled)
-        forwardButton.snp.makeConstraints { (make) in
-            make.top.equalTo(self)
-            make.left.equalTo(self.snp.centerX).offset(5)
-            make.size.equalTo(backButton)
-        }
-    }
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
-}

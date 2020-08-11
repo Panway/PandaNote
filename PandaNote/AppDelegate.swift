@@ -73,7 +73,45 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func applicationWillTerminate(_ application: UIApplication) {
         // Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
     }
+    //MARK: - Universal Links
+    /// Associated Domains Entitlement配置:applinks:p.agolddata.com
+    ///个人开发者账户不支持Associated Domains capability，所以暂时不加此功能！
+    /// 服务端配置如下：
+    /// https://p.agolddata.com/.well-known/apple-app-site-association
+    // "appID": "YOUR_TEAM_ID.com.agolddata.pandanote",
+    // "paths": ["/pandanote/*","/wechat/*"]
+    // 测试链接 ： https://p.agolddata.com/pandanote
+    //代码来源：https://developer.apple.com/documentation/xcode/allowing_apps_and_websites_to_link_to_your_content/supporting_universal_links_in_your_app
+    func application(_ application: UIApplication,
+                     continue userActivity: NSUserActivity,
+                     restorationHandler: @escaping ([UIUserActivityRestoring]?) -> Void) -> Bool
+    {
+        // Get URL components from the incoming user activity
+        guard userActivity.activityType == NSUserActivityTypeBrowsingWeb,
+            let incomingURL = userActivity.webpageURL,
+            let components = NSURLComponents(url: incomingURL, resolvingAgainstBaseURL: true) else {
+            return false
+        }
 
+        // Check for specific URL components that you need
+        guard let path = components.path,
+        let params = components.queryItems else {
+            return false
+        }
+        debugPrint("path = \(path)")
+        
+        if let albumName = params.first(where: { $0.name == "albumname" } )?.value,
+            let photoIndex = params.first(where: { $0.name == "index" })?.value {
+            //这个链接会走到这里 https://p.agolddata.com/pandanote?albumname=Life&index=1
+            debugPrint("album = \(albumName)")
+            debugPrint("photoIndex = \(photoIndex)")
+            return true
+            
+        } else {
+            debugPrint("Either album name or photo index missing")
+            return false
+        }
+    }
 
 }
 

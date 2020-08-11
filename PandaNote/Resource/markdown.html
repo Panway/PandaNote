@@ -146,7 +146,10 @@
     k = build(coll, k, level, ctx);
     return k;
   }
-
+  //套一层是为了在swift执行js方法的时候在mac的Safari打断点调试
+  function ppmarked(string) {
+    return marked(string)
+  }
   function generateTOC(string) {
     // var html = marked(string);
     var ctx = [];
@@ -170,7 +173,7 @@
   }
   // document.querySelector('#content').innerHTML = final;
   // document.getElementById('content').innerHTML = generateTOC(string) + marked(string);
-  document.getElementById('content').innerHTML = marked(string);
+  document.getElementById('content').innerHTML = ppmarked(string);
   </script>
   <script>
   //滚动时保存滚动位置
