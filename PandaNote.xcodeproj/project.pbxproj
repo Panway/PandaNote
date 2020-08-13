@@ -85,6 +85,7 @@
 /* Begin PBXFileReference section */
 		1E50942724DBB15A00238678 /* PPWebViewBottomToolbar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPWebViewBottomToolbar.swift; sourceTree = "<group>"; };
 		1EDF714C24C3F1E600A12EC9 /* NSRegularExpression+PPTool.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NSRegularExpression+PPTool.swift"; sourceTree = "<group>"; };
+		1EFF08AA24E50B8000E84AD1 /* PandaNote.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = PandaNote.entitlements; sourceTree = "<group>"; };
 		445FC61B8328A513BADB990E /* Pods-PandaNoteTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-PandaNoteTests.release.xcconfig"; path = "Target Support Files/Pods-PandaNoteTests/Pods-PandaNoteTests.release.xcconfig"; sourceTree = "<group>"; };
 		5FC90B3D04D0AB60B2DBFED0 /* Pods-PandaNoteUITests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-PandaNoteUITests.release.xcconfig"; path = "Target Support Files/Pods-PandaNoteUITests/Pods-PandaNoteUITests.release.xcconfig"; sourceTree = "<group>"; };
 		60011E3E243A29E000BC6458 /* PlayerViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PlayerViewController.swift; sourceTree = "<group>"; };
@@ -397,6 +398,7 @@
 		60F5690F22F2ADC700874994 /* PandaNote */ = {
 			isa = PBXGroup;
 			children = (
+				1EFF08AA24E50B8000E84AD1 /* PandaNote.entitlements */,
 				60F5691022F2ADC700874994 /* AppDelegate.swift */,
 				60F5691222F2ADC700874994 /* ViewController.swift */,
 				6056014F23166BAE000809CD /* Base */,
@@ -897,6 +899,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_ENTITLEMENTS = PandaNote/PandaNote.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = ZPJG9G6LK2;
 				INFOPLIST_FILE = PandaNote/Info.plist;
@@ -920,6 +923,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_ENTITLEMENTS = PandaNote/PandaNote.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = ZPJG9G6LK2;
 				INFOPLIST_FILE = PandaNote/Info.plist;

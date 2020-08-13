@@ -99,7 +99,7 @@ class PPMarkdownViewController: PPBaseViewController,UITextViewDelegate {
         }
         if (PPUserInfo.pp_valueForSettingDict(key: "saveMarkdownWhenClose")) {
             self.closeAfterSave = true
-            self.button2Action(sender: nil)
+            self.saveTextAction(sender: nil)
         } else {
             PPAlertAction.showAlert(withTitle: "是否保存已修改的文字", msg: "", buttonsStatement: ["不保存","要保存"]) { (index) in
                 debugPrint("\(index)")
@@ -108,7 +108,7 @@ class PPMarkdownViewController: PPBaseViewController,UITextViewDelegate {
                 }
                 else {
                     self.closeAfterSave = true
-                    self.button2Action(sender: nil)
+                    self.saveTextAction(sender: nil)
                 }
             }
             
@@ -135,7 +135,9 @@ class PPMarkdownViewController: PPBaseViewController,UITextViewDelegate {
         historyList.append(self.textView.text)
         debugPrint("historyList= \(historyList.count)")
     }
-    @objc func button1Action(sender:UIButton)  {
+    //MARK: 私有方法
+    /// 预览markdown
+    @objc func previewAction(sender:UIButton)  {
         self.textView.resignFirstResponder()
         let webVC = PPUserInfo.shared.webViewController//PPWebViewController()
         var path = ""
@@ -153,8 +155,14 @@ class PPMarkdownViewController: PPBaseViewController,UITextViewDelegate {
         self.navigationController?.pushViewController(webVC, animated: true)
         
     }
-    
-    @objc func button2Action(sender:UIButton?)  {
+    @objc func shareTextAction(sender:UIButton?)  {
+        UIPasteboard.general.string = textView.text
+        PPHUD.showHUDFromTop("已复制到剪贴板，你还可以通过其他方式分享")
+        let fileURL = URL(fileURLWithPath: PPDiskCache.shared.path + self.filePathStr)
+        let shareSheet = UIActivityViewController(activityItems: [fileURL], applicationActivities: nil)
+        present(shareSheet, animated: true)
+    }
+    @objc func saveTextAction(sender:UIButton?)  {
         let stringToUpload = self.textView.text ?? ""
         if stringToUpload.length < 1 {
             PPHUD.showHUDFromTop("不支持保存空文件")
@@ -183,7 +191,7 @@ class PPMarkdownViewController: PPBaseViewController,UITextViewDelegate {
         let button0 = UIButton.init(type: UIButton.ButtonType.custom)
         button0.frame = CGRect.init(x: 0, y: 0, width: 40, height: 40)
         button0.setImage(UIImage.init(named: "preview"), for: UIControl.State.normal)
-        button0.addTarget(self, action: #selector(button1Action(sender:)), for: UIControl.Event.touchUpInside)
+        button0.addTarget(self, action: #selector(previewAction(sender:)), for: UIControl.Event.touchUpInside)
         return button0
     }()
     
@@ -191,14 +199,14 @@ class PPMarkdownViewController: PPBaseViewController,UITextViewDelegate {
         let button1 = UIButton.init(type: UIButton.ButtonType.custom)
         button1.frame = CGRect.init(x: 40, y: 0, width: 40, height: 40)
         button1.setImage(UIImage.init(named: "share"), for: UIControl.State.normal)
-        button1.addTarget(self, action: #selector(button1Action(sender:)), for: UIControl.Event.touchUpInside)
+        button1.addTarget(self, action: #selector(shareTextAction(sender:)), for: UIControl.Event.touchUpInside)
         return button1
     }()
     lazy var button2 : UIButton = {
         let button2 = UIButton.init(type: UIButton.ButtonType.custom)
         button2.frame = CGRect.init(x: 80, y: 0, width: 40, height: 40)
         button2.setImage(UIImage.init(named: "done"), for: UIControl.State.normal)
-        button2.addTarget(self, action: #selector(button2Action(sender:)), for: UIControl.Event.touchUpInside)
+        button2.addTarget(self, action: #selector(saveTextAction(sender:)), for: UIControl.Event.touchUpInside)
         return button2
     }()
     

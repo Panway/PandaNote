@@ -1,17 +1,19 @@
 PODS:
-  - Alamofire (5.2.1)
+  - Alamofire (5.2.2)
   - DoraemonKit/Core (3.0.2)
   - Down (0.9.3)
   - FilesProvider (0.26.0)
-  - FLEX (3.0.0)
+  - FLEX (4.1.1)
   - FMDB (2.7.5):
     - FMDB/standard (= 2.7.5)
   - FMDB/standard (2.7.5)
-  - IQKeyboardManager (6.5.5)
+  - IQKeyboardManager (6.5.6)
   - Kanna (5.2.2)
-  - Kingfisher (4.10.1)
+  - Kingfisher (5.14.1):
+    - Kingfisher/Core (= 5.14.1)
+  - Kingfisher/Core (5.14.1)
   - MBProgressHUD (1.2.0)
-  - MJRefresh (3.4.3)
+  - MJRefresh (3.5.0)
   - PINCache (2.3)
   - PPiOSKit/CommomViews (0.0.1)
   - PPiOSKit/CrashCatcher (0.0.1):
@@ -21,10 +23,10 @@ PODS:
   - PPiOSKit/SwipePopGesture (0.0.1)
   - PryntTrimmerView (4.0.0)
   - SKPhotoBrowser (6.1.0)
-  - SnapKit (4.2.0)
+  - SnapKit (5.0.1)
   - SteviaLayout (4.7.3)
   - WechatOpenSDK (1.8.7.1)
-  - YPImagePicker (4.2.1):
+  - YPImagePicker (4.3.1):
     - PryntTrimmerView (~> 4.0.0)
     - SteviaLayout (~> 4.7.3)
   - YYText (1.0.7)
@@ -34,7 +36,7 @@ DEPENDENCIES:
   - DoraemonKit/Core (~> 3.0.2)
   - Down
   - FilesProvider
-  - FLEX (~> 3.0.0)
+  - FLEX
   - FMDB
   - IQKeyboardManager
   - Kanna (~> 5.2.2)
@@ -53,7 +55,7 @@ DEPENDENCIES:
   - YYText
 
 SPEC REPOS:
-  https://cdn.cocoapods.org/:
+  trunk:
     - Alamofire
     - DoraemonKit
     - Down
@@ -80,31 +82,31 @@ EXTERNAL SOURCES:
 
 CHECKOUT OPTIONS:
   PPiOSKit:
-    :commit: 075a44ad1167bcf6b209ebd4f96f53a4b23d8ff2
+    :commit: cdff0bf9b30b2969cb06f61c84f3c1ae565de7e3
     :git: https://github.com/Panway/CodeSnipetCollection.git
 
 SPEC CHECKSUMS:
-  Alamofire: e911732990610fe89af59ac0077f923d72dc3dfd
+  Alamofire: 814429acc853c6c54ff123fc3d2ef66803823ce0
   DoraemonKit: 8587e7a9aae0773dfc96707d2369d89d2a21b3d2
   Down: 4553b984236807e384fa0ef7c7e360ef9f7c425d
   FilesProvider: 2a8ae17d8b9c23a6feadb1308ee638fa31d21065
-  FLEX: d66c759bce0f6ebbbf472c742380874d846f2883
+  FLEX: 81096107977a09836eb440173010ceeef01105d6
   FMDB: 2ce00b547f966261cd18927a3ddb07cb6f3db82a
-  IQKeyboardManager: 3a8b9e603f8b0eeaf5f096a1f2b2cfcf121992ef
+  IQKeyboardManager: 2a6e97afdafc7becf0cb17a9a8d795e3a980717f
   Kanna: 2c4eddaaa4bfb9a1ed19e53c0b3d42ef02838046
-  Kingfisher: c148cd7b47ebde9989f6bc7c27dcaa79d81279a0
+  Kingfisher: 8050bc6f7f68cbf3908bd04df7ccbac188f6d6d6
   MBProgressHUD: 3ee5efcc380f6a79a7cc9b363dd669c5e1ae7406
-  MJRefresh: 53e3e3219f204425ee6d3e62e8733d3295944cd6
+  MJRefresh: 6afc955813966afb08305477dd7a0d9ad5e79a16
   PINCache: ce36ed282031b92fc7733ffe831f474ff80fddc2
   PPiOSKit: 9f049cf7ff47cefda7f747a404254ee1a5ae7f85
   PryntTrimmerView: 67e67573ffd4c073f1308effa66aefd0cfa667a0
   SKPhotoBrowser: 343de95d89dc7913763c5dda243cc6e606e4a168
-  SnapKit: fe8a619752f3f27075cc9a90244d75c6c3f27e2a
+  SnapKit: 97b92857e3df3a0c71833cce143274bf6ef8e5eb
   SteviaLayout: c2ecdcff57d44e38fd2f65e54ad52aeae28ca0c4
   WechatOpenSDK: 6a4d1436c15b3b5fe2a0bd383f3046010186da44
-  YPImagePicker: 3b88ca0c50134af2856c48c481572c98a8b8b65b
+  YPImagePicker: 08bbb809ed62bf4149fc015c97249eb4b9463ff9
   YYText: 5c461d709e24d55a182d1441c41dc639a18a4849
 
-PODFILE CHECKSUM: e6b8c8a2a89473b661440782c20bea4efe43f2d6
+PODFILE CHECKSUM: 9c4a63843142163d61c184bc3ffe454c81dfb2af
 
 COCOAPODS: 1.9.3

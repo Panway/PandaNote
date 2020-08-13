@@ -32,7 +32,7 @@ target 'PandaNote' do
   pod 'Down'
 #  pod 'DoraemonKit/Core'
   # https://github.com/Flipboard/FLEX
-  pod 'FLEX', '~> 3.0.0', :configurations => ['Debug']
+  pod 'FLEX', :configurations => ['Debug']
   pod 'MJRefresh'
   pod 'YYText'
 #  https://github.com/suzuki-0000/SKPhotoBrowser
@@ -46,7 +46,7 @@ target 'PandaNote' do
   #  pod 'SVProgressHUD'
   pod 'MBProgressHUD'
 #  pod 'AFWebDAVManager', :git => 'https://github.com/AFNetworking/AFWebDAVManager.git'
-  pod 'WechatOpenSDK'
+  pod 'WechatOpenSDK'#,'1.8.4'
   pod 'FMDB'
   pod 'IQKeyboardManager'
   #滴滴开源的应用内调试工具，界面比较美观 https://github.com/didi/DoraemonKit

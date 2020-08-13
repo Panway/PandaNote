@@ -383,7 +383,7 @@ static inline BOOL isiPhoneXSeries() {
 #if PP_USE_WECHAT_SHARE
 
 + (void)initWeixinAppId:(NSString *)appId appKey:(NSString *)appKey {
-    [WXApi registerApp:appId universalLink:@""];
+    [WXApi registerApp:appId universalLink:@"https://p.agolddata.com/pandanote/"];
     //    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(5 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
     //        //构造SendAuthReq结构体
     //        SendAuthReq* req = [[SendAuthReq alloc]init];
@@ -427,7 +427,7 @@ static inline BOOL isiPhoneXSeries() {
     req.message = message;
     req.scene = type == PPSharePlatformWeixinSession?WXSceneSession:WXSceneTimeline;
     [WXApi sendReq:req completion:^(BOOL success) {
-        
+        NSLog(@"微信分享成功了吗==%@",@(success));
     }];
 }
 - (void)weixinShareEmoji:(NSData *)emoji type:(NSInteger)type {

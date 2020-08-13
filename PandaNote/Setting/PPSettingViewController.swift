@@ -56,7 +56,7 @@ class PPSettingViewController: PPBaseViewController,UITableViewDataSource,UITabl
         }
         else if obj == "FLEX Debug Enable" {
             #if DEBUG
-            FLEXManager.shared()?.showExplorer()
+            FLEXManager.shared.showExplorer()
             #endif
 
         }
