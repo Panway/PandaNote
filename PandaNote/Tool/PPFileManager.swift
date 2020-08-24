@@ -21,8 +21,9 @@ class PPFileManager: NSObject,FileProviderDelegate {
         super.init()
         initWebDAVSetting()
     }
-    
+    /// WebDAV获取文件列表
     func getWebDAVFileList(path:String,completionHander:@escaping(_ data:[AnyObject],_ isFromCache:Bool,_ error:Error?) -> Void) {
+        //先从本地缓存获取数据
         PPDiskCache.shared.fetchData(key: apiCacheDir + path.pp_md5, failure: { (error) in
             if let error = error {
                 if (error as NSError).code != NSFileReadNoSuchFileError {
@@ -31,20 +32,23 @@ class PPFileManager: NSObject,FileProviderDelegate {
                     }
                 }
             }
+            //获取本地缓存失败就去服务器获取
             self.getWebDAVData(path: path, completionHander: completionHander)
         }) { (data) in
             do {
                 let archieveArray = try JSONDecoder().decode([PPFileObject].self, from: data)
-//                debugPrint(archieveArray)
+                debugPrint(archieveArray)
                 DispatchQueue.main.async {
                     completionHander(archieveArray as [AnyObject],true,nil)
                 }
+                //获取本地缓存成功了还是去服务器获取一下保证数据最新吧
                 self.getWebDAVData(path: path, completionHander: completionHander)
             } catch {
                 debugPrint(error.localizedDescription)
             }
         }
     }
+    ///去WebDAV服务器获取数据
     func getWebDAVData(path:String,completionHander:@escaping(_ data:[AnyObject],_ isFromCache:Bool,_ error:Error?) -> Void) {
         webdav?.contentsOfDirectory(path: path, completionHandler: {
             contents, error in
@@ -86,7 +90,7 @@ class PPFileManager: NSObject,FileProviderDelegate {
         })
         
     }
-
+    /// 从WebDAV下载文件获取Data
     func downloadFileFromWebDAV(path: String, cacheFile: Bool? = false,completionHandler: @escaping ((_ contents: Data?, _ isFromCache:Bool, _ error: Error?) -> Void)) {
         PPFileManager.sharedManager.webdav?.contents(path: path, completionHandler: { (data, error) in
             if error == nil {
@@ -107,7 +111,7 @@ class PPFileManager: NSObject,FileProviderDelegate {
             
     }
     
-    /// 加载文件，如果本地存在就取本地的，负责下载远程的
+    /// 加载文件，如果本地存在就取本地的，否则就下载远程服务器的
     /// - Parameters:
     ///   - path: 远程文件路径
     ///   - completionHandler: 完成回调
@@ -138,6 +142,7 @@ class PPFileManager: NSObject,FileProviderDelegate {
         }
 
     }
+    /// 通过WebDAV上传到服务器
     func uploadFileViaWebDAV(path: String, contents: Data?, completionHander:@escaping(_ error:Error?) -> Void) {
         PPFileManager.sharedManager.webdav?.writeContents(path: path, contents: contents, completionHandler: { (error) in
             if error == nil {
@@ -150,6 +155,7 @@ class PPFileManager: NSObject,FileProviderDelegate {
             }
         })
     }
+    /// 通过WebDAV修改文件
     func moveFileViaWebDAV(pathOld: String, pathNew: String, completionHander:@escaping(_ error:Error?) -> Void) {
         PPFileManager.sharedManager.webdav?.moveItem(path:pathOld, to: pathNew, completionHandler: { (error) in
             if error == nil {
@@ -168,6 +174,7 @@ class PPFileManager: NSObject,FileProviderDelegate {
     
     
     //MARK:初始化webDAV设置
+    /// 初始化WebDAV设置
     func initWebDAVSetting() -> Void {
         guard let webDAVInfoArray = PPUserInfo.shared.pp_Setting["PPWebDAVServerList"] as? Array<Any> else { return }
         
@@ -197,7 +204,7 @@ class PPFileManager: NSObject,FileProviderDelegate {
 //        self.perform(Selector(("getData:")), with: self, afterDelay: 1)
         
     }
-    /// 获取NSData
+    /// 从PHAsset获取NSData
     func getImageDataFromAsset(asset: PHAsset, completion: @escaping (_ data: NSData?,_ fileURL:URL?) -> Void) {
         let manager = PHImageManager.default()
         let options = PHImageRequestOptions()

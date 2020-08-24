@@ -12,13 +12,16 @@ import FilesProvider
 //class Person: Codable {
 //}
 
-
-struct PPFileObject {
+struct PPFileObject:Equatable {
     var name: String
     var path: String
     var size: Int64
     var isDirectory: Bool
     var modifiedDate: String
+    ///遵循Equatable协议，判断两个对象是否相等
+    static func ==(lhs: PPFileObject, rhs: PPFileObject) -> Bool {
+        return lhs.name == rhs.name && lhs.path == rhs.path
+    }
 //    var favoriteColor: UIColor
 }
 

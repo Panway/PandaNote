@@ -24,11 +24,12 @@ class PPTabBarController: UITabBarController {
     }
     class func ppTabBar() -> PPTabBarController {
         let recentsVC = PPHomeViewController()
-        recentsVC.tabBarItem = UITabBarItem(tabBarSystemItem: .recents, tag: 1)
+        recentsVC.isRecentFiles = true
+        recentsVC.tabBarItem = UITabBarItem(tabBarSystemItem: .history, tag: 1)
         let recentsNav = UINavigationController(rootViewController: recentsVC)
         
-        let testVC = PPPriceTagViewController()
-        testVC.tabBarItem = UITabBarItem(tabBarSystemItem: .search, tag: 1)
+        let testVC = PPHomeViewController()
+        testVC.tabBarItem = UITabBarItem(tabBarSystemItem: .topRated, tag: 1)
         let testNav = UINavigationController(rootViewController: testVC)
 
         let webVC = PPWebViewController()

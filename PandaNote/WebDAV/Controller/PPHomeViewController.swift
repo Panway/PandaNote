@@ -28,6 +28,8 @@ class PPHomeViewController: PPBaseViewController,UITextFieldDelegate,UITableView
 //    let documentsProvider = LocalFileProvider()
     var currentImageURL: String?
     var photoBrowser: SKPhotoBrowser!
+    ///如果是展示最近访问的列表
+    var isRecentFiles = false
     @IBOutlet weak var uploadProgressView: UIProgressView?
     @IBOutlet weak var downloadProgressView: UIProgressView?
     //MARK:Life Cycle
@@ -80,6 +82,8 @@ class PPHomeViewController: PPBaseViewController,UITextFieldDelegate,UITableView
         tableView.deselectRow(at: indexPath, animated: true)
         let fileObj = self.dataSource[indexPath.row]
         debugPrint("You tapped cell  \(fileObj.path)")
+        PPUserInfo.shared.insertToRecentFiles(fileObj)
+        
         if fileObj.isDirectory {
             let vc = PPHomeViewController.init()
             vc.pathStr = fileObj.path + "/"
@@ -422,6 +426,14 @@ class PPHomeViewController: PPBaseViewController,UITextFieldDelegate,UITableView
     }
     //MARK:获取文件列表
     func getWebDAVData() -> Void {
+        if isRecentFiles {
+            self.dataSource.removeAll()
+            self.dataSource.append(contentsOf: PPUserInfo.shared.pp_RecentFiles)
+            self.tableView.endRefreshing()
+            self.tableView.reloadData()
+            return
+        }
+        
         if (PPUserInfo.shared.webDAVServerURL.length < 1) {
             PPFileManager.sharedManager.initWebDAVSetting()
         }

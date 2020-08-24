@@ -11,22 +11,49 @@ import Foundation
 
 
 class PPUserInfo: NSObject {
+    static let shared = PPUserInfo()
+
     var webDAVServerURL = ""
     var webDAVUserName:String?
     var webDAVPassword:String?
     var webDAVRemark:String = ""
+    /// 沙盒Sandbox/Library/PandaCache
     var pp_mainDirectory:String!
     var pp_mainDirectoryURL:URL!
     var pp_fileIcon = [String:String]()
     /// 本地时间相对于格林尼治时间的差距
     var pp_timezoneOffset:Int!
     var pp_JSONConfig:String!
-    var pp_WebViewResource = [String]()///< webview资源
+    /// webview资源
+    var pp_WebViewResource = [String]()
+//    var pp_RecentFiles = [Any]()
+    /// 最近访问文件列表
+     var pp_RecentFiles:Array<PPFileObject> = [] {
+        didSet {
+            do {
+                let encodedData = try JSONEncoder().encode(pp_RecentFiles)
+                try? encodedData.write(to: URL(fileURLWithPath: self.pp_mainDirectory + "/PP_RecentFiles"))
+            } catch {
+                debugPrint(error.localizedDescription)
+            }
+        }
+    }
+    var totalSteps: Int = 0 {
+        willSet(newTotalSteps) {
+            print("About to set totalSteps to \(newTotalSteps)")
+        }
+        didSet {
+            if totalSteps > oldValue  {
+                print("Added \(totalSteps - oldValue) steps")
+            }
+        }
+    }
+    
 //    var pp_Setting:Dictionary<String, Any>!
-    /// The repeat count.
+    /// WebDAV设置等
     public var pp_Setting:Dictionary<String, Any> = [:] {
         didSet {
-            debugPrint("\(String(describing: oldValue)) --> \(String(describing: pp_Setting))")
+            debugPrint("旧值和新值：\(String(describing: oldValue)) --> \(String(describing: pp_Setting))")
             let data:NSData = NSKeyedArchiver.archivedData(withRootObject: pp_Setting) as NSData
             data.write(toFile: self.pp_mainDirectory+"/PP_UserPreference", atomically: true)
             if let jsonData = try? JSONSerialization.data(withJSONObject: pp_Setting, options: JSONSerialization.WritingOptions.prettyPrinted) {
@@ -43,7 +70,6 @@ class PPUserInfo: NSObject {
 //            }
         }
     }
-    static let shared = PPUserInfo()
     
     func initConfig() -> Void {
         self.pp_mainDirectory = NSSearchPathForDirectoriesInDomains(.libraryDirectory, .userDomainMask, true)[0]//documentDirectory
@@ -78,12 +104,25 @@ class PPUserInfo: NSObject {
             self.pp_Setting = dict2 as! Dictionary<String, Any>
 //            self.pp_JSONConfig = JSONSerialization.
         }
+        if let recentFileData = try? Data(contentsOf: URL(fileURLWithPath: self.pp_mainDirectory+"/PP_RecentFiles")) {
+            let archieveArray = try? JSONDecoder().decode([PPFileObject].self, from: recentFileData)
+            self.pp_RecentFiles = archieveArray ?? []
+        }
 
 //        self.pp_Setting = ["saveDocWhenClose":"1"]
 //        self.pp_Setting.updateValue(<#T##value: Any##Any#>, forKey: <#T##String#>)
         
     }
-    
+    /// 插入最近浏览的文件或目录到最近浏览列表（如果有需要的话）
+    func insertToRecentFiles(_ fileObj:PPFileObject) {
+        if let index = pp_RecentFiles.firstIndex(of: fileObj) {
+            pp_RecentFiles.remove(at: index)
+        }
+        pp_RecentFiles.insert(fileObj, at: 0)
+        if pp_RecentFiles.count > 30 {
+            pp_RecentFiles.removeLast()
+        }
+    }
     class func pp_valueForSettingDict(key : String) -> Bool {
         if let string : String = PPUserInfo.shared.pp_Setting[key] as? String {
             return string.bool
