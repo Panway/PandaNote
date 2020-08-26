@@ -10,10 +10,26 @@ import UIKit
 import Kanna
 import Alamofire
 
+/// 字符串分割取前面的，eg："小爱同学调戏天猫精灵集锦_哔哩哔哩" -> "小爱同学调戏天猫精灵集锦"
+/// - Parameters:
+///   - s: 原始字符串
+///   - separator: 分隔符，如`-`
+fileprivate func getStringSeparatedBy(_ s:String, _ separator:String) -> String {
+    var array = s.components(separatedBy: separator)
+    if array.count > 1 {
+        array.removeLast()
+        return array.joined(separator: " ")
+    }
+    else {
+        return s
+    }
+}
+
 class PPPasteboardTool: NSObject {
     class func getMoreInfomationOfURL() {
 //        UIPasteboard.general.string = "https://www.smzdm.com/p/20405394/?send_by=3716913905&from=other"
         guard let input = UIPasteboard.general.string else { return }
+        debugPrint("剪切板内容=\(input)")
         if let lastPasteContent : String = PPUserInfo.shared.pp_Setting["PPLastPasteBoardContent"] as? String {
             if input == lastPasteContent {
                 return
@@ -30,8 +46,11 @@ class PPPasteboardTool: NSObject {
             guard let range = Range(match.range, in: input) else { continue }
             let url = input[range]
             urlString = String(url)
+            break
         }
-        
+        if matches.count > 1 {
+            PPHUD.showHUDFromTop("URL太多，已为你解析第一个URL")
+        }
         //去掉URL问号后面的参数
         if urlString.contains("smzdm.com") || urlString.contains("okjike.com") {
             urlString = urlString.split(string: "?")[0]
@@ -40,7 +59,7 @@ class PPPasteboardTool: NSObject {
         debugPrint(urlString)
         AF.request(urlString).responseJSON { response in
             if let data = response.data, let utf8Text = String(data: data, encoding: .utf8) {
-                //保存到自己电脑某个位置查看（topcheer是当前电脑用户名）
+                //使用模拟器的时候，保存到自己电脑下载文件夹查看（pan是当前电脑用户名）
                 #if DEBUG
                 try? data.write(to: URL(fileURLWithPath: "/Users/pan/Downloads/PP_TEST.html", isDirectory: false))
                 #endif
@@ -55,7 +74,7 @@ class PPPasteboardTool: NSObject {
                     debugPrint("==\(index)")
                     if (index == 1) {
                         if let weixin = URL(string: "wechat://") {
-                            UIApplication.shared.openURL(weixin)
+                            UIApplication.shared.open(weixin, options: [:], completionHandler: nil)
                         }
                     }
                     else if (index == 2) {
@@ -79,15 +98,37 @@ class PPPasteboardTool: NSObject {
                     result = link.text ?? ""
                 }
             }
+            else if originURL.contains("www.smzdm.com/p") {
+                //如果是什么值得买网站
+                result = ""
+                for node in doc.xpath("/html/head/meta") {
+                    guard let metaC = node.toXML else {
+                        continue
+                    }
+                    if metaC.contains("og:title") {
+                        debugPrint(metaC)
+                        if let metaArray = metaC.split(string: "content=").last {
+                            result = metaArray.replacingOccurrences(of: "\"", with: "")
+                        }
+                        else {
+                            result = doc.title ?? ""
+                        }
+                        result = getStringSeparatedBy(result,"_")
+                        break
+                    }
+                }
+            }
             else {
                 result = doc.title ?? ""
+                result = getStringSeparatedBy(result,"-")
+                result = getStringSeparatedBy(result,"_")
             }
         }
         result = result.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
         result = result.replacingOccurrences(of: "\n", with: "")
-        if originURL.contains("b23.tv") || originURL.contains("bilibili.com") {
-            result = result.split(string: "_哔哩哔哩").first ?? ""
-        }
+//        if originURL.contains("b23.tv") || originURL.contains("bilibili.com") {
+//            result = result.split(string: "_哔哩哔哩").first ?? ""
+//        }
         if originURL.contains("m.weibo.cn") {
             let results = html.pp_matches(for: "text(.*),\n")
             guard let res0 = results.first else { return "" }
@@ -100,7 +141,6 @@ class PPPasteboardTool: NSObject {
         debugPrint(result)
         return result
     }
-    
     
     
     

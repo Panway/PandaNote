@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		1E50942824DBB15B00238678 /* PPWebViewBottomToolbar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E50942724DBB15A00238678 /* PPWebViewBottomToolbar.swift */; };
+		1E670AAB24F62D23002DB57C /* PPPublicTool.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E670AAA24F62D23002DB57C /* PPPublicTool.swift */; };
 		1EDF714D24C3F1E600A12EC9 /* NSRegularExpression+PPTool.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1EDF714C24C3F1E600A12EC9 /* NSRegularExpression+PPTool.swift */; };
 		60011E40243A29E000BC6458 /* PlayerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60011E3E243A29E000BC6458 /* PlayerViewController.swift */; };
 		60011E41243A29E000BC6458 /* PlayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60011E3F243A29E000BC6458 /* PlayerView.swift */; };
@@ -84,6 +85,9 @@
 
 /* Begin PBXFileReference section */
 		1E50942724DBB15A00238678 /* PPWebViewBottomToolbar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPWebViewBottomToolbar.swift; sourceTree = "<group>"; };
+		1E670AA824F49CAA002DB57C /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/Main.strings"; sourceTree = "<group>"; };
+		1E670AA924F49CAA002DB57C /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/LaunchScreen.strings"; sourceTree = "<group>"; };
+		1E670AAA24F62D23002DB57C /* PPPublicTool.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPPublicTool.swift; sourceTree = "<group>"; };
 		1EDF714C24C3F1E600A12EC9 /* NSRegularExpression+PPTool.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NSRegularExpression+PPTool.swift"; sourceTree = "<group>"; };
 		1EFF08AA24E50B8000E84AD1 /* PandaNote.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = PandaNote.entitlements; sourceTree = "<group>"; };
 		445FC61B8328A513BADB990E /* Pods-PandaNoteTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-PandaNoteTests.release.xcconfig"; path = "Target Support Files/Pods-PandaNoteTests/Pods-PandaNoteTests.release.xcconfig"; sourceTree = "<group>"; };
@@ -295,6 +299,7 @@
 				605602802317A0C4000809CD /* UI */,
 				6056021923177122000809CD /* CategoryAndExtension */,
 				6056015423166CC5000809CD /* PPUserInfo.swift */,
+				1E670AAA24F62D23002DB57C /* PPPublicTool.swift */,
 				6080D3F223333C3500F582B1 /* PPFileManager.swift */,
 				60D27790238AA52C00D8BA0C /* PPCacheManager.swift */,
 				60AA154D23DEBAC900A68FAA /* PPSQLiteManager.swift */,
@@ -544,6 +549,7 @@
 			knownRegions = (
 				en,
 				Base,
+				"zh-Hans",
 			);
 			mainGroup = 60F5690422F2ADC700874994;
 			productRefGroup = 60F5690E22F2ADC700874994 /* Products */;
@@ -715,6 +721,7 @@
 				6056022A231772AE000809CD /* PPMarkdownViewController.swift in Sources */,
 				60A1F8DC24388C98009E390C /* ViewController+PPTool.swift in Sources */,
 				604FFA4623DDE77B0059BBC9 /* PPPriceTagViewController.swift in Sources */,
+				1E670AAB24F62D23002DB57C /* PPPublicTool.swift in Sources */,
 				6056025823177A30000809CD /* PPHomeViewController.swift in Sources */,
 				60560252231778FF000809CD /* XDRefreshHeader.m in Sources */,
 				60F5D04523275549004E988B /* XDCollectionViewCell.m in Sources */,
@@ -762,6 +769,7 @@
 			isa = PBXVariantGroup;
 			children = (
 				60F5691522F2ADC700874994 /* Base */,
+				1E670AA824F49CAA002DB57C /* zh-Hans */,
 			);
 			name = Main.storyboard;
 			sourceTree = "<group>";
@@ -770,6 +778,7 @@
 			isa = PBXVariantGroup;
 			children = (
 				60F5691A22F2ADCA00874994 /* Base */,
+				1E670AA924F49CAA002DB57C /* zh-Hans */,
 			);
 			name = LaunchScreen.storyboard;
 			sourceTree = "<group>";
@@ -781,6 +790,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
@@ -842,6 +852,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
