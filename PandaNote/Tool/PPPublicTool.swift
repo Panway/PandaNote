@@ -38,7 +38,7 @@ func debugPrint<T>(_ closure: @autoclosure () -> T, _ file: String = #file, _ fu
         let file = URL(fileURLWithPath: file).lastPathComponent
         let queue = Thread.isMainThread ? "UI" : "BG"
 
-        print("<\(queue)> \(file) `\(function)` [\(line)]:\n \(description)")
+        print("\n[\(file) \(function)] 第\(line)行:<\(queue)> \n \(description)")
     #endif
 }
 
