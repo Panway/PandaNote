@@ -36,6 +36,33 @@ extension String {
     func pp_isVideoFile() -> Bool {
         return self.lowercased().hasSuffix("mp4")
     }
+    /// 可能包含中文编码的字符串data ==> 字符串
+    init?(textData gbkData: Data) {
+        if let utf8Text = String(data: gbkData, encoding: .utf8) {
+            self = utf8Text
+            return
+        }
+        //打印data
+        //debugPrint(gbkData.map { String(format: "%02x", $0) }.joined())
+
+        //获取GBK编码, 使用GB18030是因为它向下兼容GBK
+        let encodings = [CFStringEncodings.GB_18030_2000,
+                         CFStringEncodings.GB_2312_80,
+                         CFStringEncodings.macChineseSimp,
+                         CFStringEncodings.HZ_GB_2312]
+        
+        for encoding in encodings {
+            let cfEncoding = encoding
+            let encoding = CFStringConvertEncodingToNSStringEncoding(CFStringEncoding(cfEncoding.rawValue))
+            //从GBK编码的Data里初始化NSString
+            if let str = NSString(data: gbkData, encoding: encoding) {
+                self = str as String
+                return
+            }
+        }
+        return nil
+    }
+    
     //MARK: 布尔值
     var bool: Bool {
         switch self.lowercased() {
@@ -574,3 +601,8 @@ extension Int {
     }
     
 }
+
+
+//extension String.Encoding {
+//    static let gb_18030_2000 = String.Encoding(rawValue: CFStringConvertEncodingToNSStringEncoding(CFStringEncoding(CFStringEncodings.GB_18030_2000.rawValue)))
+//}

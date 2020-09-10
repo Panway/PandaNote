@@ -37,7 +37,7 @@ class PPFileManager: NSObject,FileProviderDelegate {
         }) { (data) in
             do {
                 let archieveArray = try JSONDecoder().decode([PPFileObject].self, from: data)
-                debugPrint(archieveArray)
+                debugPrint("WebDAV获取文件列表\(archieveArray.count)")
                 DispatchQueue.main.async {
                     completionHander(archieveArray as [AnyObject],true,nil)
                 }
@@ -116,8 +116,9 @@ class PPFileManager: NSObject,FileProviderDelegate {
     ///   - path: 远程文件路径
     ///   - completionHandler: 完成回调
     func loadFileFromWebDAV(path: String, downloadIfExist:Bool?=false ,completionHandler: @escaping ((_ contents: Data?, _ isFromCache:Bool, _ error: Error?) -> Void)) {
+        // 1 从本地磁盘获取文件缓存
         PPDiskCache.shared.fetchData(key: path, failure: { (error) in
-            
+            // 2-2 从本地磁盘获取文件失败也从服务器获取最新的
             PPFileManager.sharedManager.webdav?.contents(path: path, completionHandler: { (data, error) in
                 if error == nil {
                     DispatchQueue.main.async {
@@ -131,6 +132,7 @@ class PPFileManager: NSObject,FileProviderDelegate {
             })
             
         }) { (data) in
+            // 2-1 加载成功的话还从服务器获取最新的
             debugPrint("loading local file success")
             completionHandler(data,true,nil)
             if let down = downloadIfExist {

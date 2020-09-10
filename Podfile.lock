@@ -14,7 +14,14 @@ PODS:
   - Kingfisher/Core (5.14.1)
   - MBProgressHUD (1.2.0)
   - MJRefresh (3.5.0)
-  - PINCache (2.3)
+  - PINCache (3.0.1):
+    - PINCache/Arc-exception-safe (= 3.0.1)
+    - PINCache/Core (= 3.0.1)
+  - PINCache/Arc-exception-safe (3.0.1):
+    - PINCache/Core
+  - PINCache/Core (3.0.1):
+    - PINOperation (~> 1.2.0)
+  - PINOperation (1.2)
   - PPiOSKit/CommomViews (0.0.1)
   - PPiOSKit/CrashCatcher (0.0.1):
     - PPiOSKit/RuntimeTool
@@ -68,6 +75,7 @@ SPEC REPOS:
     - MBProgressHUD
     - MJRefresh
     - PINCache
+    - PINOperation
     - PryntTrimmerView
     - SKPhotoBrowser
     - SnapKit
@@ -97,7 +105,8 @@ SPEC CHECKSUMS:
   Kingfisher: 8050bc6f7f68cbf3908bd04df7ccbac188f6d6d6
   MBProgressHUD: 3ee5efcc380f6a79a7cc9b363dd669c5e1ae7406
   MJRefresh: 6afc955813966afb08305477dd7a0d9ad5e79a16
-  PINCache: ce36ed282031b92fc7733ffe831f474ff80fddc2
+  PINCache: ee3c4abadd09970a61cdda0cfc345e69a3d75b26
+  PINOperation: 3a967a927e7867e61976c6cc23e5770416449fbc
   PPiOSKit: 9f049cf7ff47cefda7f747a404254ee1a5ae7f85
   PryntTrimmerView: 67e67573ffd4c073f1308effa66aefd0cfa667a0
   SKPhotoBrowser: 343de95d89dc7913763c5dda243cc6e606e4a168
@@ -107,6 +116,6 @@ SPEC CHECKSUMS:
   YPImagePicker: 08bbb809ed62bf4149fc015c97249eb4b9463ff9
   YYText: 5c461d709e24d55a182d1441c41dc639a18a4849
 
-PODFILE CHECKSUM: 9c4a63843142163d61c184bc3ffe454c81dfb2af
+PODFILE CHECKSUM: ffa496b9fec1a6a61b6e8828d57a20f54120fdcc
 
 COCOAPODS: 1.9.3

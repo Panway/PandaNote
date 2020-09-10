@@ -52,13 +52,18 @@ class PPPasteboardTool: NSObject {
             PPHUD.showHUDFromTop("URL太多，已为你解析第一个URL")
         }
         //去掉URL问号后面的参数
-        if urlString.contains("smzdm.com") || urlString.contains("okjike.com") {
+        if urlString.contains("smzdm.com") || urlString.contains("okjike.com") || urlString.contains("weibointl.api.weibo.com"){
             urlString = urlString.split(string: "?")[0]
         }
         
         debugPrint(urlString)
         AF.request(urlString).responseJSON { response in
-            if let data = response.data, let utf8Text = String(data: data, encoding: .utf8) {
+            //if let 改成 guard let可以减少缩进。至于下面为啥没改？是历史遗留问题，改动的时候再提交。
+//            if let data = response.data, let utf8Text = String(data: data, encoding: .utf8) {
+//            }
+            guard let data = response.data, let utf8Text = String(textData: data) else {
+                return
+            }
                 //使用模拟器的时候，保存到自己电脑下载文件夹查看（pan是当前电脑用户名）
                 #if DEBUG
                 try? data.write(to: URL(fileURLWithPath: "/Users/pan/Downloads/PP_TEST.html", isDirectory: false))
@@ -83,8 +88,7 @@ class PPPasteboardTool: NSObject {
                         UIViewController.topViewControllerForKeyWindow()?.navigationController?.pushViewController(vc, animated: true)
                     }
                 }
-                
-            }
+
         }
         
         
@@ -116,6 +120,11 @@ class PPPasteboardTool: NSObject {
                         result = getStringSeparatedBy(result,"_")
                         break
                     }
+                }
+            }
+            else if originURL.contains("weibointl.api.weibo.com") {//微博国际版解析正文内容
+                for link in doc.css(".weibo-text") {
+                    result = link.text ?? ""
                 }
             }
             else {

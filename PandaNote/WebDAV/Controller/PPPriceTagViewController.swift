@@ -31,7 +31,7 @@ class PPPriceTagViewController: PPBaseViewController {
         scanToRecordBtn.addTarget(self, action: #selector(scanToRecord), for: UIControl.Event.touchUpInside)
         scanToRecordBtn.snp.makeConstraints { (make) in
             make.size.equalTo(CGSize.init(width: 200, height: 100))
-            make.top.equalTo(scanToSearchBtn.snp_bottom).offset(44)
+            make.top.equalTo(scanToSearchBtn.snp.bottom).offset(44)
             make.centerX.equalToSuperview()
         }
         
@@ -138,7 +138,7 @@ class PPPriceRecordViewController: PPBaseViewController {
             make.left.equalTo(self.view).offset(15)
             make.right.equalTo(self.view).offset(-15)
             make.height.equalTo(33)
-            make.top.equalTo(self.priceTF.snp_bottom).offset(11)
+            make.top.equalTo(self.priceTF.snp.bottom).offset(11)
         }
         
         
@@ -155,7 +155,7 @@ class PPPriceRecordViewController: PPBaseViewController {
             make.left.equalTo(self.view).offset(15)
             make.right.equalTo(self.view).offset(-15)
             make.height.equalTo(33)
-            make.top.equalTo(self.nameTF.snp_bottom).offset(11)
+            make.top.equalTo(self.nameTF.snp.bottom).offset(11)
         }
 
         categoryTF = UITextField()
@@ -172,7 +172,7 @@ class PPPriceRecordViewController: PPBaseViewController {
             make.right.equalTo(self.view).offset(-15)
 //            make.width.equalTo(88)
             make.height.equalTo(33)
-            make.top.equalTo(self.remarkTF.snp_bottom).offset(11)
+            make.top.equalTo(self.remarkTF.snp.bottom).offset(11)
         }
         
         
@@ -184,7 +184,7 @@ class PPPriceRecordViewController: PPBaseViewController {
             make.left.equalTo(self.view).offset(15)
             make.right.equalTo(self.view).offset(-15)
             make.height.equalTo(33)
-            make.top.equalTo(self.categoryTF.snp_bottom).offset(11)
+            make.top.equalTo(self.categoryTF.snp.bottom).offset(11)
         }
         
         submitBtn = UIButton.init(type: UIButton.ButtonType.custom)
@@ -196,7 +196,7 @@ class PPPriceRecordViewController: PPBaseViewController {
             make.left.equalTo(self.view).offset(15)
             make.right.equalTo(self.view).offset(-15)
             make.height.equalTo(44)
-            make.top.equalTo(self.codeLB.snp_bottom).offset(11)
+            make.top.equalTo(self.codeLB.snp.bottom).offset(11)
         }
         
         

@@ -79,7 +79,7 @@ class PPWebViewController: UIViewController,WKUIDelegate,WKNavigationDelegate,WK
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         if let _ = self.markdownStr {
-            self.wkWebView.reload()
+            self.loadURL()
         }
     }
     func loadURL() {
@@ -102,7 +102,9 @@ class PPWebViewController: UIViewController,WKUIDelegate,WKNavigationDelegate,WK
         
         
     }
-    
+    override func didReceiveMemoryWarning() {
+        debugPrint("==内存警告！")
+    }
 
     //MARK: WKNavigationDelegate
     

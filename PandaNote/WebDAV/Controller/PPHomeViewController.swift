@@ -85,12 +85,12 @@ class PPHomeViewController: PPBaseViewController,UITextFieldDelegate,UITableView
         PPUserInfo.shared.insertToRecentFiles(fileObj)
         
         if fileObj.isDirectory {
-            let vc = PPHomeViewController.init()
+            let vc = PPHomeViewController()
             vc.pathStr = fileObj.path + "/"
             self.navigationController?.pushViewController(vc, animated: true)
         }
         else if (self.isTextFile(fileObj.name))  {
-            let vc = PPMarkdownViewController.init()
+            let vc = PPMarkdownViewController()
             vc.filePathStr = fileObj.path
             self.navigationController?.pushViewController(vc, animated: true)
         }
@@ -141,7 +141,10 @@ class PPHomeViewController: PPBaseViewController,UITextFieldDelegate,UITableView
                 }
                 else {
                     DispatchQueue.main.async {
-                        PPHUD.showHUDText(message: "删除成功哟！", view: self.view)
+                        PPHUD.showHUDFromTop("文件删除成功")// (message: "删除成功哟！", view: self.view)
+                        if let index = PPUserInfo.shared.pp_RecentFiles.firstIndex(of: fileObj) {
+                            PPUserInfo.shared.pp_RecentFiles.remove(at: index)
+                        }
                         self.getWebDAVData()
                     }
                 }
@@ -155,7 +158,7 @@ class PPHomeViewController: PPBaseViewController,UITextFieldDelegate,UITableView
             debugPrint("==重命名")
             //MARK:重命名
             let fileObj = self.dataSource[indexPath.row]
-            self.renameFile(oldFileName: fileObj.name)
+            self.renameFile(fileObj)
 
         }
         complete.backgroundColor = UIColor(red:0.27, green:0.68, blue:0.49, alpha:1.00)
@@ -257,11 +260,13 @@ class PPHomeViewController: PPBaseViewController,UITextFieldDelegate,UITableView
     }
     
     /// 重命名文件
-    func renameFile(oldFileName:String) {
+    func renameFile(_ fileObj:PPFileObject) {
+        // 把 /Notes/ATest.md 变成 /Notes/
+        let pathPrefix = fileObj.path.replacingOccurrences(of: fileObj.name, with: "")
         let alertController = UIAlertController(title: "修改文件（夹）名", message: "", preferredStyle: UIAlertController.Style.alert)
         alertController.addTextField { (textField : UITextField!) -> Void in
             textField.placeholder = "输入文件名"
-            textField.text = oldFileName
+            textField.text = fileObj.name
             textField.delegate = self
             textField.tag = 2333
         }
@@ -272,9 +277,16 @@ class PPHomeViewController: PPBaseViewController,UITextFieldDelegate,UITableView
                 PPHUD.showHUDFromTop(tips, isError: true)
                 return
             }
-            
-            PPFileManager.sharedManager.moveFileViaWebDAV(pathOld: self.pathStr+oldFileName, pathNew: self.pathStr + firstTextField.text!) { (error) in
+            guard let newName = firstTextField.text else { return }
+            PPFileManager.sharedManager.moveFileViaWebDAV(pathOld: pathPrefix+fileObj.name, pathNew: pathPrefix + newName) { (error) in
                 PPHUD.showHUDFromTop("修改成功")
+                var fileNew = fileObj
+                fileNew.name = newName
+                fileNew.path = pathPrefix + newName
+                if let index = PPUserInfo.shared.pp_RecentFiles.firstIndex(of: fileObj) {
+                    PPUserInfo.shared.pp_RecentFiles.remove(at: index)
+                    PPUserInfo.shared.insertToRecentFiles(fileNew)
+                }
                 self.getWebDAVData()
             }
         })

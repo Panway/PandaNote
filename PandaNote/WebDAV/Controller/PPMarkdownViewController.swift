@@ -27,13 +27,22 @@ class PPMarkdownViewController: PPBaseViewController,UITextViewDelegate {
     override func viewDidLoad() {
         pp_initView()
         self.title = self.filePathStr.split(string: "/").last
-        PPFileManager.sharedManager.loadFileFromWebDAV(path: self.filePathStr,downloadIfExist: true) { (contents,isFromCache, error) in
+        PPFileManager.sharedManager.loadFileFromWebDAV(path: self.filePathStr,downloadIfExist: true) { (contents: Data?,isFromCache, error) in
             guard let contents = contents else {
                 return
             }
             PPHUD.showHUDFromTop(isFromCache ? "已加载缓存文件":"已加载最新的")
 //            debugPrint(String(data: contents, encoding: .utf8)!) // "hello world!"
-            self.markdownStr = String.init(data: contents as Data, encoding: String.Encoding.utf8)!
+            if let text_encoded = String(textData: contents) {
+                self.markdownStr = text_encoded
+            }
+            else {
+                PPHUD.showHUDFromTop("此文本无法用 UTF8 编码", isError:true)
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+                    self.navigationController?.popViewController(animated: true)
+                }
+                return
+            }
             self.textView.text = self.markdownStr
             //NSAttributedString+Markdown 渲染
 //            self.textView.attributedText = NSAttributedString(markdownRepresentation: self.markdownStr, attributes: [.font : UIFont.systemFont(ofSize: 17.0), .foregroundColor: UIColor.darkText ])

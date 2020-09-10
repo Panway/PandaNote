@@ -135,7 +135,7 @@ class PPUserInfo: NSObject {
     ///共享的网页，提高网页显示速度
     lazy var webViewController: PPWebViewController = {
         let webVC = PPWebViewController()
-        webVC.urlString = "https://tophub.today"
+//        webVC.urlString = "https://tophub.today"
         return webVC
     }()
 //    func save(_ value: String, forKey defaultName: String) -> Void {

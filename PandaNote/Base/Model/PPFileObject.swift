@@ -14,7 +14,7 @@ import FilesProvider
 
 struct PPFileObject:Equatable {
     var name: String
-    var path: String
+    var path: String//文件相对路径，比如`/我的坚果云/me.jpg`
     var size: Int64
     var isDirectory: Bool
     var modifiedDate: String
