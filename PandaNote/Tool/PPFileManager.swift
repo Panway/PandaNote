@@ -14,7 +14,7 @@ import PINCache
 class PPFileManager: NSObject,FileProviderDelegate {
     let apiCacheDir = "WebDAV/api_"
     
-    static let sharedManager = PPFileManager()
+    static let shared = PPFileManager()
     var webdav: WebDAVFileProvider?//未配置服务器地址时刷新可能为空
 
     override init() {
@@ -92,7 +92,7 @@ class PPFileManager: NSObject,FileProviderDelegate {
     }
     /// 从WebDAV下载文件获取Data
     func downloadFileFromWebDAV(path: String, cacheFile: Bool? = false,completionHandler: @escaping ((_ contents: Data?, _ isFromCache:Bool, _ error: Error?) -> Void)) {
-        PPFileManager.sharedManager.webdav?.contents(path: path, completionHandler: { (data, error) in
+        webdav?.contents(path: path, completionHandler: { (data, error) in
             if error == nil {
                 DispatchQueue.main.async {
                     completionHandler(data,false,error)
@@ -119,7 +119,7 @@ class PPFileManager: NSObject,FileProviderDelegate {
         // 1 从本地磁盘获取文件缓存
         PPDiskCache.shared.fetchData(key: path, failure: { (error) in
             // 2-2 从本地磁盘获取文件失败也从服务器获取最新的
-            PPFileManager.sharedManager.webdav?.contents(path: path, completionHandler: { (data, error) in
+            self.webdav?.contents(path: path, completionHandler: { (data, error) in
                 if error == nil {
                     DispatchQueue.main.async {
                         PPDiskCache.shared.setDataSynchronously(data, key: path)
@@ -146,7 +146,7 @@ class PPFileManager: NSObject,FileProviderDelegate {
     }
     /// 通过WebDAV上传到服务器
     func uploadFileViaWebDAV(path: String, contents: Data?, completionHander:@escaping(_ error:Error?) -> Void) {
-        PPFileManager.sharedManager.webdav?.writeContents(path: path, contents: contents, completionHandler: { (error) in
+        webdav?.writeContents(path: path, contents: contents, completionHandler: { (error) in
             if error == nil {
                 DispatchQueue.main.async {
                     completionHander(error)
@@ -159,7 +159,7 @@ class PPFileManager: NSObject,FileProviderDelegate {
     }
     /// 通过WebDAV修改文件
     func moveFileViaWebDAV(pathOld: String, pathNew: String, completionHander:@escaping(_ error:Error?) -> Void) {
-        PPFileManager.sharedManager.webdav?.moveItem(path:pathOld, to: pathNew, completionHandler: { (error) in
+        webdav?.moveItem(path:pathOld, to: pathNew, completionHandler: { (error) in
             if error == nil {
                 DispatchQueue.main.async {
                     completionHander(error)
@@ -173,7 +173,19 @@ class PPFileManager: NSObject,FileProviderDelegate {
             
         })
     }
-    
+    /// 通过WebDAV 新建文件夹
+    func createFolderViaWebDAV(folder folderName: String, at atPath: String, completionHander:@escaping(_ error:Error?) -> Void) {
+        webdav?.create(folder: folderName, at: atPath, completionHandler: { (error) in
+            if error == nil {
+                DispatchQueue.main.async {
+                    completionHander(error)
+                }
+            }
+            else {
+                debugPrint(error ?? "createFolderViaWebDAV Error")
+            }
+        })
+    }
     
     //MARK:初始化webDAV设置
     /// 初始化WebDAV设置

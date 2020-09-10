@@ -27,7 +27,7 @@ class PPMarkdownViewController: PPBaseViewController,UITextViewDelegate {
     override func viewDidLoad() {
         pp_initView()
         self.title = self.filePathStr.split(string: "/").last
-        PPFileManager.sharedManager.loadFileFromWebDAV(path: self.filePathStr,downloadIfExist: true) { (contents: Data?,isFromCache, error) in
+        PPFileManager.shared.loadFileFromWebDAV(path: self.filePathStr,downloadIfExist: true) { (contents: Data?,isFromCache, error) in
             guard let contents = contents else {
                 return
             }
@@ -180,7 +180,7 @@ class PPMarkdownViewController: PPBaseViewController,UITextViewDelegate {
         debugPrint("保存的是===\(stringToUpload)")
         //MARK:保存
         self.textView.resignFirstResponder()
-        PPFileManager.sharedManager.uploadFileViaWebDAV(path: self.filePathStr, contents: stringToUpload.data(using: .utf8), completionHander: { (error) in
+        PPFileManager.shared.uploadFileViaWebDAV(path: self.filePathStr, contents: stringToUpload.data(using: .utf8), completionHander: { (error) in
             PPHUD.showHUDFromTop("保存成功")
             self.textChanged = false
             if (self.closeAfterSave) {

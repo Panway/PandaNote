@@ -18,7 +18,7 @@ class PPPDFViewController: PPBaseViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         self.pdfview = PDFView(frame: CGRect(x: 0, y: 0, width: view.frame.width, height: view.frame.height))
-        PPFileManager.sharedManager.loadFileFromWebDAV(path: self.filePathStr,downloadIfExist: false) { (contents,isFromCache, error) in
+        PPFileManager.shared.loadFileFromWebDAV(path: self.filePathStr,downloadIfExist: false) { (contents,isFromCache, error) in
             guard let contents = contents else { return }
             
 //            let url = Bundle.main.url(forResource: "sample", withExtension: "pdf")

@@ -110,7 +110,7 @@ class PPHomeViewController: PPBaseViewController,UITextFieldDelegate,UITableView
             }
         }
         else if (fileObj.name.hasSuffix("mp3")||fileObj.name.lowercased().hasSuffix("mp4"))  {
-            PPFileManager.sharedManager.loadFileFromWebDAV(path: fileObj.path, downloadIfExist: false) { (contents,isFromCache, error) in
+            PPFileManager.shared.loadFileFromWebDAV(path: fileObj.path, downloadIfExist: false) { (contents,isFromCache, error) in
                 
                 if error != nil {
                     return
@@ -133,7 +133,7 @@ class PPHomeViewController: PPBaseViewController,UITextFieldDelegate,UITableView
         let delete = UITableViewRowAction(style: .default, title: "删除") { (action, indexPath) in
             let fileObj = self.dataSource[indexPath.row]
             //相对路径
-            PPFileManager.sharedManager.webdav?.removeItem(path:fileObj.path, completionHandler: { (error) in
+            PPFileManager.shared.webdav?.removeItem(path:fileObj.path, completionHandler: { (error) in
                 if let errorNew = error {
                     DispatchQueue.main.async {
                         PPHUD.showHUDFromTop("删除失败: \(String(describing: errorNew))", isError: true)
@@ -278,7 +278,7 @@ class PPHomeViewController: PPBaseViewController,UITextFieldDelegate,UITableView
                 return
             }
             guard let newName = firstTextField.text else { return }
-            PPFileManager.sharedManager.moveFileViaWebDAV(pathOld: pathPrefix+fileObj.name, pathNew: pathPrefix + newName) { (error) in
+            PPFileManager.shared.moveFileViaWebDAV(pathOld: pathPrefix+fileObj.name, pathNew: pathPrefix + newName) { (error) in
                 PPHUD.showHUDFromTop("修改成功")
                 var fileNew = fileObj
                 fileNew.name = newName
@@ -298,7 +298,7 @@ class PPHomeViewController: PPBaseViewController,UITextFieldDelegate,UITableView
     
     
     @objc func moreAction()  {
-        PPAlertAction.showSheet(withTitle: "更多操作", message: nil, cancelButtonTitle: "取消", destructiveButtonTitle: nil, otherButtonTitle: ["从🏞添加照骗","新建文本文档"]) { (index) in
+        PPAlertAction.showSheet(withTitle: "更多操作", message: nil, cancelButtonTitle: "取消", destructiveButtonTitle: nil, otherButtonTitle: ["从🏞添加照骗","新建文本文档📃","新建文件夹📂"]) { (index) in
             debugPrint(index)
             if index == 1 {
                 self.showImagePicker()
@@ -306,14 +306,17 @@ class PPHomeViewController: PPBaseViewController,UITextFieldDelegate,UITableView
             else if index == 2 {
                 self.newTextFile()
             }
+            else if index == 3 {
+                self.newTextFile(isDir: true)
+            }
         }
     }
     //MARK:新建文本文档 & 上传照片
-    func newTextFile() {
-        let alertController = UIAlertController(title: "新建纯文本(格式任意)", message: "", preferredStyle: UIAlertController.Style.alert)
+    func newTextFile(isDir:Bool = false) {
+        let alertController = UIAlertController(title: isDir ? "新建文件夹" :"新建纯文本(格式任意)", message: "", preferredStyle: UIAlertController.Style.alert)
         alertController.addTextField { (textField : UITextField!) -> Void in
             textField.placeholder = "输入文件名"
-            textField.text = "新建文档.md"
+            textField.text = isDir ? "新建文件夹" :"新建文档.md"
             textField.delegate = self
             textField.tag = 2333
         }
@@ -324,11 +327,24 @@ class PPHomeViewController: PPBaseViewController,UITextFieldDelegate,UITableView
         let saveAction = UIAlertAction(title: "保存", style: UIAlertAction.Style.default, handler: { alert -> Void in
             let firstTextField = alertController.textFields![0] as UITextField
 //            let secondTextField = alertController.textFields![1] as UITextField
-            if let tips = self.fileNameInvalidResult(firstTextField.text) {
+            guard let newName = firstTextField.text else { return }
+            if let tips = self.fileNameInvalidResult(newName) {
                 PPHUD.showHUDFromTop(tips, isError: true)
                 return
             }
-            PPFileManager.sharedManager.uploadFileViaWebDAV(path: self.pathStr+firstTextField.text!, contents: "# 标题".data(using:.utf8)) { (error) in
+            if isDir {
+                PPFileManager.shared.createFolderViaWebDAV(folder: newName, at: self.pathStr) { (error) in
+                    if error == nil {
+                        PPHUD.showHUDFromTop("新建成功")
+                        self.getWebDAVData()
+                    }
+                    else {
+                        PPHUD.showHUDFromTop("新建失败", isError: true)
+                    }
+                }
+            }
+            else {
+            PPFileManager.shared.uploadFileViaWebDAV(path: self.pathStr+newName, contents: "# 标题".data(using:.utf8)) { (error) in
                 if error != nil {
                     PPHUD.showHUDFromTop("新建失败", isError: true)
                 }
@@ -336,6 +352,8 @@ class PPHomeViewController: PPBaseViewController,UITextFieldDelegate,UITableView
                     PPHUD.showHUDFromTop("新建成功")
                     self.getWebDAVData()
                 }
+            }
+                
             }
         })
         let cancelAction = UIAlertAction(title: "取消", style: UIAlertAction.Style.default, handler: {(action : UIAlertAction!) -> Void in })
@@ -354,13 +372,13 @@ class PPHomeViewController: PPBaseViewController,UITextFieldDelegate,UITableView
             guard let photo = items.singlePhoto else {
                 return
             }
-            PPFileManager.sharedManager.getImageDataFromAsset(asset: photo.asset!, completion: { (imageData,imageLocalURL) in
+            PPFileManager.shared.getImageDataFromAsset(asset: photo.asset!, completion: { (imageData,imageLocalURL) in
                 guard let imageLocalURL = imageLocalURL else {
                     return
                 }
                 let remotePath = self.pathStr + "PP_"+imageLocalURL.lastPathComponent
                 debugPrint(imageLocalURL)
-                PPFileManager.sharedManager.uploadFileViaWebDAV(path: remotePath, contents: imageData as Data?) { (error) in
+                PPFileManager.shared.uploadFileViaWebDAV(path: remotePath, contents: imageData as Data?) { (error) in
                     PPHUD.showHUDText(message: "上传成功🦄", view: self.view)
                     self.getWebDAVData()
                 }
@@ -395,7 +413,7 @@ class PPHomeViewController: PPBaseViewController,UITextFieldDelegate,UITableView
  */
         }
         else {
-            PPFileManager.sharedManager.webdav?.contents(path: imageURL, completionHandler: {
+            PPFileManager.shared.webdav?.contents(path: imageURL, completionHandler: {
                 contents, error in
                 guard let contents = contents else {
                     return
@@ -447,9 +465,9 @@ class PPHomeViewController: PPBaseViewController,UITextFieldDelegate,UITableView
         }
         
         if (PPUserInfo.shared.webDAVServerURL.length < 1) {
-            PPFileManager.sharedManager.initWebDAVSetting()
+            PPFileManager.shared.initWebDAVSetting()
         }
-        PPFileManager.sharedManager.getWebDAVFileList(path: self.pathStr) { (contents,isFromCache, error) in
+        PPFileManager.shared.getWebDAVFileList(path: self.pathStr) { (contents,isFromCache, error) in
             if error != nil {
                 PPHUD.showHUDFromTop("加载失败，请配置服务器", isError: true)
                 self.tableView.endRefreshing()
