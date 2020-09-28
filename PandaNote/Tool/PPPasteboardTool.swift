@@ -76,8 +76,11 @@ class PPPasteboardTool: NSObject {
                 PPUserInfo.shared.pp_Setting.updateValue(title, forKey: "PPLastPasteBoardContent")
                 debugPrint("新的分享内容====" + title)
             var userActions = ["🍀去微信分享","🌏打开网页"]
+            var douyinVideoID = "" //抖音视频ID
             if urlString.contains("v.douyin.com") {
                 userActions.append("⬇️下载抖音无水印视频")
+                douyinVideoID = response.response?.url?.pathComponents.last ?? ""
+                //重定向后的URL,https://www.iesdouyin.com/share/video/6736813535613013260/ ...
             }
             
             PPAlertAction.showSheet(withTitle: "是否去微信粘贴", message: "", cancelButtonTitle: "取消", destructiveButtonTitle: nil, otherButtonTitle: userActions) { (index) in
@@ -96,7 +99,7 @@ class PPPasteboardTool: NSObject {
                         let results = utf8Text.pp_matches(for: "//s3.{1,80}reflow_video.*.js")
                         guard let res0 = results.first else { return }
                         debugPrint(res0)
-                        PPPasteboardTool.downLoadDouYinVideoWithoutWaterMark(id: "6736813535613013260", jsURL: "https:"+res0)
+                        PPPasteboardTool.downLoadDouYinVideoWithoutWaterMark(id: douyinVideoID, jsURL: "https:"+res0)
                     }
                 }
 
