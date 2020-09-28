@@ -75,7 +75,12 @@ class PPPasteboardTool: NSObject {
                 UIPasteboard.general.string = title
                 PPUserInfo.shared.pp_Setting.updateValue(title, forKey: "PPLastPasteBoardContent")
                 debugPrint("新的分享内容====" + title)
-                PPAlertAction.showSheet(withTitle: "是否去微信粘贴", message: "", cancelButtonTitle: "取消", destructiveButtonTitle: nil, otherButtonTitle: ["🍀去微信分享","🌏打开网页"]) { (index) in
+            var userActions = ["🍀去微信分享","🌏打开网页"]
+            if urlString.contains("v.douyin.com") {
+                userActions.append("⬇️下载抖音无水印视频")
+            }
+            
+            PPAlertAction.showSheet(withTitle: "是否去微信粘贴", message: "", cancelButtonTitle: "取消", destructiveButtonTitle: nil, otherButtonTitle: userActions) { (index) in
                     debugPrint("==\(index)")
                     if (index == 1) {
                         if let weixin = URL(string: "wechat://") {
@@ -86,6 +91,12 @@ class PPPasteboardTool: NSObject {
                         let vc = PPWebViewController()
                         vc.urlString = urlString
                         UIViewController.topViewControllerForKeyWindow()?.navigationController?.pushViewController(vc, animated: true)
+                    }
+                    else if (index == 3) {
+                        let results = utf8Text.pp_matches(for: "//s3.{1,80}reflow_video.*.js")
+                        guard let res0 = results.first else { return }
+                        debugPrint(res0)
+                        PPPasteboardTool.downLoadDouYinVideoWithoutWaterMark(id: "6736813535613013260", jsURL: "https:"+res0)
                     }
                 }
 
@@ -151,6 +162,39 @@ class PPPasteboardTool: NSObject {
         return result
     }
     
+    
+     
+    // 无水印解析来自：https://gist.github.com/d1y/cf8e21a1ad36b582e70da2941e624ea9
+    /// 解析抖音无水印视频并下载V1
+    class func downLoadDouYinVideoWithoutWaterMark(id:String,jsURL:String) {
+        let parameters = ["item_ids": id]
+//        let headers: HTTPHeaders = ["User-Agent":"Mozilla/5.0 (Linux; Android 5.0; SM-G900P Build/LRX21T) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.25 Mobile Safari/537.36"]
+        AF.request("https://www.iesdouyin.com/web/api/v2/aweme/iteminfo/", parameters: parameters).responseJSON { response in
+            guard let value = response.value else {
+                return
+            }
+            let jsonDic:Dictionary = value as! Dictionary<String, Any>
+            guard let item_list = jsonDic["item_list"] else {
+                return
+            }
+            let array:Array = item_list as! Array<Any>
+            let user = DouyinItem(JSON:array.first as! [String : Any] )
+            if let videoURL = user?.video?.playAddr?.urlList?[0] {
+                debugPrint(videoURL)
+                let videoURLWithoutWaterMark = videoURL.replacingOccurrences(of: "playwm", with: "play")
+                PPWebFileViewController.downloadVideo(url: videoURLWithoutWaterMark)
+                //HTTP HEAD 方法 请求资源的头部信息, 并且这些头部与 HTTP GET 方法请求时返回的一致. 该请求方法的一个使用场景是在下载一个大文件前先获取其大小再决定是否要下载, 以此可以节约带宽资源.
+                // https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Methods/HEAD
+//                AF.request(videoURL, method: .head, headers: headers).responseString { response in
+//                    if let realVideoURL = response.response?.allHeaderFields["Location"] {
+//                        debugPrint("无水印地址: \(realVideoURL)")
+//                    }
+//                }
+            }
+            
+        }
+        
+    }
     
     
     

@@ -60,55 +60,7 @@ class PPWebFileViewController: PPBaseViewController,UITableViewDataSource,UITabl
             self.showImage(index: indexPath.row, image: nil, imageName: "", imageURL: fileObj.name)
         }
         else if (fileObj.name.pp_isVideoFile())  {
-            let formatter = DateFormatter()
-            formatter.dateFormat = "yyyy-dd-MM_HHmmss"
-            let currentDate: String = formatter.string(from: Date())
-            
-            PPAlertAction.showAlert(withTitle: "是否保存到相册", msg: "", buttonsStatement: ["好的👌","不了"]) { (index) in
-                if (index == 0) {
-                    
-                    let destination: DownloadRequest.Destination = { _, _ in
-                        let documentsURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
-                        let fileURL = documentsURL.appendingPathComponent(currentDate+".mp4")
-                        
-                        return (fileURL, [.removePreviousFile, .createIntermediateDirectories])
-                    }
-                    
-                    AF.download(fileObj.path, to: destination).response { response in
-                        debugPrint(response)
-                        
-                        if response.error == nil, let imagePath = response.fileURL {
-                            PHPhotoLibrary.shared().performChanges({
-                                PHAssetChangeRequest.creationRequestForAssetFromVideo(atFileURL: imagePath)
-                            }) { saved, error in
-                                if saved {
-                                    DispatchQueue.main.async {
-                                        let alertController = UIAlertController(title: "您的视频已成功保存", message: nil, preferredStyle: .alert)
-                                        let defaultAction = UIAlertAction(title: "OK", style: .default, handler: nil)
-                                        alertController.addAction(defaultAction)
-                                        self.present(alertController, animated: true, completion: nil)
-                                        
-                                    }
-                                }
-                            }
-                            
-                            
-                        }
-                    }
-                    
-                    
-//Alamofire.download(fileObj.path).responseData { response in
-//    if let data = response.result.value {
-//        let template =  NSTemporaryDirectory().appending("/"+fileObj.name)
-//
-//        PPDiskCache.shared.setDataSync(data, destPath:template , key: fileObj.name)
-//    }
-//}
-                    
-                    
-                }
-                
-            }
+            PPWebFileViewController.downloadVideo(url: fileObj.path)
         }
         
     }
@@ -157,6 +109,41 @@ class PPWebFileViewController: PPBaseViewController,UITableViewDataSource,UITabl
                 self.dataSource = self.originalData.filter { $0.name.hasSuffix("jpg")||$0.name.hasSuffix("png")  }
                 self.tableView.reloadData()
             }
+        }
+    }
+    
+    
+    class func downloadVideo(url:String) {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-dd-MM_HHmmss"
+        let currentDate: String = formatter.string(from: Date())
+
+        PPAlertAction.showAlert(withTitle: "是否保存到相册", msg: "", buttonsStatement: ["好的👌","不了"]) { (index) in
+            if (index == 0) {
+                let destination: DownloadRequest.Destination = { _, _ in
+                    let documentsURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+                    let fileURL = documentsURL.appendingPathComponent(currentDate+".mp4")
+                    return (fileURL, [.removePreviousFile, .createIntermediateDirectories])
+                }
+                
+                AF.download(url, to: destination).response { response in
+                    debugPrint(response)
+                    guard let imagePath = response.fileURL, response.error == nil else {
+                        return
+                    }
+                    PHPhotoLibrary.shared().performChanges({
+                        PHAssetChangeRequest.creationRequestForAssetFromVideo(atFileURL: imagePath)
+                    }) { saved, error in
+                        DispatchQueue.main.async {
+                            PPAlertAction.showAlert(withTitle: "您的视频已保存" + (saved ? "成功" : "失败") , msg: "2333", buttonsStatement: ["OK"]) { (index) in
+                            }
+                        }
+                    }
+                }
+                
+                
+            }
+            
         }
     }
 

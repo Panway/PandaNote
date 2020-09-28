@@ -54,7 +54,8 @@ target 'PandaNote' do
 #  pod 'Weibo_SDK', :git => 'https://github.com/sinaweibosdk/weibo_ios_sdk.git'
   # XML解析 https://github.com/tid-kijyun/Kanna
   pod 'Kanna', '~> 5.2.2'
-
+  # JSON解析 https://github.com/tristanhimmelman/ObjectMapper
+  pod 'ObjectMapper'
 
   #----------私有----------
   #0行代码实现右滑pop返回

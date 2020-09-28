@@ -14,6 +14,7 @@ PODS:
   - Kingfisher/Core (5.14.1)
   - MBProgressHUD (1.2.0)
   - MJRefresh (3.5.0)
+  - ObjectMapper (4.2.0)
   - PINCache (3.0.1):
     - PINCache/Arc-exception-safe (= 3.0.1)
     - PINCache/Core (= 3.0.1)
@@ -50,6 +51,7 @@ DEPENDENCIES:
   - Kingfisher
   - MBProgressHUD
   - MJRefresh
+  - ObjectMapper
   - PINCache
   - PPiOSKit/CommomViews (from `https://github.com/Panway/CodeSnipetCollection.git`)
   - PPiOSKit/CrashCatcher (from `https://github.com/Panway/CodeSnipetCollection.git`)
@@ -74,6 +76,7 @@ SPEC REPOS:
     - Kingfisher
     - MBProgressHUD
     - MJRefresh
+    - ObjectMapper
     - PINCache
     - PINOperation
     - PryntTrimmerView
@@ -105,6 +108,7 @@ SPEC CHECKSUMS:
   Kingfisher: 8050bc6f7f68cbf3908bd04df7ccbac188f6d6d6
   MBProgressHUD: 3ee5efcc380f6a79a7cc9b363dd669c5e1ae7406
   MJRefresh: 6afc955813966afb08305477dd7a0d9ad5e79a16
+  ObjectMapper: 1eb41f610210777375fa806bf161dc39fb832b81
   PINCache: ee3c4abadd09970a61cdda0cfc345e69a3d75b26
   PINOperation: 3a967a927e7867e61976c6cc23e5770416449fbc
   PPiOSKit: 9f049cf7ff47cefda7f747a404254ee1a5ae7f85
@@ -116,6 +120,6 @@ SPEC CHECKSUMS:
   YPImagePicker: 08bbb809ed62bf4149fc015c97249eb4b9463ff9
   YYText: 5c461d709e24d55a182d1441c41dc639a18a4849
 
-PODFILE CHECKSUM: ffa496b9fec1a6a61b6e8828d57a20f54120fdcc
+PODFILE CHECKSUM: 1e4c6c990cb5ad5757b623d4d757bd2ad518f7a8
 
 COCOAPODS: 1.9.3
