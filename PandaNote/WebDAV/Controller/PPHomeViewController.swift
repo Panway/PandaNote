@@ -372,6 +372,10 @@ class PPHomeViewController: PPBaseViewController,UITextFieldDelegate,UITableView
             guard let photo = items.singlePhoto else {
                 return
             }
+            if photo.fromCamera == true {
+                debugPrint("====\(photo.originalImage.imageOrientation.rawValue)")
+                return
+            }
             PPFileManager.shared.getImageDataFromAsset(asset: photo.asset!, completion: { (imageData,imageLocalURL) in
                 guard let imageLocalURL = imageLocalURL else {
                     return

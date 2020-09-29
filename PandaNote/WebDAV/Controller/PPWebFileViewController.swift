@@ -135,8 +135,7 @@ class PPWebFileViewController: PPBaseViewController,UITableViewDataSource,UITabl
                         PHAssetChangeRequest.creationRequestForAssetFromVideo(atFileURL: imagePath)
                     }) { saved, error in
                         DispatchQueue.main.async {
-                            PPAlertAction.showAlert(withTitle: "您的视频已保存" + (saved ? "成功" : "失败") , msg: "2333", buttonsStatement: ["OK"]) { (index) in
-                            }
+                            PPHUD.showHUDFromTop("您的视频已保存" + (saved ? "成功" : "失败"))
                         }
                     }
                 }

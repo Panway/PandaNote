@@ -27,6 +27,7 @@ fileprivate func getStringSeparatedBy(_ s:String, _ separator:String) -> String 
 
 class PPPasteboardTool: NSObject {
     class func getMoreInfomationOfURL() {
+//        UIPasteboard.general.string = "http://v.douyin.com/mLjjtL/ 抖音的测试链接"
 //        UIPasteboard.general.string = "https://www.smzdm.com/p/20405394/?send_by=3716913905&from=other"
         guard let input = UIPasteboard.general.string else { return }
         debugPrint("剪切板内容=\(input)")
@@ -34,10 +35,8 @@ class PPPasteboardTool: NSObject {
             if input == lastPasteContent {
                 return
             }
-            
         }
 //        let input = "https://m.weibo.cn/1098618600/4494272029733190"
-
 //        let input = "This is a test with the URL https://www.smzdm.com/p/20405394/?send_by=3716913905&from=other to be detected."
         let detector = try! NSDataDetector(types: NSTextCheckingResult.CheckingType.link.rawValue)
         let matches = detector.matches(in: input, options: [], range: NSRange(location: 0, length: input.utf16.count))
@@ -96,10 +95,9 @@ class PPPasteboardTool: NSObject {
                         UIViewController.topViewControllerForKeyWindow()?.navigationController?.pushViewController(vc, animated: true)
                     }
                     else if (index == 3) {
-                        let results = utf8Text.pp_matches(for: "//s3.{1,80}reflow_video.*.js")
-                        guard let res0 = results.first else { return }
-                        debugPrint(res0)
-                        PPPasteboardTool.downLoadDouYinVideoWithoutWaterMark(id: douyinVideoID, jsURL: "https:"+res0)
+                        //let results = utf8Text.pp_matches(for: "//s3.{1,80}reflow_video.*.js")
+                        //guard let res0 = results.first else { return }
+                        PPPasteboardTool.downLoadDouYinVideoWithoutWaterMark(id: douyinVideoID)
                     }
                 }
 
@@ -169,7 +167,7 @@ class PPPasteboardTool: NSObject {
      
     // 无水印解析来自：https://gist.github.com/d1y/cf8e21a1ad36b582e70da2941e624ea9
     /// 解析抖音无水印视频并下载V1
-    class func downLoadDouYinVideoWithoutWaterMark(id:String,jsURL:String) {
+    class func downLoadDouYinVideoWithoutWaterMark(id:String) {
         let parameters = ["item_ids": id]
 //        let headers: HTTPHeaders = ["User-Agent":"Mozilla/5.0 (Linux; Android 5.0; SM-G900P Build/LRX21T) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.25 Mobile Safari/537.36"]
         AF.request("https://www.iesdouyin.com/web/api/v2/aweme/iteminfo/", parameters: parameters).responseJSON { response in
