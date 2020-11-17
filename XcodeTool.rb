@@ -1,9 +1,10 @@
 # 使用方法：cd到脚本所在目录，终端运行`ruby XcodeTool.rb`
 
 require 'xcodeproj'
-
+# 消除第三方库 deployment target警告,比如这样的:The iOS deployment target 'IPHONEOS_DEPLOYMENT_TARGET' is set to 8.0, but the range of supported deployment target versions is 9.0 to 14.2.99.
 # your_target是你的工程Target名字（每个项目都不一样，请按需修改）
-def fix_deployment_target(your_target)
+# min_surpport_version是你的项目支持的最低版本
+def fix_deployment_target(your_target,min_surpport_version)
     project_name = your_target
     full_proj_path = Dir.pwd #当前目录，比如/Users/xxx/Documents/Project/iOS/PandaNote
     full_proj_path = full_proj_path + "/Pods/*.xcodeproj"
@@ -19,13 +20,13 @@ def fix_deployment_target(your_target)
             puts target.name
             # puts "config.name is #{config.name}"
             if config.name == 'Release'
-                if config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'].to_f < 9.0
-                    config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '9.0'
+                if config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'].to_f < min_surpport_version.to_f
+                    config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = min_surpport_version
                 end
             end
             if config.name == 'Debug'
-                if config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'].to_f < 9.0
-                    config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '9.0'
+                if config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'].to_f < min_surpport_version.to_f
+                    config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = min_surpport_version
                 end
             end
 
@@ -63,9 +64,10 @@ def disableDocumentationIssue(your_target,isAllPods)
     end
 
 end
-
+# 方式是先修改众多警告的一个，然后修改一个警告，看看sourceTree里面的`project.pbxproj`文件到底是哪一行有改动，然后用我这个脚本用到的xcodeproj工具修改
 # 消除Update to recommended settings警告 isAllPods是true的话修改所有工程（Podfile设置了generate_multiple_pod_projects: true的话）
-def disableRecommendedIssue(your_target,isAllPods)
+# LastUpgradeVersion是此文件里面的值（PandaNote是我的工程名）：PandaNote.xcodeproj/xcshareddata/xcschemes/PandaNote.xcscheme
+def disableRecommendedIssue(your_target,isAllPods,lastUpgradeVersion)
     puts isAllPods.class
     project_name = your_target
     full_proj_path = Dir.pwd #当前目录，比如/Users/xxx/Documents/Project/iOS/PandaNote
@@ -77,7 +79,7 @@ def disableRecommendedIssue(your_target,isAllPods)
     puts full_proj_path
     all_file = Dir[full_proj_path]
     all_file.each do |file_name|
-        puts "=========="
+        puts "开始修改"
         puts file_name
         project = Xcodeproj::Project.open(file_name)
         #真不容易啊，在这个地方搜“PBXProject”才知道是root_object https://www.rubydoc.info/gems/xcodeproj/Xcodeproj/Project
@@ -87,14 +89,14 @@ def disableRecommendedIssue(your_target,isAllPods)
         # numberStr = number.to_s
         # nnn = Integer("123")
         # puts numberStr
-        project.root_object.attributes["LastUpgradeCheck"] = "1200" #前面想着加10，结果不行，那直接1200吧
+        project.root_object.attributes["LastUpgradeCheck"] = lastUpgradeVersion
         project.save
     end
 
 end
 
-disableRecommendedIssue("PandaNote",true)
-
+disableRecommendedIssue("PandaNote",true,"1220")
+fix_deployment_target("PandaNote","10.0")
 
 
 

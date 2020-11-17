@@ -12,7 +12,7 @@ import SKPhotoBrowser
 import Kingfisher
 import YPImagePicker
 
-class PPHomeViewController: PPBaseViewController,UITextFieldDelegate,UITableViewDataSource,UITableViewDelegate
+class PPFileListViewController: PPBaseViewController,UITextFieldDelegate,UITableViewDataSource,UITableViewDelegate
     ,SKPhotoBrowserDelegate
 {
     
@@ -85,7 +85,7 @@ class PPHomeViewController: PPBaseViewController,UITextFieldDelegate,UITableView
         PPUserInfo.shared.insertToRecentFiles(fileObj)
         
         if fileObj.isDirectory {
-            let vc = PPHomeViewController()
+            let vc = PPFileListViewController()
             vc.pathStr = fileObj.path + "/"
             self.navigationController?.pushViewController(vc, animated: true)
         }

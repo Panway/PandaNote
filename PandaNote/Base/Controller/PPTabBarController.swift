@@ -23,12 +23,12 @@ class PPTabBarController: UITabBarController {
         let _ = AF.download("https://is3-ssl.mzstatic.com/image/thumb/Purple113/v4/06/c7/6a/06c76afc-7276-8cf6-be38-4cb30cebb8e3/AppIcon-1-0-0-1x_U007emarketing-0-0-0-7-0-0-85-220.png/246x0w.png", to: destination)
     }
     class func ppTabBar() -> PPTabBarController {
-        let recentsVC = PPHomeViewController()
+        let recentsVC = PPFileListViewController()
         recentsVC.isRecentFiles = true
         recentsVC.tabBarItem = UITabBarItem(tabBarSystemItem: .history, tag: 1)
         let recentsNav = UINavigationController(rootViewController: recentsVC)
         
-        let testVC = PPHomeViewController()
+        let testVC = PPFileListViewController()
         testVC.tabBarItem = UITabBarItem(tabBarSystemItem: .topRated, tag: 1)
         let testNav = UINavigationController(rootViewController: testVC)
 
