@@ -32,6 +32,13 @@ class PPFileListViewController: PPBaseViewController,UITextFieldDelegate,UITable
     var isRecentFiles = false
     @IBOutlet weak var uploadProgressView: UIProgressView?
     @IBOutlet weak var downloadProgressView: UIProgressView?
+    //---------------搜索功能↓---------------
+    /// 展示在本控制器的上面的控制器 Search controller to help us with filtering items in the table view.
+    var searchController: UISearchController!
+    /// 展示在本控制器的上面的控制器的列表 Search results table view.
+    var resultsTableController: PPResultsTableController!
+    //---------------搜索功能↑---------------
+    
     //MARK:Life Cycle
 //    convenience init() {
 //        self.init(nibName:nil, bundle:nil)
@@ -41,10 +48,11 @@ class PPFileListViewController: PPBaseViewController,UITextFieldDelegate,UITable
         super.viewDidLoad()
         
         
-        tableView = UITableView.init(frame: self.view.bounds)
+        tableView = UITableView.init(frame: self.view.bounds)//稚嫩的写法
         self.view.addSubview(tableView)
         tableView.snp.makeConstraints { (make) in
-            make.top.left.right.equalTo(self.view)
+            make.top.equalTo(self.pp_safeLayoutGuideTop())
+            make.left.right.equalTo(self.view)
             make.bottom.equalTo(self.view).offset(0);
         }
         tableView.dataSource = self
@@ -67,6 +75,7 @@ class PPFileListViewController: PPBaseViewController,UITextFieldDelegate,UITable
         self.tableView.addRefreshHeader {
             self.getWebDAVData()
         }
+        setupSearchController()
     }
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return dataSource.count
@@ -89,7 +98,7 @@ class PPFileListViewController: PPBaseViewController,UITextFieldDelegate,UITable
             vc.pathStr = fileObj.path + "/"
             self.navigationController?.pushViewController(vc, animated: true)
         }
-        else if (self.isTextFile(fileObj.name))  {
+        else if (fileObj.name.isTextFile())  {
             let vc = PPMarkdownViewController()
             vc.filePathStr = fileObj.path
             self.navigationController?.pushViewController(vc, animated: true)
@@ -494,9 +503,6 @@ class PPFileListViewController: PPBaseViewController,UITextFieldDelegate,UITable
     
     
     
-    func isTextFile(_ fileName:String) -> Bool {
-        return fileName.hasSuffix("md")||fileName.hasSuffix("txt")||fileName.hasSuffix("js")||fileName.hasSuffix("html")||fileName.hasSuffix("json")||fileName.hasSuffix("py")||fileName.hasSuffix("c")||fileName.hasSuffix("m")||fileName.hasSuffix("swift")
-    }
     
     
     override func didReceiveMemoryWarning() {

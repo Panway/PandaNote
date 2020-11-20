@@ -583,7 +583,17 @@ extension String{
 
 
 
-
+//MARK:Your Logic 自己的业务逻辑
+extension String {
+    func isTextFile() -> Bool {
+        let textSuffixs = ["md","txt","js","css","json",
+                           "html","c","h","m","swift",
+                           "sh","java","py","rb","cpp",
+                           "go","mm","plist","xml"]
+        let existedFile = textSuffixs.filter{self.hasSuffix($0)}
+        return existedFile.count > 0
+    }
+}
 extension Int {
     func pp_SizeString() -> String {
         if(self>0) {

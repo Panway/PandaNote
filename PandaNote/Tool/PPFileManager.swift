@@ -21,6 +21,33 @@ class PPFileManager: NSObject,FileProviderDelegate {
         super.init()
         initWebDAVSetting()
     }
+    //MARK:数据处理
+    func myPPFileArrayFrom(_ contents:[FileObject]) -> [PPFileObject] {
+        var fileArray = [PPFileObject]()
+        var dirCount = 0
+        //文件夹（目录）排在前面
+        let directoryFirst = true
+        for item in contents {
+            let localDate = item.modifiedDate?.addingTimeInterval(TimeInterval(PPUserInfo.shared.pp_timezoneOffset))
+            let dateStr = String(describing: localDate).substring(9..<25)
+            
+            let ppFile = PPFileObject(name: item.name,
+                                      path: item.path,
+                                      size: item.size,
+                                      isDirectory: item.isDirectory,
+                                      modifiedDate: dateStr)
+            //添加到结果数组
+            if item.isDirectory && directoryFirst {
+                fileArray.insert(ppFile, at: dirCount)
+                dirCount += 1
+            }
+            else {
+                fileArray.append(ppFile)
+            }
+        }
+        return fileArray
+    }
+    //MARK:Get获取
     /// WebDAV获取文件列表
     func getWebDAVFileList(path:String,completionHander:@escaping(_ data:[AnyObject],_ isFromCache:Bool,_ error:Error?) -> Void) {
         //先从本地缓存获取数据
@@ -52,22 +79,7 @@ class PPFileManager: NSObject,FileProviderDelegate {
     func getWebDAVData(path:String,completionHander:@escaping(_ data:[AnyObject],_ isFromCache:Bool,_ error:Error?) -> Void) {
         webdav?.contentsOfDirectory(path: path, completionHandler: {
             contents, error in
-            var archieveArray = [PPFileObject]()
-            var dirCount = 0
-            //文件夹排在前面
-            for item in contents {
-                let localDate = item.modifiedDate?.addingTimeInterval(TimeInterval(PPUserInfo.shared.pp_timezoneOffset))
-                let dateStr = String(describing: localDate).substring(9..<25)
-                
-                let ppFile = PPFileObject(name: item.name,path: item.path,size: item.size,isDirectory: item.isDirectory,modifiedDate: dateStr)
-                if item.isDirectory {
-                    archieveArray.insert(ppFile, at: dirCount)
-                    dirCount += 1
-                }
-                else {
-                    archieveArray.append(ppFile)
-                }
-            }
+            let archieveArray = self.myPPFileArrayFrom(contents)
             do {
                 let encoded = try JSONEncoder().encode(archieveArray)
 //                debugPrint(String(decoding: encoded, as: UTF8.self))
@@ -186,6 +198,35 @@ class PPFileManager: NSObject,FileProviderDelegate {
             }
         })
     }
+    
+    
+    /// 从WebDAV下载文件获取Data
+    func searchFileViaWebDAV(path: String, searchText: String?,completionHandler: @escaping ((_ files: [PPFileObject], _ isFromCache:Bool, _ error: Error?) -> Void)) {
+        //创建谓词，默认是TRUEPREDICATE
+        var query = NSPredicate(format: "TRUEPREDICATE")
+        let searchFile:[URLResourceKey] = []//[.fileSizeKey,.creationDateKey]
+        if let searchText = searchText {
+            query = NSPredicate(format: "name CONTAINS[c] '\(searchText)'")
+        }
+        
+        webdav?.searchFiles(path: path, recursive: true, query: query, including: searchFile, foundItemHandler: nil, completionHandler: { (files, error) in
+            let archieveArray = self.myPPFileArrayFrom(files)
+            if error == nil {
+                DispatchQueue.main.async {
+                    completionHandler(archieveArray,false,error)
+                }
+            }
+            else {
+                debugPrint(error ?? "downloadFileFromWebDAV Error")
+            }
+        })
+        
+        
+            
+            
+    }
+    
+    
     
     //MARK:初始化webDAV设置
     /// 初始化WebDAV设置
