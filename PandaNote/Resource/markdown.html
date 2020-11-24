@@ -70,9 +70,10 @@
     border-radius: 6px;
     box-shadow: 0 8px 24px rgba(149, 157, 165, .2);
   }
+
   /*模仿掘金的样式，表格可水平滑动 https://juejin.cn/post/6844904154427572231*/
   table {
-    display: inline-block!important;
+    display: inline-block !important;
     /* width: auto; */
     max-width: 100%;
     overflow: auto;
@@ -157,6 +158,7 @@
   function ppmarked(string) {
     return marked(string)
   }
+
   function generateTOC(string) {
     // var html = marked(string);
     var ctx = [];
@@ -186,14 +188,14 @@
   //滚动时保存滚动位置
   window.addEventListener('scroll', function(e) {
     // document.documentElement.scrollTop || document.body.scrollTop
-    
+
     last_known_scroll_position = window.scrollY;
     // console.log('last_known_scroll_position=' + last_known_scroll_position);
     if (!localStorage.pageoffsetY)
       localStorage.pageoffsetY = 0;
 
     localStorage.pageoffsetY = parseInt(last_known_scroll_position);
-    
+
   });
 
   // ？？？
@@ -201,7 +203,7 @@
     console.log('unload')
     var confirmationMessage = "\o/";
     alert('offset')
-    (e || window.event).returnValue = confirmationMessage; //Gecko + IE
+      (e || window.event).returnValue = confirmationMessage; //Gecko + IE
     return confirmationMessage; //Webkit, Safari, Chrome
   });
 
@@ -211,9 +213,9 @@
     var offset = localStorage.getItem("pageoffsetY");
     // alert(offset)
     //https://stackoverflow.com/a/28488360
-    setTimeout(function(){ 
-    document.documentElement.scrollTop = document.body.scrollTop = parseInt(offset);
-  }, 100);
+    setTimeout(function() {
+      document.documentElement.scrollTop = document.body.scrollTop = parseInt(offset);
+    }, 100);
 
   };
   </script>
