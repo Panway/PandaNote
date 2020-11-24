@@ -131,11 +131,16 @@ class PPWebViewController: UIViewController,WKUIDelegate,WKNavigationDelegate,WK
             self.title = result as? String
         }
         if let markdown = self.markdownStr {
-            var markdownStr = markdown.replacingOccurrences(of: "\\", with: "\\\\")
-            markdownStr = markdownStr.replacingOccurrences(of: "`", with: "\\`")
-            let js = "document.getElementById('content').innerHTML = ppmarked(`\(markdownStr)`);"
+            //var markdownStr = markdown.replacingOccurrences(of: "\\", with: "\\\\")
+            //如果在模板字符串中需要使用反引号，则前面要用反斜杠转义
+            var newMD = markdown.replacingOccurrences(of: "`", with: "\\`")
+            //感谢荣宝，感谢这位老哥节约了我几个小时 https://stackoverflow.com/a/22810989/4493393
+            newMD = newMD.replacingOccurrences(of: "\'", with: "\\\'")
+            newMD = newMD.replacingOccurrences(of: "\n", with: "\\n")
+            //newMD = newMD.replacingOccurrences(of: "\r", with: "")
+            let js = "document.getElementById('content').innerHTML = ppmarked('\(newMD)')"
             webView.evaluateJavaScript(js, completionHandler: { result, error in
-                debugPrint("\(String(describing: result))")
+                debugPrint(error)
             })
         }
     }
