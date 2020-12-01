@@ -62,7 +62,21 @@ extension String {
         }
         return nil
     }
-    
+    //https://github.com/marcuswestin/WebViewJavascriptBridge/blob/master/WebViewJavascriptBridge/WebViewJavascriptBridgeBase.m#L181
+    ///如果在模板字符串中需要使用反引号，则前面要用反斜杠转义
+    ///感谢荣宝，感谢这位老哥节约了我几个小时 https://stackoverflow.com/a/22810989/4493393
+    func pp_replaceEscapeCharacter() -> String {
+        var newMD = self.replacingOccurrences(of: "\\", with: "\\\\")
+        newMD = newMD.replacingOccurrences(of: "\"", with: "\\\"")
+        newMD = newMD.replacingOccurrences(of: "\'", with: "\\\'")
+        newMD = newMD.replacingOccurrences(of: "\n", with: "\\n")
+        //newMD = newMD.replacingOccurrences(of: "`", with: "\\`")
+        //newMD = newMD.replacingOccurrences(of: "\r", with: "\\r")
+        //newMD = newMD.replacingOccurrences(of: "\f", with: "\\f")
+        //newMD = newMD.replacingOccurrences(of: "\u2028", with: "\\u2028")
+        //newMD = newMD.replacingOccurrences(of: "\u2029", with: "\\u2029")
+        return newMD
+    }
     //MARK: 布尔值
     var bool: Bool {
         switch self.lowercased() {

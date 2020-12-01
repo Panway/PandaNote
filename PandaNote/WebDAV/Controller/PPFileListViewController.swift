@@ -130,7 +130,13 @@ class PPFileListViewController: PPBaseViewController,UITextFieldDelegate,UITable
             }
         }
         else {
-            PPHUD.showHUDText(message: "暂不支持ho~", view: self.view)
+            PPAlertAction.showAlert(withTitle: "暂不支持", msg: "是否以纯文本方式打开", buttonsStatement: ["打开","不了"]) { (index) in
+                if index == 0 {
+                    let vc = PPMarkdownViewController()
+                    vc.filePathStr = fileObj.path
+                    self.navigationController?.pushViewController(vc, animated: true)
+                }
+            }
         }
         
     }
