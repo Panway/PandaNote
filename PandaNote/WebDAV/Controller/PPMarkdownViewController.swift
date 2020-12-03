@@ -158,6 +158,7 @@ class PPMarkdownViewController: PPBaseViewController,UITextViewDelegate {
             path = Bundle.main.url(forResource: "markdown", withExtension:"html")?.absoluteString ?? ""
             webVC.markdownStr = self.textView.text
             webVC.urlString = path // file:///....
+            webVC.markdownName = self.filePathStr
         }
         
 //        let fileURL = URL.init(fileURLWithPath: <#T##String#>)

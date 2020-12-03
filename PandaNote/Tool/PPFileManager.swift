@@ -172,14 +172,12 @@ class PPFileManager: NSObject,FileProviderDelegate {
     /// 通过WebDAV修改文件
     func moveFileViaWebDAV(pathOld: String, pathNew: String, completionHander:@escaping(_ error:Error?) -> Void) {
         webdav?.moveItem(path:pathOld, to: pathNew, completionHandler: { (error) in
-            if error == nil {
-                DispatchQueue.main.async {
+            DispatchQueue.main.async {
+                if error == nil {
                     completionHander(error)
                 }
-            }
-            else {
-                DispatchQueue.main.async {
-                    PPHUD.showHUDFromTop("移动文件",isError: true)
+                else {
+                    PPHUD.showHUDFromTop("移动文件失败",isError: true)
                 }
             }
             

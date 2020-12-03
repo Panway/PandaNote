@@ -9,6 +9,8 @@
 import Foundation
 import UIKit
 
+let PPCOLOR_GREEN = UIColor(red:0.27, green:0.68, blue:0.49, alpha:1.00)
+
 class PPBaseViewController: UIViewController {
     
     override func viewDidLoad() {

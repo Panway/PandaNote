@@ -92,3 +92,50 @@ extension PPFileListViewController: UISearchControllerDelegate {
     
 }
 
+//MARK:移动文件（夹）到其他文件夹功能
+extension PPFileListViewController {
+    func setupMoveUI() {
+        self.title = "移动到"
+        leftButton = UIButton(type: .custom)
+        leftButton.frame = CGRect(x: 0, y: 0, width: 66, height: 44)
+        leftButton.setTitle("取消", for: .normal)
+        leftButton.setTitleColor(PPCOLOR_GREEN, for: .normal)
+        
+        rightButton = UIButton(type: .custom)
+        rightButton.frame = CGRect(x: 0, y: 0, width: 66, height: 44)
+        rightButton.setTitle("完成", for: .normal)
+        rightButton.setTitleColor(PPCOLOR_GREEN, for: .normal)
+
+        
+        self.navigationItem.leftBarButtonItem = UIBarButtonItem(customView: leftButton)
+        self.navigationItem.rightBarButtonItem = UIBarButtonItem(customView: rightButton)
+        leftButton.addTarget(self, action: #selector(dismissSelf), for: .touchUpInside)
+        rightButton.addTarget(self, action: #selector(submitMove), for: .touchUpInside)
+    }
+    
+    @objc func dismissSelf() {
+        self.dismiss(animated: true, completion: nil)
+    }
+    
+    @objc func submitMove() {
+        PPAlertAction.showAlert(withTitle: "移动到这里？", msg: "", buttonsStatement: ["确定","取消"]) { (index) in
+            if index == 0 {
+                let first = self.navigationController?.viewControllers.first as! PPFileListViewController
+                guard let fileName = first.filePathToBeMove.split(separator: "/").last else {
+                    PPHUD.showHUDFromTop("移动失败，文件名有问题")
+                    return
+                }
+                PPFileManager.shared.moveFileViaWebDAV(pathOld: first.filePathToBeMove,
+                                                       pathNew: self.pathStr + fileName) { (error) in
+                    debugPrint(error?.localizedDescription)
+                    if error == nil {
+                        PPHUD.showHUDFromTop("移动成功，请刷新当前页面")
+                        self.dismissSelf()
+                    }
+                }
+                
+            }
+        }
+    }
+    
+}

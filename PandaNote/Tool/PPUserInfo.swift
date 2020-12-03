@@ -113,11 +113,14 @@ class PPUserInfo: NSObject {
 //        self.pp_Setting.updateValue(<#T##value: Any##Any#>, forKey: <#T##String#>)
         
     }
-    /// 插入最近浏览的文件或目录到最近浏览列表（如果有需要的话）
-    func insertToRecentFiles(_ fileObj:PPFileObject) {
+    func removeFileInRecentFiles(_ fileObj:PPFileObject) {
         if let index = pp_RecentFiles.firstIndex(of: fileObj) {
             pp_RecentFiles.remove(at: index)
         }
+    }
+    /// 插入最近浏览的文件或目录到最近浏览列表（如果有需要的话）
+    func insertToRecentFiles(_ fileObj:PPFileObject) {
+        removeFileInRecentFiles(fileObj)
         pp_RecentFiles.insert(fileObj, at: 0)
         if pp_RecentFiles.count > 30 {
             pp_RecentFiles.removeLast()

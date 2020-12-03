@@ -20,6 +20,7 @@ class PPWebViewController: UIViewController,WKUIDelegate,WKNavigationDelegate,WK
     var fileName: String?
     var titleStr: String?
     var markdownStr: String?
+    var markdownName: String?
     ///Main Bundle里预加载的js
     var preloadJSNameInBundle: String?
     var lastOffsetY : CGFloat = 0.0
@@ -131,7 +132,8 @@ class PPWebViewController: UIViewController,WKUIDelegate,WKNavigationDelegate,WK
             self.title = result as? String
         }
         if let markdown = self.markdownStr {
-            let js = "document.getElementById('content').innerHTML = ppmarked('\(markdown.pp_replaceEscapeCharacter())')"
+            let hash = self.markdownName?.hash ?? 0
+            let js = "document.getElementById('content').innerHTML = ppmarked('\(markdown.pp_replaceEscapeCharacter())');setFileHash(\(hash));"
             webView.evaluateJavaScript(js, completionHandler: { result, error in
                 debugPrint(error)
             })

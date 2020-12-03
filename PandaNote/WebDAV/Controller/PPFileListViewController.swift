@@ -38,7 +38,12 @@ class PPFileListViewController: PPBaseViewController,UITextFieldDelegate,UITable
     /// 展示在本控制器的上面的控制器的列表 Search results table view.
     var resultsTableController: PPResultsTableController!
     //---------------搜索功能↑---------------
-    
+    //---------------移动文件（夹）到其他文件夹功能↓---------------
+    var isMovingMode = false
+    var leftButton : UIButton!
+    var rightButton : UIButton!
+    var filePathToBeMove = ""
+    //---------------移动文件（夹）到其他文件夹功能↑---------------
     //MARK:Life Cycle
 //    convenience init() {
 //        self.init(nibName:nil, bundle:nil)
@@ -76,7 +81,18 @@ class PPFileListViewController: PPBaseViewController,UITextFieldDelegate,UITable
             self.getWebDAVData()
         }
         setupSearchController()
+        if isMovingMode {//移动文件模式
+            setupMoveUI()
+        }
+        
     }
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        if self.isRecentFiles {
+            self.getWebDAVData()//最近访问列表实时刷新
+        }
+    }
+    
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return dataSource.count
     }
@@ -96,6 +112,7 @@ class PPFileListViewController: PPBaseViewController,UITextFieldDelegate,UITable
         if fileObj.isDirectory {
             let vc = PPFileListViewController()
             vc.pathStr = fileObj.path + "/"
+            vc.isMovingMode = self.isMovingMode
             self.navigationController?.pushViewController(vc, animated: true)
         }
         else if (fileObj.name.isTextFile())  {
@@ -144,9 +161,18 @@ class PPFileListViewController: PPBaseViewController,UITextFieldDelegate,UITable
         return 60.0
     }
     func tableView(_ tableView: UITableView, editActionsForRowAt indexPath: IndexPath) -> [UITableViewRowAction]? {
-        
+        if self.isMovingMode {
+            return []
+        }
         let delete = UITableViewRowAction(style: .default, title: "删除") { (action, indexPath) in
             let fileObj = self.dataSource[indexPath.row]
+            if (self.isRecentFiles) {
+                self.dataSource.remove(at: indexPath.row)
+                PPUserInfo.shared.removeFileInRecentFiles(fileObj)
+                self.tableView.reloadData()
+                PPHUD.showHUDFromTop("已删除访问记录")
+                return
+            }
             //相对路径
             PPFileManager.shared.webdav?.removeItem(path:fileObj.path, completionHandler: { (error) in
                 if let errorNew = error {
@@ -157,9 +183,7 @@ class PPFileListViewController: PPBaseViewController,UITextFieldDelegate,UITable
                 else {
                     DispatchQueue.main.async {
                         PPHUD.showHUDFromTop("文件删除成功")// (message: "删除成功哟！", view: self.view)
-                        if let index = PPUserInfo.shared.pp_RecentFiles.firstIndex(of: fileObj) {
-                            PPUserInfo.shared.pp_RecentFiles.remove(at: index)
-                        }
+                        PPUserInfo.shared.removeFileInRecentFiles(fileObj)
                         self.getWebDAVData()
                     }
                 }
@@ -176,9 +200,18 @@ class PPFileListViewController: PPBaseViewController,UITextFieldDelegate,UITable
             self.renameFile(fileObj)
 
         }
-        complete.backgroundColor = UIColor(red:0.27, green:0.68, blue:0.49, alpha:1.00)
-        
-        return [delete, complete]
+        complete.backgroundColor = PPCOLOR_GREEN
+        let move = UITableViewRowAction(style: .default, title: "移动") { (action, indexPath) in
+            debugPrint("移动")
+            let fileObj = self.dataSource[indexPath.row]
+            let popVC = PPFileListViewController()
+            popVC.isMovingMode = true
+            popVC.filePathToBeMove = fileObj.path
+            let nav = UINavigationController(rootViewController: popVC)
+            self.present(nav, animated: true, completion: nil)
+        }
+        move.backgroundColor = UIColor(hexRGBValue: 0x98acf8)
+        return [delete, move ,complete]
     }
     //https://stackoverflow.com/a/58006735/4493393
     //here is how I selecte file name `Panda` from `Panda.txt`
