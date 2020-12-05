@@ -68,10 +68,7 @@ class PPWebDAVConfigViewController: PPBaseViewController {
             PPHUD.showHUDText(message: "请填写备注", view: self.view)
             return
         }
-        var serverList : Array = PPUserInfo.shared.pp_Setting["PPWebDAVServerList"] as? Array<Any> ?? []
-//        if serverList == nil {
-//            serverList = []
-//        }
+        var serverList = PPUserInfo.shared.pp_serverInfoList
             let newServer = ["PPWebDAVServerURL":cell1.serverNameTF.text!,
             "PPWebDAVUserName":cell2.serverNameTF.text!,
             "PPWebDAVPassword":cell3.serverNameTF.text!,
@@ -80,14 +77,10 @@ class PPWebDAVConfigViewController: PPBaseViewController {
             PPUserInfo.shared.pp_Setting["PPWebDAVServerList"] = serverList
         
         
-//        PPUserInfo.shared.save(cell1.serverNameTF.text!, forKey: "PPWebDAVServerURL")
-//        PPUserInfo.shared.save(cell2.serverNameTF.text!, forKey: "PPWebDAVUserName")
-//        PPUserInfo.shared.save(cell3.serverNameTF.text!, forKey: "PPWebDAVPassword")
-//        PPUserInfo.shared.save(cell4.serverNameTF.text!, forKey: "PPWebDAVRemark")
-        PPHUD.showHUDText(message: "保存成功", view: self.view)
+        PPHUD.showHUDFromTop("保存成功")
         PPUserInfo.shared.initConfig()
         DispatchQueue.main.asyncAfter(deadline: .now()+1) {
-            self.navigationController?.popViewController(animated: true)
+            self.navigationController?.popToRootViewController(animated: true)
         }
     }
 

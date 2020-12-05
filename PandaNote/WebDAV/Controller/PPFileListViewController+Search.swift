@@ -148,8 +148,8 @@ extension PPFileListViewController {
         self.navigationController?.pushViewController(vc, animated: true)
     }
     ///设置导航栏标题
-    func setNavTitle() {
-        let title = String(self.pathStr.split(separator: "/").last ?? "" + PPUserInfo.shared.webDAVRemark)
+    func setNavTitle(_ title:String?="") {
+        let title = (title != nil) ? title : String(self.pathStr.split(separator: "/").last ?? "" + PPUserInfo.shared.webDAVRemark)
         if isRecentFiles {
             self.title = "最近"
             return
@@ -178,17 +178,22 @@ extension PPFileListViewController {
     }
     @objc func showAddCloudServiceView(for barButtonItem: UIBarButtonItem) {
         // Create menu controller with actions
-        let controller = PopMenuViewController(sourceView: barButtonItem, actions: [
-            PopMenuDefaultAction(title: "坚果云", image: nil, color: .darkText),
-            PopMenuDefaultAction(title: "Pop another menu", image: nil, color: .darkText),
-            PopMenuDefaultAction(title: "Try it out!", image: nil, color: .darkText)
-        ])
+        guard let cloudServiceInfos = PPUserInfo.shared.pp_Setting["PPWebDAVServerList"] as?  [[String : String]] else { return }
+
+        var menuList = [PopMenuDefaultAction]()
+        for item: [String : String] in cloudServiceInfos {
+            debugPrint(item)
+            let item = PopMenuDefaultAction(title: item["PPWebDAVRemark"], image: nil, color: .darkText)
+            menuList.append(item)
+        }
+        
+        let controller = PopMenuViewController(sourceView: barButtonItem, actions: menuList)
         
         // Customize appearance
         controller.appearance.popMenuFont = UIFont(name: "AvenirNext-DemiBold", size: 16)!
 //        controller.appearance.popMenuBackgroundStyle = .blurred(.dark)
         // Configure options
-        controller.shouldDismissOnSelection = false
+        controller.shouldDismissOnSelection = true//选择后是否自动消失
         controller.delegate = self
         controller.appearance.popMenuColor.backgroundColor = .solid(fill: .white)
 
@@ -199,5 +204,11 @@ extension PPFileListViewController {
         // Present menu controller
         present(controller, animated: true, completion: nil)
     }
-
+    func popMenuDidSelectItem(_ popMenuViewController: PopMenuViewController, at index: Int) {
+        debugPrint(index)
+        PPUserInfo.shared.pp_Setting["pp_lastSeverInfoIndex"] = index
+        let info = PPUserInfo.shared.pp_serverInfoList[index]
+        setNavTitle(info["PPWebDAVRemark"])
+        PPUserInfo.shared.updateCurrentServerInfo(index: index)
+    }
 }

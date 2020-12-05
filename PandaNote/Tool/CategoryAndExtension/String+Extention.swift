@@ -77,6 +77,11 @@ extension String {
         //newMD = newMD.replacingOccurrences(of: "\u2029", with: "\\u2029")
         return newMD
     }
+    //获取URL某个参数值 eg：https://www.baidu.com/s?wd=panda  入参：wd 返回值：panda
+    func pp_valueOf(_ queryParamaterName: String) -> String? {
+        guard let url = URLComponents(string: self) else { return nil }
+        return url.queryItems?.first(where: { $0.name == queryParamaterName })?.value
+    }
     //MARK: 布尔值
     var bool: Bool {
         switch self.lowercased() {

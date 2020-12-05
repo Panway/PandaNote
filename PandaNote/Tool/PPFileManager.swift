@@ -229,23 +229,18 @@ class PPFileManager: NSObject,FileProviderDelegate {
     //MARK:初始化webDAV设置
     /// 初始化WebDAV设置
     func initWebDAVSetting() -> Void {
-        guard let webDAVInfoArray = PPUserInfo.shared.pp_Setting["PPWebDAVServerList"] as? Array<Any> else { return }
-        
-        let webDAVInfo:[String:String] = webDAVInfoArray[0] as! [String : String]
-        let webDAVServerURL = webDAVInfo["PPWebDAVServerURL"] ?? ""
-        let webDAVUserName:String = webDAVInfo["PPWebDAVUserName"] ?? ""
-        let webDAVPassword:String = webDAVInfo["PPWebDAVPassword"] ?? ""
-        let webDAVRemark:String = webDAVInfo["PPWebDAVRemark"] ?? ""
-        PPUserInfo.shared.webDAVServerURL = webDAVServerURL
-        PPUserInfo.shared.webDAVRemark = webDAVRemark
-        let server = URL(string: webDAVServerURL)!
-
-        
+        let currentServerIndex = PPUserInfo.shared.pp_Setting["pp_lastSeverInfoIndex"] as! Int
+        PPUserInfo.shared.updateCurrentServerInfo(index: currentServerIndex)
+        let server = URL(string: PPUserInfo.shared.webDAVServerURL)!
         
 //        let cache = URLCache(memoryCapacity: 5 * 1024 * 1024, diskCapacity: 3 * 1024 * 1024, diskPath: nil)
 //        URLCache.shared = cache
-        let userCredential = URLCredential(user: webDAVUserName ,
-                                           password: webDAVPassword ,
+        guard let user = PPUserInfo.shared.webDAVUserName,let password = PPUserInfo.shared.webDAVPassword else {
+            debugPrint("无法初始化服务器")
+            return
+        }
+        let userCredential = URLCredential(user: user,
+                                           password: password,
                                            persistence: .permanent)
         //            let protectionSpace = URLProtectionSpace.init(host: "dav.jianguoyun.com", port: 443, protocol: "https", realm: "Restricted", authenticationMethod: NSURLAuthenticationMethodHTTPBasic)
         //            URLCredentialStorage.shared.setDefaultCredential(userCredential, for: protectionSpace)
@@ -254,8 +249,6 @@ class PPFileManager: NSObject,FileProviderDelegate {
         webdav?.delegate = self
         //注意：不修改鉴权方式，会导致每次请求两次，一次401失败，一次带token成功
         webdav?.credentialType = URLRequest.AuthenticationType.basic
-//        self.perform(Selector(("getData:")), with: self, afterDelay: 1)
-        
     }
     /// 从PHAsset获取NSData
     func getImageDataFromAsset(asset: PHAsset, completion: @escaping (_ data: NSData?,_ fileURL:URL?) -> Void) {

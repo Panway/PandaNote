@@ -26,6 +26,10 @@ class PPUserInfo: NSObject {
     var pp_JSONConfig:String!
     /// webview资源
     var pp_WebViewResource = [String]()
+    /// 服务器信息（坚果云、Dropbox等）
+    var pp_serverInfoList = [[String : String]]()
+    /// 当前选择的是哪个服务器
+    var pp_lastSeverInfoIndex = 0
 //    var pp_RecentFiles = [Any]()
     /// 最近访问文件列表
      var pp_RecentFiles:Array<PPFileObject> = [] {
@@ -38,22 +42,13 @@ class PPUserInfo: NSObject {
             }
         }
     }
-    var totalSteps: Int = 0 {
-        willSet(newTotalSteps) {
-            print("About to set totalSteps to \(newTotalSteps)")
-        }
-        didSet {
-            if totalSteps > oldValue  {
-                print("Added \(totalSteps - oldValue) steps")
-            }
-        }
-    }
+    
     
 //    var pp_Setting:Dictionary<String, Any>!
     /// WebDAV设置等
     public var pp_Setting:Dictionary<String, Any> = [:] {
         didSet {
-            debugPrint("旧值和新值：\(String(describing: oldValue)) --> \(String(describing: pp_Setting))")
+            debugPrint("旧值：\(String(describing: oldValue)) \n新值： \(String(describing: pp_Setting))")
             let data:NSData = NSKeyedArchiver.archivedData(withRootObject: pp_Setting) as NSData
             data.write(toFile: self.pp_mainDirectory+"/PP_UserPreference", atomically: true)
             if let jsonData = try? JSONSerialization.data(withJSONObject: pp_Setting, options: JSONSerialization.WritingOptions.prettyPrinted) {
@@ -102,6 +97,9 @@ class PPUserInfo: NSObject {
             let dict2 = NSKeyedUnarchiver.unarchiveObject(with: data)
 //            debugPrint("\(String(describing: dict2))")
             self.pp_Setting = dict2 as! Dictionary<String, Any>
+            if let serverList = PPUserInfo.shared.pp_Setting["PPWebDAVServerList"] as? [[String : String]] {
+                pp_serverInfoList = serverList
+            }
 //            self.pp_JSONConfig = JSONSerialization.
         }
         if let recentFileData = try? Data(contentsOf: URL(fileURLWithPath: self.pp_mainDirectory+"/PP_RecentFiles")) {
@@ -113,6 +111,7 @@ class PPUserInfo: NSObject {
 //        self.pp_Setting.updateValue(<#T##value: Any##Any#>, forKey: <#T##String#>)
         
     }
+    //MARK:最近文件
     func removeFileInRecentFiles(_ fileObj:PPFileObject) {
         if let index = pp_RecentFiles.firstIndex(of: fileObj) {
             pp_RecentFiles.remove(at: index)
@@ -125,6 +124,19 @@ class PPUserInfo: NSObject {
         if pp_RecentFiles.count > 30 {
             pp_RecentFiles.removeLast()
         }
+    }
+    //MARK:云盘服务设置
+    func updateCurrentServerInfo(index:Int) {
+        let webDAVInfoArray = PPUserInfo.shared.pp_serverInfoList
+        let webDAVInfo = webDAVInfoArray[index]
+        let webDAVServerURL = webDAVInfo["PPWebDAVServerURL"] ?? ""
+        let webDAVUserName = webDAVInfo["PPWebDAVUserName"] ?? ""
+        let webDAVPassword = webDAVInfo["PPWebDAVPassword"] ?? ""
+        let webDAVRemark = webDAVInfo["PPWebDAVRemark"] ?? ""
+        PPUserInfo.shared.webDAVServerURL = webDAVServerURL
+        PPUserInfo.shared.webDAVRemark = webDAVRemark
+        PPUserInfo.shared.webDAVUserName = webDAVUserName
+        PPUserInfo.shared.webDAVPassword = webDAVPassword
     }
     class func pp_valueForSettingDict(key : String) -> Bool {
         if let string : String = PPUserInfo.shared.pp_Setting[key] as? String {
