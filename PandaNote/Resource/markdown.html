@@ -106,7 +106,9 @@
 	hljs.initHighlightingOnLoad();
 
   var showTOC = false;
-  let string = '正在由**marked.js**渲染中...\n\nRendered by **marked.js**.'
+  let string = '**marked.js**正在解析文本...\n\n Rendered by **marked.js**.'
+  var fileURLString = ''
+  var offsetYKey = 'offsetY'
   // document.getElementById('content').innerHTML = marked(string);
 
 
@@ -142,7 +144,7 @@
     tables: true,
     breaks: false,
     pedantic: false,
-    sanitize: true,
+    sanitize: false,
     smartLists: true,
     smartypants: false
   });
@@ -196,6 +198,20 @@
       document.querySelector('#ppTOCContent').innerHTML = "";
     }
   }
+  // 每个文件设置唯一的位置标识符
+  function setFileHash(hash) {
+    offsetYKey = `pageoffsetY${String(hash)}`
+    console.log(offsetYKey)
+    scrollToLastLocation()
+  }
+  // 滚动到上次滑动的位置
+  function scrollToLastLocation() {
+    var offset = localStorage.getItem(offsetYKey);
+    console.log("滚动到",offsetYKey,"==",offset)
+    setTimeout(function() {
+      document.documentElement.scrollTop = document.body.scrollTop = parseInt(offset);
+    }, 100);
+  }
   // document.querySelector('#content').innerHTML = final;
   // document.getElementById('content').innerHTML = generateTOC(string) + marked(string);
   document.getElementById('content').innerHTML = ppmarked(string);
@@ -207,11 +223,13 @@
 
     last_known_scroll_position = window.scrollY;
     // console.log('last_known_scroll_position=' + last_known_scroll_position);
-    if (!localStorage.pageoffsetY)
-      localStorage.pageoffsetY = 0;
+    if (!localStorage[offsetYKey]) {
+      localStorage[offsetYKey] = 0;
+    }
 
-    localStorage.pageoffsetY = parseInt(last_known_scroll_position);
-
+    // localStorage.offsetYKey = parseInt(last_known_scroll_position);
+    localStorage.setItem(offsetYKey, parseInt(last_known_scroll_position));
+    // console.log(`设置偏移量${offsetYKey}=${last_known_scroll_position}`)
   });
 
   // ？？？
@@ -226,7 +244,8 @@
   //onload时，取出并滚动到上次保存位置
   window.onload = function() {
     // console.log('window.onload')
-    var offset = localStorage.getItem("pageoffsetY");
+    var offset = localStorage.getItem(offsetYKey);
+    console.log("onload获取",offsetYKey,"==",offset)
     // alert(offset)
     //https://stackoverflow.com/a/28488360
     setTimeout(function() {

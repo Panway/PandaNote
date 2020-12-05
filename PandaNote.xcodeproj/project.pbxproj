@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		1E1B5894257B8118000860F6 /* NSAttributedString+PPTool.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E1B5893257B8118000860F6 /* NSAttributedString+PPTool.swift */; };
+		1E1B58A7257B9480000860F6 /* PPAddCloudServiceViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E1B58A6257B9480000860F6 /* PPAddCloudServiceViewController.swift */; };
 		1E1DE37C2567BA0A00BB2D1C /* PPFileListViewController+Search.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E1DE37B2567BA0A00BB2D1C /* PPFileListViewController+Search.swift */; };
 		1E1F2DEB25384C75002B0426 /* PPDebugViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E1F2DEA25384C75002B0426 /* PPDebugViewController.swift */; };
 		1E50942824DBB15B00238678 /* PPWebViewBottomToolbar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E50942724DBB15A00238678 /* PPWebViewBottomToolbar.swift */; };
@@ -88,6 +90,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		1E1B5893257B8118000860F6 /* NSAttributedString+PPTool.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NSAttributedString+PPTool.swift"; sourceTree = "<group>"; };
+		1E1B58A6257B9480000860F6 /* PPAddCloudServiceViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPAddCloudServiceViewController.swift; sourceTree = "<group>"; };
 		1E1DE37B2567BA0A00BB2D1C /* PPFileListViewController+Search.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PPFileListViewController+Search.swift"; sourceTree = "<group>"; };
 		1E1F2DEA25384C75002B0426 /* PPDebugViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPDebugViewController.swift; sourceTree = "<group>"; };
 		1E50942724DBB15A00238678 /* PPWebViewBottomToolbar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPWebViewBottomToolbar.swift; sourceTree = "<group>"; };
@@ -251,6 +255,7 @@
 				1E1DE37B2567BA0A00BB2D1C /* PPFileListViewController+Search.swift */,
 				1E556A0D25639BEF00A4653F /* PPResultsTableController.swift */,
 				60560229231772AE000809CD /* PPMarkdownViewController.swift */,
+				1E1B58A6257B9480000860F6 /* PPAddCloudServiceViewController.swift */,
 				6056027923178017000809CD /* PPWebDAVConfigViewController.swift */,
 				60E61425243DC16E00630B4B /* PPPDFViewController.swift */,
 				6001B6332461A82400A40593 /* PPWebFileViewController.swift */,
@@ -327,6 +332,7 @@
 			isa = PBXGroup;
 			children = (
 				6056024B231778D0000809CD /* String+Extention.swift */,
+				1E1B5893257B8118000860F6 /* NSAttributedString+PPTool.swift */,
 				6080D3AA233315B900F582B1 /* CacheSerializer+Panda.swift */,
 				60A1F8DB24388C98009E390C /* ViewController+PPTool.swift */,
 				60E61421243DAF2800630B4B /* UIColor+PPTool.swift */,
@@ -734,10 +740,12 @@
 				60E61426243DC16E00630B4B /* PPPDFViewController.swift in Sources */,
 				6056022A231772AE000809CD /* PPMarkdownViewController.swift in Sources */,
 				60A1F8DC24388C98009E390C /* ViewController+PPTool.swift in Sources */,
+				1E1B58A7257B9480000860F6 /* PPAddCloudServiceViewController.swift in Sources */,
 				604FFA4623DDE77B0059BBC9 /* PPPriceTagViewController.swift in Sources */,
 				1E670AAB24F62D23002DB57C /* PPPublicTool.swift in Sources */,
 				6056025823177A30000809CD /* PPFileListViewController.swift in Sources */,
 				1E556A0E25639BEF00A4653F /* PPResultsTableController.swift in Sources */,
+				1E1B5894257B8118000860F6 /* NSAttributedString+PPTool.swift in Sources */,
 				60560252231778FF000809CD /* XDRefreshHeader.m in Sources */,
 				60F5D04523275549004E988B /* XDCollectionViewCell.m in Sources */,
 				60A4CD332447325700367DA7 /* PPPasteboardTool.swift in Sources */,

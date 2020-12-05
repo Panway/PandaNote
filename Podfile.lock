@@ -1,41 +1,42 @@
 PODS:
-  - Alamofire (5.2.2)
+  - Alamofire (5.4.0)
   - DoraemonKit/Core (3.0.2)
-  - Down (0.9.3)
+  - Down (0.9.4)
   - FilesProvider (0.26.0)
-  - FLEX (4.1.1)
+  - FLEX (4.2.2)
   - FMDB (2.7.5):
     - FMDB/standard (= 2.7.5)
   - FMDB/standard (2.7.5)
   - IQKeyboardManager (6.5.6)
-  - Kanna (5.2.2)
-  - Kingfisher (5.14.1):
-    - Kingfisher/Core (= 5.14.1)
-  - Kingfisher/Core (5.14.1)
+  - Kanna (5.2.3)
+  - Kingfisher (5.15.8):
+    - Kingfisher/Core (= 5.15.8)
+  - Kingfisher/Core (5.15.8)
   - MBProgressHUD (1.2.0)
   - MJRefresh (3.5.0)
+  - NewPopMenu (2.1.2)
   - ObjectMapper (4.2.0)
-  - PINCache (3.0.1):
-    - PINCache/Arc-exception-safe (= 3.0.1)
-    - PINCache/Core (= 3.0.1)
-  - PINCache/Arc-exception-safe (3.0.1):
+  - PINCache (3.0.3):
+    - PINCache/Arc-exception-safe (= 3.0.3)
+    - PINCache/Core (= 3.0.3)
+  - PINCache/Arc-exception-safe (3.0.3):
     - PINCache/Core
-  - PINCache/Core (3.0.1):
-    - PINOperation (~> 1.2.0)
-  - PINOperation (1.2)
+  - PINCache/Core (3.0.3):
+    - PINOperation (~> 1.2.1)
+  - PINOperation (1.2.1)
   - PPiOSKit/CommomViews (0.0.1)
   - PPiOSKit/CrashCatcher (0.0.1):
     - PPiOSKit/RuntimeTool
   - PPiOSKit/PPAlertAction (0.0.1)
   - PPiOSKit/RuntimeTool (0.0.1)
   - PPiOSKit/SwipePopGesture (0.0.1)
-  - PryntTrimmerView (4.0.0)
+  - PryntTrimmerView (4.0.2)
   - SKPhotoBrowser (6.1.0)
   - SnapKit (5.0.1)
   - SteviaLayout (4.7.3)
   - WechatOpenSDK (1.8.7.1)
-  - YPImagePicker (4.3.1):
-    - PryntTrimmerView (~> 4.0.0)
+  - YPImagePicker (4.4.0):
+    - PryntTrimmerView (~> 4.0.2)
     - SteviaLayout (~> 4.7.3)
   - YYText (1.0.7)
 
@@ -51,6 +52,7 @@ DEPENDENCIES:
   - Kingfisher
   - MBProgressHUD
   - MJRefresh
+  - NewPopMenu
   - ObjectMapper
   - PINCache
   - PPiOSKit/CommomViews (from `https://github.com/Panway/CodeSnipetCollection.git`)
@@ -76,6 +78,7 @@ SPEC REPOS:
     - Kingfisher
     - MBProgressHUD
     - MJRefresh
+    - NewPopMenu
     - ObjectMapper
     - PINCache
     - PINOperation
@@ -97,29 +100,30 @@ CHECKOUT OPTIONS:
     :git: https://github.com/Panway/CodeSnipetCollection.git
 
 SPEC CHECKSUMS:
-  Alamofire: 814429acc853c6c54ff123fc3d2ef66803823ce0
+  Alamofire: 3b6a534a3df22db367e4dedeeca73d1ddfcf0e2f
   DoraemonKit: 8587e7a9aae0773dfc96707d2369d89d2a21b3d2
-  Down: 4553b984236807e384fa0ef7c7e360ef9f7c425d
+  Down: 276f2c3eeeaf30345873bdad25f44b2640fcfa3a
   FilesProvider: 2a8ae17d8b9c23a6feadb1308ee638fa31d21065
-  FLEX: 81096107977a09836eb440173010ceeef01105d6
+  FLEX: dbd68ae9c67fcc872c79c9e5a728f38243dfaa78
   FMDB: 2ce00b547f966261cd18927a3ddb07cb6f3db82a
   IQKeyboardManager: 2a6e97afdafc7becf0cb17a9a8d795e3a980717f
-  Kanna: 2c4eddaaa4bfb9a1ed19e53c0b3d42ef02838046
-  Kingfisher: 8050bc6f7f68cbf3908bd04df7ccbac188f6d6d6
+  Kanna: 113d111e95d7e903efe0c3eb7221f7635716084c
+  Kingfisher: a3c03d702433fa6cfedabb2bddbe076fb8f2e902
   MBProgressHUD: 3ee5efcc380f6a79a7cc9b363dd669c5e1ae7406
   MJRefresh: 6afc955813966afb08305477dd7a0d9ad5e79a16
+  NewPopMenu: c6129e08e8192f6257ceb5f9a4357e1b59c6e2e7
   ObjectMapper: 1eb41f610210777375fa806bf161dc39fb832b81
-  PINCache: ee3c4abadd09970a61cdda0cfc345e69a3d75b26
-  PINOperation: 3a967a927e7867e61976c6cc23e5770416449fbc
+  PINCache: 7a8fc1a691173d21dbddbf86cd515de6efa55086
+  PINOperation: 00c935935f1e8cf0d1e2d6b542e75b88fc3e5e20
   PPiOSKit: 9f049cf7ff47cefda7f747a404254ee1a5ae7f85
-  PryntTrimmerView: 67e67573ffd4c073f1308effa66aefd0cfa667a0
+  PryntTrimmerView: 6a43cc90df5d99addeabd33d4ba09b1365322130
   SKPhotoBrowser: 343de95d89dc7913763c5dda243cc6e606e4a168
   SnapKit: 97b92857e3df3a0c71833cce143274bf6ef8e5eb
   SteviaLayout: c2ecdcff57d44e38fd2f65e54ad52aeae28ca0c4
   WechatOpenSDK: 6a4d1436c15b3b5fe2a0bd383f3046010186da44
-  YPImagePicker: 08bbb809ed62bf4149fc015c97249eb4b9463ff9
+  YPImagePicker: 15aed8bcaa4dad976e11b6114126d731a2f9f3c9
   YYText: 5c461d709e24d55a182d1441c41dc639a18a4849
 
-PODFILE CHECKSUM: 1e4c6c990cb5ad5757b623d4d757bd2ad518f7a8
+PODFILE CHECKSUM: 629e50eb97d98f95d9396e80547b6a93a813bafd
 
 COCOAPODS: 1.10.0

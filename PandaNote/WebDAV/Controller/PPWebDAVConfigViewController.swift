@@ -10,7 +10,8 @@ import UIKit
 
 class PPWebDAVConfigViewController: PPBaseViewController {
 
-    let table = XDFastTableView.init()
+    let table = XDFastTableView()
+    var cloudType = ""
 
     override func viewDidLoad() {
         super.viewDidLoad()

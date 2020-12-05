@@ -7,7 +7,7 @@
 //
 
 import Foundation
-
+import PopMenu
 
 
 extension PPFileListViewController {
@@ -92,7 +92,7 @@ extension PPFileListViewController: UISearchControllerDelegate {
     
 }
 
-//MARK:移动文件（夹）到其他文件夹功能
+//MARK: - 移动文件（夹）到其他文件夹功能
 extension PPFileListViewController {
     func setupMoveUI() {
         self.title = "移动到"
@@ -138,4 +138,66 @@ extension PPFileListViewController {
         }
     }
     
+}
+
+//MARK: - 增加各种云服务功能
+extension PPFileListViewController {
+    ///添加云服务
+    @objc func addCloudService() {
+        let vc = PPAddCloudServiceViewController()
+        self.navigationController?.pushViewController(vc, animated: true)
+    }
+    ///设置导航栏标题
+    func setNavTitle() {
+        let title = String(self.pathStr.split(separator: "/").last ?? "" + PPUserInfo.shared.webDAVRemark)
+        if isRecentFiles {
+            self.title = "最近"
+            return
+        }
+        else if (self.navigationController?.viewControllers.count ?? 0) > 1 {
+            self.title = title
+            return
+        }
+        
+        titleViewButton = UIButton(type: .custom)
+        titleViewButton.frame = CGRect(x: 0, y: 0, width: 66, height: 44)
+        let attributes: [NSAttributedString.Key: Any] = [
+            .font: UIFont.systemFont(ofSize: 18),
+            .foregroundColor: UIColor.darkGray,
+        ]
+        
+        let image = UIImage(cgImage: (UIImage(named: "arrow_right")?.cgImage!)!, scale: UIScreen.main.scale, orientation: .right)
+        //#imageLiteral(resourceName: "arrow_right")
+        titleViewButton.setAttributedTitle(NSMutableAttributedString.pp_AttributedText(withTitle: title, titleAttributes: attributes, image: image, space: 8), for: .normal)
+        titleViewButton.setTitleColor(PPCOLOR_GREEN, for: .normal)
+        self.navigationItem.titleView = titleViewButton
+        titleViewButton.addTarget(self, action: #selector(showAddCloudServiceView), for: .touchUpInside)
+        
+        
+        
+    }
+    @objc func showAddCloudServiceView(for barButtonItem: UIBarButtonItem) {
+        // Create menu controller with actions
+        let controller = PopMenuViewController(sourceView: barButtonItem, actions: [
+            PopMenuDefaultAction(title: "坚果云", image: nil, color: .darkText),
+            PopMenuDefaultAction(title: "Pop another menu", image: nil, color: .darkText),
+            PopMenuDefaultAction(title: "Try it out!", image: nil, color: .darkText)
+        ])
+        
+        // Customize appearance
+        controller.appearance.popMenuFont = UIFont(name: "AvenirNext-DemiBold", size: 16)!
+//        controller.appearance.popMenuBackgroundStyle = .blurred(.dark)
+        // Configure options
+        controller.shouldDismissOnSelection = false
+        controller.delegate = self
+        controller.appearance.popMenuColor.backgroundColor = .solid(fill: .white)
+
+        controller.didDismiss = { selected in
+            print("Menu dismissed: \(selected ? "selected item" : "no selection")")
+        }
+        
+        // Present menu controller
+        present(controller, animated: true, completion: nil)
+    }
+
 }

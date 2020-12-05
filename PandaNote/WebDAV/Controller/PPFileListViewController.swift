@@ -11,9 +11,11 @@ import UIKit
 import SKPhotoBrowser
 import Kingfisher
 import YPImagePicker
+import PopMenu
 
 class PPFileListViewController: PPBaseViewController,UITextFieldDelegate,UITableViewDataSource,UITableViewDelegate
     ,SKPhotoBrowserDelegate
+    ,PopMenuViewControllerDelegate
 {
     
     open var pathStr: String = ""
@@ -44,6 +46,7 @@ class PPFileListViewController: PPBaseViewController,UITextFieldDelegate,UITable
     var rightButton : UIButton!
     var filePathToBeMove = ""
     //---------------移动文件（夹）到其他文件夹功能↑---------------
+    var titleViewButton : UIButton!
     //MARK:Life Cycle
 //    convenience init() {
 //        self.init(nibName:nil, bundle:nil)
@@ -71,11 +74,16 @@ class PPFileListViewController: PPBaseViewController,UITextFieldDelegate,UITable
         if self.navigationController?.viewControllers.count ?? 0 > 1 {
         self.navigationItem.rightBarButtonItem = UIBarButtonItem.init(title: "更多", style: UIBarButtonItem.Style.plain, target: self, action: #selector(moreAction))
         }
-        
+        else {
+            self.navigationItem.rightBarButtonItem = UIBarButtonItem.init(title: "添加☁️", style: UIBarButtonItem.Style.plain, target: self, action: #selector(addCloudService))
+
+        }
         
         
         getWebDAVData()
-        self.title = String(self.pathStr.split(separator: "/").last ?? "" + PPUserInfo.shared.webDAVRemark)
+        
+        setNavTitle()
+        
 
         self.tableView.addRefreshHeader {
             self.getWebDAVData()
@@ -92,7 +100,7 @@ class PPFileListViewController: PPBaseViewController,UITextFieldDelegate,UITable
             self.getWebDAVData()//最近访问列表实时刷新
         }
     }
-    
+    //MARK: - UITableViewDataSource UITableViewDelegate
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return dataSource.count
     }

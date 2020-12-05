@@ -40,6 +40,8 @@ target 'PandaNote' do
   #https://github.com/Yummypets/YPImagePicker
   pod 'YPImagePicker'
   #https://github.com/SwipeCellKit/SwipeCellKit
+  #https://github.com/CaliCastle/PopMenu
+  pod 'NewPopMenu'
 #  pod 'FRadioPlayer'
   # If you have NOT upgraded to Xcode 11, use the last Swift Xcode 10.X compatible release
 #  pod 'SwipeCellKit', '2.6.0'
@@ -88,8 +90,9 @@ end
 
 post_install do |installer|
   puts '如果自己修改了Pods源码，可以在pod install之后覆盖掉'
+  output = %x( #{"ruby XcodeTool.rb"} ) #执行 XcodeTool.rb 脚本文件消除警告
 #  output = %x( #{"sh ios_tool.sh correct_import"} )# 执行shell脚本文件
   #    output = %x( #{"cp -f -R -v PodsNew/ZFPlayer Pods"} )# 执行shell脚本
-  #    puts output
+  puts output
   
 end
