@@ -10,8 +10,8 @@ import UIKit
 
 class PPTextFieldTableViewCell: PandaFastTableViewCell {
     var serverNameTF:UITextField = UITextField.init()
-    
-    
+    let leftLB = UILabel()
+    var textFieldNonnull = true
     override func awakeFromNib() {
         super.awakeFromNib()
         // Initialization code
@@ -20,36 +20,45 @@ class PPTextFieldTableViewCell: PandaFastTableViewCell {
     override func setSelected(_ selected: Bool, animated: Bool) {
         super.setSelected(selected, animated: animated)
 
-        // Configure the view for the selected state
     }
     override func pp_addSubviews() {
-        serverNameTF = UITextField.init()
+        self.contentView.addSubview(leftLB)
+        leftLB.snp.makeConstraints { (make) in
+            make.left.equalTo(self.contentView).offset(15)
+            make.width.equalTo(66)
+            make.centerY.equalTo(self.contentView)
+        }
+        leftLB.text = "服务器"
+        
+        serverNameTF = UITextField()
         self.contentView.addSubview(serverNameTF)
         serverNameTF.snp.makeConstraints { (make) in
 //            make.top.equalTo(self.view).offset(88+1)
-            make.left.equalTo(self.contentView).offset(15)
+            make.left.equalTo(self.leftLB.snp.right).offset(15)
             make.right.equalTo(self.contentView).offset(-15)
             make.height.equalTo(30)
             make.centerY.equalTo(self.contentView)
         }
         serverNameTF.placeholder = "服务器地址"
-
+        serverNameTF.clearButtonMode = .whileEditing
+        serverNameTF.borderStyle = .bezel
     }
     override func updateUI(withData data: Any) {
-        let str : String = data as! String
-        self.serverNameTF.placeholder = str
-        if self.serverNameTF.placeholder == "服务器地址" {
-            self.serverNameTF.text = "http://dav.jianguoyun.com/dav"
+        guard let model = data as? PPAddCloudServiceModel else {
+            return
         }
-        else if self.serverNameTF.placeholder == "账号" {
-            self.serverNameTF.text = "9@qq.com"
-        }
-        else if self.serverNameTF.placeholder == "密码" {
-            self.serverNameTF.text = ""
-            self.serverNameTF.isSecureTextEntry = true
-        }
-        else if self.serverNameTF.placeholder == "备注" {
-            self.serverNameTF.text = "坚果云"
-        }
+        serverNameTF.placeholder = model.placeHolder
+        leftLB.text = model.leftName
+        serverNameTF.text = model.textValue
+        textFieldNonnull  = model.textFieldNonnull
     }
+}
+
+
+class PPAddCloudServiceModel: NSObject {
+    var leftName = ""
+    var placeHolder = ""
+    var textValue = ""
+    var textFieldNonnull = true
+
 }

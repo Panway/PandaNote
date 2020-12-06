@@ -148,14 +148,14 @@ extension PPFileListViewController {
         self.navigationController?.pushViewController(vc, animated: true)
     }
     ///设置导航栏标题
-    func setNavTitle(_ title:String?="") {
+    func setNavTitle(_ title:String?=nil,_ showArrow:Bool?=false) {
         let title = (title != nil) ? title : String(self.pathStr.split(separator: "/").last ?? "" + PPUserInfo.shared.webDAVRemark)
-        if isRecentFiles {
+        if isRecentFiles && showArrow == false {
             self.title = "最近"
             return
         }
-        else if (self.navigationController?.viewControllers.count ?? 0) > 1 {
-            self.title = title
+        else if (self.navigationController?.viewControllers.count ?? 0) > 1 && showArrow == false {
+            self.navigationItem.title = title
             return
         }
         
@@ -207,8 +207,11 @@ extension PPFileListViewController {
     func popMenuDidSelectItem(_ popMenuViewController: PopMenuViewController, at index: Int) {
         debugPrint(index)
         PPUserInfo.shared.pp_Setting["pp_lastSeverInfoIndex"] = index
+        PPUserInfo.shared.pp_lastSeverInfoIndex = index
         let info = PPUserInfo.shared.pp_serverInfoList[index]
         setNavTitle(info["PPWebDAVRemark"])
         PPUserInfo.shared.updateCurrentServerInfo(index: index)
+        PPFileManager.shared.initWebDAVSetting()
+        getWebDAVData()
     }
 }

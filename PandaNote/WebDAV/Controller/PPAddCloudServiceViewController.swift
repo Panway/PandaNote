@@ -43,6 +43,13 @@ class PPAddCloudServiceViewController : PPBaseViewController,UITableViewDataSour
         if obj == "坚果云" {
             let vc = PPWebDAVConfigViewController()
             vc.cloudType = obj
+            vc.serverURL = "http://dav.jianguoyun.com/dav"
+            vc.remark = obj
+            self.navigationController?.pushViewController(vc, animated: true)
+        }
+        else if obj == "Dropbox" {
+            let vc = PPWebViewController()
+            vc.urlString = "https://www.dropbox.com/oauth2/authorize?client_id=pjmhj9rfhownr7z&redirect_uri=filemgr://oauth-callback/dropbox&response_type=token&state=DROPBOX"
             self.navigationController?.pushViewController(vc, animated: true)
         }
         

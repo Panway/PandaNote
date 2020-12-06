@@ -16,7 +16,8 @@ class PPFileManager: NSObject,FileProviderDelegate {
     
     static let shared = PPFileManager()
     var webdav: WebDAVFileProvider?//未配置服务器地址时刷新可能为空
-
+    var dropbox: DropboxFileProvider?//未配置服务器地址时刷新可能为空
+    var currentFileProvider : HTTPFileProvider?
     override init() {
         super.init()
         initWebDAVSetting()
@@ -77,7 +78,7 @@ class PPFileManager: NSObject,FileProviderDelegate {
     }
     ///去WebDAV服务器获取数据
     func getWebDAVData(path:String,completionHander:@escaping(_ data:[AnyObject],_ isFromCache:Bool,_ error:Error?) -> Void) {
-        webdav?.contentsOfDirectory(path: path, completionHandler: {
+        currentFileProvider?.contentsOfDirectory(path: path, completionHandler: {
             contents, error in
             let archieveArray = self.myPPFileArrayFrom(contents)
             do {
@@ -104,7 +105,7 @@ class PPFileManager: NSObject,FileProviderDelegate {
     }
     /// 从WebDAV下载文件获取Data
     func downloadFileFromWebDAV(path: String, cacheFile: Bool? = false,completionHandler: @escaping ((_ contents: Data?, _ isFromCache:Bool, _ error: Error?) -> Void)) {
-        webdav?.contents(path: path, completionHandler: { (data, error) in
+        currentFileProvider?.contents(path: path, completionHandler: { (data, error) in
             if error == nil {
                 DispatchQueue.main.async {
                     completionHandler(data,false,error)
@@ -131,7 +132,7 @@ class PPFileManager: NSObject,FileProviderDelegate {
         // 1 从本地磁盘获取文件缓存
         PPDiskCache.shared.fetchData(key: path, failure: { (error) in
             // 2-2 从本地磁盘获取文件失败也从服务器获取最新的
-            self.webdav?.contents(path: path, completionHandler: { (data, error) in
+            self.currentFileProvider?.contents(path: path, completionHandler: { (data, error) in
                 if error == nil {
                     DispatchQueue.main.async {
                         PPDiskCache.shared.setDataSynchronously(data, key: path)
@@ -158,7 +159,7 @@ class PPFileManager: NSObject,FileProviderDelegate {
     }
     /// 通过WebDAV上传到服务器
     func uploadFileViaWebDAV(path: String, contents: Data?, completionHander:@escaping(_ error:Error?) -> Void) {
-        webdav?.writeContents(path: path, contents: contents, completionHandler: { (error) in
+        currentFileProvider?.writeContents(path: path, contents: contents, completionHandler: { (error) in
             if error == nil {
                 DispatchQueue.main.async {
                     completionHander(error)
@@ -171,7 +172,7 @@ class PPFileManager: NSObject,FileProviderDelegate {
     }
     /// 通过WebDAV修改文件
     func moveFileViaWebDAV(pathOld: String, pathNew: String, completionHander:@escaping(_ error:Error?) -> Void) {
-        webdav?.moveItem(path:pathOld, to: pathNew, completionHandler: { (error) in
+        currentFileProvider?.moveItem(path:pathOld, to: pathNew, completionHandler: { (error) in
             DispatchQueue.main.async {
                 if error == nil {
                     completionHander(error)
@@ -185,7 +186,7 @@ class PPFileManager: NSObject,FileProviderDelegate {
     }
     /// 通过WebDAV 新建文件夹
     func createFolderViaWebDAV(folder folderName: String, at atPath: String, completionHander:@escaping(_ error:Error?) -> Void) {
-        webdav?.create(folder: folderName, at: atPath, completionHandler: { (error) in
+        currentFileProvider?.create(folder: folderName, at: atPath, completionHandler: { (error) in
             if error == nil {
                 DispatchQueue.main.async {
                     completionHander(error)
@@ -229,19 +230,24 @@ class PPFileManager: NSObject,FileProviderDelegate {
     //MARK:初始化webDAV设置
     /// 初始化WebDAV设置
     func initWebDAVSetting() -> Void {
-        let currentServerIndex = PPUserInfo.shared.pp_Setting["pp_lastSeverInfoIndex"] as! Int
-        PPUserInfo.shared.updateCurrentServerInfo(index: currentServerIndex)
-        let server = URL(string: PPUserInfo.shared.webDAVServerURL)!
+        PPUserInfo.shared.updateCurrentServerInfo(index: PPUserInfo.shared.pp_lastSeverInfoIndex)
         
 //        let cache = URLCache(memoryCapacity: 5 * 1024 * 1024, diskCapacity: 3 * 1024 * 1024, diskPath: nil)
 //        URLCache.shared = cache
         guard let user = PPUserInfo.shared.webDAVUserName,let password = PPUserInfo.shared.webDAVPassword else {
             debugPrint("无法初始化服务器")
+            PPHUD.showHUDFromTop("无法初始化服务器,请添加", isError: true)
             return
         }
         let userCredential = URLCredential(user: user,
                                            password: password,
                                            persistence: .permanent)
+        if PPUserInfo.shared.cloudServiceType == "Dropbox" {
+            dropbox = DropboxFileProvider(credential: userCredential)
+            currentFileProvider = dropbox
+        }
+        else {
+            let server = URL(string: PPUserInfo.shared.webDAVServerURL)!
         //            let protectionSpace = URLProtectionSpace.init(host: "dav.jianguoyun.com", port: 443, protocol: "https", realm: "Restricted", authenticationMethod: NSURLAuthenticationMethodHTTPBasic)
         //            URLCredentialStorage.shared.setDefaultCredential(userCredential, for: protectionSpace)
         webdav = WebDAVFileProvider(baseURL: server, credential: userCredential)!//不能加`,cache: URLCache.shared`,要不然无法保存markdown！！！
@@ -249,6 +255,8 @@ class PPFileManager: NSObject,FileProviderDelegate {
         webdav?.delegate = self
         //注意：不修改鉴权方式，会导致每次请求两次，一次401失败，一次带token成功
         webdav?.credentialType = URLRequest.AuthenticationType.basic
+            currentFileProvider = webdav
+        }
     }
     /// 从PHAsset获取NSData
     func getImageDataFromAsset(asset: PHAsset, completion: @escaping (_ data: NSData?,_ fileURL:URL?) -> Void) {

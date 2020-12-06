@@ -473,7 +473,7 @@ class PPFileListViewController: PPBaseViewController,UITextFieldDelegate,UITable
  */
         }
         else {
-            PPFileManager.shared.webdav?.contents(path: imageURL, completionHandler: {
+            PPFileManager.shared.currentFileProvider?.contents(path: imageURL, completionHandler: {
                 contents, error in
                 guard let contents = contents else {
                     return

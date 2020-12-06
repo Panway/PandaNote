@@ -9,7 +9,9 @@
 import UIKit
 
 class PPSettingViewController: PPBaseViewController,UITableViewDataSource,UITableViewDelegate {
-    var dataSource:Array<String> = ["WebDAV Setting","自动保存","FLEX Debug Enable"]
+    var dataSource:Array<String> = ["退出时自动保存文本",
+                                    "保存设置到",
+                                    "FLEX Debug Enable"]
     var tableView = UITableView()
     
     override func viewDidLoad() {

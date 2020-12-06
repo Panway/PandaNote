@@ -22,6 +22,9 @@ extension String {
         return hash.map { String(format: "%02x", $0) }.joined()
     }
     func substring(_ r: Range<Int>) -> String {
+        if self.length < r.upperBound {
+            return ""
+        }
         let fromIndex = self.index(self.startIndex, offsetBy: r.lowerBound)
         let toIndex = self.index(self.startIndex, offsetBy: r.upperBound)
         let indexRange = Range<String.Index>(uncheckedBounds: (lower: fromIndex, upper: toIndex))

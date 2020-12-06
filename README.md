@@ -7,13 +7,22 @@
 
 ## What ？
 
-主要用来写 markdown 笔记，并实现云同步，国内可使用坚果云或自己搭建WebDAV服务，所有文件保存在第三方服务器，Dropbox、GoogleDrive暂不支持
+主要用来写 markdown 笔记，可使用坚果云等网盘实现云同步，所有文件保存在第三方服务器
+
+**目前支持的网盘（协议）**：
+
+- [x] WebDAV（坚果云或自己搭建WebDAV服务）
+
+- [x] Dropbox
+
+**目前支持的功能**：
+
 - [ ] markdown 原生渲染
-- [x] markdown 网页js渲染、查看目录
-- [x] markdown 等纯文本的新建、编辑、保存、删除
+- [x] markdown 使用marked.js渲染（包括代码高亮）
+- [x] markdown 等纯文本的新建、编辑、保存
 - [x] 支持预览mp3、mp4、pdf
 - [x] WebDAV HTTP响应和下载的文件缓存到磁盘，无网状态也可以查看文件
-- [x] 文件重命名、新建文件夹
+- [x] 文件移动、删除、重命名、新建文件夹
 - [x] 上传相册原始图片到指定目录
 - [x] 图片预览、原图分享到微信、以微信表情分享
 - [ ] 读取剪切板查看淘宝京东价格曲线
@@ -26,12 +35,13 @@
 ### Build and Run
 
 ```bash
+#克隆仓库到本地
 git clone https://github.com/Panway/PandaNote.git
-
+#进入文件夹
 cd PandaNote
 #安装依赖
 pod install
-#打开
+#打开工程
 open PandaNote.xcworkspace
 ```
 

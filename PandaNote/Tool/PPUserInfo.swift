@@ -16,7 +16,9 @@ class PPUserInfo: NSObject {
     var webDAVServerURL = ""
     var webDAVUserName:String?
     var webDAVPassword:String?
-    var webDAVRemark:String = ""
+    var webDAVRemark = ""
+    /// 坚果云、Drpbox等
+    var cloudServiceType = ""
     /// 沙盒Sandbox/Library/PandaCache
     var pp_mainDirectory:String!
     var pp_mainDirectoryURL:URL!
@@ -100,6 +102,9 @@ class PPUserInfo: NSObject {
             if let serverList = PPUserInfo.shared.pp_Setting["PPWebDAVServerList"] as? [[String : String]] {
                 pp_serverInfoList = serverList
             }
+            if let currentServerIndex = PPUserInfo.shared.pp_Setting["pp_lastSeverInfoIndex"] {
+                self.pp_lastSeverInfoIndex = currentServerIndex as! Int
+            }
 //            self.pp_JSONConfig = JSONSerialization.
         }
         if let recentFileData = try? Data(contentsOf: URL(fileURLWithPath: self.pp_mainDirectory+"/PP_RecentFiles")) {
@@ -128,15 +133,16 @@ class PPUserInfo: NSObject {
     //MARK:云盘服务设置
     func updateCurrentServerInfo(index:Int) {
         let webDAVInfoArray = PPUserInfo.shared.pp_serverInfoList
+        if webDAVInfoArray.count < 1 {
+            return
+        }
         let webDAVInfo = webDAVInfoArray[index]
-        let webDAVServerURL = webDAVInfo["PPWebDAVServerURL"] ?? ""
-        let webDAVUserName = webDAVInfo["PPWebDAVUserName"] ?? ""
-        let webDAVPassword = webDAVInfo["PPWebDAVPassword"] ?? ""
-        let webDAVRemark = webDAVInfo["PPWebDAVRemark"] ?? ""
-        PPUserInfo.shared.webDAVServerURL = webDAVServerURL
-        PPUserInfo.shared.webDAVRemark = webDAVRemark
-        PPUserInfo.shared.webDAVUserName = webDAVUserName
-        PPUserInfo.shared.webDAVPassword = webDAVPassword
+
+        PPUserInfo.shared.webDAVServerURL = webDAVInfo["PPWebDAVServerURL"] ?? ""
+        PPUserInfo.shared.webDAVUserName = webDAVInfo["PPWebDAVUserName"] ?? ""
+        PPUserInfo.shared.webDAVPassword = webDAVInfo["PPWebDAVPassword"] ?? ""
+        PPUserInfo.shared.webDAVRemark = webDAVInfo["PPWebDAVRemark"] ?? ""
+        PPUserInfo.shared.cloudServiceType = webDAVInfo["PPCloudServiceType"] ?? ""
     }
     class func pp_valueForSettingDict(key : String) -> Bool {
         if let string : String = PPUserInfo.shared.pp_Setting[key] as? String {

@@ -233,6 +233,9 @@ class PPWebViewController: UIViewController,WKUIDelegate,WKNavigationDelegate,WK
             //跳转到目录的某个位置后隐藏
             wkWebView.evaluateJavaScript("displayTOC()", completionHandler: nil)
         }
+        else {
+            return handleMyStartLoad(urlString)
+        }
         return true
     }
     @objc func goBack() {
@@ -265,3 +268,24 @@ class PPWebViewController: UIViewController,WKUIDelegate,WKNavigationDelegate,WK
 
 
 
+//MARK: - User 自己的业务逻辑
+extension PPWebViewController {
+    func handleMyStartLoad(_ urlString:String) -> Bool {
+        if urlString.hasPrefix("filemgr://oauth-callback") {
+            let urlWithToken = urlString.removingPercentEncoding?.replacingOccurrences(of: "#access_token", with: "?access_token")
+            let access_token = urlWithToken?.pp_valueOf("access_token")
+//            let account_id = urlWithToken?.pp_valueOf("account_id")
+            debugPrint(access_token)
+            
+            let vc = PPWebDAVConfigViewController()
+            vc.cloudType = "Dropbox"
+            vc.serverURL = ""
+            vc.remark = "Dropbox"
+            vc.password = access_token ?? ""
+            self.navigationController?.pushViewController(vc, animated: true)
+
+            
+        }
+        return true
+    }
+}
