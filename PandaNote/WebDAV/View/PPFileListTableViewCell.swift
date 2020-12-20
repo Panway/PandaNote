@@ -54,7 +54,7 @@ class PPFileListTableViewCell: PPBaseTableViewCell {
             self.iconImage.image = UIImage.init(named: "ico_folder")
         }
         else if (fileObj.name.pp_isImageFile())  {
-            let imagePath = PPUserInfo.shared.pp_mainDirectory + fileObj.path
+            let imagePath = PPDiskCache.shared.path + fileObj.path
 //            self.currentImageURL = imagePath
             if FileManager.default.fileExists(atPath: imagePath) {
                 let imageData = try?Data(contentsOf: URL(fileURLWithPath: imagePath))

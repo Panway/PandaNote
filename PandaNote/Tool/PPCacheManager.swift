@@ -11,7 +11,7 @@ import Foundation
 class PPDiskCache {
     static let shared = PPDiskCache()
     
-    
+    ///缓存路径`/Library/Caches/PPAPICache`
     public let path = NSSearchPathForDirectoriesInDomains(.cachesDirectory, .userDomainMask, true).first! + "/PPAPICache"
 
 
@@ -24,13 +24,14 @@ class PPDiskCache {
     public init() {
         self.cacheQueue.async(execute: {
             do {
+                debugPrint("PP缓存路径：\(self.path)")
                 try FileManager.default.createDirectory(atPath: self.path, withIntermediateDirectories: true, attributes: nil)
             } catch  {
                 debugPrint("==FileManager Crash")
             }
         })
     }
-    
+    ///保存到`/Library/Caches/PPAPICache`
     open func setData( _ getData: @autoclosure @escaping () -> Data?, key: String) {
         cacheQueue.async(execute: {
             if let data = getData() {

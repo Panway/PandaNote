@@ -12,7 +12,7 @@ import FilesProvider
 import PINCache
 
 class PPFileManager: NSObject,FileProviderDelegate {
-    let apiCacheDir = "WebDAV/api_"
+    let apiCachePrefix = "FileList/api_"
     
     static let shared = PPFileManager()
     static let dateFormatter = DateFormatter()
@@ -72,7 +72,11 @@ class PPFileManager: NSObject,FileProviderDelegate {
     /// 获取文件列表（先取本地再获取最新）
     func pp_getFileList(path:String,completionHandler:@escaping(_ data:[PPFileObject],_ isFromCache:Bool,_ error:Error?) -> Void) {
         //先从本地缓存获取数据
-        PPDiskCache.shared.fetchData(key: apiCacheDir + path.pp_md5, failure: { (error) in
+        var archieveKey = self.apiCachePrefix + "\(self.currentFileProvider?.baseURL?.absoluteString ?? "")\(path)".pp_md5
+        if PPUserInfo.shared.cloudServiceType == .baiduyun {
+            archieveKey = "baidu_" + "\(baiduwangpan?.baiduURL ?? "")\(path)".pp_md5
+        }
+        PPDiskCache.shared.fetchData(key: archieveKey, failure: { (error) in
             if let error = error {
                 if (error as NSError).code != NSFileReadNoSuchFileError {
                     DispatchQueue.main.async {
@@ -85,15 +89,15 @@ class PPFileManager: NSObject,FileProviderDelegate {
         }) { (data) in
             do {
                 let archieveArray = try JSONDecoder().decode([PPFileObject].self, from: data)
-                debugPrint("WebDAV获取文件列表\(archieveArray.count)")
+                debugPrint("获取解档文件个数\(archieveArray.count)")
                 DispatchQueue.main.async {
                     completionHandler(archieveArray,true,nil)
                 }
-                //获取本地缓存成功了还是去服务器获取一下,保证数据最新
-                self.getRemoteFileList(path: path, completionHandler: completionHandler)
             } catch {
                 debugPrint(error.localizedDescription)
             }
+            //获取本地缓存成功了还是去服务器获取一下,保证数据最新
+            self.getRemoteFileList(path: path, completionHandler: completionHandler)
         }
     }
     ///去WebDAV服务器获取数据
@@ -104,7 +108,8 @@ class PPFileManager: NSObject,FileProviderDelegate {
             do {
                 let encoded = try JSONEncoder().encode(archieveArray)
 //                debugPrint(String(decoding: encoded, as: UTF8.self))
-                PPDiskCache.shared.setData(encoded, key: self.apiCacheDir + path.pp_md5)
+                let archieveKey = self.apiCachePrefix + "\(self.currentFileProvider?.baseURL?.absoluteString ?? "")\(path)".pp_md5
+                PPDiskCache.shared.setData(encoded, key:archieveKey)
             } catch {
                 debugPrint(error.localizedDescription)
             }
@@ -133,16 +138,14 @@ class PPFileManager: NSObject,FileProviderDelegate {
         }
     }
     /// 从WebDAV下载文件获取Data
-    func downloadFileFromWebDAV(path: String, cacheFile: Bool? = false,completionHandler: @escaping ((_ contents: Data?, _ isFromCache:Bool, _ error: Error?) -> Void)) {
+    func downloadFileFromWebDAV(path: String, cacheToDisk: Bool? = false,completionHandler: @escaping ((_ contents: Data?, _ isFromCache:Bool, _ error: Error?) -> Void)) {
         currentFileProvider?.contents(path: path, completionHandler: { (data, error) in
             if let error = error {
                 debugPrint("下载失败：\(error.localizedDescription)")
                 return
             }
-            if let shouldCache = cacheFile {
-                if shouldCache {
-                    PPDiskCache.shared.setData(data, key: path)
-                }
+            if let shouldCacheToDisk = cacheToDisk, shouldCacheToDisk == true {
+                PPDiskCache.shared.setData(data, key: path)
             }
             DispatchQueue.main.async {
                 completionHandler(data,false,error)
@@ -160,14 +163,14 @@ class PPFileManager: NSObject,FileProviderDelegate {
         // 1 从本地磁盘获取文件缓存
         PPDiskCache.shared.fetchData(key: path, failure: { (error) in
             // 2-2 本地磁盘没有，就从服务器获取最新的
-            self.downloadFileFromWebDAV(path: path, cacheFile: true, completionHandler: completionHandler)
+            self.downloadFileFromWebDAV(path: path, cacheToDisk: true, completionHandler: completionHandler)
             
         }) { (data) in
             // 2-1 本地磁盘有，按需从服务器获取最新的
             debugPrint("loading local file success")
             completionHandler(data,true,nil)
             if let down = downloadIfExist,down == true {
-                self.downloadFileFromWebDAV(path: path, cacheFile: true, completionHandler: completionHandler)
+                self.downloadFileFromWebDAV(path: path, cacheToDisk: true, completionHandler: completionHandler)
             }
         }
 
@@ -186,15 +189,18 @@ class PPFileManager: NSObject,FileProviderDelegate {
                      downloadIfCached:Bool?=false ,
                      completionHandler: @escaping ((_ contents: Data?, _ isFromCache:Bool, _ error: Error?) -> Void)) {
         if PPUserInfo.shared.cloudServiceType == .baiduyun {
-            baiduwangpan?.contents(path: path,fs_id:fileID ?? "", completionHandler: { (data, isFromDisk, error) in
+            let downloadIfCached = path.pp_isImageFile() || path.pp_isVideoFile()
+            baiduwangpan?.contents(path: path,
+                                   fs_id:fileID ?? "",
+                                   downloadIfCached:!downloadIfCached,
+                                   completionHandler: { (data, isFromDisk, error) in
                 if let error = error {
                     debugPrint("下载失败：\(error.localizedDescription)")
                     return
                 }
-                if let shouldCache = cacheToDisk {
-                    if shouldCache {
-                        PPDiskCache.shared.setData(data, key: path)
-                    }
+                if let shouldCacheToDisk = cacheToDisk, shouldCacheToDisk == true {
+                    let archieveKey = "baidu_" + "\(self.baiduwangpan?.baiduURL ?? "")\(path)".pp_md5
+                    PPDiskCache.shared.setData(data, key: archieveKey)
                 }
                 DispatchQueue.main.async {
                     completionHandler(data,false,error)
@@ -441,7 +447,51 @@ class PPFileManager: NSObject,FileProviderDelegate {
          */
     }
     
-    
-    
+    //MARK:- deprecated废弃的方法
+    func loadAndSaveImage(imageURL:String,completionHandler: ((Data) -> Void)? = nil) {
+        let imagePath = PPUserInfo.shared.pp_mainDirectory + imageURL
+
+        if FileManager.default.fileExists(atPath: imagePath) {
+            let imageData = try?Data(contentsOf: URL(fileURLWithPath: imagePath))
+            if let handler = completionHandler {
+                    handler(imageData!)
+            }
+            
+            /*
+            if ((cachedData) == nil) {//KingFisher用
+                //DefaultCacheSerializer会对大图压缩后缓存，所以这里用自定义序列化类实现缓存原始图片数据
+                cache.store(UIImage.init(data: imageData! )!, original: imageData, forKey: imageURL, processorIdentifier: "", cacheSerializer: PandaCacheSerializer.default, toDisk: true) {
+                }
+                //cache.store(UIImage.init(data: imageData! )!, original: imageData, forKey:fileObj.path )
+            }
+ */
+        }
+        else {
+            PPFileManager.shared.currentFileProvider?.contents(path: imageURL, completionHandler: {
+                contents, error in
+                guard let contents = contents else {
+                    return
+                }
+                if !FileManager.default.fileExists(atPath: PPUserInfo.shared.pp_mainDirectory + imageURL) {
+                    do {
+                        var array = imageURL.split(separator: "/")
+                        array.removeLast()
+                        let newStr:String = array.joined(separator: "/")
+                        try FileManager.default.createDirectory(atPath: PPUserInfo.shared.pp_mainDirectory+"/"+newStr, withIntermediateDirectories: true, attributes: nil)
+                    } catch  {
+                        debugPrint("==FileManager Crash")
+                    }
+                }
+                
+                FileManager.default.createFile(atPath: PPUserInfo.shared.pp_mainDirectory + imageURL, contents: contents, attributes: nil)
+                
+                if let handler = completionHandler {
+                    handler(contents)
+                }
+                
+            })
+            
+        }
+    }
     
 }

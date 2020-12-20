@@ -8,7 +8,6 @@
 
 import Foundation
 import ObjectMapper
-import FilesProvider
 
 public final class BDFileObject: Mappable {
     public init?(map: Map) {

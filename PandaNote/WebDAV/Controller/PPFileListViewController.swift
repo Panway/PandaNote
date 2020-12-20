@@ -114,7 +114,7 @@ class PPFileListViewController: PPBaseViewController,UITextFieldDelegate,UITable
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
         let fileObj = self.dataSource[indexPath.row]
-        debugPrint("You tapped cell  \(fileObj.path)")
+//        debugPrint("文件：\(fileObj.path)")
         PPUserInfo.shared.insertToRecentFiles(fileObj)
         
         if fileObj.isDirectory {
@@ -130,8 +130,8 @@ class PPFileListViewController: PPBaseViewController,UITextFieldDelegate,UITable
             self.navigationController?.pushViewController(vc, animated: true)
         }
         else if (fileObj.name.pp_isImageFile())  {
-            loadAndSaveImage(imageURL: fileObj.path) { (imageData) in
-                debugPrint(imageData)
+            loadAndSaveImage(imageURL: fileObj.path,fileID: fileObj.fileID) { (imageData) in
+//                debugPrint(imageData)
                 self.showImage(contents: imageData, image: nil, imageName: fileObj.path,imageURL:fileObj.path)
             }
         }
@@ -451,55 +451,19 @@ class PPFileListViewController: PPBaseViewController,UITextFieldDelegate,UITable
         self.present(picker, animated: true, completion: nil)
     }
     /// 加载图片并保存，如果本地不存在就从服务器获取
-    func loadAndSaveImage(imageURL:String,completionHandler: ((Data) -> Void)? = nil) {
+    func loadAndSaveImage(imageURL:String,fileID:String,completionHandler: ((Data) -> Void)? = nil) {
 //        let cache = ImageCache.default//KingFisher用
         let imagePath = PPUserInfo.shared.pp_mainDirectory + imageURL
         self.currentImageURL = imagePath
         
 //        let filePath = cache.cachePath(forComputedKey: imageURL)//KingFisher用
 //        let cachedData = try?Data(contentsOf: URL(fileURLWithPath: filePath))//KingFisher用
-        
-        if FileManager.default.fileExists(atPath: imagePath) {
-            let imageData = try?Data(contentsOf: URL(fileURLWithPath: imagePath))
+        PPFileManager.shared.getFileData(path: imageURL, fileID: fileID,cacheToDisk:true) { (contents: Data?,isFromCache, error) in
+            guard let contents = contents else { return }
             if let handler = completionHandler {
-                    handler(imageData!)
+                handler(contents)
             }
-            
-            /*
-            if ((cachedData) == nil) {//KingFisher用
-                //DefaultCacheSerializer会对大图压缩后缓存，所以这里用自定义序列化类实现缓存原始图片数据
-                cache.store(UIImage.init(data: imageData! )!, original: imageData, forKey: imageURL, processorIdentifier: "", cacheSerializer: PandaCacheSerializer.default, toDisk: true) {
-                }
-                //cache.store(UIImage.init(data: imageData! )!, original: imageData, forKey:fileObj.path )
-            }
- */
-        }
-        else {
-            PPFileManager.shared.currentFileProvider?.contents(path: imageURL, completionHandler: {
-                contents, error in
-                guard let contents = contents else {
-                    return
-                }
-                if !FileManager.default.fileExists(atPath: PPUserInfo.shared.pp_mainDirectory + imageURL) {
-                    do {
-                        var array = imageURL.split(separator: "/")
-                        array.removeLast()
-                        let newStr:String = array.joined(separator: "/")
-                        try FileManager.default.createDirectory(atPath: PPUserInfo.shared.pp_mainDirectory+"/"+newStr, withIntermediateDirectories: true, attributes: nil)
-                    } catch  {
-                        debugPrint("==FileManager Crash")
-                    }
-                }
-                
-                FileManager.default.createFile(atPath: PPUserInfo.shared.pp_mainDirectory + imageURL, contents: contents, attributes: nil)
-                
-                if let handler = completionHandler {
-                    handler(contents)
-                }
-                
-            })
-            
-        }
+        }        
     }
     
     
