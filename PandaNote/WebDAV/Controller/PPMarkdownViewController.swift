@@ -19,7 +19,10 @@ class PPMarkdownViewController: PPBaseViewController,UITextViewDelegate {
     var markdownStr = "I support a *lot* of custom Markdown **Elements**, even `code`!"
     var historyList = [String]()
     var textView = PPPTextView()
-    open var filePathStr: String = ""//文件相对路径
+    ///文件相对路径
+    var filePathStr: String = ""
+    ///文件ID（仅百度网盘）
+    var fileID = ""
 //    var webdav: WebDAVFileProvider?
     var closeAfterSave : Bool = false
     var textChanged : Bool = false//文本改变的话就不需要再比较字符串了
@@ -27,7 +30,7 @@ class PPMarkdownViewController: PPBaseViewController,UITextViewDelegate {
     override func viewDidLoad() {
         pp_initView()
         self.title = self.filePathStr.split(string: "/").last
-        PPFileManager.shared.loadFileFromWebDAV(path: self.filePathStr,downloadIfExist: true) { (contents: Data?,isFromCache, error) in
+        PPFileManager.shared.getFileData(path: filePathStr, fileID: fileID,cacheToDisk:true) { (contents: Data?,isFromCache, error) in
             guard let contents = contents else {
                 return
             }
@@ -181,7 +184,7 @@ class PPMarkdownViewController: PPBaseViewController,UITextViewDelegate {
         debugPrint("保存的是===\(stringToUpload)")
         //MARK:保存
         self.textView.resignFirstResponder()
-        PPFileManager.shared.uploadFileViaWebDAV(path: self.filePathStr, contents: stringToUpload.data(using: .utf8), completionHander: { (error) in
+        PPFileManager.shared.uploadFileViaWebDAV(path: self.filePathStr, contents: stringToUpload.data(using: .utf8), completionHandler: { (error) in
             PPHUD.showHUDFromTop("保存成功")
             self.textChanged = false
             if (self.closeAfterSave) {

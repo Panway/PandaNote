@@ -52,7 +52,22 @@ class PPAddCloudServiceViewController : PPBaseViewController,UITableViewDataSour
             vc.urlString = "https://www.dropbox.com/oauth2/authorize?client_id=pjmhj9rfhownr7z&redirect_uri=filemgr://oauth-callback/dropbox&response_type=token&state=DROPBOX"
             self.navigationController?.pushViewController(vc, animated: true)
         }
-        
+        else if obj == "百度云" {
+            PPAlertAction.showSheet(withTitle: "您想如何获取access_token", message: nil, cancelButtonTitle: "取消", destructiveButtonTitle: nil, otherButtonTitle: ["手动输入（抓包获取）","授权登录自动获取"]) { (index) in
+                if index == 1 {
+                    let vc = PPWebDAVConfigViewController()
+                    vc.cloudType = "baiduyun"
+                    vc.serverURL = "https://pan.baidu.com/rest/2.0/xpan/file"
+                    vc.remark = "百度云"
+                    self.navigationController?.pushViewController(vc, animated: true)                }
+                else if index == 2 {
+                    let vc = PPWebViewController()
+                    vc.urlString = "https://openapi.baidu.com/oauth/2.0/authorize?response_type=token&client_id=NqOMXF6XGhGRIGemsQ9nG0Na&redirect_uri=http://www.estrongs.com&scope=basic,netdisk&display=mobile&state=STATE&force_login=1"
+                    self.navigationController?.pushViewController(vc, animated: true)
+                }
+                
+            }
+        }
         
     }
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {

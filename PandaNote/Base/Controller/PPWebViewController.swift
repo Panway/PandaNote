@@ -271,6 +271,7 @@ class PPWebViewController: UIViewController,WKUIDelegate,WKNavigationDelegate,WK
 //MARK: - User 自己的业务逻辑
 extension PPWebViewController {
     func handleMyStartLoad(_ urlString:String) -> Bool {
+        //获取Dropbox的access_token
         if urlString.hasPrefix("filemgr://oauth-callback") {
             let urlWithToken = urlString.removingPercentEncoding?.replacingOccurrences(of: "#access_token", with: "?access_token")
             let access_token = urlWithToken?.pp_valueOf("access_token")
@@ -283,8 +284,19 @@ extension PPWebViewController {
             vc.remark = "Dropbox"
             vc.password = access_token ?? ""
             self.navigationController?.pushViewController(vc, animated: true)
-
+        }
+        //获取百度网盘的access_token
+        else if urlString.hasPrefix("http://www.estrongs.com") {
+            let urlWithToken = urlString.removingPercentEncoding?.replacingOccurrences(of: "www.estrongs.com/#", with: "www.estrongs.com?")
+            let access_token = urlWithToken?.pp_valueOf("access_token")
+            debugPrint(access_token)
             
+            let vc = PPWebDAVConfigViewController()
+            vc.cloudType = "baiduyun"
+            vc.serverURL = "https://pan.baidu.com/rest/2.0/xpan/file"
+            vc.remark = "百度云"
+            vc.password = access_token ?? ""
+            self.navigationController?.pushViewController(vc, animated: true)
         }
         return true
     }

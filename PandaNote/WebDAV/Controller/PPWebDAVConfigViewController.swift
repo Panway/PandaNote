@@ -42,7 +42,9 @@ class PPWebDAVConfigViewController: PPBaseViewController {
             if (self.cloudType == "Dropbox") && (model.leftName == "服务器" || model.leftName == "账号"){
                 model.textFieldNonnull = false
             }
-            
+            if (self.cloudType == "baiduyun") && (model.leftName == "服务器" || model.leftName == "账号"){
+                model.textFieldNonnull = false
+            }
             table.dataSource.append(model)
         }
         table.didSelectRowAtIndexHandler = {(index: Int) ->Void in
@@ -76,7 +78,7 @@ class PPWebDAVConfigViewController: PPBaseViewController {
         tipsLB.textColor = UIColor(hexRGBValue: 0xcd594b)
         tipsLB.text = """
         注意：
-        Dropbox服务器和账号可不填写
+        Dropbox、百度网盘的服务器和账号可不填写
         """
     }
     

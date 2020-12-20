@@ -126,6 +126,7 @@ class PPFileListViewController: PPBaseViewController,UITextFieldDelegate,UITable
         else if (fileObj.name.isTextFile())  {
             let vc = PPMarkdownViewController()
             vc.filePathStr = fileObj.path
+            vc.fileID = fileObj.fileID
             self.navigationController?.pushViewController(vc, animated: true)
         }
         else if (fileObj.name.pp_isImageFile())  {
@@ -138,6 +139,7 @@ class PPFileListViewController: PPBaseViewController,UITextFieldDelegate,UITable
             if #available(iOS 11.0, *) {
                 let vc = PPPDFViewController()
                 vc.filePathStr = fileObj.path
+                vc.fileID = fileObj.fileID
                 self.navigationController?.pushViewController(vc, animated: true)
             } else {
                 PPHUD.showHUDFromTop("抱歉，暂不支持iOS11以下系统预览PDF哟")
@@ -527,7 +529,7 @@ class PPFileListViewController: PPBaseViewController,UITextFieldDelegate,UITable
         if (PPUserInfo.shared.webDAVServerURL.length < 1) {
             PPFileManager.shared.initWebDAVSetting()
         }
-        PPFileManager.shared.getWebDAVFileList(path: self.pathStr) { (contents,isFromCache, error) in
+        PPFileManager.shared.pp_getFileList(path: self.pathStr) { (contents,isFromCache, error) in
             if error != nil {
                 PPHUD.showHUDFromTop("加载失败，请配置服务器", isError: true)
                 self.tableView.endRefreshing()
@@ -535,12 +537,10 @@ class PPFileListViewController: PPBaseViewController,UITextFieldDelegate,UITable
             }
             PPHUD.showHUDFromTop(isFromCache ? "已加载缓存":"已加载最新")
 
-            if let objects = contents as? [PPFileObject] {
-                self.dataSource.removeAll()
-                self.dataSource.append(contentsOf: objects)
-                self.tableView.endRefreshing()
-                self.tableView.reloadData()
-            }
+            self.dataSource.removeAll()
+            self.dataSource.append(contentsOf: contents)
+            self.tableView.endRefreshing()
+            self.tableView.reloadData()
             
 
         }

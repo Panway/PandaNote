@@ -14,11 +14,13 @@ class PPPDFViewController: PPBaseViewController {
     var pdfdocument: PDFDocument?
     var pdfview: PDFView!
     var filePathStr: String = ""//文件相对路径
+    ///文件ID（仅百度网盘）
+    var fileID = ""
 
     override func viewDidLoad() {
         super.viewDidLoad()
         self.pdfview = PDFView(frame: CGRect(x: 0, y: 0, width: view.frame.width, height: view.frame.height))
-        PPFileManager.shared.loadFileFromWebDAV(path: self.filePathStr,downloadIfExist: false) { (contents,isFromCache, error) in
+        PPFileManager.shared.getFileData(path: filePathStr, fileID: fileID,cacheToDisk:true) { (contents: Data?,isFromCache, error) in
             guard let contents = contents else { return }
             
 //            let url = Bundle.main.url(forResource: "sample", withExtension: "pdf")

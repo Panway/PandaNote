@@ -633,7 +633,11 @@ extension Int {
     }
     
 }
-
+extension Date {
+    func pp_stringFromDate() -> String {
+        return PPFileManager.dateFormatter.string(from: self)
+    }
+}
 
 //extension String.Encoding {
 //    static let gb_18030_2000 = String.Encoding(rawValue: CFStringConvertEncodingToNSStringEncoding(CFStringEncoding(CFStringEncodings.GB_18030_2000.rawValue)))

@@ -11,6 +11,12 @@ import Foundation
 
 
 class PPUserInfo: NSObject {
+    public enum PPCloudServiceType : String {
+        case webdav = "webdav"
+        case dropbox = "Dropbox"
+        case baiduyun = "baiduyun"
+        case onedrive = "OneDrive"
+    }
     static let shared = PPUserInfo()
 
     var webDAVServerURL = ""
@@ -18,7 +24,7 @@ class PPUserInfo: NSObject {
     var webDAVPassword:String?
     var webDAVRemark = ""
     /// 坚果云、Drpbox等
-    var cloudServiceType = ""
+    var cloudServiceType:PPCloudServiceType = .webdav
     /// 沙盒Sandbox/Library/PandaCache
     var pp_mainDirectory:String!
     var pp_mainDirectoryURL:URL!
@@ -142,7 +148,7 @@ class PPUserInfo: NSObject {
         PPUserInfo.shared.webDAVUserName = webDAVInfo["PPWebDAVUserName"] ?? ""
         PPUserInfo.shared.webDAVPassword = webDAVInfo["PPWebDAVPassword"] ?? ""
         PPUserInfo.shared.webDAVRemark = webDAVInfo["PPWebDAVRemark"] ?? ""
-        PPUserInfo.shared.cloudServiceType = webDAVInfo["PPCloudServiceType"] ?? ""
+        PPUserInfo.shared.cloudServiceType = PPCloudServiceType(rawValue: webDAVInfo["PPCloudServiceType"] ?? "") ?? .webdav
     }
     class func pp_valueForSettingDict(key : String) -> Bool {
         if let string : String = PPUserInfo.shared.pp_Setting[key] as? String {

@@ -18,11 +18,14 @@ struct PPFileObject:Equatable {
     var size: Int64
     var isDirectory: Bool
     var modifiedDate: String
+    ///百度网盘的文件fs_id
+    var fileID = ""
+    //当前属于哪个云服务的标识
+    var serverID = ""
     ///遵循Equatable协议，判断两个对象是否相等
     static func ==(lhs: PPFileObject, rhs: PPFileObject) -> Bool {
         return lhs.name == rhs.name && lhs.path == rhs.path
     }
-//    var favoriteColor: UIColor
 }
 
 
@@ -33,6 +36,8 @@ extension PPFileObject: Codable {
         case size
         case modifiedDate
         case isDirectory
+        case fileID
+        case serverID
     }
     
     init(from decoder: Decoder) throws {
@@ -42,6 +47,8 @@ extension PPFileObject: Codable {
         isDirectory = try container.decode(Bool.self, forKey: .isDirectory)
         modifiedDate = try container.decode(String.self, forKey: .modifiedDate)
         path = try container.decode(String.self, forKey: .path)
+        fileID = try container.decode(String.self, forKey: .fileID)
+        serverID = try container.decode(String.self, forKey: .serverID)
         // 获取到原始数据
 //        let colorData = try container.decode(Data.self, forKey: .favoriteColor)
         // 进行解码
@@ -55,6 +62,8 @@ extension PPFileObject: Codable {
         try container.encode(isDirectory, forKey: .isDirectory)
         try container.encode(modifiedDate, forKey: .modifiedDate)
         try container.encode(size, forKey: .size)
+        try container.encode(fileID, forKey: .fileID)
+        try container.encode(serverID, forKey: .serverID)
         // 转化为 原始数据
 //        let colorData = try NSKeyedArchiver.archivedData(withRootObject: favoriteColor, requiringSecureCoding: false)
         // 进行编码
