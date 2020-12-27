@@ -7,9 +7,13 @@
 //
 
 import UIKit
+protocol PPSettingCellDelegate: AnyObject {
+    func didClickSwitch(sender: UISwitch,name:String)
+}
 
 class PPSettingCell: PPBaseTableViewCell {
     var titleLB:UILabel!
+    weak var delegate: PPSettingCellDelegate?
     lazy var rightLB : UILabel = {
         let aLB = UILabel(frame: CGRect(x: 0, y: 0, width: 100, height: 40))
         aLB.textColor = UIColor.gray
@@ -32,9 +36,12 @@ class PPSettingCell: PPBaseTableViewCell {
             make.right.equalToSuperview().offset(-15)
             make.centerY.equalToSuperview()
         }
+        switchBtn.addTarget(self, action: #selector(switchBtnAction(_:)), for: .touchUpInside)
         return switchBtn
     }()
-    
+    @objc func switchBtnAction(_ sender:UISwitch) {
+        delegate?.didClickSwitch(sender: self.switchBtn, name: self.titleLB.text ?? "")
+    }
     override func pp_addSubViews() {
         titleLB = UILabel(frame: CGRect(x: 0, y: 0, width: 100, height: 40))
 //        aLB.autoresizingMask = [.flexibleWidth, .flexibleHeight]

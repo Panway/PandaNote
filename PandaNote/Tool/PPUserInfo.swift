@@ -151,7 +151,10 @@ class PPUserInfo: NSObject {
         PPUserInfo.shared.cloudServiceType = PPCloudServiceType(rawValue: webDAVInfo["PPCloudServiceType"] ?? "") ?? .webdav
     }
     class func pp_valueForSettingDict(key : String) -> Bool {
-        if let string : String = PPUserInfo.shared.pp_Setting[key] as? String {
+        return self.pp_boolValue(key)
+    }
+    class func pp_boolValue(_ keyInSettingDict : String) -> Bool {
+        if let string : String = PPUserInfo.shared.pp_Setting[keyInSettingDict] as? String {
             return string.bool
         }
         return false

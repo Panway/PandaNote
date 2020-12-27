@@ -39,8 +39,8 @@ extension PPFileListViewController {
         definesPresentationContext = true
     }
 }
-
-// MARK: - UISearchBarDelegate
+// MARK: - 搜索功能
+// MARK: UISearchBarDelegate
 
 extension PPFileListViewController: UISearchBarDelegate {
     // 键盘的搜索按钮点击后
@@ -64,7 +64,7 @@ extension PPFileListViewController: UISearchBarDelegate {
     
 }
 
-// MARK: - UISearchControllerDelegate
+// MARK:  UISearchControllerDelegate
 
 // Use these delegate functions for additional control over the search controller.
 
@@ -211,7 +211,7 @@ extension PPFileListViewController {
         let info = PPUserInfo.shared.pp_serverInfoList[index]
         setNavTitle(info["PPWebDAVRemark"])
         PPUserInfo.shared.updateCurrentServerInfo(index: index)
-        PPFileManager.shared.initWebDAVSetting()
+        PPFileManager.shared.initCloudServiceSetting()
         getWebDAVData()
     }
 }

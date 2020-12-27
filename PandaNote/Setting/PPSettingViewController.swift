@@ -8,20 +8,24 @@
 
 import UIKit
 
-class PPSettingViewController: PPBaseViewController,UITableViewDataSource,UITableViewDelegate {
+class PPSettingViewController: PPBaseViewController,UITableViewDataSource,UITableViewDelegate,PPSettingCellDelegate {
+    
+    
     var dataSource:Array<String> = ["退出时自动保存文本",
+                                    "上传图片名称使用创建日期",
+                                    "上传照片后删除原照片",
                                     "保存设置到",
                                     "FLEX Debug Enable"]
     var tableView = UITableView()
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        tableView = UITableView.init(frame: self.view.bounds,style: UITableView.Style.grouped)
+        tableView = UITableView(frame: self.view.bounds,style: UITableView.Style.grouped)
         self.view.addSubview(tableView)
         tableView.dataSource = self
         tableView.delegate = self
         self.tableView.register(PPSettingCell.self, forCellReuseIdentifier: kPPBaseCellIdentifier)
-        tableView.tableFooterView = UIView.init()
+        tableView.tableFooterView = UIView()
         
         
     }
@@ -30,10 +34,19 @@ class PPSettingViewController: PPBaseViewController,UITableViewDataSource,UITabl
         dataSource = ["WebDAV Setting","Web"]
         self.tableView.reloadData()
     }
-    @objc func saveMarkdownWhenClose(_ sender:UISwitch) {
-        debugPrint("======\(sender.isOn)")
-        PPUserInfo.shared.pp_Setting.updateValue(sender.isOn ? "1" : "0", forKey: "saveMarkdownWhenClose")
-
+    
+    
+    func didClickSwitch(sender: UISwitch, name: String) {
+        debugPrint("======\(sender.isOn):\(name)")
+        if name == "退出时自动保存文本" {
+            PPUserInfo.shared.pp_Setting.updateValue(sender.isOn ? "1" : "0", forKey: "saveMarkdownWhenClose")
+        }
+        else if name == "上传图片名称使用创建日期" {
+            PPUserInfo.shared.pp_Setting.updateValue(sender.isOn ? "1" : "0", forKey: "uploadImageNameUseCreationDate")
+        }
+        else if name == "上传照片后删除原照片" {
+            PPUserInfo.shared.pp_Setting.updateValue(sender.isOn ? "1" : "0", forKey: "deletePhotoAfterUploading")
+        }
     }
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return dataSource.count
@@ -43,10 +56,16 @@ class PPSettingViewController: PPBaseViewController,UITableViewDataSource,UITabl
         let cell = tableView.dequeueReusableCell(withIdentifier: kPPBaseCellIdentifier, for: indexPath) as! PPSettingCell
         cell.titleLB.text = self.dataSource[indexPath.row]
         let obj = self.dataSource[indexPath.row]
-        if obj == "自动保存" {
-            cell.switchBtn.isOn = PPUserInfo.pp_valueForSettingDict(key: "saveMarkdownWhenClose")
-            cell.switchBtn.addTarget(self, action: #selector(saveMarkdownWhenClose(_:)), for: UIControl.Event.touchUpInside)
+        if obj == "退出时自动保存文本" {
+            cell.switchBtn.isOn = PPUserInfo.pp_boolValue("saveMarkdownWhenClose")
         }
+        else if obj == "上传图片名称使用创建日期" {
+            cell.switchBtn.isOn = PPUserInfo.pp_boolValue("uploadImageNameUseCreationDate")
+        }
+        else if obj == "上传照片后删除原照片" {
+            cell.switchBtn.isOn = PPUserInfo.pp_boolValue("deletePhotoAfterUploading")
+        }
+        cell.delegate = self
         return cell
     }
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
@@ -60,11 +79,6 @@ class PPSettingViewController: PPBaseViewController,UITableViewDataSource,UITabl
             #if DEBUG
             FLEXManager.shared.showExplorer()
             #endif
-
-        }
-        else if obj == "自动保存" {
-            PPUserInfo.shared.pp_Setting.updateValue("1", forKey: "saveMarkdownWhenClose")
-            
         }
         
     }

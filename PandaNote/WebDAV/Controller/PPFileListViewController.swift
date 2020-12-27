@@ -12,6 +12,7 @@ import SKPhotoBrowser
 import Kingfisher
 import YPImagePicker
 import PopMenu
+import Photos
 
 class PPFileListViewController: PPBaseViewController,UITextFieldDelegate,UITableViewDataSource,UITableViewDelegate
     ,SKPhotoBrowserDelegate
@@ -419,37 +420,6 @@ class PPFileListViewController: PPBaseViewController,UITextFieldDelegate,UITable
         alertController.addAction(cancelAction)
         self.present(alertController, animated: true, completion: nil)
     }
-    func showImagePicker() {
-        var config = YPImagePickerConfiguration()
-        config.library.maxNumberOfItems = 1
-        config.showsPhotoFilters = false
-        config.startOnScreen = YPPickerScreen.library
-        let picker = YPImagePicker(configuration: config)
-        //                let picker = YPImagePicker()
-        picker.didFinishPicking { [unowned picker] items, _ in
-            guard let photo = items.singlePhoto else {
-                return
-            }
-            if photo.fromCamera == true {
-                debugPrint("====\(photo.originalImage.imageOrientation.rawValue)")
-                return
-            }
-            PPFileManager.shared.getImageDataFromAsset(asset: photo.asset!, completion: { (imageData,imageLocalURL) in
-                guard let imageLocalURL = imageLocalURL else {
-                    return
-                }
-                let remotePath = self.pathStr + "PP_"+imageLocalURL.lastPathComponent
-                debugPrint(imageLocalURL)
-                PPFileManager.shared.uploadFileViaWebDAV(path: remotePath, contents: imageData as Data?) { (error) in
-                    PPHUD.showHUDText(message: "上传成功🦄", view: self.view)
-                    self.getWebDAVData()
-                }
-                
-            })
-            picker.dismiss(animated: true, completion: nil)
-        }
-        self.present(picker, animated: true, completion: nil)
-    }
     /// 加载图片并保存，如果本地不存在就从服务器获取
     func loadAndSaveImage(imageURL:String,fileID:String,completionHandler: ((Data) -> Void)? = nil) {
 //        let cache = ImageCache.default//KingFisher用
@@ -491,7 +461,7 @@ class PPFileListViewController: PPBaseViewController,UITextFieldDelegate,UITable
         }
         
         if (PPUserInfo.shared.webDAVServerURL.length < 1) {
-            PPFileManager.shared.initWebDAVSetting()
+            PPFileManager.shared.initCloudServiceSetting()
         }
         PPFileManager.shared.pp_getFileList(path: self.pathStr) { (contents,isFromCache, error) in
             if error != nil {
@@ -523,5 +493,85 @@ class PPFileListViewController: PPBaseViewController,UITextFieldDelegate,UITable
     
     
     
+
+}
+//MARK: - 照片上传等处理
+extension PPFileListViewController {
+    
+    func uploadPhotos(_ mediaItems:[YPMediaItem]) {
+//        let myQueue = DispatchQueue.global()
+        let group = DispatchGroup()
+//        group.enter()//把该任务添加到组队列中执行
+//        myQueue.async(group: group, qos: .default, flags: [], execute: {
+//            for _ in 0...10 {
+//                print("耗时任务一")
+//                group.leave()//执行完之后从组队列中移除
+//            }
+//        })
+        var assetsToDeleteFromDevice = [PHAsset]()
+        for item in mediaItems {
+            group.enter() // 将以下任务添加进group
+            
+            switch item {
+            case .photo(let photo):
+                debugPrint(photo)
+                guard let asset = photo.asset else { continue }
+                PPFileManager.shared.getImageDataFromAsset(asset: asset, completion: { (imageData,imageLocalURL,imageInfo) in
+                    guard let imageLocalURL = imageLocalURL else {
+                        return
+                    }
+                    var uploadName = imageLocalURL.lastPathComponent
+                    if PPUserInfo.pp_boolValue("uploadImageNameUseCreationDate") {
+                        if let creationDate = imageInfo["creationDate"] {
+                            uploadName = creationDate.replacingOccurrences(of: ":", with: ".") + "." + imageLocalURL.lastPathComponent.split(separator: ".").last!
+                        }
+                    }
+                    let remotePath = self.pathStr + uploadName
+                    debugPrint(imageLocalURL)
+                    PPFileManager.shared.uploadFileViaWebDAV(path: remotePath, contents: imageData as Data?) { (error) in
+                        PPHUD.showHUDFromTop("上传+1")
+                        assetsToDeleteFromDevice.append(asset)
+                        group.leave() //本次任务完成（即本次for循环任务完成），将任务从group中移除
+                    }
+                    
+                })
+            case .video(let video):
+                debugPrint(video)
+            }
+            
+        }
+        
+        //当上面所有的任务执行完之后通知 (timeout: .now() + 5)
+        group.notify(queue: .main) {
+            PPHUD.showHUDFromTop("全部上传成功🦄")
+            debugPrint("所有的上传任务执行完了")
+            if PPUserInfo.pp_boolValue("deletePhotoAfterUploading") {
+                PPFileManager.shared.deletePhotos(assetsToDeleteFromDevice)
+            }
+            self.getWebDAVData()
+        }
+
+    }
+    func showImagePicker() {
+        var config = YPImagePickerConfiguration()
+        config.library.maxNumberOfItems = 99
+//        config.library.mediaType = .photoAndVideo//支持上传图片和视频
+        config.showsPhotoFilters = false
+        config.startOnScreen = YPPickerScreen.library
+        let picker = YPImagePicker(configuration: config)
+        picker.didFinishPicking { [unowned picker] items, _ in
+            guard let photo = items.singlePhoto else {
+                return
+            }
+            if photo.fromCamera == true {
+                debugPrint("====\(photo.originalImage.imageOrientation.rawValue)")
+                return
+            }
+            self.uploadPhotos(items)
+
+            picker.dismiss(animated: true, completion: nil)
+        }
+        self.present(picker, animated: true, completion: nil)
+    }
 
 }

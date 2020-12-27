@@ -117,7 +117,7 @@ class PPWebDAVConfigViewController: PPBaseViewController {
         
         PPHUD.showHUDFromTop("保存成功")
         PPUserInfo.shared.initConfig()
-        PPFileManager.shared.initWebDAVSetting()
+        PPFileManager.shared.initCloudServiceSetting()
         if let home = self.navigationController?.viewControllers[0] {
             let vc = home as! PPFileListViewController
             vc.setNavTitle(cell4.serverNameTF.text,true)

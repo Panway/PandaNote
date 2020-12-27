@@ -40,7 +40,7 @@ class PPFileManager: NSObject,FileProviderDelegate {
     override init() {
         super.init()
         PPFileManager.dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
-        initWebDAVSetting()
+        initCloudServiceSetting()
     }
     //MARK:- 数据处理
     func myPPFileArrayFrom(_ contents:[FileObject]) -> [PPFileObject] {
@@ -78,11 +78,11 @@ class PPFileManager: NSObject,FileProviderDelegate {
         }
         PPDiskCache.shared.fetchData(key: archieveKey, failure: { (error) in
             if let error = error {
-                if (error as NSError).code != NSFileReadNoSuchFileError {
+//                if (error as NSError).code != NSFileReadNoSuchFileError {
                     DispatchQueue.main.async {
                         completionHandler([],false,error)
                     }
-                }
+//                }
             }
             //获取本地缓存失败就去服务器获取
             self.getRemoteFileList(path: path, completionHandler: completionHandler)
@@ -283,7 +283,8 @@ class PPFileManager: NSObject,FileProviderDelegate {
     
     //MARK:- webDAV、云服务设置
     /// 初始化WebDAV设置
-    func initWebDAVSetting() -> Void {
+    @discardableResult
+    func initCloudServiceSetting() -> Bool {
         PPUserInfo.shared.updateCurrentServerInfo(index: PPUserInfo.shared.pp_lastSeverInfoIndex)
         
 //        let cache = URLCache(memoryCapacity: 5 * 1024 * 1024, diskCapacity: 3 * 1024 * 1024, diskPath: nil)
@@ -291,7 +292,7 @@ class PPFileManager: NSObject,FileProviderDelegate {
         guard let user = PPUserInfo.shared.webDAVUserName,let password = PPUserInfo.shared.webDAVPassword else {
             debugPrint("无法初始化服务器")
             PPHUD.showHUDFromTop("无法初始化服务器,请添加", isError: true)
-            return
+            return false
         }
         let userCredential = URLCredential(user: user,
                                            password: password,
@@ -313,9 +314,10 @@ class PPFileManager: NSObject,FileProviderDelegate {
         webdav?.credentialType = URLRequest.AuthenticationType.basic
             currentFileProvider = webdav
         }
+        return true
     }
     /// 从PHAsset获取NSData
-    func getImageDataFromAsset(asset: PHAsset, completion: @escaping (_ data: NSData?,_ fileURL:URL?) -> Void) {
+    func getImageDataFromAsset(asset: PHAsset, completion: @escaping (_ data: NSData?,_ fileURL:URL?,_ imageInfo:[String:String]) -> Void) {
         let manager = PHImageManager.default()
         let options = PHImageRequestOptions()
         options.isNetworkAccessAllowed = true
@@ -345,18 +347,29 @@ class PPFileManager: NSObject,FileProviderDelegate {
             else {
                 url = URL(fileURLWithPath: asset.value(forKey: "filename") as! String)
             }
-            
+            let imageInfo = ["creationDate":(asset.creationDate != nil) ? asset.creationDate!.pp_stringFromDate() : "",
+                             "modificationDate":(asset.modificationDate != nil) ? asset.creationDate!.pp_stringFromDate() : "",
+                             "pixelWidth":"",
+                             "pixelHeight":""]
             if let imageData = imgData {
-                completion(imageData as NSData,url)
+                completion(imageData as NSData,url,imageInfo)
             } else {
-                completion(nil,url)
+                completion(nil,url,imageInfo)
             }
         }
 //        }
         
         
     }
-    
+    //https://stackoverflow.com/a/59869659
+    ///删除相册图片
+    func deletePhotos(_ assetsToDeleteFromDevice:[PHAsset]) {
+        let assetIdentifiers = assetsToDeleteFromDevice.map({ $0.localIdentifier })
+        let assets = PHAsset.fetchAssets(withLocalIdentifiers: assetIdentifiers, options: nil)
+        PHPhotoLibrary.shared().performChanges({
+            PHAssetChangeRequest.deleteAssets(assets)
+        })
+    }
     func getImageDataFromPHAsset(asset: PHAsset) -> Data {
         let options = PHImageRequestOptions()
         options.isNetworkAccessAllowed = true

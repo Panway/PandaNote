@@ -635,6 +635,9 @@ extension Int {
 }
 extension Date {
     func pp_stringFromDate() -> String {
+        if self == nil {
+            return ""
+        }
         return PPFileManager.dateFormatter.string(from: self)
     }
 }
