@@ -12,7 +12,7 @@ import FilesProvider
 import PINCache
 
 class PPFileManager: NSObject,FileProviderDelegate {
-    let apiCachePrefix = "FileList/api_"
+    let apiCachePrefix = "APICache/api_"
     
     static let shared = PPFileManager()
     static let dateFormatter = DateFormatter()
@@ -78,11 +78,12 @@ class PPFileManager: NSObject,FileProviderDelegate {
         }
         PPDiskCache.shared.fetchData(key: archieveKey, failure: { (error) in
             if let error = error {
-//                if (error as NSError).code != NSFileReadNoSuchFileError {
+                //忽略文件不存在错误
+                if (error as NSError).code != NSFileReadNoSuchFileError {
                     DispatchQueue.main.async {
                         completionHandler([],false,error)
                     }
-//                }
+                }
             }
             //获取本地缓存失败就去服务器获取
             self.getRemoteFileList(path: path, completionHandler: completionHandler)
@@ -145,7 +146,7 @@ class PPFileManager: NSObject,FileProviderDelegate {
                 return
             }
             if let shouldCacheToDisk = cacheToDisk, shouldCacheToDisk == true {
-                PPDiskCache.shared.setData(data, key: path)
+                PPDiskCache.shared.setData(data, key:  PPUserInfo.shared.webDAVRemark + path)
             }
             DispatchQueue.main.async {
                 completionHandler(data,false,error)
@@ -161,7 +162,7 @@ class PPFileManager: NSObject,FileProviderDelegate {
     ///   - completionHandler: 完成回调
     func loadFileFromWebDAV(path: String, downloadIfExist:Bool?=false ,completionHandler: @escaping ((_ contents: Data?, _ isFromCache:Bool, _ error: Error?) -> Void)) {
         // 1 从本地磁盘获取文件缓存
-        PPDiskCache.shared.fetchData(key: path, failure: { (error) in
+        PPDiskCache.shared.fetchData(key: PPUserInfo.shared.webDAVRemark + path, failure: { (error) in
             // 2-2 本地磁盘没有，就从服务器获取最新的
             self.downloadFileFromWebDAV(path: path, cacheToDisk: true, completionHandler: completionHandler)
             
@@ -349,8 +350,8 @@ class PPFileManager: NSObject,FileProviderDelegate {
             }
             let imageInfo = ["creationDate":(asset.creationDate != nil) ? asset.creationDate!.pp_stringFromDate() : "",
                              "modificationDate":(asset.modificationDate != nil) ? asset.creationDate!.pp_stringFromDate() : "",
-                             "pixelWidth":"",
-                             "pixelHeight":""]
+                             "pixelWidth":"\(asset.pixelWidth)",
+                             "pixelHeight":"\(asset.pixelHeight)"]
             if let imageData = imgData {
                 completion(imageData as NSData,url,imageInfo)
             } else {

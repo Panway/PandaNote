@@ -23,19 +23,20 @@ extension PPFileListViewController {
         searchController.searchBar.autocapitalizationType = .none
         searchController.dimsBackgroundDuringPresentation = false
         searchController.searchBar.delegate = self // Monitor when the search button is tapped.
-        
+        searchController.searchBar.tintColor = PPCOLOR_GREEN
 //        searchController.searchBar.scopeButtonTitles = ["A","B","C","D"]
 
         
         if #available(iOS 11.0, *) {
             // 将搜索栏放置在导航栏中 Place the search bar in the navigation bar.
-            navigationItem.searchController = searchController
+//            navigationItem.searchController = searchController
             // 滚动时隐藏搜索栏
-            navigationItem.hidesSearchBarWhenScrolling = true
+//            navigationItem.hidesSearchBarWhenScrolling = false
         } else {
             // Fallback on earlier versions
         }
-        
+        self.tableView.tableHeaderView = searchController.searchBar;
+
         definesPresentationContext = true
     }
 }

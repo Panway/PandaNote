@@ -12,7 +12,7 @@ class PPDiskCache {
     static let shared = PPDiskCache()
     
     ///缓存路径`/Library/Caches/PPAPICache`
-    public let path = NSSearchPathForDirectoriesInDomains(.cachesDirectory, .userDomainMask, true).first! + "/PPAPICache"
+    public let path = NSSearchPathForDirectoriesInDomains(.cachesDirectory, .userDomainMask, true).first! + "/PandaCache"
 
 
     open lazy var cacheQueue : DispatchQueue = {

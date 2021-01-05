@@ -423,7 +423,7 @@ class PPFileListViewController: PPBaseViewController,UITextFieldDelegate,UITable
     /// 加载图片并保存，如果本地不存在就从服务器获取
     func loadAndSaveImage(imageURL:String,fileID:String,completionHandler: ((Data) -> Void)? = nil) {
 //        let cache = ImageCache.default//KingFisher用
-        let imagePath = PPUserInfo.shared.pp_mainDirectory + imageURL
+        let imagePath = "\(PPDiskCache.shared.path)/\(PPUserInfo.shared.webDAVRemark)/\(imageURL)"
         self.currentImageURL = imagePath
         
 //        let filePath = cache.cachePath(forComputedKey: imageURL)//KingFisher用
