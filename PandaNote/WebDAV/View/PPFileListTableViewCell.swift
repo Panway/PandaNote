@@ -8,8 +8,10 @@
 
 import UIKit
 import FilesProvider
+import Kingfisher
 
 class PPFileListTableViewCell: PPBaseTableViewCell {
+    private let imageWidth = 50.0
     var titleLabel : UILabel = {
         let label = UILabel();
         label.textColor = "333333".HEXColor()
@@ -54,14 +56,19 @@ class PPFileListTableViewCell: PPBaseTableViewCell {
             self.iconImage.image = UIImage.init(named: "ico_folder")
         }
         else if (fileObj.name.pp_isImageFile())  {
-            let imagePath = PPDiskCache.shared.path + fileObj.path
+            let imagePath = PPFileManager.shared.downloadPath + fileObj.path
 //            self.currentImageURL = imagePath
+
             if FileManager.default.fileExists(atPath: imagePath) {
-                let imageData = try?Data(contentsOf: URL(fileURLWithPath: imagePath))
-                self.iconImage.image = UIImage.init(data: imageData!)
+                //使用略缩图 显示略缩图 减少内存占用
+                //https://github.com/onevcat/Kingfisher/wiki/Cheat-Sheet#processor
+                let processor = DownsamplingImageProcessor(size: CGSize(width: imageWidth*2, height: imageWidth*2))
+                self.iconImage.kf.setImage(with: URL(fileURLWithPath: imagePath), options: [.processor(processor)])
+//                let imageData = try?Data(contentsOf: URL(fileURLWithPath: imagePath))
+//                self.iconImage.image = UIImage(data: imageData!)
             }
             else {
-                self.iconImage.image = UIImage.init(named: "ico_jpg")
+                self.iconImage.image = UIImage(named: "ico_jpg")
             }
         }
         else {
@@ -82,8 +89,8 @@ class PPFileListTableViewCell: PPBaseTableViewCell {
         self.iconImage.snp.makeConstraints { (make) in
             make.left.equalTo(self.snp.left).offset(15);
             make.centerY.equalTo(self.snp.centerY);
-            make.width.equalTo(50)
-            make.height.equalTo(50)
+            make.width.equalTo(imageWidth)
+            make.height.equalTo(imageWidth)
 
         }
         

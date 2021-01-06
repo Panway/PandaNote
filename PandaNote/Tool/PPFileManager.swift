@@ -20,6 +20,13 @@ class PPFileManager: NSObject,FileProviderDelegate {
     var dropbox: DropboxFileProvider?//未配置服务器地址时刷新可能为空
     var baiduwangpan : BaiduyunAPITool?
     var baiduFSID = 0
+    /// 下载保存的文件路径，只读
+    public var downloadPath:String {
+        get {
+            return "\(PPDiskCache.shared.path)/\(PPUserInfo.shared.webDAVRemark)"
+        }
+    }
+
     ///获取当前云服务读写文件的对象
     open internal(set) var currentFileProvider: HTTPFileProvider? {
         get {
@@ -230,6 +237,12 @@ class PPFileManager: NSObject,FileProviderDelegate {
         currentFileProvider?.moveItem(path:pathOld, to: pathNew, completionHandler: { (error) in
             DispatchQueue.main.async {
                 if error == nil {
+                    //移动本地的文件
+                    if FileManager.default.fileExists(atPath: self.downloadPath + pathOld) {
+                        try? FileManager.default.moveItem(atPath: self.downloadPath + pathOld,
+                                                          toPath: self.downloadPath + pathNew)
+                    }
+
                     completionHandler(error)
                 }
                 else {

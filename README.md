@@ -9,6 +9,8 @@
 
 主要用来写 markdown 笔记，可使用坚果云等网盘实现云同步，所有文件保存在第三方服务器
 
+App 初步支持macOS运行（使用Mac Catalyst）
+
 **目前支持的网盘（协议）**：
 
 - [x] WebDAV（坚果云或自己搭建WebDAV服务）

@@ -48,7 +48,7 @@ target 'PandaNote' do
   #  pod 'SVProgressHUD'
   pod 'MBProgressHUD'
 #  pod 'AFWebDAVManager', :git => 'https://github.com/AFNetworking/AFWebDAVManager.git'
-  pod 'WechatOpenSDK'#,'1.8.4'
+#  pod 'WechatOpenSDK'#,'1.8.4'
   pod 'FMDB'
   pod 'IQKeyboardManager'
   #滴滴开源的应用内调试工具，界面比较美观 https://github.com/didi/DoraemonKit
@@ -57,6 +57,7 @@ target 'PandaNote' do
   # XML解析 https://github.com/tid-kijyun/Kanna
   pod 'Kanna', '~> 5.2.2'
   # JSON解析 https://github.com/tristanhimmelman/ObjectMapper
+  # 中文指南 https://github.com/SwiftOldDriver/ObjectMapper-CN-Guide
   pod 'ObjectMapper'
 
   #----------私有----------
@@ -89,8 +90,10 @@ end
 
 
 post_install do |installer|
-  puts '如果自己修改了Pods源码，可以在pod install之后覆盖掉'
+  puts '在pod install之后执行的脚本'
   output = %x( #{"ruby XcodeTool.rb"} ) #执行 XcodeTool.rb 脚本文件消除警告
+  #支持Mac Catalyst
+  output = %x( #{"curl http://pandago.tk/l/pydx/DoraemonAppInfoViewController.m -o DoraemonAppInfoViewController.m && cp -v -f DoraemonAppInfoViewController.m Pods/DoraemonKit/iOS/DoraemonKit/Src/Core/Plugin/Common/AppInfo/DoraemonAppInfoViewController.m"})
 #  output = %x( #{"sh ios_tool.sh correct_import"} )# 执行shell脚本文件
   #    output = %x( #{"cp -f -R -v PodsNew/ZFPlayer Pods"} )# 执行shell脚本
   puts output

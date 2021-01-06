@@ -34,7 +34,6 @@ PODS:
   - SKPhotoBrowser (6.1.0)
   - SnapKit (5.0.1)
   - SteviaLayout (4.7.3)
-  - WechatOpenSDK (1.8.7.1)
   - YPImagePicker (4.4.0):
     - PryntTrimmerView (~> 4.0.2)
     - SteviaLayout (~> 4.7.3)
@@ -61,7 +60,6 @@ DEPENDENCIES:
   - PPiOSKit/SwipePopGesture (from `https://github.com/Panway/CodeSnipetCollection.git`)
   - SKPhotoBrowser
   - SnapKit
-  - WechatOpenSDK
   - YPImagePicker
   - YYText
 
@@ -86,7 +84,6 @@ SPEC REPOS:
     - SKPhotoBrowser
     - SnapKit
     - SteviaLayout
-    - WechatOpenSDK
     - YPImagePicker
     - YYText
 
@@ -96,7 +93,7 @@ EXTERNAL SOURCES:
 
 CHECKOUT OPTIONS:
   PPiOSKit:
-    :commit: cdff0bf9b30b2969cb06f61c84f3c1ae565de7e3
+    :commit: 32aeb80ddd1602cce23d83a68cf9f29b9e32eb87
     :git: https://github.com/Panway/CodeSnipetCollection.git
 
 SPEC CHECKSUMS:
@@ -120,10 +117,9 @@ SPEC CHECKSUMS:
   SKPhotoBrowser: 343de95d89dc7913763c5dda243cc6e606e4a168
   SnapKit: 97b92857e3df3a0c71833cce143274bf6ef8e5eb
   SteviaLayout: c2ecdcff57d44e38fd2f65e54ad52aeae28ca0c4
-  WechatOpenSDK: 6a4d1436c15b3b5fe2a0bd383f3046010186da44
   YPImagePicker: 15aed8bcaa4dad976e11b6114126d731a2f9f3c9
   YYText: 5c461d709e24d55a182d1441c41dc639a18a4849
 
-PODFILE CHECKSUM: 629e50eb97d98f95d9396e80547b6a93a813bafd
+PODFILE CHECKSUM: 52ffec7095ec3353a9f074ff390f0b6e81625c11
 
 COCOAPODS: 1.10.0

@@ -131,8 +131,8 @@ class PPFileListViewController: PPBaseViewController,UITextFieldDelegate,UITable
             self.navigationController?.pushViewController(vc, animated: true)
         }
         else if (fileObj.name.pp_isImageFile())  {
-            loadAndSaveImage(imageURL: fileObj.path,fileID: fileObj.fileID) { (imageData) in
-//                debugPrint(imageData)
+            loadAndCacheImage(imageURL: fileObj.path,fileID: fileObj.fileID) { (imageData) in
+                tableView.reloadRows(at: [indexPath], with: .none)
                 self.showImage(contents: imageData, image: nil, imageName: fileObj.path,imageURL:fileObj.path)
             }
         }
@@ -257,7 +257,7 @@ class PPFileListViewController: PPBaseViewController,UITextFieldDelegate,UITable
             guard let underlyingImage = photo.underlyingImage else {
                 return
             }
-            PPShareManager.shared().weixinShareImage(underlyingImage, type: PPSharePlatform.weixinSession.rawValue)
+//            PPShareManager.shared().weixinShareImage(underlyingImage, type: PPSharePlatform.weixinSession.rawValue)
         }
         else if buttonIndex == 1 {
 //            let photo = photoBrowser.photos[photoIndex]
@@ -267,7 +267,7 @@ class PPFileListViewController: PPBaseViewController,UITextFieldDelegate,UITable
 //            let imagePath = ImageCache.default.cachePath(forKey: self.currentImageURL ?? "")
 //            let imageData = try?Data(contentsOf: URL(fileURLWithPath: self.currentImageURL ?? ""))
             let imageData = FileManager.default.contents(atPath: self.currentImageURL ?? "")
-            PPShareManager.shared().weixinShareEmoji(imageData ?? Data.init(), type: PPSharePlatform.weixinSession.rawValue)
+//            PPShareManager.shared().weixinShareEmoji(imageData ?? Data.init(), type: PPSharePlatform.weixinSession.rawValue)
         }
     }
     func showImage(contents:Data,image:UIImage?,imageName:String,imageURL:String) -> Void {
@@ -421,7 +421,7 @@ class PPFileListViewController: PPBaseViewController,UITextFieldDelegate,UITable
         self.present(alertController, animated: true, completion: nil)
     }
     /// 加载图片并保存，如果本地不存在就从服务器获取
-    func loadAndSaveImage(imageURL:String,fileID:String,completionHandler: ((Data) -> Void)? = nil) {
+    func loadAndCacheImage(imageURL:String,fileID:String,completionHandler: ((Data) -> Void)? = nil) {
 //        let cache = ImageCache.default//KingFisher用
         let imagePath = "\(PPDiskCache.shared.path)/\(PPUserInfo.shared.webDAVRemark)/\(imageURL)"
         self.currentImageURL = imagePath
