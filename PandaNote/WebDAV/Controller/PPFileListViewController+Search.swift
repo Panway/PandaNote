@@ -126,6 +126,21 @@ extension PPFileListViewController {
                     PPHUD.showHUDFromTop("移动失败，文件名有问题")
                     return
                 }
+                //如果是本地文件就上传（上传App配置）
+                if (first.filePathToBeMove.contains(PPUserInfo.shared.pp_mainDirectory)) {
+                    let path = URL(fileURLWithPath: PPUserInfo.shared.pp_mainDirectory+"/PP_JSONConfig.json")
+                    let jsonData = try? Data(contentsOf: path)
+                    PPFileManager.shared.uploadFileViaWebDAV(path: self.pathStr + fileName, contents: jsonData) { (error) in
+                        if error != nil {
+                            PPHUD.showHUDFromTop("上传配置失败", isError: true)
+                        }
+                        else {
+                            PPHUD.showHUDFromTop("上传配置成功")
+                            self.dismissSelf()
+                        }
+                    }
+                    return
+                }
                 PPFileManager.shared.moveFileViaWebDAV(pathOld: first.filePathToBeMove,
                                                        pathNew: self.pathStr + fileName) { (error) in
                     debugPrint(error?.localizedDescription)
@@ -179,7 +194,7 @@ extension PPFileListViewController {
     }
     @objc func showAddCloudServiceView(for barButtonItem: UIBarButtonItem) {
         // Create menu controller with actions
-        guard let cloudServiceInfos = PPUserInfo.shared.pp_Setting["PPWebDAVServerList"] as?  [[String : String]] else { return }
+        guard let cloudServiceInfos = PPUserInfo.shared.pp_serverInfoList as?  [[String : String]] else { return }
 
         var menuList = [PopMenuDefaultAction]()
         for item: [String : String] in cloudServiceInfos {

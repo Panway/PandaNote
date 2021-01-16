@@ -14,6 +14,7 @@ PODS:
   - Kingfisher/Core (5.15.8)
   - MBProgressHUD (1.2.0)
   - MJRefresh (3.5.0)
+  - MonkeyKing (2.1.0)
   - NewPopMenu (2.1.2)
   - ObjectMapper (4.2.0)
   - PINCache (3.0.3):
@@ -51,6 +52,7 @@ DEPENDENCIES:
   - Kingfisher
   - MBProgressHUD
   - MJRefresh
+  - MonkeyKing
   - NewPopMenu
   - ObjectMapper
   - PINCache
@@ -76,6 +78,7 @@ SPEC REPOS:
     - Kingfisher
     - MBProgressHUD
     - MJRefresh
+    - MonkeyKing
     - NewPopMenu
     - ObjectMapper
     - PINCache
@@ -108,6 +111,7 @@ SPEC CHECKSUMS:
   Kingfisher: a3c03d702433fa6cfedabb2bddbe076fb8f2e902
   MBProgressHUD: 3ee5efcc380f6a79a7cc9b363dd669c5e1ae7406
   MJRefresh: 6afc955813966afb08305477dd7a0d9ad5e79a16
+  MonkeyKing: 1656e3e01911b5f72f988d4496c1cc988d0c009c
   NewPopMenu: c6129e08e8192f6257ceb5f9a4357e1b59c6e2e7
   ObjectMapper: 1eb41f610210777375fa806bf161dc39fb832b81
   PINCache: 7a8fc1a691173d21dbddbf86cd515de6efa55086
@@ -120,6 +124,6 @@ SPEC CHECKSUMS:
   YPImagePicker: 15aed8bcaa4dad976e11b6114126d731a2f9f3c9
   YYText: 5c461d709e24d55a182d1441c41dc639a18a4849
 
-PODFILE CHECKSUM: 52ffec7095ec3353a9f074ff390f0b6e81625c11
+PODFILE CHECKSUM: e91e657ca7fe34c4301197e99fe30ddd599d6eb5
 
 COCOAPODS: 1.10.0

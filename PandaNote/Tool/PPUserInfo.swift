@@ -34,17 +34,19 @@ class PPUserInfo: NSObject {
     var pp_JSONConfig:String!
     /// webview资源
     var pp_WebViewResource = [String]()
-    /// 服务器信息（坚果云、Dropbox等）
-    var pp_serverInfoList = [[String : String]]()
     /// 当前选择的是哪个服务器
     var pp_lastSeverInfoIndex = 0
-//    var pp_RecentFiles = [Any]()
+    /// App配置备份到服务器的位置
+    var appSettingLocationInServer = ""
+    /// 强制刷新文件列表的时候设为true（添加完服务器配置）
+    var refreshFileList = false
+
     /// 最近访问文件列表
      var pp_RecentFiles:Array<PPFileObject> = [] {
         didSet {
             do {
                 let encodedData = try JSONEncoder().encode(pp_RecentFiles)
-                try? encodedData.write(to: URL(fileURLWithPath: self.pp_mainDirectory + "/PP_RecentFiles"))
+                try? encodedData.write(to: URL(fileURLWithPath: self.pp_mainDirectory + "/PP_RecentFiles.json"))
             } catch {
                 debugPrint(error.localizedDescription)
             }
@@ -52,13 +54,12 @@ class PPUserInfo: NSObject {
     }
     
     
-//    var pp_Setting:Dictionary<String, Any>!
-    /// WebDAV设置等
-    public var pp_Setting:Dictionary<String, Any> = [:] {
+    /// App等跟哟用户隐私无关的设置
+    public var pp_Setting : Dictionary<String, Any> = [:] {
         didSet {
             debugPrint("旧值：\(String(describing: oldValue)) \n新值： \(String(describing: pp_Setting))")
-            let data:NSData = NSKeyedArchiver.archivedData(withRootObject: pp_Setting) as NSData
-            data.write(toFile: self.pp_mainDirectory+"/PP_UserPreference", atomically: true)
+//            let data:NSData = NSKeyedArchiver.archivedData(withRootObject: pp_Setting) as NSData
+//            data.write(toFile: self.pp_mainDirectory+"/PP_UserPreference", atomically: true)
             if let jsonData = try? JSONSerialization.data(withJSONObject: pp_Setting, options: JSONSerialization.WritingOptions.prettyPrinted) {
                 do {
                     try jsonData.write(to: URL(fileURLWithPath: self.pp_mainDirectory + "/PP_JSONConfig.json"), options: .atomic)
@@ -73,12 +74,22 @@ class PPUserInfo: NSObject {
 //            }
         }
     }
-    
+    /// 服务器信息（坚果云、Dropbox等）
+    var pp_serverInfoList : [[String : String]] = [] {
+        didSet {
+            do {
+                let encodedData = try JSONEncoder().encode(pp_serverInfoList)
+                try? encodedData.write(to: URL(fileURLWithPath: self.pp_mainDirectory + "/PP_CloudServerSetting.json"))
+            } catch {
+                debugPrint(error.localizedDescription)
+            }
+        }
+    }
+
     func initConfig() -> Void {
         self.pp_mainDirectory = NSSearchPathForDirectoriesInDomains(.libraryDirectory, .userDomainMask, true)[0]//documentDirectory
-        self.pp_mainDirectory += "/PandaCache"
+        self.pp_mainDirectory += "/PandaNote"
         self.pp_mainDirectoryURL = URL.init(fileURLWithPath: self.pp_mainDirectory)
-//        FileManager.default.fileExists(atPath: self.pp_mainDirectory, isDirectory: &true)
         pp_fileIcon = ["pdf":"ico_pdf",
                        "mp3":"ico_music",
                        "zip":"ico_zip",
@@ -101,25 +112,29 @@ class PPUserInfo: NSObject {
         catch {}
         self.pp_timezoneOffset = TimeZone.current.secondsFromGMT()
         
-        if let data = try? Data(contentsOf: URL(fileURLWithPath: self.pp_mainDirectory+"/PP_UserPreference")) {
-            let dict2 = NSKeyedUnarchiver.unarchiveObject(with: data)
-//            debugPrint("\(String(describing: dict2))")
-            self.pp_Setting = dict2 as! Dictionary<String, Any>
-            if let serverList = PPUserInfo.shared.pp_Setting["PPWebDAVServerList"] as? [[String : String]] {
-                pp_serverInfoList = serverList
+        if let data = try? Data(contentsOf: URL(fileURLWithPath: self.pp_mainDirectory+"/PP_JSONConfig.json")) {
+//            let dict2 = NSKeyedUnarchiver.unarchiveObject(with: data)
+//            self.pp_Setting = dict2 as! Dictionary<String, Any>
+            if let json = try? JSONSerialization.jsonObject(with: data, options: .allowFragments) {
+                self.pp_Setting = json as! Dictionary<String, Any>
             }
             if let currentServerIndex = PPUserInfo.shared.pp_Setting["pp_lastSeverInfoIndex"] {
                 self.pp_lastSeverInfoIndex = currentServerIndex as! Int
             }
-//            self.pp_JSONConfig = JSONSerialization.
         }
-        if let recentFileData = try? Data(contentsOf: URL(fileURLWithPath: self.pp_mainDirectory+"/PP_RecentFiles")) {
+        
+        //服务器配置
+        if let data = try? Data(contentsOf: URL(fileURLWithPath: self.pp_mainDirectory+"/PP_CloudServerSetting.json")) {
+            if let json = try? JSONSerialization.jsonObject(with: data, options: .allowFragments) {
+                self.pp_serverInfoList = json as! [[String : String]]
+            }
+        }
+        
+        
+        if let recentFileData = try? Data(contentsOf: URL(fileURLWithPath: self.pp_mainDirectory+"/PP_RecentFiles.json")) {
             let archieveArray = try? JSONDecoder().decode([PPFileObject].self, from: recentFileData)
             self.pp_RecentFiles = archieveArray ?? []
         }
-
-//        self.pp_Setting = ["saveDocWhenClose":"1"]
-//        self.pp_Setting.updateValue(<#T##value: Any##Any#>, forKey: <#T##String#>)
         
     }
     //MARK:最近文件

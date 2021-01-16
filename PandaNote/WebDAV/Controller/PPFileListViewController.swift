@@ -13,6 +13,8 @@ import Kingfisher
 import YPImagePicker
 import PopMenu
 import Photos
+import MonkeyKing
+
 
 class PPFileListViewController: PPBaseViewController,UITextFieldDelegate,UITableViewDataSource,UITableViewDelegate
     ,SKPhotoBrowserDelegate
@@ -97,8 +99,9 @@ class PPFileListViewController: PPBaseViewController,UITextFieldDelegate,UITable
     }
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        if self.isRecentFiles {
+        if self.isRecentFiles || PPUserInfo.shared.refreshFileList {
             self.getWebDAVData()//最近访问列表实时刷新
+            PPUserInfo.shared.refreshFileList = false
         }
     }
     //MARK: - UITableViewDataSource UITableViewDelegate
@@ -132,8 +135,9 @@ class PPFileListViewController: PPBaseViewController,UITextFieldDelegate,UITable
         }
         else if (fileObj.name.pp_isImageFile())  {
             loadAndCacheImage(imageURL: fileObj.path,fileID: fileObj.fileID) { (imageData) in
-                tableView.reloadRows(at: [indexPath], with: .none)
-                self.showImage(contents: imageData, image: nil, imageName: fileObj.path,imageURL:fileObj.path)
+                self.showImage(contents: imageData, image: nil, imageName: fileObj.path,imageURL:fileObj.path) {
+                    tableView.reloadRows(at: [indexPath], with: .none)//下载成功后再刷新
+                }
             }
         }
         else if (fileObj.name.hasSuffix("pdf"))  {
@@ -257,6 +261,16 @@ class PPFileListViewController: PPBaseViewController,UITextFieldDelegate,UITable
             guard let underlyingImage = photo.underlyingImage else {
                 return
             }
+            let message = MonkeyKing.Message.weChat(.session(info: (
+                title: "Session",
+                description: "Hello Session",
+                thumbnail: nil,
+                media: .image(underlyingImage)
+            )))
+            
+            MonkeyKing.deliver(message) { success in
+                print("shareURLToWeChatSession success: \(success)")
+            }
 //            PPShareManager.shared().weixinShareImage(underlyingImage, type: PPSharePlatform.weixinSession.rawValue)
         }
         else if buttonIndex == 1 {
@@ -270,7 +284,7 @@ class PPFileListViewController: PPBaseViewController,UITextFieldDelegate,UITable
 //            PPShareManager.shared().weixinShareEmoji(imageData ?? Data.init(), type: PPSharePlatform.weixinSession.rawValue)
         }
     }
-    func showImage(contents:Data,image:UIImage?,imageName:String,imageURL:String) -> Void {
+    func showImage(contents:Data,image:UIImage?,imageName:String,imageURL:String,completion: (() -> Void)? = nil) -> Void {
         DispatchQueue.main.async {
             if let image_down = UIImage.init(data: contents) {
                 // 1. create SKPhoto Array from UIImage
@@ -287,7 +301,9 @@ class PPFileListViewController: PPBaseViewController,UITextFieldDelegate,UITable
                 SKPhotoBrowserOptions.actionButtonTitles = ["微信原图分享","作为微信表情分享😄","UIActivityViewController分享"]
                 
                 self.present(self.photoBrowser, animated: true, completion: {})
-                
+                if let completion = completion {
+                    completion()
+                }
                 
                 /*
                 DispatchQueue.main.asyncAfter(deadline: .now()+1, execute: {
@@ -529,9 +545,11 @@ extension PPFileListViewController {
                     let remotePath = self.pathStr + uploadName
                     debugPrint(imageLocalURL)
                     PPFileManager.shared.uploadFileViaWebDAV(path: remotePath, contents: imageData as Data?) { (error) in
+                        if error == nil {
                         PPHUD.showHUDFromTop("上传+1")
                         assetsToDeleteFromDevice.append(asset)
                         group.leave() //本次任务完成（即本次for循环任务完成），将任务从group中移除
+                        }
                     }
                     
                 })

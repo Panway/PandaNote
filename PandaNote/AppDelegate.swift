@@ -13,6 +13,9 @@ import UIKit
 #if DEBUG
 import DoraemonKit
 #endif
+import MonkeyKing
+
+
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -23,20 +26,29 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
         PPUserInfo.shared.initConfig()
+        #if targetEnvironment(macCatalyst)
+        print("targetEnvironment(macCatalyst)")
+        #else
+        MonkeyKing.registerAccount(.weChat(appID: "wx37af47629351b5c0", appKey: "", miniAppID: nil, universalLink: "https://p.agolddata.com/pandanote/"))
+        //        PPShareManager.initWeixinAppId("wx37af47629351b5c0", appKey: "")
+        #endif
+
         window = UIWindow(frame: UIScreen.main.bounds)
         window?.rootViewController = PPTabBarController.ppTabBar()
         window?.makeKeyAndVisible()
-        PPShareManager.initWeixinAppId("wx37af47629351b5c0", appKey: "")
         #if DEBUG
-        Bundle(path: "/Applications/InjectionIII.app/Contents/Resources/iOSInjection.bundle")?.load()
-        DoraemonManager.shareInstance().install()
+        self.debugSetting()
+
         #endif
         
         //disable dark mode globally
         if #available(iOS 13.0, *) {
             self.window?.overrideUserInterfaceStyle = .light
         }
-        
+        //macOS进入前台通知 https://stackoverflow.com/a/62626134
+        #if targetEnvironment(macCatalyst)
+        NotificationCenter.default.addObserver(self, selector: #selector(appDidBecomeActiveAction), name: NSNotification.Name("NSApplicationDidBecomeActiveNotification"),object: nil)
+        #endif
         
         let dbModel = PPPriceDBModel()
         let sqliteManager = PPSQLiteManager(delegate: dbModel)
@@ -67,11 +79,29 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func applicationDidBecomeActive(_ application: UIApplication) {
         // Restart any tasks that were paused (or not yet started) while the application was inactive. If the application was previously in the background, optionally refresh the user interface.
-        PPPasteboardTool.getMoreInfomationOfURL()
+        appDidBecomeActiveAction()
     }
 
     func applicationWillTerminate(_ application: UIApplication) {
         // Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
+    }
+    /// wx37af47629351b5c0://platformId=wechat
+    func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey : Any] = [:]) -> Bool {
+        var result = true
+        if url.host == "oauth-callback" {
+            // 支付跳转支付宝钱包进行支付，处理支付结果
+            // 授权跳转支付宝钱包进行支付，处理支付结果
+        }
+        else if url.host == "weixinPayDone.com" {
+        }
+        else {
+            result = MonkeyKing.handleOpenURL(url)
+        }
+        if !result {
+            // 其他如支付等SDK的回调
+            return true
+        }
+        return result
     }
     //MARK: - Universal Links
     /// Associated Domains Entitlement配置:applinks:p.agolddata.com

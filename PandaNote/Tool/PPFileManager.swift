@@ -47,7 +47,7 @@ class PPFileManager: NSObject,FileProviderDelegate {
     override init() {
         super.init()
         PPFileManager.dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
-        initCloudServiceSetting()
+//        initCloudServiceSetting()
     }
     //MARK:- 数据处理
     func myPPFileArrayFrom(_ contents:[FileObject]) -> [PPFileObject] {
@@ -221,13 +221,15 @@ class PPFileManager: NSObject,FileProviderDelegate {
     }
     /// 通过WebDAV上传到服务器
     func uploadFileViaWebDAV(path: String, contents: Data?, completionHandler:@escaping(_ error:Error?) -> Void) {
+        guard let contents = contents else {
+            PPHUD.showHUDFromTop("空文件",isError: true)
+            return
+        }
         currentFileProvider?.writeContents(path: path, contents: contents, completionHandler: { (error) in
-            if error == nil {
-                DispatchQueue.main.async {
-                    completionHandler(error)
-                }
+            DispatchQueue.main.async {
+                completionHandler(error)
             }
-            else {
+            if error != nil {
                 debugPrint(error ?? "uploadFileViaWebDAV Error")
             }
         })

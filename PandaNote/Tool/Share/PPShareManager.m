@@ -383,7 +383,10 @@ static inline BOOL isiPhoneXSeries() {
 #if PP_USE_WECHAT_SHARE
 
 + (void)initWeixinAppId:(NSString *)appId appKey:(NSString *)appKey {
+#if !TARGET_OS_MACCATALYST
     [WXApi registerApp:appId universalLink:@"https://p.agolddata.com/pandanote/"];
+#endif
+    
     //    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(5 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
     //        //构造SendAuthReq结构体
     //        SendAuthReq* req = [[SendAuthReq alloc]init];

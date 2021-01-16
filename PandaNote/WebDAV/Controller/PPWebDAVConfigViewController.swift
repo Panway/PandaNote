@@ -112,17 +112,17 @@ class PPWebDAVConfigViewController: PPBaseViewController {
             "PPCloudServiceType":self.cloudType,
             "PPWebDAVRemark":cell4.serverNameTF.text!]
             serverList.append(newServer)
-            PPUserInfo.shared.pp_Setting["PPWebDAVServerList"] = serverList
+            PPUserInfo.shared.pp_serverInfoList = serverList
         
         
-        PPHUD.showHUDFromTop("保存成功")
+        PPHUD.showHUDFromTop("设置成功")
         PPUserInfo.shared.initConfig()
         PPFileManager.shared.initCloudServiceSetting()
         if let home = self.navigationController?.viewControllers[0] {
             let vc = home as! PPFileListViewController
             vc.setNavTitle(cell4.serverNameTF.text,true)
         }
-        
+        PPUserInfo.shared.refreshFileList = true
         DispatchQueue.main.asyncAfter(deadline: .now()+1) {
             self.navigationController?.popToRootViewController(animated: true)
         }

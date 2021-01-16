@@ -11,8 +11,11 @@
 #import "XDHorizontalItemView.h"
 
 #if __has_include(<WXApi.h>)
+#if !TARGET_OS_MACCATALYST
+
 #import <WXApi.h>
 #define PP_USE_WECHAT_SHARE 1
+#endif
 #else
 #define PP_USE_WECHAT_SHARE 0
 #endif

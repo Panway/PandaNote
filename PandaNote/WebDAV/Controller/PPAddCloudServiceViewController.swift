@@ -9,7 +9,7 @@
 import UIKit
 
 class PPAddCloudServiceViewController : PPBaseViewController,UITableViewDataSource,UITableViewDelegate {
-    var dataSource:Array<String> = ["坚果云",
+    var dataSource:Array<String> = ["WebDAV（坚果云等）",
                                     "Dropbox",
                                     "蓝奏云",
                                     "百度云"]
@@ -40,7 +40,7 @@ class PPAddCloudServiceViewController : PPBaseViewController,UITableViewDataSour
     }
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let obj = self.dataSource[indexPath.row]
-        if obj == "坚果云" {
+        if obj == "WebDAV（坚果云等）" {
             let vc = PPWebDAVConfigViewController()
             vc.cloudType = obj
             vc.serverURL = "http://dav.jianguoyun.com/dav"
@@ -53,7 +53,7 @@ class PPAddCloudServiceViewController : PPBaseViewController,UITableViewDataSour
             self.navigationController?.pushViewController(vc, animated: true)
         }
         else if obj == "百度云" {
-            PPAlertAction.showSheet(withTitle: "您想如何获取access_token", message: nil, cancelButtonTitle: "取消", destructiveButtonTitle: nil, otherButtonTitle: ["手动输入（抓包获取）","授权登录自动获取"]) { (index) in
+            PPAlertAction.showSheet(withTitle: "您想如何获取访问令牌（access_token）", message: nil, cancelButtonTitle: "取消", destructiveButtonTitle: nil, otherButtonTitle: ["手动输入（抓包获取）","授权登录自动获取"]) { (index) in
                 if index == 1 {
                     let vc = PPWebDAVConfigViewController()
                     vc.cloudType = "baiduyun"

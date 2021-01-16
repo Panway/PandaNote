@@ -185,6 +185,10 @@ class PPMarkdownViewController: PPBaseViewController,UITextViewDelegate {
         //MARK:保存
         self.textView.resignFirstResponder()
         PPFileManager.shared.uploadFileViaWebDAV(path: self.filePathStr, contents: stringToUpload.data(using: .utf8), completionHandler: { (error) in
+            if error != nil {
+                PPHUD.showHUDFromTop("保存失败", isError: true)
+                return
+            }
             PPHUD.showHUDFromTop("保存成功")
             self.textChanged = false
             if (self.closeAfterSave) {
