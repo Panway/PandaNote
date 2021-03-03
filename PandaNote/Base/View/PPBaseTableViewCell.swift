@@ -13,6 +13,10 @@ import SnapKit
 let kPPBaseCellIdentifier = "kPPBaseCellIdentifier"
 
 class PPBaseTableViewCell: UITableViewCell {
+    //记录第几区 第几行
+    var pp_section = 0
+    var pp_row = 0
+    
     
     
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {

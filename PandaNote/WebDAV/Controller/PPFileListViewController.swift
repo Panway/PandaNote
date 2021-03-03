@@ -31,7 +31,7 @@ class PPFileListViewController: PPBaseViewController,UITextFieldDelegate,UITable
     var tableView = UITableView()
     let cellReuseIdentifier = "cell"
 //    let documentsProvider = LocalFileProvider()
-    var currentImageURL: String?
+    var currentImageURL = ""
     var photoBrowser: SKPhotoBrowser!
     ///如果是展示最近访问的列表
     var isRecentFiles = false
@@ -280,7 +280,19 @@ class PPFileListViewController: PPBaseViewController,UITextFieldDelegate,UITable
 //            }
 //            let imagePath = ImageCache.default.cachePath(forKey: self.currentImageURL ?? "")
 //            let imageData = try?Data(contentsOf: URL(fileURLWithPath: self.currentImageURL ?? ""))
-            let imageData = FileManager.default.contents(atPath: self.currentImageURL ?? "")
+            guard let imageData = FileManager.default.contents(atPath: self.currentImageURL) else {
+                return
+            }
+            let message = MonkeyKing.Message.weChat(.session(info: (
+                title: nil,
+                description: nil,
+                thumbnail: UIImage(data: imageData),
+                media: .gif(imageData)
+            )))
+            
+            MonkeyKing.deliver(message) { success in
+                print("分享Gif表情到微信 shareGifToWeChatSession result: \(success)")
+            }
 //            PPShareManager.shared().weixinShareEmoji(imageData ?? Data.init(), type: PPSharePlatform.weixinSession.rawValue)
         }
     }

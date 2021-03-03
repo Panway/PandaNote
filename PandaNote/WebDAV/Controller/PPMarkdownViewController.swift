@@ -30,7 +30,7 @@ class PPMarkdownViewController: PPBaseViewController,UITextViewDelegate {
     override func viewDidLoad() {
         pp_initView()
         self.title = self.filePathStr.split(string: "/").last
-        PPFileManager.shared.getFileData(path: filePathStr, fileID: fileID,cacheToDisk:true) { (contents: Data?,isFromCache, error) in
+        PPFileManager.shared.getFileData(path: filePathStr, fileID: fileID,cacheToDisk:true,downloadIfCached:true) { (contents: Data?,isFromCache, error) in
             guard let contents = contents else {
                 return
             }
@@ -66,7 +66,6 @@ class PPMarkdownViewController: PPBaseViewController,UITextViewDelegate {
     func pp_initView() {
         self.view.addSubview(textView)
         textView.textContainerInset = UIEdgeInsets(top: 0, left: 8, bottom: 0, right: 8)
-//        textView.frame = self.view.bounds
         self.pp_viewEdgeEqualToSafeArea(textView)
         textView.backgroundColor = UIColor.white
         textView.font = UIFont.systemFont(ofSize: 16.0)
@@ -143,7 +142,7 @@ class PPMarkdownViewController: PPBaseViewController,UITextViewDelegate {
         return true
     }
     func textViewDidEndEditing(_ textView: PPPTextView) {
-        debugPrint("===textViewDidEndEditing \(textView.attributedText.markdownRepresentation)")
+//        debugPrint("===textViewDidEndEditing \(textView.attributedText.markdownRepresentation)")
         historyList.append(self.textView.text)
         debugPrint("historyList= \(historyList.count)")
     }

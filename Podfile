@@ -42,6 +42,8 @@ target 'PandaNote' do
   #https://github.com/SwipeCellKit/SwipeCellKit
   #https://github.com/CaliCastle/PopMenu
   pod 'NewPopMenu'
+  pod 'BTNavigationDropdownMenu'
+  pod 'DropDown'
 #  pod 'FRadioPlayer'
   # If you have NOT upgraded to Xcode 11, use the last Swift Xcode 10.X compatible release
 #  pod 'SwipeCellKit', '2.6.0'

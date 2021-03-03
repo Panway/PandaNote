@@ -1,0 +1,55 @@
+[
+  [
+  {
+    "name": "底部Tab默认选中第几个",
+    "key": "tabbarSelectedIndex",
+    "category": "常规设置",
+    "ATTENTION": "注意！每个数组仅第一个设置category！"
+  }],
+  [
+  {
+    "name": "退出时自动保存文本",
+    "key": "saveMarkdownWhenClose",
+    "category": "文本编辑设置",
+    "ATTENTION": "注意！每个数组仅第一个设置category！",
+    "showSwitch": "1"
+  }],
+  [
+  {
+    "name": "上传图片名称使用创建日期",
+    "key": "uploadImageNameUseCreationDate",
+    "category": "文件设置",
+    "showSwitch": "1"
+  },
+  {
+    "name": "上传照片后删除原照片",
+    "key": "deletePhotoAfterUploading",
+    "showSwitch": "1",
+    "detail": ""
+  },
+  {
+    "name": "搜索递归层数",
+    "key": "recursiveDepthWhenSearch",
+    "showSwitch": "",
+    "detail": "强制递归搜索子文件夹"
+  }],
+  [
+  {
+    "name": "保存设置到",
+    "category": "云同步设置"
+  }],
+  [
+  {
+    "name": "允许读取剪贴板以解析",
+    "category": "隐私设置",
+    "key": "allowReadPasteBoard",
+    "comment": "允许读取解析剪贴板然后以纯文本形式分享等",
+    "showSwitch": "1"
+  }],
+  [
+  {
+    "name": "FLEX Debug Enable",
+    "category": "调试设置"
+
+  }]
+]

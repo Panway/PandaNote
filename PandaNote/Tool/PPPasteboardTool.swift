@@ -14,10 +14,15 @@ import Alamofire
 /// - Parameters:
 ///   - s: 原始字符串
 ///   - separator: 分隔符，如`-`
-fileprivate func getStringSeparatedBy(_ s:String, _ separator:String) -> String {
+fileprivate func getStringSeparatedBy(_ s:String, _ separator:String,_ removeLast:Bool?=true) -> String {
     var array = s.components(separatedBy: separator)
     if array.count > 1 {
-        array.removeLast()
+        if removeLast == true {
+            array.removeLast()//移除分隔符后面的，取前
+        }
+        else {
+            array.remove(at: 0)//移除分隔符前面的，取后
+        }
         return array.joined(separator: " ")
     }
     else {
@@ -138,6 +143,10 @@ class PPPasteboardTool: NSObject {
                 for link in doc.css(".weibo-text") {
                     result = link.text ?? ""
                 }
+            }
+            else if originURL.contains("//github.com") {
+                result = doc.title ?? ""
+                result = getStringSeparatedBy(result,"-",false)
             }
             else {
                 result = doc.title ?? ""

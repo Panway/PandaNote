@@ -25,27 +25,35 @@ class PPTabBarController: UITabBarController {
     class func ppTabBar() -> PPTabBarController {
         let recentsVC = PPFileListViewController()
         recentsVC.isRecentFiles = true
-        recentsVC.tabBarItem = UITabBarItem(tabBarSystemItem: .history, tag: 1)
+        recentsVC.tabBarItem = UITabBarItem(title: "最近", image: UIImage(named: "tab_history"), tag: 0)
         let recentsNav = UINavigationController(rootViewController: recentsVC)
         
         let testVC = PPFileListViewController()
-        testVC.tabBarItem = UITabBarItem(tabBarSystemItem: .topRated, tag: 1)
+        testVC.tabBarItem = UITabBarItem(title: "文件", image: UIImage(named: "tab_folder"), tag: 0)
         let testNav = UINavigationController(rootViewController: testVC)
 
         let webVC = PPWebViewController()
         webVC.urlString = "https://tophub.today"
-        webVC.tabBarItem = UITabBarItem(tabBarSystemItem: .bookmarks, tag: 0)
+        webVC.tabBarItem = UITabBarItem(title: "看一看", image: UIImage(named: "tab_stories"), tag: 0)
         let webNav = UINavigationController(rootViewController: webVC)
 
         let settingVC = PPSettingViewController()
-        settingVC.tabBarItem = UITabBarItem(tabBarSystemItem: .more, tag: 2)
+        settingVC.tabBarItem = UITabBarItem(title: "我", image: UIImage(named: "tab_user"), tag: 0)
         let settingNav = UINavigationController(rootViewController: settingVC)
 
         let tabBarList = [recentsNav, testNav, webNav, settingNav]
         
         let tab = PPTabBarController()
         tab.viewControllers = tabBarList
-        tab.selectedIndex = 0
+        //默认选择第几个tab
+        if let selectedIndex = PPUserInfo.shared.pp_Setting["pp_tab_selected_index"] {
+            tab.selectedIndex = selectedIndex as! Int
+        }
+        else {
+            tab.selectedIndex = 0
+        }
+        tab.tabBar.tintColor = PPCOLOR_GREEN
+//        UITabBar.appearance().tintColor
         return tab
     }
     

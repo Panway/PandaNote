@@ -1,7 +1,9 @@
 PODS:
   - Alamofire (5.4.0)
+  - BTNavigationDropdownMenu (0.7)
   - DoraemonKit/Core (3.0.2)
   - Down (0.9.4)
+  - DropDown (2.3.13)
   - FilesProvider (0.26.0)
   - FLEX (4.2.2)
   - FMDB (2.7.5):
@@ -42,8 +44,10 @@ PODS:
 
 DEPENDENCIES:
   - Alamofire (~> 5.0)
+  - BTNavigationDropdownMenu
   - DoraemonKit/Core (~> 3.0.2)
   - Down
+  - DropDown
   - FilesProvider
   - FLEX
   - FMDB
@@ -68,8 +72,10 @@ DEPENDENCIES:
 SPEC REPOS:
   trunk:
     - Alamofire
+    - BTNavigationDropdownMenu
     - DoraemonKit
     - Down
+    - DropDown
     - FilesProvider
     - FLEX
     - FMDB
@@ -101,8 +107,10 @@ CHECKOUT OPTIONS:
 
 SPEC CHECKSUMS:
   Alamofire: 3b6a534a3df22db367e4dedeeca73d1ddfcf0e2f
+  BTNavigationDropdownMenu: 57a72c74dc211db3564f5be168f4f7643491a7de
   DoraemonKit: 8587e7a9aae0773dfc96707d2369d89d2a21b3d2
   Down: 276f2c3eeeaf30345873bdad25f44b2640fcfa3a
+  DropDown: 8a2116376c1981888557f72ec2ffc9a5e0e456ec
   FilesProvider: 2a8ae17d8b9c23a6feadb1308ee638fa31d21065
   FLEX: dbd68ae9c67fcc872c79c9e5a728f38243dfaa78
   FMDB: 2ce00b547f966261cd18927a3ddb07cb6f3db82a
@@ -124,6 +132,6 @@ SPEC CHECKSUMS:
   YPImagePicker: 15aed8bcaa4dad976e11b6114126d731a2f9f3c9
   YYText: 5c461d709e24d55a182d1441c41dc639a18a4849
 
-PODFILE CHECKSUM: e91e657ca7fe34c4301197e99fe30ddd599d6eb5
+PODFILE CHECKSUM: dca1c7b1c57b4ea164c3bfd5b5bc0f6e2c52ae79
 
 COCOAPODS: 1.10.0

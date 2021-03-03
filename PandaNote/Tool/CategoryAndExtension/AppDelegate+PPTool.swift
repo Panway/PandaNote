@@ -12,7 +12,9 @@ import Foundation
 extension AppDelegate {
     @objc func appDidBecomeActiveAction() {
         //App进入前台就开始解析剪贴板内容
-        PPPasteboardTool.getMoreInfomationOfURL()
+        if PPUserInfo.pp_boolValue("allowReadPasteBoard") {
+            PPPasteboardTool.getMoreInfomationOfURL()
+        }
 
     }
     

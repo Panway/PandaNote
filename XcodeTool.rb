@@ -98,7 +98,7 @@ end
 # 下面一行解注释会消除Update to recommended settings警告
 # disableRecommendedIssue("PandaNote",true,"1230")
 
-fix_deployment_target("PandaNote","10.0")
+# fix_deployment_target("PandaNote","10.0")
 
 
 

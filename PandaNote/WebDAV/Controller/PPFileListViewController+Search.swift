@@ -174,7 +174,9 @@ extension PPFileListViewController {
             self.navigationItem.title = title
             return
         }
-        
+        if PPUserInfo.shared.pp_serverInfoList.count < 1 {
+            return//没有服务器信息就不显示下箭头
+        }
         titleViewButton = UIButton(type: .custom)
         titleViewButton.frame = CGRect(x: 0, y: 0, width: 66, height: 44)
         let attributes: [NSAttributedString.Key: Any] = [
