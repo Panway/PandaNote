@@ -139,7 +139,7 @@ class PPPasteboardTool: NSObject {
                     }
                 }
             }
-            else if originURL.contains("weibointl.api.weibo.com") {//微博国际版解析正文内容
+            else if (originURL.contains("weibointl.api.weibo.com") || originURL.contains("share.api.weibo.cn")) {//微博国际版解析正文内容
                 for link in doc.css(".weibo-text") {
                     result = link.text ?? ""
                 }
