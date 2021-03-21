@@ -196,10 +196,9 @@ extension PPFileListViewController {
     }
     @objc func showAddCloudServiceView(for barButtonItem: UIBarButtonItem) {
         // Create menu controller with actions
-        guard let cloudServiceInfos = PPUserInfo.shared.pp_serverInfoList as?  [[String : String]] else { return }
 
         var menuList = [PopMenuDefaultAction]()
-        for item: [String : String] in cloudServiceInfos {
+        for item in PPUserInfo.shared.pp_serverInfoList {
             debugPrint(item)
             let item = PopMenuDefaultAction(title: item["PPWebDAVRemark"], image: nil, color: .darkText)
             menuList.append(item)

@@ -544,10 +544,8 @@ extension PPFileListViewController {
             case .photo(let photo):
                 debugPrint(photo)
                 guard let asset = photo.asset else { continue }
-                PPFileManager.shared.getImageDataFromAsset(asset: asset, completion: { (imageData,imageLocalURL,imageInfo) in
-                    guard let imageLocalURL = imageLocalURL else {
-                        return
-                    }
+                PPFileManager.shared.getImageDataFromAsset(asset: asset, completion: { (imageData,urlString,imageInfo) in
+                    let imageLocalURL = URL(fileURLWithPath: urlString)
                     var uploadName = imageLocalURL.lastPathComponent
                     if PPUserInfo.pp_boolValue("uploadImageNameUseCreationDate") {
                         if let creationDate = imageInfo["creationDate"] {

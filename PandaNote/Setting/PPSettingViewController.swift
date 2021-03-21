@@ -129,6 +129,19 @@ class PPSettingViewController: PPBaseViewController,UITableViewDataSource,UITabl
             DropDown.appearance().setupCornerRadius(10)
             dropDown.show()
         }
+        else if obj == "图片压缩质量" {
+            let dropDown = DropDown()
+            dropDown.anchorView = tableView.cellForRow(at: indexPath)
+            dropDown.direction = .bottom
+            dropDown.bottomOffset = CGPoint(x: 200, y: 0)
+            dropDown.dataSource = ["0.1", "0.2", "0.3", "0.4","0.5"]
+            dropDown.selectionAction = { (index: Int, item: String) in
+                PPUserInfo.shared.pp_Setting.updateValue(dropDown.dataSource[index], forKey:"pp_imageCompressionQuality")
+            }
+            dropDown.width = 55
+            DropDown.appearance().setupCornerRadius(10)
+            dropDown.show()
+        }
         
     }
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {

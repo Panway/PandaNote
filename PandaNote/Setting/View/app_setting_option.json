@@ -2,7 +2,7 @@
   [
   {
     "name": "底部Tab默认选中第几个",
-    "key": "tabbarSelectedIndex",
+    "key": "pp_tab_selected_index",
     "category": "常规设置",
     "ATTENTION": "注意！每个数组仅第一个设置category！"
   }],
@@ -26,6 +26,16 @@
     "key": "deletePhotoAfterUploading",
     "showSwitch": "1",
     "detail": ""
+  },
+  {
+    "name": "照片压缩后上传",
+    "key": "pp_compressImageBeforeUpload",
+    "showSwitch": "1"
+  },
+  {
+    "name": "图片压缩质量",
+    "key": "pp_imageCompressionQuality",
+    "detail": "数字越小越模糊，推荐设置0.5~0.2"
   },
   {
     "name": "搜索递归层数",

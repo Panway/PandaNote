@@ -333,7 +333,7 @@ class PPFileManager: NSObject,FileProviderDelegate {
         return true
     }
     /// 从PHAsset获取NSData
-    func getImageDataFromAsset(asset: PHAsset, completion: @escaping (_ data: NSData?,_ fileURL:URL?,_ imageInfo:[String:String]) -> Void) {
+    func getImageDataFromAsset(asset: PHAsset, completion: @escaping (_ data: NSData?,_ fileURL:String,_ imageInfo:[String:String]) -> Void) {
         let manager = PHImageManager.default()
         let options = PHImageRequestOptions()
         options.isNetworkAccessAllowed = true
@@ -355,13 +355,39 @@ class PPFileManager: NSObject,FileProviderDelegate {
 //                }
 //            }
 //        } else {
+        // 如果上传前需要压缩图片
+        if PPUserInfo.pp_boolValue("pp_compressImageBeforeUpload") {
+            manager.requestImage(for: asset, targetSize: PHImageManagerMaximumSize, contentMode: .aspectFill, options: options) { (restulImage, imageInfo) in
+                //https://developer.apple.com/documentation/photokit/phimagemanager/1616964-requestimage
+                //这里会回调两次，第一次是低质量的图像数据，当高质量的图像准备好后，照片会再次回调到这里
+                let isDegraded = (imageInfo?[PHImageResultIsDegradedKey] as? Bool) ?? false
+                if isDegraded {
+                   return//降级的，低质量的图片略缩图不要 https://stackoverflow.com/a/52355835/4493393
+                }
+                debugPrint(restulImage?.size)
+                var originalFilename = "noname.jpg"
+                if let name = PHAssetResource.assetResources(for: asset).first?.originalFilename {
+                    originalFilename = name
+                }
+                var compressionQuality = CGFloat(0.5)
+                if let compressionQ = PPUserInfo.shared.pp_Setting["pp_imageCompressionQuality"] as? String {
+                    compressionQuality = NumberFormatter().number(from: compressionQ) as? CGFloat ?? CGFloat(0.5)
+                }
+                if let imageData = restulImage?.jpegData(compressionQuality: compressionQuality) {
+                    completion(imageData as NSData, originalFilename, [:])
+                } else {
+                    completion(nil, originalFilename, [:])
+                }
+            }
+            return
+        }
         manager.requestImageData(for: asset, options: options) { (imgData, string, orientation, info) -> Void in
-            var url : URL
-            if ((info?["PHImageFileURLKey"]) != nil) {
-                url = info?["PHImageFileURLKey"] as! URL
+            var url = ""
+            if let imageFileURL = info?["PHImageFileURLKey"] {
+                url = imageFileURL as! String
             }
             else {
-                url = URL(fileURLWithPath: asset.value(forKey: "filename") as! String)
+                url = asset.value(forKey: "filename") as! String
             }
             let imageInfo = ["creationDate":(asset.creationDate != nil) ? asset.creationDate!.pp_stringFromDate() : "",
                              "modificationDate":(asset.modificationDate != nil) ? asset.creationDate!.pp_stringFromDate() : "",

@@ -139,29 +139,29 @@ Finally, we are ready to write our lexer. We'll try to match against any of the 
 Here's the method of interest:
 
 ```swift
-func tokenize(input: String) -> [Token] {  
+func tokenize(input: String) -> [Token] {
     var tokens = [Token]()
     var content = input
-
-    while (content.characters.count > 0) {
+    
+    while (content.count > 0) {
         var matched = false
-
+        
         for (pattern, generator) in tokenList {
-            if let m = content.match(pattern) {
+            if let m = content.match(regex: pattern) {
                 if let t = generator(m) {
                     tokens.append(t)
                 }
 
-                content = content.substringFromIndex(content.startIndex.advancedBy(m.characters.count))
+                content = content.substring(from: content.index(content.startIndex, offsetBy: m.count))
                 matched = true
                 break
             }
         }
 
         if !matched {
-            let index = content.startIndex.advancedBy(1)
-            tokens.append(.Other(content.substringToIndex(index)))
-            content = content.substringFromIndex(index)
+            let index = content.index(content.startIndex, offsetBy: 1)
+            tokens.append(.Other(content.substring(to: index)))
+            content = content.substring(from: index)
         }
     }
     return tokens
@@ -181,7 +181,7 @@ To keep things simple we used a `String` extension to provide regex functionalit
 ```swift
 var expressions = [String: NSRegularExpression]()  
 public extension String {  
-    public func match(regex: String) -> String? {
+    func match(regex: String) -> String? {
         let expression: NSRegularExpression
         if let exists = expressions[regex] {
             expression = exists
@@ -189,10 +189,10 @@ public extension String {
             expression = try! NSRegularExpression(pattern: "^\(regex)", options: [])
             expressions[regex] = expression
         }
-
-        let range = expression.rangeOfFirstMatchInString(self, options: [], range: NSMakeRange(0, self.utf16.count))
+        
+        let range = expression.rangeOfFirstMatch(in: self, options: [], range: NSMakeRange(0, self.utf16.count))
         if range.location != NSNotFound {
-            return (self as NSString).substringWithRange(range)
+            return (self as NSString).substring(with: range)
         }
         return nil
     }
