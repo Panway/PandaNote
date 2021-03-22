@@ -136,7 +136,7 @@ class PPFileManager: NSObject,FileProviderDelegate {
         })
         
     }
-    ///去服务器获取数据
+    /// 从远程服务器获取文件列表数据
     func getRemoteFileList(path:String,completionHandler:@escaping(_ data:[PPFileObject],_ isFromCache:Bool,_ error:Error?) -> Void) {
         if PPUserInfo.shared.cloudServiceType == .baiduyun {
             baiduwangpan?.getFileList(path: path, completionHandler: completionHandler)
@@ -234,7 +234,7 @@ class PPFileManager: NSObject,FileProviderDelegate {
             }
         })
     }
-    /// 通过WebDAV修改文件
+    /// 移动文件（夹）、重命名文件（夹）
     func moveFileViaWebDAV(pathOld: String, pathNew: String, completionHandler:@escaping(_ error:Error?) -> Void) {
         currentFileProvider?.moveItem(path:pathOld, to: pathNew, completionHandler: { (error) in
             DispatchQueue.main.async {
@@ -256,6 +256,14 @@ class PPFileManager: NSObject,FileProviderDelegate {
     }
     /// 通过WebDAV 新建文件夹
     func createFolderViaWebDAV(folder folderName: String, at atPath: String, completionHandler:@escaping(_ error:Error?) -> Void) {
+        if PPUserInfo.shared.cloudServiceType == .baiduyun {
+            baiduwangpan?.createFolder(path: atPath+folderName, completionHandler: { (error) in
+                DispatchQueue.main.async {
+                    completionHandler(error)
+                }
+            })
+        }
+        else {
         currentFileProvider?.create(folder: folderName, at: atPath, completionHandler: { (error) in
             if error == nil {
                 DispatchQueue.main.async {
@@ -266,8 +274,26 @@ class PPFileManager: NSObject,FileProviderDelegate {
                 debugPrint(error ?? "createFolderViaWebDAV Error")
             }
         })
+            
+        }
     }
-    
+    //删除远程服务器的文件
+    func deteteRemoteFile(path: String, completionHandler:@escaping(_ error:Error?) -> Void) {
+        if PPUserInfo.shared.cloudServiceType == .baiduyun {
+            baiduwangpan?.delete(path: [path], completionHandler: { (error) in
+                DispatchQueue.main.async {
+                    completionHandler(error)
+                }
+            })
+        }
+        else {
+            currentFileProvider?.removeItem(path:path, completionHandler: { (error) in
+                DispatchQueue.main.async {
+                    completionHandler(error)
+                }
+            })
+        }
+    }
     
     /// 从WebDAV下载文件获取Data
     func searchFileViaWebDAV(path: String, searchText: String?,completionHandler: @escaping ((_ files: [PPFileObject], _ isFromCache:Bool, _ error: Error?) -> Void)) {

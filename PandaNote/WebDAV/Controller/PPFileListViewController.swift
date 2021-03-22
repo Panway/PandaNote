@@ -189,21 +189,16 @@ class PPFileListViewController: PPBaseViewController,UITextFieldDelegate,UITable
                 return
             }
             //相对路径
-            PPFileManager.shared.webdav?.removeItem(path:fileObj.path, completionHandler: { (error) in
+            PPFileManager.shared.deteteRemoteFile(path: fileObj.path) { (error) in
                 if let errorNew = error {
-                    DispatchQueue.main.async {
-                        PPHUD.showHUDFromTop("删除失败: \(String(describing: errorNew))", isError: true)
-                    }
+                    PPHUD.showHUDFromTop("删除失败: \(String(describing: errorNew))", isError: true)
                 }
                 else {
-                    DispatchQueue.main.async {
-                        PPHUD.showHUDFromTop("文件删除成功")// (message: "删除成功哟！", view: self.view)
-                        PPUserInfo.shared.removeFileInRecentFiles(fileObj)
-                        self.getWebDAVData()
-                    }
+                    PPHUD.showHUDFromTop("文件删除成功")// (message: "删除成功哟！", view: self.view)
+                    PPUserInfo.shared.removeFileInRecentFiles(fileObj)
+                    self.getWebDAVData()
                 }
-                
-            })
+            }
         }
         delete.backgroundColor = UIColor.red
         

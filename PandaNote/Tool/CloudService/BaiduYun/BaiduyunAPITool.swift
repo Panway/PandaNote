@@ -8,11 +8,20 @@
 
 import Foundation
 import Alamofire
+///PPSwiftTips: 错误的处理
+public enum PPCloudServiceError: Error {
+    /// 未知错误
+    case unknown
+    /// 文件不存在错误
+    case fileNotExist
+}
 
 //兼容FilesProvider的类
 open class BaiduyunAPITool: NSObject {
 
     var access_token : String = ""
+    let host = "https://pan.baidu.com"
+    let path = "/rest/2.0/xpan/file"
     let baiduURL = "https://pan.baidu.com/rest/2.0/xpan/file"
     let headers: HTTPHeaders = [
         "User-Agent": "pan.baidu.com"
@@ -37,13 +46,10 @@ open class BaiduyunAPITool: NSObject {
                           "start": "0"]
         
         AF.request(baiduURL, parameters: parameters,headers: headers).responseJSON { response in
-            guard let jsonDic = response.value as? [String : Any] else {
-                return
-            }
-            let errorNo = (jsonDic["errno"] as? NSNumber)?.intValue
-            var dataSource = [PPFileObject]()
+            let result = self.hanldeResponse(response.value as? [String : Any])
+            let jsonDic = result.responseJSONDic
             //有错误
-            if errorNo != 0 {
+            if result.errorNum != 0 {
                 PPHUD.showHUDFromTop("百度云错误", isError: true)
                 completionHandler([],false, CocoaError(.fileNoSuchFile,
                                                        userInfo: [NSLocalizedDescriptionKey: "Base URL is not set."]))
@@ -56,6 +62,7 @@ open class BaiduyunAPITool: NSObject {
             }
             debugPrint("百度网盘获取文件数量：\(list.count)")
             //如果list有数据，可以拿去显示了
+            var dataSource = [PPFileObject]()
             for baiduFile in list {
                 if let item = BDFileObject(JSON: baiduFile) {
                     let ppFile = PPFileObject(name: item.name,
@@ -111,12 +118,10 @@ open class BaiduyunAPITool: NSObject {
                           "method": "filemetas"]
 
         AF.request(reqURL, parameters: parameters,headers: headers).responseJSON { response in
-            guard let jsonDic = response.value as? [String : Any] else {
-                return
-            }
-            let errorNo = (jsonDic["errno"] as? NSNumber)?.intValue
+            let result = self.hanldeResponse(response.value as? [String : Any])
+            let jsonDic = result.responseJSONDic
             //如果有错误
-            if errorNo != 0 {
+            if result.errorNum != 0 {
                 PPHUD.showHUDFromTop("百度云错误", isError: true)
                 completionHandler(nil,false, nil)
                 return
@@ -140,9 +145,52 @@ open class BaiduyunAPITool: NSObject {
         }
         
     }
+    ///创建文件夹
+    ///POST /rest/2.0/xpan/file?access_token=666666&method=create
+    ///isdir=1&path=/2021/NewFolder/0322&rtype=1&size=0
+    func createFolder(path: String, completionHandler:@escaping(_ error:Error?) -> Void) {
+        let parameters: [String: String] = [
+            "isdir": "1",
+            "path": path,
+            "rtype": "1",
+            "size": "0"
+        ]
+        let url = baiduURL + "?access_token=\(access_token)&method=create"
+        AF.request(url, method: .post, parameters: parameters).responseJSON { response in
+            let handle = self.hanldeResponse(response.value as? [String : Any])
+            completionHandler(handle.error)
+        }
+    }
     
+    ///删除百度云文件（夹）
+    ///POST /rest/2.0/xpan/file?access_token=666666&method=filemanager&opera=delete
+    ///async=0&filelist=%5B%22%5C/2021%5C/Useless%5C/old.html%22%5D
+    func delete(path: [String], completionHandler:@escaping(_ error:Error?) -> Void) {
+        //注意！ES文件浏览器里面把path数组里的字符串对象的斜杠`/`的转义成`\/`，这里没转义也可以
+        let parameters: [String: Any] = [
+            "async": "0",
+            "filelist": "[\"" + path.joined(separator: "\",\"") + "\"]"
+        ]
+        let url = baiduURL + "?access_token=\(access_token)&&method=filemanager&opera=delete"
+        //let enc = URLEncoding(arrayEncoding: .noBrackets)
+        AF.request(url, method: .post, parameters: parameters).responseJSON { response in
+            let handle = self.hanldeResponse(response.value as? [String : Any])
+            completionHandler(handle.error)
+        }
+    }
     
-    
+    func hanldeResponse(_ responseJSON:[String : Any]?) -> (responseJSONDic:[String : Any],errorNum:Int,error:Error?) {
+        guard let jsonDic = responseJSON else {
+            return ([:], -1, PPCloudServiceError.unknown)
+        }
+        var errorNo = 0
+        if let no = (jsonDic["errno"] as? NSNumber)?.intValue {
+            errorNo = no
+        }
+        // let nsError = NSError(domain:"", code:2, userInfo:nil)
+        //有错误
+        return (jsonDic,errorNo, errorNo == 0 ? nil : PPCloudServiceError.unknown)
+    }
 }
 
 
