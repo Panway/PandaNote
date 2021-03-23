@@ -360,7 +360,7 @@ class PPFileListViewController: PPBaseViewController,UITextFieldDelegate,UITable
                 return
             }
             guard let newName = firstTextField.text else { return }
-            PPFileManager.shared.moveFileViaWebDAV(pathOld: pathPrefix+fileObj.name, pathNew: pathPrefix + newName) { (error) in
+            PPFileManager.shared.moveRemoteFile(pathOld: pathPrefix+fileObj.name, pathNew: pathPrefix + newName) { (error) in
                 PPHUD.showHUDFromTop("修改成功")
                 var fileNew = fileObj
                 fileNew.name = newName

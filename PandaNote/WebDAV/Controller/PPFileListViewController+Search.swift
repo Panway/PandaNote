@@ -141,7 +141,7 @@ extension PPFileListViewController {
                     }
                     return
                 }
-                PPFileManager.shared.moveFileViaWebDAV(pathOld: first.filePathToBeMove,
+                PPFileManager.shared.moveRemoteFile(pathOld: first.filePathToBeMove,
                                                        pathNew: self.pathStr + fileName) { (error) in
                     debugPrint(error?.localizedDescription)
                     if error == nil {

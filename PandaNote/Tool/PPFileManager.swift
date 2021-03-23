@@ -225,17 +225,29 @@ class PPFileManager: NSObject,FileProviderDelegate {
             PPHUD.showHUDFromTop("空文件",isError: true)
             return
         }
-        currentFileProvider?.writeContents(path: path, contents: contents, completionHandler: { (error) in
-            DispatchQueue.main.async {
+        if PPUserInfo.shared.cloudServiceType == .baiduyun {
+            baiduwangpan?.upload(path: path, data: contents) { error in
                 completionHandler(error)
             }
-            if error != nil {
-                debugPrint(error ?? "uploadFileViaWebDAV Error")
-            }
-        })
+        }
+        else {
+            currentFileProvider?.writeContents(path: path, contents: contents, completionHandler: { (error) in
+                DispatchQueue.main.async {
+                    completionHandler(error)
+                }
+            })
+        }
     }
     /// 移动文件（夹）、重命名文件（夹）
-    func moveFileViaWebDAV(pathOld: String, pathNew: String, completionHandler:@escaping(_ error:Error?) -> Void) {
+    func moveRemoteFile(pathOld: String, pathNew: String, completionHandler:@escaping(_ error:Error?) -> Void) {
+        if PPUserInfo.shared.cloudServiceType == .baiduyun {
+            let fileName = String(pathNew.split(separator: "/").last ?? "new_file")
+            let dirNew = pathNew.replacingOccurrences(of: fileName, with: "")
+            baiduwangpan?.moveFile(pathOld: pathOld, pathNew: dirNew, newName: fileName, completionHandler: { (error, _) in
+                completionHandler(error)
+            })
+        }
+        else {
         currentFileProvider?.moveItem(path:pathOld, to: pathNew, completionHandler: { (error) in
             DispatchQueue.main.async {
                 if error == nil {
@@ -253,6 +265,7 @@ class PPFileManager: NSObject,FileProviderDelegate {
             }
             
         })
+        }
     }
     /// 通过WebDAV 新建文件夹
     func createFolderViaWebDAV(folder folderName: String, at atPath: String, completionHandler:@escaping(_ error:Error?) -> Void) {

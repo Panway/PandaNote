@@ -8,13 +8,17 @@
 
 import Foundation
 import Alamofire
+
+
 ///PPSwiftTips: 错误的处理
 public enum PPCloudServiceError: Error {
     /// 未知错误
     case unknown
     /// 文件不存在错误
     case fileNotExist
+    case preCreateError
 }
+struct HTTPBinResponse: Decodable { let url: String; let request_id:String }
 
 //兼容FilesProvider的类
 open class BaiduyunAPITool: NSObject {
@@ -156,12 +160,56 @@ open class BaiduyunAPITool: NSObject {
             "size": "0"
         ]
         let url = baiduURL + "?access_token=\(access_token)&method=create"
-        AF.request(url, method: .post, parameters: parameters).responseJSON { response in
+        AF.request(url, method: .post, parameters: parameters, headers: headers).responseJSON { response in
             let handle = self.hanldeResponse(response.value as? [String : Any])
             completionHandler(handle.error)
         }
     }
-    
+    /// precreate文件，上传文件前的操作，md5字母小写
+    func precreateFile(dir: String, md5:String, size:String, fileName:String, completionHandler:@escaping(_ error:Error?,_ responseJSON:[String : Any]) -> Void) {
+        let url = baiduURL + "?access_token=\(access_token)&method=precreate"
+        let parameters: [String: Any] = [
+            "autoinit": "1",
+            "isdir":"0",
+            "path":"\(dir)\(fileName)",
+            "rtype": "1",
+            "size": size,
+            "block_list": "[\"" + md5 + "\"]"
+        ]
+        AF.request(url, method: .post, parameters: parameters, headers: headers).responseJSON { response in
+            let handle = self.hanldeResponse(response.value as? [String : Any])
+            completionHandler(handle.error, handle.responseJSONDic)
+        }
+    }
+    /// 创建文件
+    func createFile(path: String, md5:String, size:String, uploadid:String, completionHandler:@escaping(_ error:Error?,_ responseJSON:[String : Any]) -> Void) {
+        let url = baiduURL + "?access_token=\(access_token)&method=create"
+        let parameters: [String: String] = [
+            "block_list":"[\"\(md5)\"]",
+            "isdir": "0",
+            "path": path,
+            "rtype": "1",
+            "size": size,
+            "uploadid":uploadid
+        ]
+        AF.request(url, method: .post, parameters: parameters, headers: headers).responseJSON { response in
+            let handle = self.hanldeResponse(response.value as? [String : Any])
+            completionHandler(handle.error, handle.responseJSONDic)
+        }
+    }
+    /// 移动文件
+    func moveFile(pathOld: String, pathNew: String, newName:String, completionHandler:@escaping(_ error:Error?,_ responseJSON:[String : Any]) -> Void) {
+        let url = baiduURL + "?access_token=\(access_token)&method=filemanager&opera=move"
+        let parameters: [String: Any] = [
+            "async":"0",
+            "filelist": "[{\"path\":\"\(pathOld)\",\"dest\":\"\(pathNew)\",\"newname\":\"\(newName)\",\"ondup\":\"newcopy\"}]"
+//            "filelist": [["path":pathOld,"newname":newName,"ondup":"newcopy"]]
+        ]
+        AF.request(url, method: .post, parameters: parameters, headers: headers).responseJSON { response in
+            let handle = self.hanldeResponse(response.value as? [String : Any])
+            completionHandler(handle.error, handle.responseJSONDic)
+        }
+    }
     ///删除百度云文件（夹）
     ///POST /rest/2.0/xpan/file?access_token=666666&method=filemanager&opera=delete
     ///async=0&filelist=%5B%22%5C/2021%5C/Useless%5C/old.html%22%5D
@@ -173,12 +221,56 @@ open class BaiduyunAPITool: NSObject {
         ]
         let url = baiduURL + "?access_token=\(access_token)&&method=filemanager&opera=delete"
         //let enc = URLEncoding(arrayEncoding: .noBrackets)
-        AF.request(url, method: .post, parameters: parameters).responseJSON { response in
+        AF.request(url, method: .post, parameters: parameters, headers: headers).responseJSON { response in
             let handle = self.hanldeResponse(response.value as? [String : Any])
             completionHandler(handle.error)
         }
     }
     
+    //上传文件
+    func upload(path: String,data:Data,completionHandler:@escaping(_ error:Error?) -> Void) {
+        let fileName = String(path.split(separator: "/").last ?? "new_upload_file")
+        let dirNew = path.replacingOccurrences(of: fileName, with: "")
+        let fileSize = String(data.count)
+        // Step1 预创建
+        precreateFile(dir: "/apps/ES文件浏览器/", md5: data.pp_md5().uppercased(), size: fileSize, fileName: fileName) { (error, responseJSON) in
+            if let _ = error {
+                completionHandler(PPCloudServiceError.preCreateError)//precreate错误
+                return
+            }
+            guard let uploadid = responseJSON["uploadid"] as? String else {
+                return
+            }
+            let tmpPath = "/apps/ES文件浏览器/\(fileName)".addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? fileName
+            let uploadid_encode = uploadid.addingPercentEncoding(withAllowedCharacters: .afURLQueryAllowed) ?? uploadid
+            let url = "https://d.pcs.baidu.com/rest/2.0/pcs/superfile2?access_token=\(self.access_token)&method=upload&partseq=0&path=\(tmpPath)&type=tmpfile&uploadid=\(uploadid_encode)"
+            debugPrint(url)
+            // Step2 上传
+            AF.upload(multipartFormData: { multipartFormData in
+                multipartFormData.append(data, withName: "file",fileName: fileName)
+                //连同表单file一起的附加参数（可选）
+                // for (key, value) in parameters {multipartFormData.append((value as AnyObject).data(using: String.Encoding.utf8.rawValue)!, withName: key)}
+            },
+            to:url, headers: self.headers)
+            .responseJSON { response in
+                guard let jsonDic = response.value as? [String : Any],let md5_r = jsonDic["md5"] as? String else {
+                    return
+                }
+                // Step3 创建
+                self.createFile(path: "/apps/ES文件浏览器/\(fileName)", md5: md5_r, size: fileSize, uploadid: uploadid) { (error, responseJSON) in
+                    //Step4 移动
+                    self.moveFile(pathOld: "/apps/ES文件浏览器/\(fileName)", pathNew: dirNew, newName: fileName) { (error, responseJSON) in
+                        completionHandler(error)
+                    }
+                }
+            }
+
+        }
+        
+
+        
+        
+    }
     func hanldeResponse(_ responseJSON:[String : Any]?) -> (responseJSONDic:[String : Any],errorNum:Int,error:Error?) {
         guard let jsonDic = responseJSON else {
             return ([:], -1, PPCloudServiceError.unknown)
