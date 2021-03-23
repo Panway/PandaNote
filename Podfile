@@ -62,6 +62,9 @@ target 'PandaNote' do
   # JSON解析 https://github.com/tristanhimmelman/ObjectMapper
   # 中文指南 https://github.com/SwiftOldDriver/ObjectMapper-CN-Guide
   pod 'ObjectMapper'
+  # 安全加密算法 https://github.com/krzyzanowskim/CryptoSwift
+  # 在这里发现的 https://github.com/topics/md5?l=swift
+  pod 'CryptoSwift'
 
   #----------私有----------
   #0行代码实现右滑pop返回
