@@ -95,8 +95,12 @@ class PPFileManager: NSObject,FileProviderDelegate {
             //获取本地缓存失败就去服务器获取
             self.getRemoteFileList(path: path, completionHandler: completionHandler)
         }) { (data) in
+            guard let fileData = data else {
+                debugPrint("获取文件数据失败")
+                return
+            }
             do {
-                let archieveArray = try JSONDecoder().decode([PPFileObject].self, from: data)
+                let archieveArray = try JSONDecoder().decode([PPFileObject].self, from: fileData)
                 debugPrint("获取解档文件个数\(archieveArray.count)")
                 DispatchQueue.main.async {
                     completionHandler(archieveArray,true,nil)
@@ -167,9 +171,12 @@ class PPFileManager: NSObject,FileProviderDelegate {
     /// - Parameters:
     ///   - path: 远程文件路径
     ///   - completionHandler: 完成回调
-    func loadFileFromWebDAV(path: String, downloadIfExist:Bool?=false ,completionHandler: @escaping ((_ contents: Data?, _ isFromCache:Bool, _ error: Error?) -> Void)) {
+    func loadFileFromWebDAV(path: String,
+                            downloadIfExist : Bool? = false,
+                            onlyCheckIfFileExist : Bool? = false,
+                            completionHandler: @escaping ((_ contents: Data?, _ isFromCache:Bool, _ error: Error?) -> Void)) {
         // 1 从本地磁盘获取文件缓存
-        PPDiskCache.shared.fetchData(key: PPUserInfo.shared.webDAVRemark + path, failure: { (error) in
+        PPDiskCache.shared.fetchData(key: PPUserInfo.shared.webDAVRemark + path,onlyCheckIfFileExist:onlyCheckIfFileExist, failure: { (error) in
             // 2-2 本地磁盘没有，就从服务器获取最新的
             self.downloadFileFromWebDAV(path: path, cacheToDisk: true, completionHandler: completionHandler)
             
@@ -195,6 +202,7 @@ class PPFileManager: NSObject,FileProviderDelegate {
                      fileID:String?,
                      cacheToDisk:Bool?=false ,
                      downloadIfCached:Bool?=false ,
+                     onlyCheckIfFileExist : Bool? = false,
                      completionHandler: @escaping ((_ contents: Data?, _ isFromCache:Bool, _ error: Error?) -> Void)) {
         if PPUserInfo.shared.cloudServiceType == .baiduyun {
             let downloadIfCached = path.pp_isImageFile() || path.pp_isVideoFile()
@@ -216,7 +224,10 @@ class PPFileManager: NSObject,FileProviderDelegate {
             })
         }
         else {
-            loadFileFromWebDAV(path: path, completionHandler: completionHandler)
+            loadFileFromWebDAV(path: path,
+                               downloadIfExist:downloadIfCached,
+                               onlyCheckIfFileExist:onlyCheckIfFileExist,
+                               completionHandler: completionHandler)
         }
     }
     /// 通过WebDAV上传到服务器

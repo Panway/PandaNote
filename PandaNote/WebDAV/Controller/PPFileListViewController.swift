@@ -151,13 +151,13 @@ class PPFileListViewController: PPBaseViewController,UITextFieldDelegate,UITable
             }
         }
         else if (fileObj.name.hasSuffix("mp3")||fileObj.name.lowercased().hasSuffix("mp4"))  {
-            PPFileManager.shared.loadFileFromWebDAV(path: fileObj.path, downloadIfExist: false) { (contents,isFromCache, error) in
-                
+            PPFileManager.shared.getFileData(path: fileObj.path, fileID: fileObj.fileID,cacheToDisk:true,onlyCheckIfFileExist:true) { (contents: Data?,isFromCache, error) in
                 if error != nil {
                     return
                 }
                 let vc = PlayerViewController()
-                vc.localFileURL = URL(fileURLWithPath: PPDiskCache.shared.path + fileObj.path)
+                let filePath = "\(PPDiskCache.shared.path)/\(PPUserInfo.shared.webDAVRemark)/\(fileObj.path)"
+                vc.localFileURL = URL(fileURLWithPath: filePath)
                 self.navigationController?.pushViewController(vc, animated: true)
             }
         }

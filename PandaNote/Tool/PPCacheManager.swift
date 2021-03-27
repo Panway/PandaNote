@@ -6,6 +6,11 @@
 //  Copyright © 2019 WeirdPan. All rights reserved.
 //  https://github.com/Haneke/HanekeSwift/blob/master/Haneke/DiskCache.swift
 
+public enum PPDiskCacheError: Error {
+    /// 文件不存在错误
+    case fileNotExist
+}
+
 import Foundation
 
 class PPDiskCache {
@@ -48,19 +53,37 @@ class PPDiskCache {
             debugPrint("Failed to get data for key \(key)")
         }
     }
-    open func fetchData(key: String, failure fail: ((Error?) -> ())? = nil, success succeed: @escaping (Data) -> ()) {
+    open func fetchData(key: String,
+                        onlyCheckIfFileExist : Bool? = false,
+                        failure fail: ((Error?) -> ())? = nil,
+                        success succeed: @escaping (Data?) -> ()) {
         cacheQueue.async {
-            let path = self.path(forKey: key)
-            do {
-                let data = try Data(contentsOf: URL(fileURLWithPath: path), options: Data.ReadingOptions())
-                DispatchQueue.main.async {
-                    succeed(data)
-                }
-                self.updateDiskAccessDate(atPath: path)
-            } catch {
-                if let block = fail {
+            let path = self.fullPath(forKey: key)
+            if FileManager.default.fileExists(atPath: path) {
+                if let onlyCheckIfFileExist = onlyCheckIfFileExist, onlyCheckIfFileExist == true {
                     DispatchQueue.main.async {
-                        block(error)
+                        succeed(nil)
+                    }
+                    return
+                }
+                do {
+                    let data = try Data(contentsOf: URL(fileURLWithPath: path), options: Data.ReadingOptions())
+                    DispatchQueue.main.async {
+                        succeed(data)
+                    }
+                    self.updateDiskAccessDate(atPath: path)
+                } catch {
+                    if let failHandler = fail {
+                        DispatchQueue.main.async {
+                            failHandler(error)
+                        }
+                    }
+                }
+            }
+            else {
+                if let failHandler = fail {
+                    DispatchQueue.main.async {
+                        failHandler(PPDiskCacheError.fileNotExist)
                     }
                 }
             }
@@ -69,7 +92,7 @@ class PPDiskCache {
 
     open func removeData(with key: String) {
         cacheQueue.async(execute: {
-            let path = self.path(forKey: key)
+            let path = self.fullPath(forKey: key)
             self.removeFile(atPath: path)
         })
     }
@@ -101,7 +124,7 @@ class PPDiskCache {
 
     open func updateAccessDate( _ getData: @autoclosure @escaping () -> Data?, key: String) {
         cacheQueue.async(execute: {
-            let path = self.path(forKey: key)
+            let path = self.fullPath(forKey: key)
             let fileManager = FileManager.default
             if (!(fileManager.fileExists(atPath: path) && self.updateDiskAccessDate(atPath: path))){
                 if let data = getData() {
@@ -113,15 +136,15 @@ class PPDiskCache {
         })
     }
 
-    open func path(forKey key: String) -> String {
-        let keyPath = (self.path as NSString).appendingPathComponent(key)
-        return keyPath
+    open func fullPath(forKey key: String) -> String {
+        let fullFilePath = (self.path as NSString).appendingPathComponent(key)
+        return fullFilePath
     }
     
     // MARK: Private
     
     fileprivate func setDataSync(_ data: Data, key: String) {
-        let path = self.path(forKey: key)
+        let path = self.fullPath(forKey: key)
         
         if !FileManager.default.fileExists(atPath: path) {
             do {
