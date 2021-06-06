@@ -30,8 +30,9 @@
     overflow-x: auto;
     display: block;
   }
+
   #content p {
-  	word-wrap: break-word;
+    word-wrap: break-word;
   }
 
   div[class*=language-] {
@@ -60,6 +61,7 @@
   }
 
   #ppTOCContent {
+    padding: 8px;
     position: fixed;
     top: 44px;
     bottom: 0;
@@ -74,6 +76,42 @@
     box-shadow: 0 8px 24px rgba(149, 157, 165, .2);
   }
 
+  .sidebar .sidebar-sub-headers {
+    padding-left: 1rem;
+    font-size: .95em;
+  }
+
+  a.sidebar-link {
+    font-weight: 400;
+    display: inline-block;
+    color: #2c3e50;
+    border-left: .25rem solid transparent;
+    /*padding: .35rem 1rem .35rem 1.25rem;*/
+    padding: .35rem 1rem .35rem 0rem;
+    line-height: 1.4;
+    width: 100%;
+    box-sizing: border-box
+  }
+
+  a.sidebar-link:hover {
+    color: #3eaf7c
+  }
+
+  a.sidebar-link.active {
+    font-weight: 600;
+    color: #3eaf7c;
+    border-left-color: #3eaf7c;
+  }
+
+  .sidebar ul {
+    list-style: none;
+  }
+
+  .sidebar ul,
+  ol {
+    padding-left: 10px;
+  }
+
   /*模仿掘金的样式，表格可水平滑动 https://juejin.cn/post/6844904154427572231*/
   table {
     display: inline-block !important;
@@ -86,24 +124,28 @@
 
 <body>
   <div class="sidebar-button" onclick="displayTOC()" style="position: fixed;">
-    <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" role="img" viewBox="0 0 448 512" class="icon">
+    <!-- 内联使用SVG this is sometimes called putting your SVG inline, or inlining SVG -->
+    <!--     <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" role="img" viewBox="0 0 448 512" class="icon">
       <path fill="currentColor" d="M436 124H12c-6.627 0-12-5.373-12-12V80c0-6.627 5.373-12 12-12h424c6.627 0 12 5.373 12 12v32c0 6.627-5.373 12-12 12zm0 160H12c-6.627 0-12-5.373-12-12v-32c0-6.627 5.373-12 12-12h424c6.627 0 12 5.373 12 12v32c0 6.627-5.373 12-12 12zm0 160H12c-6.627 0-12-5.373-12-12v-32c0-6.627 5.373-12 12-12h424c6.627 0 12 5.373 12 12v32c0 6.627-5.373 12-12 12z"></path>
+    </svg> -->
+    <svg height="16" class="octicon octicon-list-unordered" viewBox="0 0 16 16" version="1.1" width="16" aria-hidden="true">
+      <path fill-rule="evenodd" d="M2 4a1 1 0 100-2 1 1 0 000 2zm3.75-1.5a.75.75 0 000 1.5h8.5a.75.75 0 000-1.5h-8.5zm0 5a.75.75 0 000 1.5h8.5a.75.75 0 000-1.5h-8.5zm0 5a.75.75 0 000 1.5h8.5a.75.75 0 000-1.5h-8.5zM3 8a1 1 0 11-2 0 1 1 0 012 0zm-1 6a1 1 0 100-2 1 1 0 000 2z"></path>
     </svg>
+    <!-- <img src="github_readme_menu.svg" alt="github readme menu"> -->
   </div>
-  <div id="ppTOCContent"></div>
+  <div id="ppTOCContent" class="sidebar"></div>
   <div id="content">
   </div>
   <!-- <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script> -->
   <!-- <script src="https://cdn.jsdelivr.net/npm/marked@1.1.0/lib/marked.min.js"></script> -->
   <script src="https://cdn.jsdelivr.net/npm/marked@1.1.0/lib/marked.js"></script>
   <!-- <script src="https://cdn.bootcdn.net/ajax/libs/highlight.js/10.3.2/highlight.min.js"></script> -->
-  <link rel="stylesheet"
-      href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.4.0/build/styles/default.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.4.0/build/styles/default.min.css">
   <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.4.0/build/highlight.min.js"></script>
   <!-- <script></script> -->
   <script>
-  	//代码高亮设置
-	hljs.initHighlightingOnLoad();
+  //代码高亮设置
+  hljs.initHighlightingOnLoad();
 
   var showTOC = false;
   let string = '**marked.js**正在解析文本...\n\n Rendered by **marked.js**.'
@@ -148,16 +190,17 @@
     smartLists: true,
     smartypants: false
   });
-	//代码高亮设置
-	marked.setOptions({
-        highlight: function (code) {
-        return hljs.highlightAuto(code).value;
-      }
-    });
+  //代码高亮设置
+  marked.setOptions({
+    highlight: function(code) {
+      return hljs.highlightAuto(code).value;
+    }
+  });
+
   function build(coll, k, level, ctx) {
     if (k >= coll.length || coll[k].level <= level) { return k; }
     var node = coll[k];
-    ctx.push("<li><a href='#" + node.anchor + "'>" + node.text + "</a>");
+    ctx.push("<li><a class=\"sidebar-link\" href='#" + node.anchor + "'>" + node.text + "</a>");
     k++;
     var childCtx = [];
     k = build(coll, k, node.level, childCtx);
@@ -207,7 +250,7 @@
   // 滚动到上次滑动的位置
   function scrollToLastLocation() {
     var offset = localStorage.getItem(offsetYKey);
-    console.log("滚动到",offsetYKey,"==",offset)
+    console.log("滚动到", offsetYKey, "==", offset)
     setTimeout(function() {
       document.documentElement.scrollTop = document.body.scrollTop = parseInt(offset);
     }, 100);
@@ -245,7 +288,7 @@
   window.onload = function() {
     // console.log('window.onload')
     var offset = localStorage.getItem(offsetYKey);
-    console.log("onload获取",offsetYKey,"==",offset)
+    console.log("onload获取", offsetYKey, "==", offset)
     // alert(offset)
     //https://stackoverflow.com/a/28488360
     setTimeout(function() {

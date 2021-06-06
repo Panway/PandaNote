@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		1E0DE3E82612153A002BA5D9 /* web in Resources */ = {isa = PBXBuildFile; fileRef = 1E0DE3E72612153A002BA5D9 /* web */; };
 		1E179BF925B549B0006C3A56 /* UIView+PPTool.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E179BF825B549B0006C3A56 /* UIView+PPTool.swift */; };
 		1E1B5894257B8118000860F6 /* NSAttributedString+PPTool.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E1B5893257B8118000860F6 /* NSAttributedString+PPTool.swift */; };
 		1E1B58A7257B9480000860F6 /* PPAddCloudServiceViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E1B58A6257B9480000860F6 /* PPAddCloudServiceViewController.swift */; };
@@ -98,6 +99,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		1E0DE3E72612153A002BA5D9 /* web */ = {isa = PBXFileReference; lastKnownFileType = folder; path = web; sourceTree = "<group>"; };
 		1E179BF825B549B0006C3A56 /* UIView+PPTool.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIView+PPTool.swift"; sourceTree = "<group>"; };
 		1E1B5893257B8118000860F6 /* NSAttributedString+PPTool.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NSAttributedString+PPTool.swift"; sourceTree = "<group>"; };
 		1E1B58A6257B9480000860F6 /* PPAddCloudServiceViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPAddCloudServiceViewController.swift; sourceTree = "<group>"; };
@@ -436,6 +438,7 @@
 		6056027623177C4F000809CD /* Resource */ = {
 			isa = PBXGroup;
 			children = (
+				1E0DE3E72612153A002BA5D9 /* web */,
 				60249C68231D1DB100223F1A /* vue.css */,
 				6056027723177C73000809CD /* markdown.html */,
 			);
@@ -650,6 +653,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1E0DE3E82612153A002BA5D9 /* web in Resources */,
 				1EE5A41A25B2DBB500429CB8 /* app_setting_option.json in Resources */,
 				60F5691B22F2ADCA00874994 /* LaunchScreen.storyboard in Resources */,
 				60F5691822F2ADCA00874994 /* Assets.xcassets in Resources */,

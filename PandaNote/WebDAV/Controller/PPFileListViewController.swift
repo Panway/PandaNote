@@ -21,7 +21,7 @@ class PPFileListViewController: PPBaseViewController,UITextFieldDelegate,UITable
     ,PopMenuViewControllerDelegate
 {
     
-    open var pathStr: String = ""
+    open var pathStr: String = "/"
 
 //    let server: URL = URL(string: "http://dav.jianguoyun.com/dav")!
 //    let username = "XXXXX@qq.com"
@@ -480,6 +480,7 @@ class PPFileListViewController: PPBaseViewController,UITextFieldDelegate,UITable
             self.dataSource.append(contentsOf: PPUserInfo.shared.pp_RecentFiles)
             self.tableView.endRefreshing()
             self.tableView.reloadData()
+            PPHUD.showHUDFromTop("暂无最近文件")
             return
         }
         
@@ -581,8 +582,14 @@ extension PPFileListViewController {
 //        config.library.mediaType = .photoAndVideo//支持上传图片和视频
         config.showsPhotoFilters = false
         config.startOnScreen = YPPickerScreen.library
+        config.hidesStatusBar = false
         let picker = YPImagePicker(configuration: config)
-        picker.didFinishPicking { [unowned picker] items, _ in
+        picker.didFinishPicking { [unowned picker] items, cancelled in
+            if cancelled {
+                //点击左上角的取消让选择器消失
+                picker.dismiss(animated: true, completion: nil)
+                return
+            }
             guard let photo = items.singlePhoto else {
                 return
             }

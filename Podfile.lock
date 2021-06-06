@@ -1,16 +1,16 @@
 PODS:
-  - Alamofire (5.4.1)
+  - Alamofire (5.4.3)
   - BTNavigationDropdownMenu (0.7)
-  - CryptoSwift (1.3.8)
+  - CryptoSwift (1.4.0)
   - DoraemonKit/Core (3.0.7):
     - FMDB
     - GCDWebServer
     - GCDWebServer/WebDAV
     - GCDWebServer/WebUploader
-  - Down (0.10.0)
+  - Down (0.11.0)
   - DropDown (2.3.13)
   - FilesProvider (0.26.0)
-  - FLEX (4.4.0)
+  - FLEX (4.4.1)
   - FMDB (2.7.5):
     - FMDB/standard (= 2.7.5)
   - FMDB/standard (2.7.5)
@@ -23,9 +23,9 @@ PODS:
     - GCDWebServer/Core
   - IQKeyboardManager (6.5.6)
   - Kanna (5.2.4)
-  - Kingfisher (6.2.1)
+  - Kingfisher (6.3.0)
   - MBProgressHUD (1.2.0)
-  - MJRefresh (3.5.0)
+  - MJRefresh (3.6.1)
   - MonkeyKing (2.1.0)
   - NewPopMenu (2.1.2)
   - ObjectMapper (4.2.0)
@@ -47,7 +47,7 @@ PODS:
   - SKPhotoBrowser (6.1.0)
   - SnapKit (5.0.1)
   - SteviaLayout (4.7.3)
-  - YPImagePicker (4.4.0):
+  - YPImagePicker (4.5.0):
     - PryntTrimmerView (~> 4.0.2)
     - SteviaLayout (~> 4.7.3)
   - YYText (1.0.7)
@@ -119,21 +119,21 @@ CHECKOUT OPTIONS:
     :git: https://github.com/Panway/CodeSnipetCollection.git
 
 SPEC CHECKSUMS:
-  Alamofire: 2291f7d21ca607c491dd17642e5d40fdcda0e65c
+  Alamofire: e447a2774a40c996748296fa2c55112fdbbc42f9
   BTNavigationDropdownMenu: 57a72c74dc211db3564f5be168f4f7643491a7de
-  CryptoSwift: 01b0f0cba1d5c212e5a335ff6c054fb75a204f00
+  CryptoSwift: 7cc902df1784de3b389a387756c7d710f197730c
   DoraemonKit: 32fb97f3aa82efa133111d193080ca5462cef135
-  Down: 01f155f9d7e99673c667efd2218709c3b9a8bc13
+  Down: b6ba1bc985c9d2f4e15e3b293d2207766fa12612
   DropDown: 8a2116376c1981888557f72ec2ffc9a5e0e456ec
   FilesProvider: 2a8ae17d8b9c23a6feadb1308ee638fa31d21065
-  FLEX: 0592c011c6dfbfdb94a5e24f2d4a9dbff0c6026d
+  FLEX: 7ca2c8cd3a435ff501ff6d2f2141e9bdc934eaab
   FMDB: 2ce00b547f966261cd18927a3ddb07cb6f3db82a
   GCDWebServer: 2c156a56c8226e2d5c0c3f208a3621ccffbe3ce4
   IQKeyboardManager: 2a6e97afdafc7becf0cb17a9a8d795e3a980717f
   Kanna: b9d00d7c11428308c7f95e1f1f84b8205f567a8f
-  Kingfisher: e71c6fac2aebb1262888cabc2cb13d313362a48f
+  Kingfisher: 6c3df386db71d82c0817a429d2c9421a77396529
   MBProgressHUD: 3ee5efcc380f6a79a7cc9b363dd669c5e1ae7406
-  MJRefresh: 6afc955813966afb08305477dd7a0d9ad5e79a16
+  MJRefresh: d2c1970d1cf6e77fcfcdfe76c943dfab8dbfa5c1
   MonkeyKing: 1656e3e01911b5f72f988d4496c1cc988d0c009c
   NewPopMenu: c6129e08e8192f6257ceb5f9a4357e1b59c6e2e7
   ObjectMapper: 1eb41f610210777375fa806bf161dc39fb832b81
@@ -144,9 +144,9 @@ SPEC CHECKSUMS:
   SKPhotoBrowser: 343de95d89dc7913763c5dda243cc6e606e4a168
   SnapKit: 97b92857e3df3a0c71833cce143274bf6ef8e5eb
   SteviaLayout: c2ecdcff57d44e38fd2f65e54ad52aeae28ca0c4
-  YPImagePicker: 15aed8bcaa4dad976e11b6114126d731a2f9f3c9
+  YPImagePicker: 6f410f475bd22fa8cd430495b54d4b2f15865c2d
   YYText: 5c461d709e24d55a182d1441c41dc639a18a4849
 
-PODFILE CHECKSUM: 5b47105592122338d09a8e5344d925ea9ea10e56
+PODFILE CHECKSUM: 64db03b60313e0389ec64a37c73e5f0cc0bd1659
 
 COCOAPODS: 1.10.1

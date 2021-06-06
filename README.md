@@ -60,3 +60,21 @@ AFNetworking作者的： https://github.com/mattt/CommonMarkAttributedString
 Cmark的Swift封装：https://github.com/iwasrobbed/Down
 
 markdown与AttributeString互转： https://github.com/chockenberry/MarkdownAttributedString.git
+
+1200+star https://github.com/mdiep/MMMarkdown
+
+1300+star https://github.com/SimonFairbairn/SwiftyMarkdown
+
+577star https://github.com/bmoliveira/MarkdownKit
+
+77star https://github.com/calebkleveter/SwiftMark
+
+MWeb作者使用的：
+
+https://github.com/hoedown/hoedown
+
+https://github.com/ali-rantakari/peg-markdown-highlight
+
+[写一个 markdown 解析器，用什么方式比较好呢？](https://www.v2ex.com/t/682051)
+
+Java 解析 https://github.com/vsch/flexmark-java
