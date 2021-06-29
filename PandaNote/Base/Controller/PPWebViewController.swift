@@ -23,6 +23,8 @@ class PPWebViewController: UIViewController,WKUIDelegate,WKNavigationDelegate,WK
     var markdownName: String?
     ///Main Bundle里预加载的js
     var preloadJSNameInBundle: String?
+    /// 是否注册scheme来拦截http资源
+    var registerHTTPSchemeForCustomProtocol = false
     var lastOffsetY : CGFloat = 0.0
     var bottomView : PPWebViewBottomToolbar!
     override func viewDidLoad() {
@@ -31,6 +33,12 @@ class PPWebViewController: UIViewController,WKUIDelegate,WKNavigationDelegate,WK
         self.view.backgroundColor = UIColor.white
         if let titleStr = self.titleStr {
             self.title = titleStr
+        }
+        if registerHTTPSchemeForCustomProtocol {
+            PPWebViewController.registerHTTPScheme()
+        }
+        else {
+            PPWebViewController.unregisterHTTPScheme()
         }
         let config = WKWebViewConfiguration()
         config.userContentController.add(self, name: "pppanda")

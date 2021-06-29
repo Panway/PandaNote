@@ -59,7 +59,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         sqliteManager.operation(process: sql, value: [])
 //        test()
         URLProtocol.registerClass(PPReplacingImageURLProtocol.self)//当你的应用程序启动时，它会向 URL 加载系统注册协议。 这意味着它将有机会处理每个发送到 URL加载系统的请求。
-        PPWebViewController.registerHTTPScheme()
+        //PPWebViewController.registerHTTPScheme()
         return true
     }
 
@@ -92,7 +92,18 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             // 支付跳转支付宝钱包进行支付，处理支付结果
             // 授权跳转支付宝钱包进行支付，处理支付结果
         }
-        else if url.host == "weixinPayDone.com" {
+        else if url.host == "baiduwangpan" {
+            let urlWithToken = url.absoluteString.removingPercentEncoding?.replacingOccurrences(of: "baiduwangpan#", with: "baiduwangpan?")
+            if let access_token = urlWithToken?.pp_valueOf("access_token") {
+                debugPrint("baidu access_token:",access_token)
+                let vc = PPWebDAVConfigViewController()
+                vc.cloudType = "baiduyun"
+                vc.serverURL = "https://pan.baidu.com/rest/2.0/xpan/file"
+                vc.remark = "百度云"
+                vc.password = access_token
+                UIViewController.topViewControllerForKeyWindow().navigationController?.pushViewController(vc, animated: true)
+            }
+            
         }
         else {
             result = MonkeyKing.handleOpenURL(url)
