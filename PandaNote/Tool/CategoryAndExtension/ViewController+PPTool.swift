@@ -10,7 +10,7 @@ import Foundation
 import SnapKit
 
 extension UIViewController {
-    class func topViewControllerForKeyWindow() -> UIViewController? {
+    class func pp_topViewController() -> UIViewController? {
         let rootVC = UIApplication.shared.delegate?.window??.rootViewController
         var resultVC = self._topViewController(rootVC)
         while ((resultVC?.presentedViewController) != nil) {

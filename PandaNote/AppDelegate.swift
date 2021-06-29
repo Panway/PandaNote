@@ -101,7 +101,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                 vc.serverURL = "https://pan.baidu.com/rest/2.0/xpan/file"
                 vc.remark = "百度云"
                 vc.password = access_token
-                UIViewController.topViewControllerForKeyWindow().navigationController?.pushViewController(vc, animated: true)
+                UIViewController.pp_topViewController()?.navigationController?.pushViewController(vc, animated: true)
             }
             
         }

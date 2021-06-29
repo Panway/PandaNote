@@ -97,7 +97,7 @@ class PPPasteboardTool: NSObject {
                     else if (index == 2) {
                         let vc = PPWebViewController()
                         vc.urlString = urlString
-                        UIViewController.topViewControllerForKeyWindow()?.navigationController?.pushViewController(vc, animated: true)
+                        UIViewController.pp_topViewController()?.navigationController?.pushViewController(vc, animated: true)
                     }
                     else if (index == 3) {
                         //let results = utf8Text.pp_matches(for: "//s3.{1,80}reflow_video.*.js")
