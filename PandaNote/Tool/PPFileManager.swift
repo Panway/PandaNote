@@ -9,7 +9,7 @@
 import Foundation
 import Photos
 import FilesProvider
-import PINCache
+//import PINCache
 
 class PPFileManager: NSObject,FileProviderDelegate {
     let apiCachePrefix = "APICache/api_"
@@ -471,6 +471,10 @@ class PPFileManager: NSObject,FileProviderDelegate {
 
         
         return Data()
+    }
+    /// 当前服务器配置信息的唯一标识
+    func currentServerUniqueID() -> String {
+        return "\(PPUserInfo.shared.webDAVServerURL)_\(PPUserInfo.shared.webDAVUserName ?? "")"
     }
     //MARK:- FileProviderDelegate
     func fileproviderSucceed(_ fileProvider: FileProviderOperations, operation: FileOperationType) {

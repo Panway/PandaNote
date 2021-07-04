@@ -1,4 +1,4 @@
-# 基于WebDAV的iOS客户端
+# 一个iOS markdown笔记应用
 
 ## Why ？
 
@@ -9,24 +9,29 @@
 
 主要用来写 markdown 笔记，可使用坚果云等网盘实现云同步，所有文件保存在第三方服务器
 
-App 初步支持macOS运行（使用Mac Catalyst）
+**设备兼容性：**
 
-**目前支持的网盘（协议）**：
+iOS、macOS（初步支持，使用了Mac Catalyst）
+
+**已支持的网盘（协议）**：
 
 - [x] WebDAV（坚果云或自己搭建WebDAV服务）
 - [x] Dropbox
 - [x] 百度网盘
 
-**目前支持的功能**：
+**已支持的文本编辑功能**：
 
-- [ ] markdown 原生渲染
-- [x] markdown 使用marked.js渲染（包括代码高亮）
+- [x] markdown 原生渲染（待优化）
+- [x] markdown 使用 [marked.js](https://github.com/markedjs/marked) 渲染、目录生成、代码高亮
 - [x] markdown 等纯文本的新建、编辑、保存
+
+**其他功能**：
+
 - [x] 支持预览mp3、mp4、pdf
 - [x] WebDAV HTTP响应和下载的文件缓存到磁盘，无网状态也可以查看文件
 - [x] 文件移动、删除、重命名、新建文件夹
 - [x] 上传相册原始图片到指定目录
-- [x] 图片预览、原图分享到微信、以微信表情分享
+- [x] 图片预览、原图和Gif（微信表情）分享到微信
 - [ ] 读取剪切板查看淘宝京东价格曲线
 - [x] 抖音视频无水印下载，微博等视频解析下载
 
@@ -53,7 +58,7 @@ open PandaNote.xcworkspace
 
 
 
-# markdown渲染相关
+# 解析markdown相关资源
 
 AFNetworking作者的： https://github.com/mattt/CommonMarkAttributedString
 

@@ -562,6 +562,15 @@ extension String{
             return nil
         }
     }
+    
+    func toCGFloat() -> CGFloat {
+        if let n = NumberFormatter().number(from: self) {
+            return CGFloat(n.floatValue)
+        }
+        else {
+            return CGFloat(0)
+        }
+    }
 }
 
 //MARK:-- 获取文本的宽高 --

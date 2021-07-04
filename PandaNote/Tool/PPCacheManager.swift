@@ -12,6 +12,7 @@ public enum PPDiskCacheError: Error {
 }
 
 import Foundation
+import PINCache
 
 class PPDiskCache {
     static let shared = PPDiskCache()
@@ -81,6 +82,7 @@ class PPDiskCache {
                 }
             }
             else {
+                //文件不存在
                 if let failHandler = fail {
                     DispatchQueue.main.async {
                         failHandler(PPDiskCacheError.fileNotExist)
@@ -192,4 +194,28 @@ private func isNoSuchFileError(_ error : Error?) -> Bool {
         return NSCocoaErrorDomain == (error as NSError).domain && (error as NSError).code == NSFileReadNoSuchFileError
     }
     return false
+}
+
+
+
+
+
+
+
+
+
+
+class PPCacheManeger {
+    static let shared = PPCacheManeger()
+    let pinCache = PINCache.init(name: "PPPINCache")
+    func set(_ object:String,key:String) {
+        pinCache.setObject(object, forKey: key)
+    }
+    
+    func get(_ key:String) -> String {
+        if let value = pinCache.object(forKey: key) as? String {
+            return value
+        }
+        return ""
+    }
 }

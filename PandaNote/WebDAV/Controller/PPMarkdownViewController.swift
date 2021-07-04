@@ -71,7 +71,10 @@ class PPMarkdownViewController: PPBaseViewController,UITextViewDelegate {
                 self.textView.text = self.markdownStr
             }
             
-            
+            //定位到上次滚动的位置
+            let offsetKey = PPFileManager.shared.currentServerUniqueID().pp_md5
+            let offsetY = PPCacheManeger.shared.get(offsetKey).toCGFloat()
+            self.textView.setContentOffset(CGPoint(x: 0, y: offsetY), animated: false)
             
         }
 
@@ -82,12 +85,10 @@ class PPMarkdownViewController: PPBaseViewController,UITextViewDelegate {
     }
     func pp_initView() {
         self.view.addSubview(textView)
-        textView.textContainerInset = UIEdgeInsets(top: 0, left: 8, bottom: 0, right: 8)
+        textView.textContainerInset = UIEdgeInsets(top: 0, left: 8, bottom: 0, right: 8)//Padding,内边距
         self.pp_viewEdgeEqualToSafeArea(textView)
         textView.backgroundColor = UIColor.white
         textView.font = UIFont.systemFont(ofSize: 16.0)
-//        textView.attributedText = markdownParser.parse(markdown)
-//        textView!.text = markdown
         
         textView.delegate = self
         
@@ -142,7 +143,7 @@ class PPMarkdownViewController: PPBaseViewController,UITextViewDelegate {
             
         }
     }
-    
+    // MARK:UITextViewDelegate 文本框代理
     func textViewDidChange(_ textView: PPPTextView) {
 //        debugPrint(textView.text)
     }
@@ -163,7 +164,12 @@ class PPMarkdownViewController: PPBaseViewController,UITextViewDelegate {
         historyList.append(self.textView.text)
         debugPrint("historyList= \(historyList.count)")
     }
-    //MARK: 私有方法
+    func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
+        let offsetKey = PPFileManager.shared.currentServerUniqueID().pp_md5
+        debugPrint("滚动偏移量:\(scrollView.contentOffset.y)")
+        PPCacheManeger.shared.set("\(scrollView.contentOffset.y)", key: offsetKey)
+    }
+    //MARK: Private 私有方法
     /// 预览markdown
     @objc func previewAction(sender:UIButton)  {
         self.textView.resignFirstResponder()
