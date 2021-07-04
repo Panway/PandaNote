@@ -193,7 +193,7 @@ class PPWebViewController: UIViewController,WKUIDelegate,WKNavigationDelegate,WK
     }
     class func unregisterHTTPScheme() {
         for scheme in ["http", "https"] {
-            URLProtocol.self.wk_registerScheme(scheme)
+            URLProtocol.self.wk_unregisterScheme(scheme)
         }
     }
     //MARK:Private

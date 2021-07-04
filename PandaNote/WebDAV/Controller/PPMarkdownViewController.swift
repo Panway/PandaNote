@@ -46,9 +46,26 @@ class PPMarkdownViewController: PPBaseViewController,UITextViewDelegate {
                 }
                 return
             }
-            self.textView.text = self.markdownStr
-            //NSAttributedString+Markdown 渲染
-//            self.textView.attributedText = NSAttributedString(markdownRepresentation: self.markdownStr, attributes: [.font : UIFont.systemFont(ofSize: 17.0), .foregroundColor: UIColor.darkText ])
+            
+            //markdown解析的方式
+            if let selectedIndex = PPUserInfo.shared.pp_Setting["pp_markdownParseMethod"] {
+                let method = selectedIndex as! String
+                if method == "NSAttributedString+Markdown" {
+                    //NSAttributedString+Markdown 解析
+                    self.textView.attributedText = NSAttributedString(markdownRepresentation: self.markdownStr, attributes: [.font : UIFont.systemFont(ofSize: 17.0), .foregroundColor: UIColor.darkText ])
+                    
+                }
+                else if method == "Down" {
+                    
+                }
+                else {
+                    self.textView.text = self.markdownStr//none
+                }
+            }
+            else {//没设置
+                self.textView.text = self.markdownStr
+            }
+            
             
             //MARK:Down渲染
 //            let down = Down(markdownString: self.markdownStr)

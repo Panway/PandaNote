@@ -13,6 +13,11 @@
     "category": "文本编辑设置",
     "ATTENTION": "注意！每个数组仅第一个设置category！",
     "showSwitch": "1"
+  },
+  {
+    "name": "markdown文本解析器设置",
+    "detail": "试验性功能，请谨慎使用(默认none)",
+    "key": "pp_markdownParseMethod",
   }],
   [
   {

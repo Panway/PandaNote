@@ -35,7 +35,7 @@
 #import <UIKit/UIKit.h>
 #endif
 
-#define ALLOW_CODE_MARKERS 0	// EXPERIMENTAL - Currently literals aren't escaped and style attributes are baked in (not using styleAttributes).
+#define ALLOW_CODE_MARKERS 1	// EXPERIMENTAL - Currently literals aren't escaped and style attributes are baked in 目前literals没有转义，样式属性可能会糟糕(not using styleAttributes).
 
 NS_ASSUME_NONNULL_BEGIN
 

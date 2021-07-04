@@ -29,8 +29,8 @@
 
 // NOTE: Since the parser makes a pass over the source Markdown for each marker, turning off the ALLOW configuration items
 // below will improve performance slightly.
-
-#define ALLOW_LINKS 1			// CONFIGURATION - When enabled, inline and automatic links in Markdown will be converted to rich text attributes.
+#define SHOW_ORIGINAL_TEXT 1    //增加样式也显示原始文本，比如显示`[BAIDU](https://baidu.com)`而不是蓝色的`BAIDU`
+#define ALLOW_LINKS 1			// CONFIGURATION - 启用后，Markdown中的内联和自动链接将转换为富文本属性.
 #define ALLOW_ALTERNATES 1		// CONFIGURATION - When enabled, alternate Markdown such as * for single emphasis and __ for double will be converted.
 
 #define LOG_CONVERSIONS 1		// CONFIGURATION - When enabled, debug logging will include string conversion details.
@@ -108,7 +108,7 @@ NSString *const escape = @"\\";
 NSString *const literalAsterisk = @"*";
 NSString *const literalUnderscore = @"_";
 
-const unichar escapeCharacter = '\\';
+const unichar escapeCharacter = '\\';/// `\\`
 const unichar spaceCharacter = ' ';
 const unichar tabCharacter = '\t';
 const unichar newlineCharacter = '\n';
@@ -121,7 +121,7 @@ typedef enum {
     MarkdownSpanLinkAutomatic,
     MarkdownSpanCode, // not supported
 } MarkdownSpanType;
-
+/// 第range.location + offset 个字符是不是等于character，即某个位置的前或后offset个是不是等于character
 static BOOL hasCharacterRelative(NSString *string, NSRange range, NSUInteger offset, unichar character)
 {
 	BOOL hasCharacter = NO;
@@ -202,17 +202,26 @@ static void replaceAttributes(MarkdownSpanType spanType, NSDictionary<MarkdownSt
 	}];
 }
 
+/// 更新AttributedString
+/// @param result 完整的原始字符串
+/// @param beginMarker `[`
+/// @param dividerMarker `](`
+/// @param endMarker `)`
+/// @param spanType 类型
+/// @param MarkdownStyleKey` _ or * __ or **`
+/// @param NSAttributedStringKey ？？？
+/// @param styleAttributes 样式，eg：代码、加粗、链接等
 static void updateAttributedString(NSMutableAttributedString *result, NSString *beginMarker, NSString *dividerMarker, NSString *endMarker, MarkdownSpanType spanType, NSDictionary<MarkdownStyleKey, NSDictionary<NSAttributedStringKey, id> *> *styleAttributes)
 {
 	NSStringCompareOptions options = 0;
 
-	// see the note below about these two variables
+	// 请参阅下面有关这两个变量的注释（废话）
 	NSString *scanString = [result.string copy];
 	NSUInteger mutationOffset = 0;
 	
-	// 检查输入中的水平规则horizontal rules，忽略出现在其行范围内的标记markers
+	// 检查输入中的水平规则(horizontal rules)，忽略出现在其行范围内的标记（markers）
 	NSMutableArray *horizontalRuleRangeValues = [NSMutableArray array];
-	NSString *rulerString = [beginMarker substringToIndex:1];
+	NSString *rulerString = [beginMarker substringToIndex:1];//[
 	if ([rulerString isEqual:literalAsterisk] || [rulerString isEqual:literalUnderscore]) {
 		NSRange checkRange = NSMakeRange(0, 1);
 		while (checkRange.location + checkRange.length < scanString.length) {
@@ -237,26 +246,26 @@ static void updateAttributedString(NSMutableAttributedString *result, NSString *
 	BOOL abortScan = NO;
 	NSUInteger scanIndex = 0;
 	while ((! abortScan) && (scanIndex < scanString.length)) {
-		NSRange beginRange = [scanString rangeOfString:beginMarker options:options range:NSMakeRange(scanIndex, scanString.length - scanIndex)];
+		NSRange beginRange = [scanString rangeOfString:beginMarker options:options range:NSMakeRange(scanIndex, scanString.length - scanIndex)];//先找到`[`字符所在的位置，length=1
 		if (beginRange.length > 0) {
 			// 找到潜在的开始标记
 			
-			BOOL skipEscapedMarker = hasCharacterRelative(scanString, beginRange, -1, escapeCharacter);
+			BOOL skipEscapedMarker = hasCharacterRelative(scanString, beginRange, -1, escapeCharacter);//前一个字符是不是"\"
 			BOOL skipLiteralOrListMarker = NO;
-			if (beginRange.length == 1) {
-				BOOL hasPrefixStartOfLine = beginRange.location == 0 || hasCharacterRelative(scanString, beginRange, -1, newlineCharacter);
-				BOOL hasPrefixSpace = hasCharacterRelative(scanString, beginRange, -1, spaceCharacter);
-				BOOL hasSuffixSpace = hasCharacterRelative(scanString, beginRange, +1, spaceCharacter);
+			if (beginRange.length == 1) {//有[这个字符
+				BOOL hasPrefixStartOfLine = beginRange.location == 0 || hasCharacterRelative(scanString, beginRange, -1, newlineCharacter);//前一个字符是换行
+				BOOL hasPrefixSpace = hasCharacterRelative(scanString, beginRange, -1, spaceCharacter);//前一个字符是空格
+				BOOL hasSuffixSpace = hasCharacterRelative(scanString, beginRange, +1, spaceCharacter);//后一个字符是空格
 				BOOL hasPrefixTab = hasCharacterRelative(scanString, beginRange, -1, tabCharacter);
 				BOOL hasSuffixTab = hasCharacterRelative(scanString, beginRange, +1, tabCharacter);
 				if ((hasPrefixStartOfLine || hasPrefixSpace || hasPrefixTab) && (hasSuffixSpace || hasSuffixTab)) {
-					skipLiteralOrListMarker = YES;
+					skipLiteralOrListMarker = YES;//跳过文字或列表标记（前一个字符是换行啥的，就不给它样式）
 				}
 			}
 			BOOL skipLinkedText = NO;
-			NSUInteger mutatedIndex = beginRange.location - mutationOffset;
+			NSUInteger mutatedIndex = beginRange.location - mutationOffset;//x-0=x
 			if (mutatedIndex >= 0 && mutatedIndex < result.length) {
-				if ([result attribute:NSLinkAttributeName atIndex:mutatedIndex effectiveRange:nil] != nil) {
+				if ([result attribute:NSLinkAttributeName atIndex:mutatedIndex effectiveRange:nil] != nil) {//返回给定索引处字符的属性
 					skipLinkedText = YES;
 				}
 			}
@@ -274,7 +283,7 @@ static void updateAttributedString(NSMutableAttributedString *result, NSString *
 				scanIndex = beginRange.location + beginRange.length;
 			}
 			else {
-				NSUInteger beginIndex = beginRange.location + beginRange.length;
+				NSUInteger beginIndex = beginRange.location + beginRange.length;//x+1
 				
 				BOOL foundEndMarker = NO;
 				NSRange endRange = emptyRange();
@@ -289,26 +298,25 @@ static void updateAttributedString(NSMutableAttributedString *result, NSString *
 				}
 				while ((! abortEndScan) && (scanEndIndex < scanString.length)) {
 					BOOL continueScan = NO;
-					// 在到第一个视觉换行符（即两个换行符\n\n）或文本结尾的剩余范围内寻找结束标记
-					NSRange remainingRange = NSMakeRange(scanEndIndex, scanString.length - scanEndIndex);
+					// 在到第一个视觉换行符（即两个换行符`\n\n`）或文本结尾的剩余范围内寻找结束标记)。
+					NSRange remainingRange = NSMakeRange(scanEndIndex, scanString.length - scanEndIndex);//从`]`的下一个字符到最后
 					NSRange visualLineRange = [scanString rangeOfString:visualLineBreak options:options range:remainingRange];
 					if (visualLineRange.location != NSNotFound) {
-						remainingRange = NSMakeRange(scanEndIndex, visualLineRange.location - scanEndIndex);
+						remainingRange = NSMakeRange(scanEndIndex, visualLineRange.location - scanEndIndex);//如果有`\n\n`的话
 					}
-					endRange = [scanString rangeOfString:endMarker options:options range:remainingRange];
+					endRange = [scanString rangeOfString:endMarker options:options range:remainingRange];//`)`的位置
 					if (endRange.length > 0) {
-						// 找到潜在的结束标记
-						
+						// 找到潜在的结束标记，即`)`
 						BOOL dividerMissing = NO;
 						if (dividerMarker) {
-							// 如果指定了分隔符，请确保我们刚刚捕获的range包含它
-							NSRange dividerRange = [scanString rangeOfString:dividerMarker options:options range:NSMakeRange(scanEndIndex, endRange.location - scanEndIndex)];
+							// 如果指定了分隔符`](`，请确保我们刚刚捕获的range包含它
+							NSRange dividerRange = [scanString rangeOfString:dividerMarker options:options range:NSMakeRange(scanEndIndex, endRange.location - scanEndIndex)];//`](`的位置
 							if (dividerRange.location == NSNotFound) {
 								dividerMissing = YES;
 							}
 						}
 						if (! dividerMissing) {
-							BOOL hasEscapeMarker = hasCharacterRelative(scanString, endRange, -1, escapeCharacter);
+							BOOL hasEscapeMarker = hasCharacterRelative(scanString, endRange, -1, escapeCharacter);//前一个是`\\`
 							BOOL hasPrefixSpace = hasCharacterRelative(scanString, endRange, -1, spaceCharacter);
 							BOOL hasSuffixSpace = hasCharacterRelative(scanString, endRange, +1, spaceCharacter);
 							if (! hasEscapeMarker && ! (hasPrefixSpace && hasSuffixSpace)) {
@@ -350,7 +358,7 @@ static void updateAttributedString(NSMutableAttributedString *result, NSString *
 
 #if DEBUG
 #if LOG_CONVERSIONS
-					NSString *textString = [scanString substringWithRange:NSMakeRange(beginIndex, endIndex - beginIndex)];
+					NSString *textString = [scanString substringWithRange:NSMakeRange(beginIndex, endIndex - beginIndex)];//eg:`BAIDU](https://baidu.com`
 					NSString *logString = [textString stringByReplacingOccurrencesOfString:@"\n" withString:@"\\n"];
 					DebugLog(@"%s <<<<      \"%@\" (%ld)", "NSAttributedString+Markdown", logString, textString.length);
 #endif
@@ -385,27 +393,27 @@ static void updateAttributedString(NSMutableAttributedString *result, NSString *
 								replaceMarkers = YES;
 							}
 							break;
-						case MarkdownSpanLinkInline: {
+						case MarkdownSpanLinkInline: {//解析类似`[BAIDU](https://baidu.com)`这样的
 							NSString *linkText = nil;
 							NSString *inlineLink = nil;
-							NSString *matchString = [result.string substringWithRange:mutatedMatchTextRange];
-							NSRange linkTextMarkerRange = [matchString rangeOfString:linkInlineStartDivider options:0 range:NSMakeRange(0, matchString.length)];
+							NSString *matchString = [result.string substringWithRange:mutatedMatchTextRange];//BAIDU](https://baidu.com
+							NSRange linkTextMarkerRange = [matchString rangeOfString:linkInlineStartDivider options:0 range:NSMakeRange(0, matchString.length)];//`]`的位置
 							if (linkTextMarkerRange.length > 0) {
 								NSRange linkTextRange = NSMakeRange(0, linkTextMarkerRange.location);
-								linkText = [matchString substringWithRange:linkTextRange];
-								NSRange inlineLinkMarkerRange = [matchString rangeOfString:linkInlineEndDivider options:NSBackwardsSearch range:NSMakeRange(0, matchString.length)];
+								linkText = [matchString substringWithRange:linkTextRange];//链接文本，eg：BAIDU
+								NSRange inlineLinkMarkerRange = [matchString rangeOfString:linkInlineEndDivider options:NSBackwardsSearch range:NSMakeRange(0, matchString.length)];//`(`
 								if (inlineLinkMarkerRange.length > 0) {
 									if (inlineLinkMarkerRange.location == linkTextMarkerRange.location + linkTextMarkerRange.length) {
 										NSUInteger markerIndex = inlineLinkMarkerRange.location + 1;
 										NSRange inlineLinkRange = NSMakeRange(markerIndex, matchString.length - markerIndex);
-										inlineLink = [matchString substringWithRange:inlineLinkRange];
+										inlineLink = [matchString substringWithRange:inlineLinkRange];//https://baidu.com
 									}
 								}
 							}
 							if (linkText && inlineLink) {
 								NSURL *URL = [NSURL URLWithString:inlineLink];
 								if (URL) {
-									replacementString = linkText;
+									//replacementString = linkText;//PPCHANGE，不把`BAIDU](https://baidu.com`变成`BAIDU`
 									replacementAttributes = @{ NSLinkAttributeName: URL };
 									replaceMarkers = YES;
 								}
@@ -455,7 +463,7 @@ static void updateAttributedString(NSMutableAttributedString *result, NSString *
 #if ALLOW_CODE_MARKERS
 							// NOTE: This is a simplistic implementation that only adjusts the visual aspects of the inline code. It's a much harder problem
 							// when you think about how stuff between the code markers doesn't get modified (e.g. with emphasis or literals.)
-							replacementAttributes = @{ NSForegroundColorAttributeName: NSColor.labelColor, NSBackgroundColorAttributeName: [NSColor.labelColor colorWithAlphaComponent:0.1], NSFontAttributeName: [NSFont userFixedPitchFontOfSize:16.0], NSMarkedClauseSegmentAttributeName: @(1) };
+							replacementAttributes = @{ NSForegroundColorAttributeName: UIColor.lightGrayColor, NSBackgroundColorAttributeName: [UIColor.lightGrayColor colorWithAlphaComponent:0.1], NSFontAttributeName: [UIFont systemFontOfSize:16.0], @"NSMarkedClauseSegmentAttributeName": @(1) };
 							replaceMarkers = YES;
 #else
 							NSCAssert(NO, @"Not implemented");
@@ -464,10 +472,11 @@ static void updateAttributedString(NSMutableAttributedString *result, NSString *
 					}
                      
 					if (replaceMarkers) {
+#if !SHOW_ORIGINAL_TEXT
 						NSRange mutatedBeginRange = NSMakeRange(beginRange.location - mutationOffset, beginRange.length);
-						[result replaceCharactersInRange:mutatedBeginRange withString:@""];//去掉链接的[
+						[result replaceCharactersInRange:mutatedBeginRange withString:@""];//eg：去掉链接的`[`
 						mutationOffset += beginRange.length;
-				   
+#endif
 						NSRange mutatedTextRange = NSMakeRange(beginIndex - mutationOffset, endIndex - beginIndex);
 
 						if (replaceStyleAttributes) {
@@ -489,17 +498,18 @@ static void updateAttributedString(NSMutableAttributedString *result, NSString *
 							}
 						}
 						
-						if (replacementAttributes) {
+						if (replacementAttributes) {//给富文本增加样式
 							[result addAttributes:replacementAttributes range:mutatedTextRange];
 						}
 						if (replacementString) {
-							[result replaceCharactersInRange:mutatedTextRange withString:replacementString];
+							[result replaceCharactersInRange:mutatedTextRange withString:replacementString];//把BAIDU](https://baidu.com变成BAIDU)
 							mutationOffset += mutatedTextRange.length - replacementString.length;
 						}
-						
+#if !SHOW_ORIGINAL_TEXT
 						NSRange mutatedEndRange = NSMakeRange(endRange.location - mutationOffset, endRange.length);
-						[result replaceCharactersInRange:mutatedEndRange withString:@""];//去掉链接的]
+						[result replaceCharactersInRange:mutatedEndRange withString:@""];//去掉`BAIDU)`里的`)`
 						mutationOffset += endRange.length;
+#endif
 					}
 					
 					scanIndex = endRange.location + endRange.length;
@@ -559,7 +569,7 @@ static void removeEscapesInAttributedString(NSMutableAttributedString *result, N
 
 #if ALLOW_LINKS
     // 用链接属性替换[]和()标记
-	NSString *linkInlineDividerMarker = [linkInlineStartDivider stringByAppendingString:linkInlineEndDivider];//](
+	NSString *linkInlineDividerMarker = [linkInlineStartDivider stringByAppendingString:linkInlineEndDivider];//"]("
     updateAttributedString(result, linkInlineStart, linkInlineDividerMarker, linkInlineEnd, MarkdownSpanLinkInline, styleAttributes);
 
     // replace < and > markers with a link attribute
@@ -810,7 +820,7 @@ static void emitMarkdown(NSMutableString *result, NSString *normalizedString, NS
 		
 #if ALLOW_CODE_MARKERS
 		BOOL currentRangeHasCode = NO;
-		if (currentAttributes[NSMarkedClauseSegmentAttributeName]) {
+		if (currentAttributes[@"NSMarkedClauseSegmentAttributeName"]) {
 			currentRangeHasCode = YES;
 		}
 #endif

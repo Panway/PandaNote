@@ -129,6 +129,18 @@ class PPSettingViewController: PPBaseViewController,UITableViewDataSource,UITabl
             DropDown.appearance().setupCornerRadius(10)
             dropDown.show()
         }
+        else if obj == "markdown文本解析器设置" {
+            let dropDown = DropDown()
+            dropDown.anchorView = tableView.cellForRow(at: indexPath) // UIView or UIBarButtonItem
+            dropDown.direction = .bottom
+            dropDown.bottomOffset = CGPoint(x: 100, y: 0)
+            dropDown.dataSource = ["none", "NSAttributedString+Markdown"]
+            dropDown.selectionAction = { (index: Int, item: String) in
+                PPUserInfo.shared.pp_Setting.updateValue(dropDown.dataSource[index], forKey:"pp_markdownParseMethod")
+            }
+            DropDown.appearance().setupCornerRadius(10)
+            dropDown.show()
+        }
         else if obj == "图片压缩质量" {
             let dropDown = DropDown()
             dropDown.anchorView = tableView.cellForRow(at: indexPath)

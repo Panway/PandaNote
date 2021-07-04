@@ -47,7 +47,7 @@ class PPFileManager: NSObject,FileProviderDelegate {
     override init() {
         super.init()
         PPFileManager.dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
-//        initCloudServiceSetting()
+        initCloudServiceSetting()//初始化服务器配置
     }
     //MARK:- 数据处理
     func myPPFileArrayFrom(_ contents:[FileObject]) -> [PPFileObject] {
@@ -75,7 +75,7 @@ class PPFileManager: NSObject,FileProviderDelegate {
         }
         return fileArray
     }
-    //MARK:- 文件操作
+    //MARK:- 文件列表操作
     /// 获取文件列表（先取本地再获取最新）
     func pp_getFileList(path:String,completionHandler:@escaping(_ data:[PPFileObject],_ isFromCache:Bool,_ error:Error?) -> Void) {
         //先从本地缓存获取数据
@@ -84,14 +84,15 @@ class PPFileManager: NSObject,FileProviderDelegate {
             archieveKey = "baidu_" + "\(baiduwangpan?.baiduURL ?? "")\(path)".pp_md5
         }
         PPDiskCache.shared.fetchData(key: archieveKey, failure: { (error) in
-            if let error = error {
-                //忽略文件不存在错误
-                if (error as NSError).code != NSFileReadNoSuchFileError {
-                    DispatchQueue.main.async {
-                        completionHandler([],false,error)
-                    }
-                }
-            }
+            //哎，忘了为啥这么写
+//            if let error = error {
+//                //忽略文件不存在错误
+//                if (error as NSError).code != NSFileReadNoSuchFileError {
+//                    DispatchQueue.main.async {
+//                        completionHandler([],false,error)
+//                    }
+//                }
+//            }
             //获取本地缓存失败就去服务器获取
             self.getRemoteFileList(path: path, completionHandler: completionHandler)
         }) { (data) in
@@ -149,6 +150,7 @@ class PPFileManager: NSObject,FileProviderDelegate {
             getWebDAVFileList(path: path, completionHandler: completionHandler)
         }
     }
+    //MARK:- 文件操作
     /// 从WebDAV下载文件获取Data
     func downloadFileFromWebDAV(path: String, cacheToDisk: Bool? = false,completionHandler: @escaping ((_ contents: Data?, _ isFromCache:Bool, _ error: Error?) -> Void)) {
         currentFileProvider?.contents(path: path, completionHandler: { (data, error) in
@@ -171,7 +173,7 @@ class PPFileManager: NSObject,FileProviderDelegate {
     /// - Parameters:
     ///   - path: 远程文件路径
     ///   - completionHandler: 完成回调
-    func loadFileFromWebDAV(path: String,
+    func getFileFromWebDAV(path: String,
                             downloadIfExist : Bool? = false,
                             onlyCheckIfFileExist : Bool? = false,
                             completionHandler: @escaping ((_ contents: Data?, _ isFromCache:Bool, _ error: Error?) -> Void)) {
@@ -224,7 +226,7 @@ class PPFileManager: NSObject,FileProviderDelegate {
             })
         }
         else {
-            loadFileFromWebDAV(path: path,
+            getFileFromWebDAV(path: path,
                                downloadIfExist:downloadIfCached,
                                onlyCheckIfFileExist:onlyCheckIfFileExist,
                                completionHandler: completionHandler)
