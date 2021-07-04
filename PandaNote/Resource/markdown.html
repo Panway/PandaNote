@@ -43,15 +43,19 @@
 
   .sidebar-button {
     display: block;
-    width: 1.25rem;
-    height: 1.25rem;
+    width: 20px;/*1.25rem;*/
+    height: 20px;
     position: absolute;
-    padding: .6rem;
-    top: .6rem;
-    left: 1rem;
+    padding: 5px;
+    top: 10px;
+    bottom: .1rem;
+    right: 10px;
     cursor: pointer;
     /*我加的*/
     z-index: 15;
+    /*border: 1px solid rgba(66, 185, 131, 0.45);*/
+    border-radius: 5px;
+    background-color:rgba(66, 185, 131, 0.15);
   }
 
   .sidebar-button .icon {
@@ -61,10 +65,13 @@
   }
 
   #ppTOCContent {
-    padding: 8px;
+    margin-left: 10px;
+    /*padding: 8px;*/
     position: fixed;
     top: 44px;
-    bottom: 0;
+    right: 10px;
+    /*bottom: 44px;*/
+    max-height: 80vh;
     overflow-y: auto;
     background-color: #fff;
     font-size: 13px;
@@ -107,11 +114,16 @@
     list-style: none;
   }
 
-  .sidebar ul,
-  ol {
+  .sidebar ul,ol {
     padding-left: 10px;
   }
-
+  
+  /*一级目录 */
+  .pptoclist > .pptocitem > .sidebar-link {
+    font-size: 16px;
+    font-weight: bold;    
+  }
+  
   /*模仿掘金的样式，表格可水平滑动 https://juejin.cn/post/6844904154427572231*/
   table {
     display: inline-block !important;
@@ -151,6 +163,7 @@
   let string = '**marked.js**正在解析文本...\n\n Rendered by **marked.js**.'
   var fileURLString = ''
   var offsetYKey = 'offsetY'
+  var ppTOCHTMLString = ''
   // document.getElementById('content').innerHTML = marked(string);
 
 
@@ -200,7 +213,7 @@
   function build(coll, k, level, ctx) {
     if (k >= coll.length || coll[k].level <= level) { return k; }
     var node = coll[k];
-    ctx.push("<li><a class=\"sidebar-link\" href='#" + node.anchor + "'>" + node.text + "</a>");
+    ctx.push("<li class=\"pptocitem\"><a class=\"sidebar-link\" href='#" + node.anchor + "'>" + node.text + "</a>");
     k++;
     var childCtx = [];
     k = build(coll, k, node.level, childCtx);
@@ -215,31 +228,27 @@
     k = build(coll, k, level, ctx);
     return k;
   }
+
   //套一层是为了在swift执行js方法的时候在mac的Safari打断点调试
   function ppmarked(string) {
     return marked(string)
   }
+  function ppGenerateTOC(string) {
+    return generateTOC(string)
+  }  
 
   function generateTOC(string) {
-    // var html = marked(string);
     var ctx = [];
-    ctx.push('<h3 id="table-of-contents">目录TOC</h3>\n<ul>');
+    ctx.push('<ul class="pptoclist">');//<h3 id="table-of-contents">目录</h3>
     build(toc, 0, 0, ctx);
     ctx.push("</ul>");
     let final = ctx.join("");
     return final;
   }
-  var tocHTML = generateTOC(string);
-
+  document.querySelector('#ppTOCContent').hidden = true;
   function displayTOC() {
     console.log('显示目录');
-    if (!showTOC) {
-      document.querySelector('#ppTOCContent').innerHTML = generateTOC(string);
-      showTOC = true
-    } else {
-      showTOC = false
-      document.querySelector('#ppTOCContent').innerHTML = "";
-    }
+    document.querySelector('#ppTOCContent').hidden = !document.querySelector('#ppTOCContent').hidden;
   }
   // 每个文件设置唯一的位置标识符
   function setFileHash(hash) {
@@ -255,8 +264,6 @@
       document.documentElement.scrollTop = document.body.scrollTop = parseInt(offset);
     }, 100);
   }
-  // document.querySelector('#content').innerHTML = final;
-  // document.getElementById('content').innerHTML = generateTOC(string) + marked(string);
   document.getElementById('content').innerHTML = ppmarked(string);
   </script>
   <script>

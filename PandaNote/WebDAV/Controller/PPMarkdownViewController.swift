@@ -56,6 +56,11 @@ class PPMarkdownViewController: PPBaseViewController,UITextViewDelegate {
                     
                 }
                 else if method == "Down" {
+                    //MARK:Down渲染
+                    let down = Down(markdownString: self.markdownStr)
+                    //DownAttributedStringRenderable 31行
+                    let attributedString = try? down.toAttributedString(DownOptions.default, stylesheet: "* {font-family: Helvetica } code, pre { font-family: Menlo } code {position: relative;background-color: #f6f8fa;border-radius: 6px;} img {max-width: 100%;display: block;margin-left: auto;margin-right: auto;}")
+                    self.textView.attributedText = attributedString
                     
                 }
                 else {
@@ -67,11 +72,6 @@ class PPMarkdownViewController: PPBaseViewController,UITextViewDelegate {
             }
             
             
-            //MARK:Down渲染
-//            let down = Down(markdownString: self.markdownStr)
-//            //DownAttributedStringRenderable 31行
-//            let attributedString = try? down.toAttributedString(DownOptions.default, stylesheet: "* {font-family: Helvetica } code, pre { font-family: Menlo } code {position: relative;background-color: #f6f8fa;border-radius: 6px;} img {max-width: 100%;display: block;margin-left: auto;margin-right: auto;}")
-//            self.textView.attributedText = attributedString
             
         }
 

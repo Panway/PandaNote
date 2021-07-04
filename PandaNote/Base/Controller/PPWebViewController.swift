@@ -137,11 +137,12 @@ class PPWebViewController: UIViewController,WKUIDelegate,WKNavigationDelegate,WK
             self.bottomView.isHidden = false
         }
         webView.evaluateJavaScript("document.title") { (result:Any?, error) in
-            self.title = result as? String
+            self.navigationItem.title = result as? String
         }
         if let markdown = self.markdownStr {
             let hash = self.markdownName?.hash ?? 0
-            let js = "document.getElementById('content').innerHTML = ppmarked('\(markdown.pp_replaceEscapeCharacter())');setFileHash(\(hash));"
+            let markdown2JS = markdown.pp_replaceEscapeCharacter()
+            let js = "document.getElementById('content').innerHTML = ppmarked('\(markdown2JS)');document.getElementById('ppTOCContent').innerHTML = ppGenerateTOC('\(markdown2JS)');setFileHash(\(hash));"
             webView.evaluateJavaScript(js, completionHandler: { result, error in
                 debugPrint(error)
             })
