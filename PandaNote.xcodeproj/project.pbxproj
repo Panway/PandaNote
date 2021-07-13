@@ -326,6 +326,7 @@
 		6056014F23166BAE000809CD /* Base */ = {
 			isa = PBXGroup;
 			children = (
+				60560221231771E2000809CD /* PandaNote-Bridging-Header.h */,
 				6056015223166BC5000809CD /* Controller */,
 				6056015123166BC0000809CD /* View */,
 				6056015023166BBA000809CD /* Model */,
@@ -408,7 +409,6 @@
 				607150C92459ABE900E2FDEB /* NSURLProtocol+WebKitSupport.h */,
 				607150C82459ABE900E2FDEB /* NSURLProtocol+WebKitSupport.m */,
 				1EC4F0332608D66600377D97 /* Data+PPTool.swift */,
-				60560221231771E2000809CD /* PandaNote-Bridging-Header.h */,
 			);
 			path = CategoryAndExtension;
 			sourceTree = "<group>";
@@ -1022,7 +1022,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.agolddata.pandanote;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTS_MACCATALYST = YES;
-				SWIFT_OBJC_BRIDGING_HEADER = "PandaNote/Tool/CategoryAndExtension/PandaNote-Bridging-Header.h";
+				SWIFT_OBJC_BRIDGING_HEADER = "PandaNote/Base/PandaNote-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -1047,7 +1047,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.agolddata.pandanote;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTS_MACCATALYST = YES;
-				SWIFT_OBJC_BRIDGING_HEADER = "PandaNote/Tool/CategoryAndExtension/PandaNote-Bridging-Header.h";
+				SWIFT_OBJC_BRIDGING_HEADER = "PandaNote/Base/PandaNote-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};

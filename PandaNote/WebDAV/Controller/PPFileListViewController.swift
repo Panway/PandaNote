@@ -10,7 +10,9 @@ import UIKit
 //import FilesProvider
 import SKPhotoBrowser
 import Kingfisher
+#if USE_YPImagePicker
 import YPImagePicker
+#endif
 import PopMenu
 import Photos
 import MonkeyKing
@@ -521,62 +523,21 @@ class PPFileListViewController: PPBaseViewController,UITextFieldDelegate,UITable
 }
 //MARK: - 照片上传等处理
 extension PPFileListViewController {
-    
-    func uploadPhotos(_ mediaItems:[YPMediaItem]) {
-//        let myQueue = DispatchQueue.global()
-        let group = DispatchGroup()
-//        group.enter()//把该任务添加到组队列中执行
-//        myQueue.async(group: group, qos: .default, flags: [], execute: {
-//            for _ in 0...10 {
-//                print("耗时任务一")
-//                group.leave()//执行完之后从组队列中移除
-//            }
-//        })
-        var assetsToDeleteFromDevice = [PHAsset]()
-        for item in mediaItems {
-            group.enter() // 将以下任务添加进group
-            
-            switch item {
-            case .photo(let photo):
-                debugPrint(photo)
-                guard let asset = photo.asset else { continue }
-                PPFileManager.shared.getImageDataFromAsset(asset: asset, completion: { (imageData,urlString,imageInfo) in
-                    let imageLocalURL = URL(fileURLWithPath: urlString)
-                    var uploadName = imageLocalURL.lastPathComponent
-                    if PPUserInfo.pp_boolValue("uploadImageNameUseCreationDate") {
-                        if let creationDate = imageInfo["creationDate"] {
-                            uploadName = creationDate.replacingOccurrences(of: ":", with: ".") + "." + imageLocalURL.lastPathComponent.split(separator: ".").last!
-                        }
-                    }
-                    let remotePath = self.pathStr + uploadName
-                    debugPrint(imageLocalURL)
-                    PPFileManager.shared.uploadFileViaWebDAV(path: remotePath, contents: imageData as Data?) { (error) in
-                        if error == nil {
-                        PPHUD.showHUDFromTop("上传+1")
-                        assetsToDeleteFromDevice.append(asset)
-                        group.leave() //本次任务完成（即本次for循环任务完成），将任务从group中移除
-                        }
-                    }
-                    
-                })
-            case .video(let video):
-                debugPrint(video)
-            }
-            
-        }
-        
-        //当上面所有的任务执行完之后通知 (timeout: .now() + 5)
-        group.notify(queue: .main) {
-            PPHUD.showHUDFromTop("全部上传成功🦄")
-            debugPrint("所有的上传任务执行完了")
-            if PPUserInfo.pp_boolValue("deletePhotoAfterUploading") {
-                PPFileManager.shared.deletePhotos(assetsToDeleteFromDevice)
-            }
-            self.getWebDAVData()
-        }
-
-    }
+    //显示图片选择器
     func showImagePicker() {
+        //#if targetEnvironment(macCatalyst)
+        #if !USE_YPImagePicker
+        print("targetEnvironment(macCatalyst)")
+        let picker = TZImagePickerController()
+        picker.didFinishPickingPhotosWithInfosHandle = { (photos, assets, isSelectOriginalPhoto, infoArr) -> (Void) in
+            // debugPrint("\(photos?.count) ---\(assets?.count)")
+            guard let photoAssets = assets as? [PHAsset] else { return }
+            PPFileManager.shared.uploadPhotos(photoAssets, completion: { photoAssets in
+                self.getWebDAVData()
+            })
+        }
+        self.present(picker, animated: true, completion: nil)
+        #else
         var config = YPImagePickerConfiguration()
         config.library.maxNumberOfItems = 99
 //        config.library.mediaType = .photoAndVideo//支持上传图片和视频
@@ -597,11 +558,29 @@ extension PPFileListViewController {
                 debugPrint("====\(photo.originalImage.imageOrientation.rawValue)")
                 return
             }
-            self.uploadPhotos(items)
+            //遍历每个assets
+            let photoAssets = items.map { item -> PHAsset in
+                switch item {
+                case .photo(let photo):
+                    if let asset = photo.asset {
+                        return asset
+                    }
+                case .video(let video):
+                    if let asset = video.asset {
+                        return asset
+                    }
+                }
+                return PHAsset()//这种情况一般不存在
+            }
+            
+            PPFileManager.shared.uploadPhotos(photoAssets, completion: { photoAssets in
+                self.getWebDAVData()
+            })
 
             picker.dismiss(animated: true, completion: nil)
         }
         self.present(picker, animated: true, completion: nil)
+        #endif
     }
 
 }

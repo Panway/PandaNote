@@ -14,6 +14,7 @@ incremental_installation: true
 
 target 'PandaNote' do
   # Comment the next line if you don't want to use dynamic frameworks
+  # 告诉 CocoaPods 你想要使用frameworks而不是静态库。因为 Swift 不支持静态库，所以你必须使用frameworks
   use_frameworks!
 
   # Pods for PandaNote
@@ -38,7 +39,8 @@ target 'PandaNote' do
 #  https://github.com/suzuki-0000/SKPhotoBrowser
   pod 'SKPhotoBrowser'
   #https://github.com/Yummypets/YPImagePicker
-  pod 'YPImagePicker'
+#  pod 'YPImagePicker'
+  pod 'TZImagePickerController'
   #https://github.com/SwipeCellKit/SwipeCellKit
   #https://github.com/CaliCastle/PopMenu
   pod 'NewPopMenu'

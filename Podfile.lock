@@ -43,13 +43,9 @@ PODS:
   - PPiOSKit/PPAlertAction (0.0.1)
   - PPiOSKit/RuntimeTool (0.0.1)
   - PPiOSKit/SwipePopGesture (0.0.1)
-  - PryntTrimmerView (4.0.2)
   - SKPhotoBrowser (6.1.0)
   - SnapKit (5.0.1)
-  - SteviaLayout (4.7.3)
-  - YPImagePicker (4.5.0):
-    - PryntTrimmerView (~> 4.0.2)
-    - SteviaLayout (~> 4.7.3)
+  - TZImagePickerController (3.6.0)
   - YYText (1.0.7)
 
 DEPENDENCIES:
@@ -77,7 +73,7 @@ DEPENDENCIES:
   - PPiOSKit/SwipePopGesture (from `https://github.com/Panway/CodeSnipetCollection.git`)
   - SKPhotoBrowser
   - SnapKit
-  - YPImagePicker
+  - TZImagePickerController
   - YYText
 
 SPEC REPOS:
@@ -102,11 +98,9 @@ SPEC REPOS:
     - ObjectMapper
     - PINCache
     - PINOperation
-    - PryntTrimmerView
     - SKPhotoBrowser
     - SnapKit
-    - SteviaLayout
-    - YPImagePicker
+    - TZImagePickerController
     - YYText
 
 EXTERNAL SOURCES:
@@ -140,13 +134,11 @@ SPEC CHECKSUMS:
   PINCache: 7a8fc1a691173d21dbddbf86cd515de6efa55086
   PINOperation: 00c935935f1e8cf0d1e2d6b542e75b88fc3e5e20
   PPiOSKit: 9f049cf7ff47cefda7f747a404254ee1a5ae7f85
-  PryntTrimmerView: 6a43cc90df5d99addeabd33d4ba09b1365322130
   SKPhotoBrowser: 343de95d89dc7913763c5dda243cc6e606e4a168
   SnapKit: 97b92857e3df3a0c71833cce143274bf6ef8e5eb
-  SteviaLayout: c2ecdcff57d44e38fd2f65e54ad52aeae28ca0c4
-  YPImagePicker: 6f410f475bd22fa8cd430495b54d4b2f15865c2d
+  TZImagePickerController: a37d7eec87c54436e896a67947033ad2178d498b
   YYText: 5c461d709e24d55a182d1441c41dc639a18a4849
 
-PODFILE CHECKSUM: 64db03b60313e0389ec64a37c73e5f0cc0bd1659
+PODFILE CHECKSUM: 862d60d41217189dea8256477bf802f4e10a7bdc
 
 COCOAPODS: 1.10.1

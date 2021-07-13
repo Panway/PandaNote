@@ -8,6 +8,7 @@
 
 import UIKit
 
+@available(macCatalyst 14.0, *)
 class PPPriceTagViewController: PPBaseViewController {
 
     override func viewDidLoad() {
@@ -37,8 +38,9 @@ class PPPriceTagViewController: PPBaseViewController {
         
     }
     
+    @available(macCatalyst 14.0, *)
     @objc func scanToRecord() {
-        let vc = PPScanViewController.init()
+        let vc = PPScanViewController()
         vc.scanCompletionHandler = {(codeString) in
             debugPrint(codeString)
             let vc = PPPriceRecordViewController.init()

@@ -19,6 +19,7 @@ class PPFileManager: NSObject,FileProviderDelegate {
     var webdav: WebDAVFileProvider?//未配置服务器地址时刷新可能为空
     var dropbox: DropboxFileProvider?//未配置服务器地址时刷新可能为空
     var baiduwangpan : BaiduyunAPITool?
+    var currentPath = ""
     var baiduFSID = 0
     /// 下载保存的文件路径，只读
     public var downloadPath:String {
@@ -78,6 +79,7 @@ class PPFileManager: NSObject,FileProviderDelegate {
     //MARK:- 文件列表操作
     /// 获取文件列表（先取本地再获取最新）
     func pp_getFileList(path:String,completionHandler:@escaping(_ data:[PPFileObject],_ isFromCache:Bool,_ error:Error?) -> Void) {
+        self.currentPath = path
         //先从本地缓存获取数据
         var archieveKey = self.apiCachePrefix + "\(self.currentFileProvider?.baseURL?.absoluteString ?? "")\(path)".pp_md5
         if PPUserInfo.shared.cloudServiceType == .baiduyun {
@@ -384,6 +386,7 @@ class PPFileManager: NSObject,FileProviderDelegate {
         }
         return true
     }
+    //MARK: 图片（PHAsset）相关处理
     /// 从PHAsset获取NSData
     func getImageDataFromAsset(asset: PHAsset, completion: @escaping (_ data: NSData?,_ fileURL:String,_ imageInfo:[String:String]) -> Void) {
         let manager = PHImageManager.default()
@@ -468,10 +471,58 @@ class PPFileManager: NSObject,FileProviderDelegate {
         let options = PHImageRequestOptions()
         options.isNetworkAccessAllowed = true
         options.isSynchronous = false
-
-        
         return Data()
     }
+    //   let myQueue = DispatchQueue.global()
+    //    group.enter()//
+    //    myQueue.async(group: group, qos: .default, flags: [], execute: {
+    //    for _ in 0...10 {
+    //    print("耗时任务一")
+    //    group.leave()//执行完之后从组队列中移除
+    //    }
+    //    })
+    //上传多张图片
+    func uploadPhotos(_ mediaItems:[PHAsset], completion: ((_ uploadedAssets:[PHAsset]) -> Void)? = nil) {
+        let group = DispatchGroup()
+        var assetsToDeleteFromDevice = [PHAsset]()
+        let path = self.currentPath
+        //多图上传
+        for asset in mediaItems {
+            group.enter() // 将以下任务添加进group，相当于把某个任务添加到组队列中执行
+            PPFileManager.shared.getImageDataFromAsset(asset: asset, completion: { (imageData,urlString,imageInfo) in
+                let imageLocalURL = URL(fileURLWithPath: urlString)
+                var uploadName = imageLocalURL.lastPathComponent
+                //使用创建时间当文件名
+                if let creationDate = imageInfo["creationDate"], PPUserInfo.pp_boolValue("uploadImageNameUseCreationDate") == true {
+                    uploadName = creationDate.replacingOccurrences(of: ":", with: ".") + "." + imageLocalURL.lastPathComponent.split(separator: ".").last!
+                }
+                let remotePath = path + uploadName
+                debugPrint(imageLocalURL)
+                PPFileManager.shared.uploadFileViaWebDAV(path: remotePath, contents: imageData as Data?) { (error) in
+                    if error != nil { return }//上传出错
+                    PPHUD.showHUDFromTop("上传+1")
+                    assetsToDeleteFromDevice.append(asset)
+                    group.leave() //本次任务完成（即本次for循环任务完成），将任务从group中移除
+                }
+                
+            })
+            
+        }
+        
+        //当上面所有的任务执行完之后通知 (timeout: .now() + 5)
+        group.notify(queue: .main) {
+            PPHUD.showHUDFromTop("全部上传成功🦄")
+            debugPrint("所有的上传任务执行完了")
+            if let completion = completion {
+                completion(assetsToDeleteFromDevice)
+            }
+            if PPUserInfo.pp_boolValue("deletePhotoAfterUploading") {
+                PPFileManager.shared.deletePhotos(assetsToDeleteFromDevice)
+            }
+        }
+
+    }
+    
     /// 当前服务器配置信息的唯一标识
     func currentServerUniqueID() -> String {
         return "\(PPUserInfo.shared.webDAVServerURL)_\(PPUserInfo.shared.webDAVUserName ?? "")"
