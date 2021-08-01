@@ -15,6 +15,11 @@
 		1E1F2DEB25384C75002B0426 /* PPDebugViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E1F2DEA25384C75002B0426 /* PPDebugViewController.swift */; };
 		1E289EF2258E125A003E1042 /* PPCloudServiceAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E289EF1258E125A003E1042 /* PPCloudServiceAPI.swift */; };
 		1E50942824DBB15B00238678 /* PPWebViewBottomToolbar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E50942724DBB15A00238678 /* PPWebViewBottomToolbar.swift */; };
+		1E526EC226B6788A0026DC67 /* PPCloudService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E526EC126B6788A0026DC67 /* PPCloudService.swift */; };
+		1E526EC526B699FB0026DC67 /* PPWebDAVService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E526EC426B699FB0026DC67 /* PPWebDAVService.swift */; };
+		1E526EC726B6BD360026DC67 /* PPLocalFileService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E526EC626B6BD360026DC67 /* PPLocalFileService.swift */; };
+		1E526ECB26B6C0E90026DC67 /* PPFilesProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E526ECA26B6C0E90026DC67 /* PPFilesProvider.swift */; };
+		1E526ECE26B6F20B0026DC67 /* PPDropboxService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E526ECD26B6F20B0026DC67 /* PPDropboxService.swift */; };
 		1E556A0E25639BEF00A4653F /* PPResultsTableController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E556A0D25639BEF00A4653F /* PPResultsTableController.swift */; };
 		1E670AAB24F62D23002DB57C /* PPPublicTool.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E670AAA24F62D23002DB57C /* PPPublicTool.swift */; };
 		1E92F0AC258A0B54009374C9 /* BaiduyunAPITool.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E92F0AB258A0B54009374C9 /* BaiduyunAPITool.swift */; };
@@ -107,6 +112,11 @@
 		1E1F2DEA25384C75002B0426 /* PPDebugViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPDebugViewController.swift; sourceTree = "<group>"; };
 		1E289EF1258E125A003E1042 /* PPCloudServiceAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPCloudServiceAPI.swift; sourceTree = "<group>"; };
 		1E50942724DBB15A00238678 /* PPWebViewBottomToolbar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPWebViewBottomToolbar.swift; sourceTree = "<group>"; };
+		1E526EC126B6788A0026DC67 /* PPCloudService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPCloudService.swift; sourceTree = "<group>"; };
+		1E526EC426B699FB0026DC67 /* PPWebDAVService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPWebDAVService.swift; sourceTree = "<group>"; };
+		1E526EC626B6BD360026DC67 /* PPLocalFileService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPLocalFileService.swift; sourceTree = "<group>"; };
+		1E526ECA26B6C0E90026DC67 /* PPFilesProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPFilesProvider.swift; sourceTree = "<group>"; };
+		1E526ECD26B6F20B0026DC67 /* PPDropboxService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPDropboxService.swift; sourceTree = "<group>"; };
 		1E556A0D25639BEF00A4653F /* PPResultsTableController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PPResultsTableController.swift; sourceTree = "<group>"; };
 		1E670AA824F49CAA002DB57C /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/Main.strings"; sourceTree = "<group>"; };
 		1E670AA924F49CAA002DB57C /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/LaunchScreen.strings"; sourceTree = "<group>"; };
@@ -226,9 +236,42 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		1E526EBF26B673720026DC67 /* Tool */ = {
+			isa = PBXGroup;
+			children = (
+				1E526EC026B6781E0026DC67 /* PPCloudService */,
+			);
+			path = Tool;
+			sourceTree = "<group>";
+		};
+		1E526EC026B6781E0026DC67 /* PPCloudService */ = {
+			isa = PBXGroup;
+			children = (
+				1E526EC126B6788A0026DC67 /* PPCloudService.swift */,
+			);
+			path = PPCloudService;
+			sourceTree = "<group>";
+		};
+		1E526EC326B699D60026DC67 /* WebDAV */ = {
+			isa = PBXGroup;
+			children = (
+				1E526EC426B699FB0026DC67 /* PPWebDAVService.swift */,
+			);
+			path = WebDAV;
+			sourceTree = "<group>";
+		};
+		1E526ECC26B6F1DB0026DC67 /* Dropbox */ = {
+			isa = PBXGroup;
+			children = (
+				1E526ECD26B6F20B0026DC67 /* PPDropboxService.swift */,
+			);
+			path = Dropbox;
+			sourceTree = "<group>";
+		};
 		1ECEE1C025BD20EC00454966 /* Public */ = {
 			isa = PBXGroup;
 			children = (
+				1E526EBF26B673720026DC67 /* Tool */,
 				1ECEE1CB25BD225D00454966 /* Extension */,
 				1ECEE1C125BD20FB00454966 /* View */,
 			);
@@ -254,6 +297,10 @@
 			isa = PBXGroup;
 			children = (
 				1E289EF1258E125A003E1042 /* PPCloudServiceAPI.swift */,
+				1E526EC626B6BD360026DC67 /* PPLocalFileService.swift */,
+				1E526ECA26B6C0E90026DC67 /* PPFilesProvider.swift */,
+				1E526ECC26B6F1DB0026DC67 /* Dropbox */,
+				1E526EC326B699D60026DC67 /* WebDAV */,
 				1ED298E72589F85400735B6B /* BaiduYun */,
 			);
 			path = CloudService;
@@ -784,6 +831,7 @@
 				60E6141E243DA27700630B4B /* PPBaseView.swift in Sources */,
 				6056024A231778B5000809CD /* PPFileListTableViewCell.swift in Sources */,
 				1E289EF2258E125A003E1042 /* PPCloudServiceAPI.swift in Sources */,
+				1E526ECB26B6C0E90026DC67 /* PPFilesProvider.swift in Sources */,
 				604FFA4823DDEBCF0059BBC9 /* PPScanViewController.swift in Sources */,
 				6001B6342461A82400A40593 /* PPWebFileViewController.swift in Sources */,
 				607150CC2459ACF300E2FDEB /* PPWebResourceProtocol.swift in Sources */,
@@ -807,19 +855,23 @@
 				60D27791238AA52C00D8BA0C /* PPCacheManager.swift in Sources */,
 				1EDF714D24C3F1E600A12EC9 /* NSRegularExpression+PPTool.swift in Sources */,
 				60F5691322F2ADC700874994 /* ViewController.swift in Sources */,
+				1E526EC226B6788A0026DC67 /* PPCloudService.swift in Sources */,
 				60F5D042232751D8004E988B /* PPShareManager.m in Sources */,
 				60011E41243A29E000BC6458 /* PlayerView.swift in Sources */,
 				60F5691122F2ADC700874994 /* AppDelegate.swift in Sources */,
 				60E61426243DC16E00630B4B /* PPPDFViewController.swift in Sources */,
+				1E526EC526B699FB0026DC67 /* PPWebDAVService.swift in Sources */,
 				6056022A231772AE000809CD /* PPMarkdownViewController.swift in Sources */,
 				60A1F8DC24388C98009E390C /* ViewController+PPTool.swift in Sources */,
 				1E1B58A7257B9480000860F6 /* PPAddCloudServiceViewController.swift in Sources */,
 				1E92F0AC258A0B54009374C9 /* BaiduyunAPITool.swift in Sources */,
+				1E526EC726B6BD360026DC67 /* PPLocalFileService.swift in Sources */,
 				604FFA4623DDE77B0059BBC9 /* PPPriceTagViewController.swift in Sources */,
 				1E670AAB24F62D23002DB57C /* PPPublicTool.swift in Sources */,
 				6056025823177A30000809CD /* PPFileListViewController.swift in Sources */,
 				1E556A0E25639BEF00A4653F /* PPResultsTableController.swift in Sources */,
 				1E1B5894257B8118000860F6 /* NSAttributedString+PPTool.swift in Sources */,
+				1E526ECE26B6F20B0026DC67 /* PPDropboxService.swift in Sources */,
 				60560252231778FF000809CD /* XDRefreshHeader.m in Sources */,
 				1E179BF925B549B0006C3A56 /* UIView+PPTool.swift in Sources */,
 				60F5D04523275549004E988B /* XDCollectionViewCell.m in Sources */,

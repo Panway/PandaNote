@@ -2,8 +2,8 @@
 //  BaiduyunAPITool.swift
 //  PandaNote
 //
-//  Created by panway on 2020/12/16.
-//  Copyright © 2020 WeirdPan. All rights reserved.
+//  Created by Panway on 2020/12/16.
+//  Copyright © 2020 Panway. All rights reserved.
 //
 
 import Foundation
@@ -18,11 +18,13 @@ public enum PPCloudServiceError: Error {
     case fileNotExist
     case preCreateError
 }
-struct HTTPBinResponse: Decodable { let url: String; let request_id:String }
+//struct HTTPBinResponse: Decodable { let url: String; let request_id:String }
 
 //兼容FilesProvider的类
-open class BaiduyunAPITool: NSObject {
-
+open class BaiduyunAPITool: NSObject, PPCloudServiceProtocol {
+    var baseURL: String {
+        return baiduURL
+    }
     var access_token : String = ""
     let host = "https://pan.baidu.com"
     let path = "/rest/2.0/xpan/file"
@@ -282,6 +284,43 @@ open class BaiduyunAPITool: NSObject {
         // let nsError = NSError(domain:"", code:2, userInfo:nil)
         //有错误
         return (jsonDic,errorNo, errorNo == 0 ? nil : PPCloudServiceError.unknown)
+    }
+    
+    //MARK:PPCloudServiceProtocol
+    func contentsOfDirectory(_ path: String, completionHandler: @escaping ([PPFileObject], Error?) -> Void) {
+        self.getFileList(path: path) { fileList, isCache, error in
+            completionHandler(fileList,error)
+        }
+    }
+    
+    func contentsOfFile(_ path: String, completionHandler: @escaping (Data?, Error?) -> Void) {
+
+    }
+    
+    func createDirectory(_ folderName: String, at atPath: String, completionHandler: @escaping (Error?) -> Void) {
+        self.createFolder(path: folderName, completionHandler: completionHandler)
+    }
+    
+    func createFile(atPath path: String, contents: Data, completionHandler: @escaping (Error?) -> Void) {
+        upload(path: path, data: contents) { error in
+            completionHandler(error)
+        }
+    }
+    
+    func moveItem(atPath srcPath: String, toPath dstPath: String, completionHandler: @escaping (Error?) -> Void) {
+        let fileName = String(dstPath.split(separator: "/").last ?? "new_file")
+        let dirNew = dstPath.replacingOccurrences(of: fileName, with: "")
+        self.moveFile(pathOld: srcPath, pathNew: dirNew, newName: fileName, completionHandler: { (error, _) in
+            completionHandler(error)
+        })
+    }
+    
+    func removeItem(atPath path: String, completionHandler: @escaping (Error?) -> Void) {
+        delete(path: [path], completionHandler: { (error) in
+            DispatchQueue.main.async {
+                completionHandler(error)
+            }
+        })
     }
 }
 

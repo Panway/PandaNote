@@ -2,8 +2,8 @@
 //  PPFileListTableViewCell.swift
 //  TeamDisk
 //
-//  Created by panwei on 2019/8/1.
-//  Copyright © 2019 Wei & Meng. All rights reserved.
+//  Created by Panway on 2019/8/1.
+//  Copyright © 2019 Panway. All rights reserved.
 //
 
 import UIKit
@@ -82,23 +82,26 @@ class PPFileListTableViewCell: PPBaseTableViewCell {
         
 
     }
+    /// cached file alpha=0.5 ; newset file alpha=1
+    func updateCacheStatus(_ isCachedFile:Bool) {
+        self.contentView.alpha = isCachedFile ? 0.7 : 1.0;
+    }
     
     
     override func pp_addSubViews() {
-        self.addSubview(self.iconImage)
+        self.contentView.addSubview(self.iconImage)
         self.iconImage.snp.makeConstraints { (make) in
             make.left.equalTo(self.snp.left).offset(15);
             make.centerY.equalTo(self.snp.centerY);
             make.width.equalTo(imageWidth)
             make.height.equalTo(imageWidth)
-
         }
         
         
         
         
         
-        self.addSubview(self.titleLabel)
+        self.contentView.addSubview(self.titleLabel)
         self.titleLabel.snp.makeConstraints { (make) in
             make.left.equalTo(self.iconImage.snp.right).offset(12)
             make.top.equalTo(self.snp.top).offset(15)
@@ -106,14 +109,14 @@ class PPFileListTableViewCell: PPBaseTableViewCell {
 //            make.height.equalTo(21)
         }
         
-        self.addSubview(self.timeLabel)
+        self.contentView.addSubview(self.timeLabel)
         self.timeLabel.snp.makeConstraints { (make) in
             make.left.equalTo(self.titleLabel).offset(0)
             make.top.equalTo(self.titleLabel.snp.bottom).offset(11)
         }
         
         
-        self.addSubview(self.couponNumLabel)
+        self.contentView.addSubview(self.couponNumLabel)
         self.couponNumLabel.snp.makeConstraints { (make) in
             make.left.equalTo(self.snp.left).offset(12)
             make.top.equalTo(self.titleLabel.snp.bottom).offset(5)
@@ -121,7 +124,7 @@ class PPFileListTableViewCell: PPBaseTableViewCell {
         
         let sepView = UIView.init()
         sepView.backgroundColor = "EEEEEE".HEXColor()
-        self.addSubview(sepView)
+        self.contentView.addSubview(sepView)
         sepView.snp.makeConstraints { (make) in
             make.left.equalTo(self.snp.left).offset(12)
             make.right.bottom.equalTo(self)

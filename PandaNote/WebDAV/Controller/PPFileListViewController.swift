@@ -2,8 +2,8 @@
 //  XDHomeViewController.swift
 //  TeamDisk
 //
-//  Created by panwei on 2019/8/1.
-//  Copyright © 2019 Wei & Meng. All rights reserved.
+//  Created by Panway on 2019/8/1.
+//  Copyright © 2019 Panway. All rights reserved.
 //
 
 import UIKit
@@ -23,22 +23,15 @@ class PPFileListViewController: PPBaseViewController,UITextFieldDelegate,UITable
     ,PopMenuViewControllerDelegate
 {
     
-    open var pathStr: String = "/"
-
-//    let server: URL = URL(string: "http://dav.jianguoyun.com/dav")!
-//    let username = "XXXXX@qq.com"
-//    let password = "XXXXXXXX"
-    
+    var pathStr = "/"
     var dataSource:Array<PPFileObject> = []
     var tableView = UITableView()
-    let cellReuseIdentifier = "cell"
-//    let documentsProvider = LocalFileProvider()
+
     var currentImageURL = ""
     var photoBrowser: SKPhotoBrowser!
     ///如果是展示最近访问的列表
     var isRecentFiles = false
-    @IBOutlet weak var uploadProgressView: UIProgressView?
-    @IBOutlet weak var downloadProgressView: UIProgressView?
+    var isCachedFile = false
     //---------------搜索功能↓---------------
     /// 展示在本控制器的上面的控制器 Search controller to help us with filtering items in the table view.
     var searchController: UISearchController!
@@ -70,19 +63,13 @@ class PPFileListViewController: PPBaseViewController,UITextFieldDelegate,UITable
         }
         tableView.dataSource = self
         tableView.delegate = self
-        self.tableView.register(PPFileListTableViewCell.self, forCellReuseIdentifier: cellReuseIdentifier)
+        self.tableView.register(PPFileListTableViewCell.self, forCellReuseIdentifier: kPPBaseCellIdentifier)
         tableView.tableFooterView = UIView.init()
         
         
         
         
-        if self.navigationController?.viewControllers.count ?? 0 > 1 {
         self.navigationItem.rightBarButtonItem = UIBarButtonItem.init(title: "更多", style: UIBarButtonItem.Style.plain, target: self, action: #selector(moreAction))
-        }
-        else {
-            self.navigationItem.rightBarButtonItem = UIBarButtonItem.init(title: "添加☁️", style: UIBarButtonItem.Style.plain, target: self, action: #selector(addCloudService))
-
-        }
         
         
         getWebDAVData()
@@ -99,6 +86,7 @@ class PPFileListViewController: PPBaseViewController,UITextFieldDelegate,UITable
         }
         
     }
+    
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         if self.isRecentFiles || PPUserInfo.shared.refreshFileList {
@@ -112,9 +100,10 @@ class PPFileListViewController: PPBaseViewController,UITextFieldDelegate,UITable
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: cellReuseIdentifier, for: indexPath) as! PPFileListTableViewCell
+        let cell = tableView.dequeueReusableCell(withIdentifier: kPPBaseCellIdentifier, for: indexPath) as! PPFileListTableViewCell
         let fileObj = self.dataSource[indexPath.row]
         cell.updateUIWithData(fileObj as AnyObject)
+        cell.updateCacheStatus(self.isCachedFile)
         return cell
     }
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
@@ -382,7 +371,11 @@ class PPFileListViewController: PPBaseViewController,UITextFieldDelegate,UITable
     
     
     @objc func moreAction()  {
-        PPAlertAction.showSheet(withTitle: "更多操作", message: nil, cancelButtonTitle: "取消", destructiveButtonTitle: nil, otherButtonTitle: ["从🏞添加照骗","新建文本文档📃","新建文件夹📂"]) { (index) in
+        var menuTitile = ["从🏞添加照骗","新建文本文档📃","新建文件夹📂"]
+        if self.navigationController?.viewControllers.count == 1 {
+            menuTitile.append("添加云服务")
+        }
+        PPAlertAction.showSheet(withTitle: "更多操作", message: nil, cancelButtonTitle: "取消", destructiveButtonTitle: nil, otherButtonTitle: menuTitile) { (index) in
             debugPrint(index)
             if index == 1 {
                 self.showImagePicker()
@@ -392,6 +385,9 @@ class PPFileListViewController: PPBaseViewController,UITextFieldDelegate,UITable
             }
             else if index == 3 {
                 self.newTextFile(isDir: true)
+            }
+            else {
+                self.addCloudService()
             }
         }
     }
@@ -490,6 +486,7 @@ class PPFileListViewController: PPBaseViewController,UITextFieldDelegate,UITable
             PPFileManager.shared.initCloudServiceSetting()
         }
         PPFileManager.shared.pp_getFileList(path: self.pathStr) { (contents,isFromCache, error) in
+            self.isCachedFile = isFromCache
             if error != nil {
                 PPHUD.showHUDFromTop("加载失败，请配置服务器", isError: true)
                 self.tableView.endRefreshing()

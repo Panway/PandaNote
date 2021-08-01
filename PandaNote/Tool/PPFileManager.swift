@@ -2,8 +2,8 @@
 //  PPFileManager.swift
 //  PandaNote
 //
-//  Created by panwei on 2019/9/19.
-//  Copyright © 2019 WeirdPan. All rights reserved.
+//  Created by Panway on 2019/9/19.
+//  Copyright © 2019 Panway. All rights reserved.
 //
 
 import Foundation
@@ -16,30 +16,31 @@ class PPFileManager: NSObject,FileProviderDelegate {
     
     static let shared = PPFileManager()
     static let dateFormatter = DateFormatter()
-    var webdav: WebDAVFileProvider?//未配置服务器地址时刷新可能为空
-    var dropbox: DropboxFileProvider?//未配置服务器地址时刷新可能为空
+    var webdavService : PPWebDAVService?
+    var dropbox: PPDropboxService?//未配置服务器地址时刷新可能为空
+    var localFileService: PPLocalFileService?
     var baiduwangpan : BaiduyunAPITool?
     var currentPath = ""
     var baiduFSID = 0
     /// 下载保存的文件路径，只读
     public var downloadPath:String {
         get {
-            return "\(PPDiskCache.shared.path)/\(PPUserInfo.shared.webDAVRemark)"
+            return "\(PPDiskCache.shared.path)/\(currentService?.baseURL.pp_md5 ?? "fileCache")"
         }
     }
 
     ///获取当前云服务读写文件的对象
-    open internal(set) var currentFileProvider: HTTPFileProvider? {
+    open internal(set) var currentService: PPCloudServiceProtocol? {
         get {
             switch PPUserInfo.shared.cloudServiceType {
             case .dropbox:
                 return dropbox
-//            case .baiduyun:
-//                return nil
-//            case .onedrive:
-//                return onedrive
+            case .webdav:
+                return webdavService
+            case .baiduyun:
+                return baiduwangpan
             default:
-                return webdav
+                return localFileService
             }
         }
         set {
@@ -50,41 +51,28 @@ class PPFileManager: NSObject,FileProviderDelegate {
         PPFileManager.dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
         initCloudServiceSetting()//初始化服务器配置
     }
-    //MARK:- 数据处理
-    func myPPFileArrayFrom(_ contents:[FileObject]) -> [PPFileObject] {
-        var fileArray = [PPFileObject]()
-        var dirCount = 0
-        //文件夹（目录）排在前面
-        let directoryFirst = true
-        for item in contents {
-            let localDate = item.modifiedDate?.addingTimeInterval(TimeInterval(PPUserInfo.shared.pp_timezoneOffset))
-            let dateStr = String(describing: localDate).substring(9..<25)
-            
-            let ppFile = PPFileObject(name: item.name,
-                                      path: item.path,
-                                      size: item.size,
-                                      isDirectory: item.isDirectory,
-                                      modifiedDate: dateStr)
-            //添加到结果数组
-            if item.isDirectory && directoryFirst {
-                fileArray.insert(ppFile, at: dirCount)
-                dirCount += 1
+    /// 获取文件列表对象数组然后缓存
+    private func getFileListThenCache(path:String,archieveKey:String,completionHandler:@escaping(_ data:[PPFileObject],_ isFromCache:Bool,_ error:Error?) -> Void) {
+        //获取本地缓存失败就去服务器获取
+        currentService?.contentsOfDirectory(path, completionHandler: { fileList, error in
+            do {
+                let encoded = try JSONEncoder().encode(fileList)
+//                debugPrint(String(decoding: encoded, as: UTF8.self))
+                PPDiskCache.shared.setData(encoded, key:archieveKey)
+            } catch {
+                debugPrint(error.localizedDescription)
             }
-            else {
-                fileArray.append(ppFile)
+            DispatchQueue.main.async {
+                completionHandler(fileList,false,error)
             }
-        }
-        return fileArray
+        })
     }
     //MARK:- 文件列表操作
     /// 获取文件列表（先取本地再获取最新）
     func pp_getFileList(path:String,completionHandler:@escaping(_ data:[PPFileObject],_ isFromCache:Bool,_ error:Error?) -> Void) {
         self.currentPath = path
         //先从本地缓存获取数据
-        var archieveKey = self.apiCachePrefix + "\(self.currentFileProvider?.baseURL?.absoluteString ?? "")\(path)".pp_md5
-        if PPUserInfo.shared.cloudServiceType == .baiduyun {
-            archieveKey = "baidu_" + "\(baiduwangpan?.baiduURL ?? "")\(path)".pp_md5
-        }
+        let archieveKey = self.apiCachePrefix + "\(self.currentService?.baseURL ?? "")\(path)".pp_md5
         PPDiskCache.shared.fetchData(key: archieveKey, failure: { (error) in
             //哎，忘了为啥这么写
 //            if let error = error {
@@ -96,7 +84,7 @@ class PPFileManager: NSObject,FileProviderDelegate {
 //                }
 //            }
             //获取本地缓存失败就去服务器获取
-            self.getRemoteFileList(path: path, completionHandler: completionHandler)
+            self.getFileListThenCache(path: path, archieveKey: archieveKey, completionHandler: completionHandler)
         }) { (data) in
             guard let fileData = data else {
                 debugPrint("获取文件数据失败")
@@ -112,50 +100,14 @@ class PPFileManager: NSObject,FileProviderDelegate {
                 debugPrint(error.localizedDescription)
             }
             //获取本地缓存成功了还是去服务器获取一下,保证数据最新
-            self.getRemoteFileList(path: path, completionHandler: completionHandler)
+            self.getFileListThenCache(path: path, archieveKey: archieveKey, completionHandler: completionHandler)
         }
     }
-    ///去WebDAV服务器获取数据
-    func getWebDAVFileList(path:String,completionHandler:@escaping(_ data:[PPFileObject],_ isFromCache:Bool,_ error:Error?) -> Void) {
-        currentFileProvider?.contentsOfDirectory(path: path, completionHandler: {
-            contents, error in
-            let archieveArray = self.myPPFileArrayFrom(contents)
-            do {
-                let encoded = try JSONEncoder().encode(archieveArray)
-//                debugPrint(String(decoding: encoded, as: UTF8.self))
-                let archieveKey = self.apiCachePrefix + "\(self.currentFileProvider?.baseURL?.absoluteString ?? "")\(path)".pp_md5
-                PPDiskCache.shared.setData(encoded, key:archieveKey)
-            } catch {
-                debugPrint(error.localizedDescription)
-            }
-            DispatchQueue.main.async {
-                completionHandler(archieveArray,false,error)
-            }
-//            PINCache.shared().setObject(archieveArray, forKey: "img")
-            /*
-             for file in contents {
-             print("Name: \(file.name)")
-             print("Size: \(file.size)")
-             print("Creation Date: \(String(describing: file.creationDate))")
-             print("Modification Date: \(String(describing: file.modifiedDate))")
-             }
-             */
-        })
-        
-    }
-    /// 从远程服务器获取文件列表数据
-    func getRemoteFileList(path:String,completionHandler:@escaping(_ data:[PPFileObject],_ isFromCache:Bool,_ error:Error?) -> Void) {
-        if PPUserInfo.shared.cloudServiceType == .baiduyun {
-            baiduwangpan?.getFileList(path: path, completionHandler: completionHandler)
-        }
-        else {
-            getWebDAVFileList(path: path, completionHandler: completionHandler)
-        }
-    }
+    
     //MARK:- 文件操作
     /// 从WebDAV下载文件获取Data
-    func downloadFileFromWebDAV(path: String, cacheToDisk: Bool? = false,completionHandler: @escaping ((_ contents: Data?, _ isFromCache:Bool, _ error: Error?) -> Void)) {
-        currentFileProvider?.contents(path: path, completionHandler: { (data, error) in
+    func downloadFile(path: String, cacheToDisk: Bool? = false,completionHandler: @escaping ((_ contents: Data?, _ isFromCache:Bool, _ error: Error?) -> Void)) {
+        currentService?.contentsOfFile(path, completionHandler: { data, error in
             if let error = error {
                 debugPrint("下载失败：\(error.localizedDescription)")
                 return
@@ -175,21 +127,21 @@ class PPFileManager: NSObject,FileProviderDelegate {
     /// - Parameters:
     ///   - path: 远程文件路径
     ///   - completionHandler: 完成回调
-    func getFileFromWebDAV(path: String,
+    private func getFileFromWebDAV(path: String,
                             downloadIfExist : Bool? = false,
                             onlyCheckIfFileExist : Bool? = false,
                             completionHandler: @escaping ((_ contents: Data?, _ isFromCache:Bool, _ error: Error?) -> Void)) {
         // 1 从本地磁盘获取文件缓存
         PPDiskCache.shared.fetchData(key: PPUserInfo.shared.webDAVRemark + path,onlyCheckIfFileExist:onlyCheckIfFileExist, failure: { (error) in
             // 2-2 本地磁盘没有，就从服务器获取最新的
-            self.downloadFileFromWebDAV(path: path, cacheToDisk: true, completionHandler: completionHandler)
+            self.downloadFile(path: path, cacheToDisk: true, completionHandler: completionHandler)
             
         }) { (data) in
             // 2-1 本地磁盘有，按需从服务器获取最新的
             debugPrint("loading local file success")
             completionHandler(data,true,nil)
             if let down = downloadIfExist,down == true {
-                self.downloadFileFromWebDAV(path: path, cacheToDisk: true, completionHandler: completionHandler)
+                self.downloadFile(path: path, cacheToDisk: true, completionHandler: completionHandler)
             }
         }
 
@@ -240,112 +192,50 @@ class PPFileManager: NSObject,FileProviderDelegate {
             PPHUD.showHUDFromTop("空文件",isError: true)
             return
         }
-        if PPUserInfo.shared.cloudServiceType == .baiduyun {
-            baiduwangpan?.upload(path: path, data: contents) { error in
+        currentService?.createFile(atPath: path, contents: contents, completionHandler: { error in
+            DispatchQueue.main.async {
                 completionHandler(error)
             }
-        }
-        else {
-            currentFileProvider?.writeContents(path: path, contents: contents, completionHandler: { (error) in
-                DispatchQueue.main.async {
-                    completionHandler(error)
-                }
-            })
-        }
+        })
     }
     /// 移动文件（夹）、重命名文件（夹）
     func moveRemoteFile(pathOld: String, pathNew: String, completionHandler:@escaping(_ error:Error?) -> Void) {
-        if PPUserInfo.shared.cloudServiceType == .baiduyun {
-            let fileName = String(pathNew.split(separator: "/").last ?? "new_file")
-            let dirNew = pathNew.replacingOccurrences(of: fileName, with: "")
-            baiduwangpan?.moveFile(pathOld: pathOld, pathNew: dirNew, newName: fileName, completionHandler: { (error, _) in
-                completionHandler(error)
-            })
-        }
-        else {
-        currentFileProvider?.moveItem(path:pathOld, to: pathNew, completionHandler: { (error) in
+        currentService?.moveItem(atPath: pathOld, toPath: pathNew, completionHandler: { error in
             DispatchQueue.main.async {
-                if error == nil {
-                    //移动本地的文件
-                    if FileManager.default.fileExists(atPath: self.downloadPath + pathOld) {
-                        try? FileManager.default.moveItem(atPath: self.downloadPath + pathOld,
-                                                          toPath: self.downloadPath + pathNew)
-                    }
-
-                    completionHandler(error)
-                }
-                else {
+                if error != nil {
                     PPHUD.showHUDFromTop("移动文件失败",isError: true)
+                    return
                 }
+                let downloadPath = PPFileManager.shared.downloadPath
+                //移动本地的文件
+                if FileManager.default.fileExists(atPath: downloadPath + pathOld) {
+                    try? FileManager.default.moveItem(atPath: downloadPath + pathOld,
+                                                      toPath: downloadPath + pathNew)
+                }
+                completionHandler(error)
             }
-            
         })
-        }
     }
     /// 通过WebDAV 新建文件夹
     func createFolderViaWebDAV(folder folderName: String, at atPath: String, completionHandler:@escaping(_ error:Error?) -> Void) {
-        if PPUserInfo.shared.cloudServiceType == .baiduyun {
-            baiduwangpan?.createFolder(path: atPath+folderName, completionHandler: { (error) in
-                DispatchQueue.main.async {
-                    completionHandler(error)
-                }
-            })
-        }
-        else {
-        currentFileProvider?.create(folder: folderName, at: atPath, completionHandler: { (error) in
-            if error == nil {
-                DispatchQueue.main.async {
-                    completionHandler(error)
-                }
-            }
-            else {
-                debugPrint(error ?? "createFolderViaWebDAV Error")
+        currentService?.createDirectory(folderName, at: atPath, completionHandler: { error in
+            DispatchQueue.main.async {
+                completionHandler(error)
             }
         })
-            
-        }
     }
     //删除远程服务器的文件
     func deteteRemoteFile(path: String, completionHandler:@escaping(_ error:Error?) -> Void) {
-        if PPUserInfo.shared.cloudServiceType == .baiduyun {
-            baiduwangpan?.delete(path: [path], completionHandler: { (error) in
-                DispatchQueue.main.async {
-                    completionHandler(error)
-                }
-            })
-        }
-        else {
-            currentFileProvider?.removeItem(path:path, completionHandler: { (error) in
-                DispatchQueue.main.async {
-                    completionHandler(error)
-                }
-            })
-        }
+        currentService?.removeItem(atPath: path, completionHandler: { error in
+            DispatchQueue.main.async {
+                completionHandler(error)
+            }
+        })
     }
     
     /// 从WebDAV下载文件获取Data
     func searchFileViaWebDAV(path: String, searchText: String?,completionHandler: @escaping ((_ files: [PPFileObject], _ isFromCache:Bool, _ error: Error?) -> Void)) {
-        //创建谓词，默认是TRUEPREDICATE
-        var query = NSPredicate(format: "TRUEPREDICATE")
-        let searchFile:[URLResourceKey] = []//[.fileSizeKey,.creationDateKey]
-        if let searchText = searchText {
-            query = NSPredicate(format: "name CONTAINS[c] '\(searchText)'")
-        }
-        
-        webdav?.searchFiles(path: path, recursive: true, query: query, including: searchFile, foundItemHandler: nil, completionHandler: { (files, error) in
-            let archieveArray = self.myPPFileArrayFrom(files)
-            if error == nil {
-                DispatchQueue.main.async {
-                    completionHandler(archieveArray,false,error)
-                }
-            }
-            else {
-                debugPrint(error ?? "downloadFileFromWebDAV Error")
-            }
-        })
-        
-        
-            
+        //TODO:webdav
             
     }
     
@@ -364,25 +254,17 @@ class PPFileManager: NSObject,FileProviderDelegate {
             PPHUD.showHUDFromTop("无法初始化服务器,请添加", isError: true)
             return false
         }
-        let userCredential = URLCredential(user: user,
-                                           password: password,
-                                           persistence: .permanent)
         if PPUserInfo.shared.cloudServiceType == .dropbox {
-            dropbox = DropboxFileProvider(credential: userCredential)
+            dropbox = PPDropboxService(access_token: password)
         }
         else if PPUserInfo.shared.cloudServiceType == .baiduyun {
             baiduwangpan = BaiduyunAPITool(access_token: password)
         }
-        else {
-            let server = URL(string: PPUserInfo.shared.webDAVServerURL)!
-        //            let protectionSpace = URLProtectionSpace.init(host: "dav.jianguoyun.com", port: 443, protocol: "https", realm: "Restricted", authenticationMethod: NSURLAuthenticationMethodHTTPBasic)
-        //            URLCredentialStorage.shared.setDefaultCredential(userCredential, for: protectionSpace)
-        webdav = WebDAVFileProvider(baseURL: server, credential: userCredential)!//不能加`,cache: URLCache.shared`,要不然无法保存markdown！！！
-//        webdav.useCache = true
-        webdav?.delegate = self
-        //注意：不修改鉴权方式，会导致每次请求两次，一次401失败，一次带token成功
-        webdav?.credentialType = URLRequest.AuthenticationType.basic
-            currentFileProvider = webdav
+        else if PPUserInfo.shared.cloudServiceType == .local {
+            localFileService = PPLocalFileService()
+        }
+        else if PPUserInfo.shared.cloudServiceType == .webdav {
+            webdavService = PPWebDAVService(url: PPUserInfo.shared.webDAVServerURL, username: user, password: password)
         }
         return true
     }
@@ -629,7 +511,7 @@ class PPFileManager: NSObject,FileProviderDelegate {
  */
         }
         else {
-            PPFileManager.shared.currentFileProvider?.contents(path: imageURL, completionHandler: {
+            PPFileManager.shared.currentService?.contentsOfFile(imageURL, completionHandler: {
                 contents, error in
                 guard let contents = contents else {
                     return

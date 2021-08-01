@@ -2,9 +2,9 @@
 //  PPUserInfoManager.swift
 //  PandaNote
 //
-//  Created by panwei on 2019/8/28.
-//  Copyright © 2019 WeirdPan. All rights reserved.
-//
+//  Created by Panway on 2019/8/28.
+//  Copyright © 2019 Panway. All rights reserved.
+//  App公有设置和用户私有设置混在一起，后期优化
 
 import Foundation
 
@@ -13,6 +13,7 @@ import Foundation
 class PPUserInfo: NSObject {
     public enum PPCloudServiceType : String {
         case webdav = "webdav"
+        case local = "local"
         case dropbox = "Dropbox"
         case baiduyun = "baiduyun"
         case onedrive = "OneDrive"
@@ -129,6 +130,13 @@ class PPUserInfo: NSObject {
                 self.pp_serverInfoList = json as! [[String : String]]
             }
         }
+        else {
+            debugPrint("no server config found 初次安装无数据，默认使用本地文件列表")
+            let newServer = ["PPWebDAVUserName":"本地",
+                             "PPWebDAVRemark":"本地",
+                             "PPCloudServiceType":PPCloudServiceType.local.rawValue]
+            self.pp_serverInfoList = [newServer]
+        }
         
         
         if let recentFileData = try? Data(contentsOf: URL(fileURLWithPath: self.pp_mainDirectory+"/PP_RecentFiles.json")) {
@@ -151,7 +159,7 @@ class PPUserInfo: NSObject {
             pp_RecentFiles.removeLast()
         }
     }
-    //MARK:云盘服务设置
+    //MARK:更新云盘服务设置
     func updateCurrentServerInfo(index:Int) {
         let webDAVInfoArray = PPUserInfo.shared.pp_serverInfoList
         if webDAVInfoArray.count < 1 {
