@@ -41,7 +41,7 @@ class PPLocalFileService:PPFilesProvider, PPCloudServiceProtocol {
     }
     
     func createFile(atPath path: String, contents: Data, completionHandler: @escaping (Error?) -> Void) {
-        fileProvider.writeContents(path: path, contents: contents, completionHandler: completionHandler)
+        fileProvider.writeContents(path: path, contents: contents, overwrite: true, completionHandler: completionHandler)
     }
     
     func moveItem(atPath srcPath: String, toPath dstPath: String, completionHandler: @escaping (Error?) -> Void) {

@@ -43,7 +43,7 @@ class PPDropboxService: PPFilesProvider, PPCloudServiceProtocol {
     }
     
     func createFile(atPath path: String, contents: Data, completionHandler: @escaping (Error?) -> Void) {
-        dropbox?.writeContents(path: path, contents: contents, completionHandler: completionHandler)
+        dropbox?.writeContents(path: path, contents: contents, overwrite: true, completionHandler: completionHandler)
     }
     
     func moveItem(atPath srcPath: String, toPath dstPath: String, completionHandler: @escaping (Error?) -> Void) {
