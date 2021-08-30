@@ -8,11 +8,15 @@
 >
 > Tokenizing：标记化
 >
+> tokenizer：分词器，标记生成器
+>
 > Abstract Syntax Tree, or AST：抽象语法树
 >
 > terminal：终结符
 >
 > Backus Normal Form，BNF：巴科斯范式，又称为巴科斯-诺尔范式，是一种用于表示上下文无关文法的语言，上下文无关文法描述了一类形式语言。它是由约翰·巴科斯（John Backus）和彼得·诺尔（Peter Naur）首先引入的用来描述计算机语言语法的符号集。
+>
+> emphasis 强调、重音、加重（斜体）
 
 # Part1
 
@@ -744,3 +748,204 @@ Parser.new.parse("__Foo__ and *bar*.\n\nAnother paragraph.")
 
 That is no easy feat! We’ve talked a lot about parsers, grammars, tokens and all that stuff. More than enough to sip in for a day. Remember the source code is [on GitHub](https://github.com/beezwax/markdown-compiler), feel free to clone and play around with it.
 这可真不容易啊！我们已经谈了很多关于解析器、语法、标记等东西，源代码在GitHub上。
+
+# Part 3
+
+## Visitor Pattern 访问者模式
+
+Now that we have our little language represented in an AST, we’ll use something called *Visitor Pattern* to visit each node and emit the proper HTML. I could point you to an article explaining this pattern but it’s not really worth it, it’s easier to just see it in action.
+现在我们已经用AST表示了我们的小型语言，接下来我们将使用一个叫做*访问者模式*的东西来访问每个节点并输出HTML。我可以给你看一篇解释这种模式的文章，但现在直接看它的操作会更容易。
+
+The core idea of our implementation is that each visitor will return some valid HTML. Once we have visited the whole tree we’ll join all of the visitor’s generated code into a full HTML translation of our markdown subset.
+实现的核心思想是每个访问者都会返回一些有效的HTML。一旦我们访问了整棵树，我们将把所有访问者生成的代码加入到我们的markdown子集的完整HTML转换中。
+
+Not much theory in this one, let’s just dive into the code!
+这里没有太多的理论，让我们直接在代码中遨游吧!
+
+```ruby
+class Generator
+  def generate(ast)
+    body_visitor.visit(ast)
+  end
+
+  private
+
+  def body_visitor
+    BodyVisitor.new
+  end
+end
+```
+
+As you can see, we start with the top-most node, the Body. For each node in our AST we have a corresponding visitor. The body visitor is quite trivial, let’s take a look:
+正如你所看到的，我们从最顶部的节点开始，即Body。对于AST中的每个节点，我们都有一个相应的访问者。body 访问者非常简单：
+
+```ruby
+class BodyVisitor
+  def visit(body_node)
+    body_node.paragraphs.map do |paragraph|
+      paragraph_visitor.visit(paragraph)
+    end.join
+  end
+
+  private
+
+  def paragraph_visitor
+    @paragraph_visitor ||= ParagraphVisitor.new
+  end
+end
+```
+
+Because `body_node` is just a collection of paragraphs, we simply visit each paragraph and join the results together. The `ParagraphVisitor` is a bit more interesting:
+因为`body_node`只是一个段落的集合，我们只是简单地访问每个段落，并将结果连接在一起。`ParagraphVisitor`就更好玩了：
+
+```ruby
+class ParagraphVisitor
+  def visit(paragraph_node)
+    "<p>#{sentences_for(paragraph_node)}</p>"
+  end
+
+  private
+
+  def sentences_for(paragraph_node)
+    paragraph_node.sentences.map do |sentences|
+      sentence_visitor.visit(sentences)
+    end.join
+  end
+
+  def sentence_visitor
+    @sentence_visitor ||= SentenceVisitor.new
+  end
+end
+```
+
+We are doing basically the same thing, the only difference is that we finally add in some HTML! Because paragraphs are surrounded by `p` tags we wrap whatever it’s inside with those tags. We defer the work of translating what’s inside the paragraph to the `SentenceVisitor`:
+
+我们所做的事情基本上是一样的，唯一不同的是我们最后加入了一些HTML。因为html的段落被p标签所包围，所以我们用这些标签来包裹它里面的内容。我们把翻译段落中的内容的工作推迟到 `SentenceVisitor`：
+
+```ruby
+class SentenceVisitor
+  SENTENCE_VISITORS = {
+    "BOLD"     => BoldVisitor,
+    "EMPHASIS" => EmphasisVisitor,
+    "TEXT"     => TextVisitor
+  }.freeze
+
+  def visit(node)
+    visitor_for(node).visit(node)
+  end
+
+  private
+
+  def visitor_for(node)
+    SENTENCE_VISITORS.fetch(node.type) { raise "Invalid sentence node type" }.new
+  end
+end
+```
+
+Sentences are made of a bunch three diffeerent possible token combinations. In this visitor we make sure to get a valid instance given `node.type`. The remaining visitors are quite small so I’ll just show them all together:
+句子由一堆三种不同的token组合（加粗、黑体、文本）构成。在这个访问者中，我们确保得到一个有效的实例，给定`node.type`。其余的访问者太小，所以我就把它们放在一起展示。
+
+```ruby
+class BoldVisitor
+  def visit(node)
+    "<strong>#{node.value}</strong>"
+  end
+end
+
+class EmphasisVisitor
+  def visit(node)
+    "<em>#{node.value}</em>"
+  end
+end
+
+class TextVisitor
+  def visit(node)
+    node.value
+  end
+end
+```
+
+As you can see we have chosen to translate bold using `strong` tags and emphasis using `em` tags. We could of course use `b` and `i` tags or basically whatever we want.
+正如你所看到的，我们选择用`strong`标签来转换粗体，用`em`标签来转换斜体。当然你也可以使用`b`和`i`标签。
+
+And that’s it! Let’s take a look at the generator tests to get a glimpse at how everything fits together:
+就这样吧! 让我们看一下生成器的测试例子，以便了解所有东西是如何结合在一起的。
+
+```ruby
+class TestGenerator < Minitest::Test
+  def setup
+    @tokenizer = Tokenizer.new
+    @parser    = Parser.new
+    @generator = Generator.new
+  end
+
+  def generate(markdown)
+    tokens = @tokenizer.tokenize(markdown)
+    ast    = @parser.parse(tokens)
+    @generator.generate(ast)
+  end
+
+  def test_generates_html
+    assert_equal generate("__Foo__ and *text*.\n\nAnother para."),
+      "<p><strong>Foo</strong> and <em>text</em>.</p><p>Another para.</p>"
+  end
+end
+```
+
+It’s simply function composition 我们把函数进行组合（嵌套）: `generate(parse(tokenize("my input")))`.
+
+Let’s just add one more object to our compiler, a pretty *frontend* object to abstract all the internals from our API consumers, we should always expose as little complexity as possible:
+让我们再给我们的编译器添加一个对象，一个漂亮的前端对象，从我们的API consumer那里抽象出所有的内部结构，我们应该总是尽可能少地暴露出复杂的东西。
+
+```ruby
+class Markdown
+  # ...
+  def self.to_html(input)
+    @generator.generate(@parser.parse(@tokenizer.tokenize(input)))
+  end
+  # ...
+end
+```
+
+
+
+## You did it!你搞定啦！
+
+Congratulations! Hopefully, by now, you have a deeper understanding on compilers. How they work, what they do, and a common compiler architecture. Please note that this is a very minimalistic compiler. A lot of things are missing, like good error reporting and more markdown features – nevertheless, the core concepts are there. So feel free to play around with [the code](https://github.com/beezwax/markdown-compiler), change whatever you want, or even share your own project in the comments section!
+祝贺你! 希望到现在为止，你对编译器有了更深的了解：它们是如何工作的、做了什么，以及一个常见的编译器架构。请注意，这是一个非常简单的编译器。缺少了很多东西，比如良好的错误报告和更多的markdown功能。尽管如此，核心概念还是存在的。所以，请随意玩耍这些代码，改变你想要的东西，甚至在评论区分享你自己的项目！
+
+The cool thing about this structure is that you can write another code-gen layer for, say, XML, or [ODT](https://en.wikipedia.org/wiki/OpenDocument) just by making a new generator. You could also re-think a new syntax for markdown, by building a new tokenizer + parser and just reuse the codegen layer.
+这种结构最酷的地方在于，你可以为XML或ODT编写另一个代码生成层，只需制作一个新的生成器。你也可以为markdown重新考虑一种新的语法，通过建立一个新的标记器+解析器，而只是重复使用代码生成层。
+
+It doesn’t really matter if you dont understand **everything**, the point is having a birds-eye view of the way compilers work. Hopefully these series served you as a solid base for any project requiring some of these skills, or at least just scratched an itch 
+如果你不了解所有的东西，这并不重要，关键是要对编译器的工作方式有一个鸟瞰的认识。希望这些系列文章能够为任何需要这些技能的项目打下坚实的基础，或者至少是挠到了痒处
+
+Remember the full source code [is at GitHub](https://github.com/beezwax/markdown-compiler), feel free to play around with it.
+完整的源代码在GitHub上，请随意玩耍。
+
+## Where to go from here 继续深造
+
+What I’ve shown you is *the hard way* of writing compilers. In my opinion, it’s very important to do things “by hand” in order to fully understand the underlying concepts. Of course, nowadays there are some tools which make life easier.
+我向你展示的是编写编译器的艰难方式。在我看来，为了充分理解基本概念，"手工 "做事情是非常重要的。当然，现在有一些工具可以使生活更容易。
+
+One of the oldest and most popular tools out there is [Yacc](http://dinosaur.compilertools.net/yacc/). It’s a C library that takes in a grammar file, and gives you a C program which is able to recognize the given grammar.
+最古老和最流行的工具之一是Yacc。这是一个C语言库，它接收一个语法文件，并给你一个能够识别给定语法的C语言程序。
+
+Because Yacc was the first tool out there which did this, there are a lot of similar tools for other languages. There is [Jison](https://github.com/zaach/jison) for Javascript and [Racc](https://github.com/tenderlove/racc) for Ruby. Note that both Yacc and Jison allow us to use left-recursion in our rules, so even though both grammars match the same thing, this allows us to write more expressive, concise rules. Nothing is without a downside though, this introduces some complexity into our grammars, needed to remove ambiguity, like having to define operator precedence.
+因为Yacc是第一个这样做的工具，所以有很多类似的工具用于处理其他语言。有用于Javascript的Jison和用于Ruby的Racc。注意Yacc和Jison都允许我们在规则中使用左递归，所以尽管这两种语法匹配的是同样的东西，但这允许我们写出更有表现力、更简洁的规则。不过没有什么是没有缺点的，这给我们的语法带来了一些复杂性，需要消除歧义，比如必须定义运算符的优先级。
+
+Personally, I like [Peg.js](https://pegjs.org/online), PEG stands for [Parsing Expression Grammar](https://en.wikipedia.org/wiki/Parsing_expression_grammar), and it has the same limitations we used in our grammar. For quick prototyping is quite useful and easy to use. [ANTLR](http://www.antlr.org/) is another popular tool for Java. Quite powerful, even though I’ve never used it myself, I’ve heard great things about this one.
+就个人而言，我喜欢Peg.js，PEG代表解析表达式语法，它具有与我们的语法相同的限制。对于快速的原型设计是相当有用的，而且易于使用。ANTLR是另一个流行的Java工具。相当强大，尽管我自己从未使用过它，但我听说过关于这个的好东西。
+
+If you like functional programming, there’s a whole functional-oriented architecture going on over there, they are called [Parser Combinators](https://en.wikipedia.org/wiki/Parser_combinator) and they play with the idea of combining small parsers together to build bigger ones. Here you can find [a Ruby parser combinator](https://github.com/gosukiwi/parser-combinator#introduction) to get an idea of how they work.
+如果你喜欢函数式编程，有一个完整的面向函数编程的架构，它们被称为解析器组合器，它们玩的是把小的解析器组合在一起建立更大的解析器的想法。在这里，你可以找到一个Ruby解析器组合器来了解它们是如何工作的。
+
+It’s important to note though, that most popular programming languages, like Lua and C#, implement their own tokenizers and parsers in order to be as efficient as possible.
+很多流行的编程语言都实现了自己的分词器和解析器，如Lua和C#，以便尽可能地高效。
+
+> **NOTE** *If you want to build a toy programming language, I recommend this little book,* [How To Create Your Own Freaking Awesome Programming Language](http://createyourproglang.com/)*, which is a nice summary of the techniques displayed here, and adds a lot of new topics you can investigate further on your own. The book itself is a rough overview on language development rather than deep explanation of each topic. It’s a great place to start.*
+> 注意 如果你想建立一个玩具编程语言，我推荐这本小书《如何创建你自己的超棒的编程语言》，它是对这里展示的技术的一个很好的总结，并增加了很多新的话题，你可以自己进一步研究。这本书本身是对语言发展的粗略概述，而不是对每个主题的深入解释。这本书是一个很好的开始。
+
+That’s all! Thanks for reading! Hopefully this was at least a somewhat useful intro. Let us know in the comments sections what you think. Cheers!
+这就是全部，谢谢你的阅读！希望这至少是一个有用的介绍，请在评论区告诉我们你的想法，干杯！
+
