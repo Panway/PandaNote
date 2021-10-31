@@ -16,6 +16,7 @@ class PPWebDAVConfigViewController: PPBaseViewController {
     var userName = ""
     var password = ""
     var remark = ""
+    var extraString = "" //额外的字段
     override func viewDidLoad() {
         super.viewDidLoad()
         self.title = "新增服务器设置"
@@ -110,6 +111,7 @@ class PPWebDAVConfigViewController: PPBaseViewController {
             "PPWebDAVUserName":cell2.serverNameTF.text!,
             "PPWebDAVPassword":cell3.serverNameTF.text!,
             "PPCloudServiceType":self.cloudType,
+            "PPCloudServiceExtra":self.extraString,
             "PPWebDAVRemark":cell4.serverNameTF.text!]
             serverList.append(newServer)
             PPUserInfo.shared.pp_serverInfoList = serverList

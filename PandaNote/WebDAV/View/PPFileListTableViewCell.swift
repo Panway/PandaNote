@@ -56,8 +56,8 @@ class PPFileListTableViewCell: PPBaseTableViewCell {
             self.iconImage.image = UIImage.init(named: "ico_folder")
         }
         else if (fileObj.name.pp_isImageFile())  {
-            let imagePath = PPFileManager.shared.downloadPath + fileObj.path
-//            self.currentImageURL = imagePath
+//            let imagePath = PPFileManager.shared.downloadPath + fileObj.path
+            let imagePath = "\(PPDiskCache.shared.path)/\(PPUserInfo.shared.webDAVRemark)/\(fileObj.path)"
 
             if FileManager.default.fileExists(atPath: imagePath) {
                 //使用略缩图 显示略缩图 减少内存占用
@@ -72,7 +72,12 @@ class PPFileListTableViewCell: PPBaseTableViewCell {
             }
         }
         else {
-            self.iconImage.image = UIImage.init(named: PPUserInfo.shared.pp_fileIcon[String(fileObj.name.split(separator: ".").last!)] ?? "ico_jpg")
+            if let icon = PPUserInfo.shared.pp_fileIcon[fileObj.name.pp_fileExtension] {
+                self.iconImage.image = UIImage(named: icon)
+            }
+            else {
+                self.iconImage.image = UIImage(named: "ico_jpg")
+            }
         }
         
         let sizeStr = (fileObj.size>0) ? " - \(Int(fileObj.size).pp_SizeString())" :""

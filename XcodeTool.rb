@@ -3,6 +3,7 @@
 require 'xcodeproj'
 # 消除第三方库 deployment target警告,比如这样的:The iOS deployment target 'IPHONEOS_DEPLOYMENT_TARGET' is set to 8.0, but the range of supported deployment target versions is 9.0 to 14.2.99.
 # your_target是你的工程Target名字（每个项目都不一样，请按需修改）
+# 还可以消除 Command CompileSwiftSources failed with a nonzero exit code 错误
 # min_surpport_version是你的项目支持的最低版本
 def fix_deployment_target(your_target,min_surpport_version)
     project_name = your_target

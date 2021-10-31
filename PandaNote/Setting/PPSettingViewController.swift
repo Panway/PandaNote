@@ -134,7 +134,7 @@ class PPSettingViewController: PPBaseViewController,UITableViewDataSource,UITabl
             dropDown.anchorView = tableView.cellForRow(at: indexPath) // UIView or UIBarButtonItem
             dropDown.direction = .bottom
             dropDown.bottomOffset = CGPoint(x: 100, y: 0)
-            dropDown.dataSource = ["none", "NSAttributedString+Markdown"]
+            dropDown.dataSource = ["none", "NSAttributedString+Markdown", "Down"]
             dropDown.selectionAction = { (index: Int, item: String) in
                 PPUserInfo.shared.pp_Setting.updateValue(dropDown.dataSource[index], forKey:"pp_markdownParseMethod")
             }

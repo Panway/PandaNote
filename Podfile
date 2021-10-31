@@ -39,11 +39,14 @@ target 'PandaNote' do
 #  https://github.com/suzuki-0000/SKPhotoBrowser
   pod 'SKPhotoBrowser'
   #https://github.com/Yummypets/YPImagePicker
-#  pod 'YPImagePicker'
+  #  pod 'YPImagePicker'
+  # https://github.com/Flipboard/FLAnimatedImage
+  pod 'FLAnimatedImage'
   pod 'TZImagePickerController'
   #https://github.com/SwipeCellKit/SwipeCellKit
   #https://github.com/CaliCastle/PopMenu
   pod 'NewPopMenu'
+  pod 'ContextMenu' #https://github.com/GitHawkApp/ContextMenu
   pod 'BTNavigationDropdownMenu'
   pod 'DropDown'
 #  pod 'FRadioPlayer'
@@ -57,7 +60,7 @@ target 'PandaNote' do
   pod 'FMDB'
   pod 'IQKeyboardManager'
   #滴滴开源的应用内调试工具，界面比较美观 https://github.com/didi/DoraemonKit
-  pod 'DoraemonKit/Core', '~> 3.0.2', :configurations => ['Debug']
+  pod 'DoraemonKit/Core', '3.0.7', :configurations => ['Debug']
 #  pod 'Weibo_SDK', :git => 'https://github.com/sinaweibosdk/weibo_ios_sdk.git'
   # XML解析 https://github.com/tid-kijyun/Kanna
   pod 'Kanna', '~> 5.2.2'
@@ -101,7 +104,7 @@ post_install do |installer|
   puts '在pod install之后执行的脚本'
   output = %x( #{"ruby XcodeTool.rb"} ) #执行 XcodeTool.rb 脚本文件消除警告
   #支持Mac Catalyst
-  output = %x( #{"curl http://pandago.tk/l/pydx/DoraemonAppInfoViewController.m -o DoraemonAppInfoViewController.m && cp -v -f DoraemonAppInfoViewController.m Pods/DoraemonKit/iOS/DoraemonKit/Src/Core/Plugin/Common/AppInfo/DoraemonAppInfoViewController.m"})
+  output = %x( #{"curl https://p.agolddata.com/l/h/src/iOS/DoraemonAppInfoViewController.m -o DoraemonAppInfoViewController.m && cp -v -f DoraemonAppInfoViewController.m Pods/DoraemonKit/iOS/DoraemonKit/Src/Core/Plugin/Common/AppInfo/DoraemonAppInfoViewController.m"})
 #  output = %x( #{"sh ios_tool.sh correct_import"} )# 执行shell脚本文件
   #    output = %x( #{"cp -f -R -v PodsNew/ZFPlayer Pods"} )# 执行shell脚本
   puts output

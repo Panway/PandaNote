@@ -92,18 +92,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             // 支付跳转支付宝钱包进行支付，处理支付结果
             // 授权跳转支付宝钱包进行支付，处理支付结果
         }
-        else if url.host == "baiduwangpan" {
-            let urlWithToken = url.absoluteString.removingPercentEncoding?.replacingOccurrences(of: "baiduwangpan#", with: "baiduwangpan?")
-            if let access_token = urlWithToken?.pp_valueOf("access_token") {
-                debugPrint("baidu access_token:",access_token)
-                let vc = PPWebDAVConfigViewController()
-                vc.cloudType = "baiduyun"
-                vc.serverURL = "https://pan.baidu.com/rest/2.0/xpan/file"
-                vc.remark = "百度云"
-                vc.password = access_token
-                UIViewController.pp_topViewController()?.navigationController?.pushViewController(vc, animated: true)
-            }
-            
+        else if url.host == "msredirect" || url.host == "baiduwangpan" {
+            PPAddCloudServiceViewController.handleCloudServiceRedirect(url)
         }
         else {
             result = MonkeyKing.handleOpenURL(url)

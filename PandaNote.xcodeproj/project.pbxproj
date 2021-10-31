@@ -14,6 +14,8 @@
 		1E1DE37C2567BA0A00BB2D1C /* PPFileListViewController+Search.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E1DE37B2567BA0A00BB2D1C /* PPFileListViewController+Search.swift */; };
 		1E1F2DEB25384C75002B0426 /* PPDebugViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E1F2DEA25384C75002B0426 /* PPDebugViewController.swift */; };
 		1E289EF2258E125A003E1042 /* PPCloudServiceAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E289EF1258E125A003E1042 /* PPCloudServiceAPI.swift */; };
+		1E3158F726B795DF008F432D /* PPOneDriveService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E3158F626B795DF008F432D /* PPOneDriveService.swift */; };
+		1E347B7C272E3ED6007770C2 /* PPOneDriveFileObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E347B7B272E3ED6007770C2 /* PPOneDriveFileObject.swift */; };
 		1E50942824DBB15B00238678 /* PPWebViewBottomToolbar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E50942724DBB15A00238678 /* PPWebViewBottomToolbar.swift */; };
 		1E526EC226B6788A0026DC67 /* PPCloudService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E526EC126B6788A0026DC67 /* PPCloudService.swift */; };
 		1E526EC526B699FB0026DC67 /* PPWebDAVService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E526EC426B699FB0026DC67 /* PPWebDAVService.swift */; };
@@ -111,6 +113,8 @@
 		1E1DE37B2567BA0A00BB2D1C /* PPFileListViewController+Search.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PPFileListViewController+Search.swift"; sourceTree = "<group>"; };
 		1E1F2DEA25384C75002B0426 /* PPDebugViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPDebugViewController.swift; sourceTree = "<group>"; };
 		1E289EF1258E125A003E1042 /* PPCloudServiceAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPCloudServiceAPI.swift; sourceTree = "<group>"; };
+		1E3158F626B795DF008F432D /* PPOneDriveService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPOneDriveService.swift; sourceTree = "<group>"; };
+		1E347B7B272E3ED6007770C2 /* PPOneDriveFileObject.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPOneDriveFileObject.swift; sourceTree = "<group>"; };
 		1E50942724DBB15A00238678 /* PPWebViewBottomToolbar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPWebViewBottomToolbar.swift; sourceTree = "<group>"; };
 		1E526EC126B6788A0026DC67 /* PPCloudService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPCloudService.swift; sourceTree = "<group>"; };
 		1E526EC426B699FB0026DC67 /* PPWebDAVService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPWebDAVService.swift; sourceTree = "<group>"; };
@@ -236,6 +240,15 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		1E3158F526B79567008F432D /* OneDrive */ = {
+			isa = PBXGroup;
+			children = (
+				1E3158F626B795DF008F432D /* PPOneDriveService.swift */,
+				1E347B7B272E3ED6007770C2 /* PPOneDriveFileObject.swift */,
+			);
+			path = OneDrive;
+			sourceTree = "<group>";
+		};
 		1E526EBF26B673720026DC67 /* Tool */ = {
 			isa = PBXGroup;
 			children = (
@@ -299,6 +312,7 @@
 				1E289EF1258E125A003E1042 /* PPCloudServiceAPI.swift */,
 				1E526EC626B6BD360026DC67 /* PPLocalFileService.swift */,
 				1E526ECA26B6C0E90026DC67 /* PPFilesProvider.swift */,
+				1E3158F526B79567008F432D /* OneDrive */,
 				1E526ECC26B6F1DB0026DC67 /* Dropbox */,
 				1E526EC326B699D60026DC67 /* WebDAV */,
 				1ED298E72589F85400735B6B /* BaiduYun */,
@@ -852,6 +866,7 @@
 				60E61420243DA3B500630B4B /* PPBottomToolBarView.swift in Sources */,
 				6056027F23178C2C000809CD /* PPTextFieldTableViewCell.swift in Sources */,
 				60E61422243DAF2800630B4B /* UIColor+PPTool.swift in Sources */,
+				1E3158F726B795DF008F432D /* PPOneDriveService.swift in Sources */,
 				60D27791238AA52C00D8BA0C /* PPCacheManager.swift in Sources */,
 				1EDF714D24C3F1E600A12EC9 /* NSRegularExpression+PPTool.swift in Sources */,
 				60F5691322F2ADC700874994 /* ViewController.swift in Sources */,
@@ -861,6 +876,7 @@
 				60F5691122F2ADC700874994 /* AppDelegate.swift in Sources */,
 				60E61426243DC16E00630B4B /* PPPDFViewController.swift in Sources */,
 				1E526EC526B699FB0026DC67 /* PPWebDAVService.swift in Sources */,
+				1E347B7C272E3ED6007770C2 /* PPOneDriveFileObject.swift in Sources */,
 				6056022A231772AE000809CD /* PPMarkdownViewController.swift in Sources */,
 				60A1F8DC24388C98009E390C /* ViewController+PPTool.swift in Sources */,
 				1E1B58A7257B9480000860F6 /* PPAddCloudServiceViewController.swift in Sources */,

@@ -307,6 +307,29 @@ extension PPWebViewController {
             vc.password = access_token ?? ""
             self.navigationController?.pushViewController(vc, animated: true)
         }
+        //获取了OneDrive的带code的回调URL
+        else if urlString.hasPrefix("https://login.microsoftonline.com/common/oauth2/nativeclient?code=") {
+//            var code = urlString.pp_valueOf("code")
+            PPAddCloudServiceViewController.handleCloudServiceRedirect(URL(string: urlString)!)
+        }
+        #if DEBUG
+//        fakeData(urlString)
+        #endif
         return true
+    }
+    func fakeData(_ urlString:String) {
+        //测试代码！！！
+        if urlString.contains("www.dropbox.com/oauth2/authorize") {
+//            self.urlString = "filemgr://oauth-callback/dropbox#access_token=AAAAAA&token_type=bearer&state=DROPBOX&uid=666666&account_id=dbid%XXXXXX"
+//            DispatchQueue.main.asyncAfter(deadline: .now()+5) {
+//                self.loadURL()
+//            }
+        }
+        if urlString.contains("openapi.baidu.com/oauth/2.0/authorize") {
+            self.urlString = "http://www.estrongs.com/#expires_in=2592000&access_token=AAAAAA&session_secret=&session_key=&scope=basic+netdisk&state=STATE"
+            DispatchQueue.main.asyncAfter(deadline: .now()+5) {
+                self.loadURL()
+            }
+        }
     }
 }

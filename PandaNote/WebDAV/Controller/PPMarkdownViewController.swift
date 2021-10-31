@@ -74,7 +74,10 @@ class PPMarkdownViewController: PPBaseViewController,UITextViewDelegate {
             //定位到上次滚动的位置
             let offsetKey = PPFileManager.shared.currentServerUniqueID().pp_md5
             let offsetY = PPCacheManeger.shared.get(offsetKey).toCGFloat()
-            self.textView.setContentOffset(CGPoint(x: 0, y: offsetY), animated: false)
+            if offsetY > 0 {
+                //为0的时候设置好像有时候文字不显示？？？
+                self.textView.setContentOffset(CGPoint(x: 0, y: offsetY), animated: false)
+            }
             
         }
 

@@ -24,6 +24,7 @@ class PPUserInfo: NSObject {
     var webDAVUserName:String?
     var webDAVPassword:String?
     var webDAVRemark = ""
+    var cloudServiceExtra = ""//额外的字段
     /// 坚果云、Drpbox等
     var cloudServiceType:PPCloudServiceType = .webdav
     /// 沙盒Sandbox/Library/PandaCache
@@ -171,6 +172,7 @@ class PPUserInfo: NSObject {
         PPUserInfo.shared.webDAVUserName = webDAVInfo["PPWebDAVUserName"] ?? ""
         PPUserInfo.shared.webDAVPassword = webDAVInfo["PPWebDAVPassword"] ?? ""
         PPUserInfo.shared.webDAVRemark = webDAVInfo["PPWebDAVRemark"] ?? ""
+        PPUserInfo.shared.cloudServiceExtra = webDAVInfo["PPCloudServiceExtra"] ?? ""
         PPUserInfo.shared.cloudServiceType = PPCloudServiceType(rawValue: webDAVInfo["PPCloudServiceType"] ?? "") ?? .webdav
     }
     class func pp_valueForSettingDict(key : String) -> Bool {

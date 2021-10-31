@@ -1,7 +1,8 @@
 PODS:
-  - Alamofire (5.4.3)
+  - Alamofire (5.4.4)
   - BTNavigationDropdownMenu (0.7)
-  - CryptoSwift (1.4.0)
+  - ContextMenu (0.4.0)
+  - CryptoSwift (1.4.2)
   - DoraemonKit/Core (3.0.7):
     - FMDB
     - GCDWebServer
@@ -10,7 +11,8 @@ PODS:
   - Down (0.11.0)
   - DropDown (2.3.13)
   - FilesProvider (0.26.0)
-  - FLEX (4.4.1)
+  - FLAnimatedImage (1.0.16)
+  - FLEX (4.6.0)
   - FMDB (2.7.5):
     - FMDB/standard (= 2.7.5)
   - FMDB/standard (2.7.5)
@@ -22,11 +24,11 @@ PODS:
   - GCDWebServer/WebUploader (3.5.4):
     - GCDWebServer/Core
   - IQKeyboardManager (6.5.6)
-  - Kanna (5.2.4)
-  - Kingfisher (6.3.0)
+  - Kanna (5.2.7)
+  - Kingfisher (6.3.1)
   - MBProgressHUD (1.2.0)
-  - MJRefresh (3.6.1)
-  - MonkeyKing (2.1.0)
+  - MJRefresh (3.7.2)
+  - MonkeyKing (2.2.1)
   - NewPopMenu (2.1.2)
   - ObjectMapper (4.2.0)
   - PINCache (3.0.3):
@@ -43,19 +45,21 @@ PODS:
   - PPiOSKit/PPAlertAction (0.0.1)
   - PPiOSKit/RuntimeTool (0.0.1)
   - PPiOSKit/SwipePopGesture (0.0.1)
-  - SKPhotoBrowser (6.1.0)
+  - SKPhotoBrowser (7.0.0)
   - SnapKit (5.0.1)
-  - TZImagePickerController (3.6.0)
+  - TZImagePickerController (3.6.6)
   - YYText (1.0.7)
 
 DEPENDENCIES:
   - Alamofire (~> 5.0)
   - BTNavigationDropdownMenu
+  - ContextMenu
   - CryptoSwift
-  - DoraemonKit/Core (~> 3.0.2)
+  - DoraemonKit/Core (= 3.0.7)
   - Down
   - DropDown
   - FilesProvider
+  - FLAnimatedImage
   - FLEX
   - FMDB
   - IQKeyboardManager
@@ -80,11 +84,13 @@ SPEC REPOS:
   trunk:
     - Alamofire
     - BTNavigationDropdownMenu
+    - ContextMenu
     - CryptoSwift
     - DoraemonKit
     - Down
     - DropDown
     - FilesProvider
+    - FLAnimatedImage
     - FLEX
     - FMDB
     - GCDWebServer
@@ -113,32 +119,34 @@ CHECKOUT OPTIONS:
     :git: https://github.com/Panway/CodeSnipetCollection.git
 
 SPEC CHECKSUMS:
-  Alamofire: e447a2774a40c996748296fa2c55112fdbbc42f9
+  Alamofire: f3b09a368f1582ab751b3fff5460276e0d2cf5c9
   BTNavigationDropdownMenu: 57a72c74dc211db3564f5be168f4f7643491a7de
-  CryptoSwift: 7cc902df1784de3b389a387756c7d710f197730c
+  ContextMenu: f835e09a93f1c28c631b76ee94396d9570397fd1
+  CryptoSwift: a532e74ed010f8c95f611d00b8bbae42e9fe7c17
   DoraemonKit: 32fb97f3aa82efa133111d193080ca5462cef135
   Down: b6ba1bc985c9d2f4e15e3b293d2207766fa12612
   DropDown: 8a2116376c1981888557f72ec2ffc9a5e0e456ec
   FilesProvider: 2a8ae17d8b9c23a6feadb1308ee638fa31d21065
-  FLEX: 7ca2c8cd3a435ff501ff6d2f2141e9bdc934eaab
+  FLAnimatedImage: 8f3e854ebf9680b71f0b6e700939687fc4d82b4b
+  FLEX: 6223ad3d853fb6177a6ab1cda85f372a72768da8
   FMDB: 2ce00b547f966261cd18927a3ddb07cb6f3db82a
   GCDWebServer: 2c156a56c8226e2d5c0c3f208a3621ccffbe3ce4
   IQKeyboardManager: 2a6e97afdafc7becf0cb17a9a8d795e3a980717f
-  Kanna: b9d00d7c11428308c7f95e1f1f84b8205f567a8f
-  Kingfisher: 6c3df386db71d82c0817a429d2c9421a77396529
+  Kanna: 01cfbddc127f5ff0963692f285fcbc8a9d62d234
+  Kingfisher: 016c8b653a35add51dd34a3aba36b580041acc74
   MBProgressHUD: 3ee5efcc380f6a79a7cc9b363dd669c5e1ae7406
-  MJRefresh: d2c1970d1cf6e77fcfcdfe76c943dfab8dbfa5c1
-  MonkeyKing: 1656e3e01911b5f72f988d4496c1cc988d0c009c
+  MJRefresh: 30997d30b347c8e9508a4db11e3a690da0c9b85a
+  MonkeyKing: 196838a3b4c97e95915f3e7046fb2d6044f06101
   NewPopMenu: c6129e08e8192f6257ceb5f9a4357e1b59c6e2e7
   ObjectMapper: 1eb41f610210777375fa806bf161dc39fb832b81
   PINCache: 7a8fc1a691173d21dbddbf86cd515de6efa55086
   PINOperation: 00c935935f1e8cf0d1e2d6b542e75b88fc3e5e20
   PPiOSKit: 9f049cf7ff47cefda7f747a404254ee1a5ae7f85
-  SKPhotoBrowser: 343de95d89dc7913763c5dda243cc6e606e4a168
+  SKPhotoBrowser: 6aaa8f232752e87c7e76bace183bead0a137097d
   SnapKit: 97b92857e3df3a0c71833cce143274bf6ef8e5eb
-  TZImagePickerController: a37d7eec87c54436e896a67947033ad2178d498b
+  TZImagePickerController: edf61b8e87f26e3e445aa50eb66254bd7f4859db
   YYText: 5c461d709e24d55a182d1441c41dc639a18a4849
 
-PODFILE CHECKSUM: 862d60d41217189dea8256477bf802f4e10a7bdc
+PODFILE CHECKSUM: b43150e8d6c8cc3b1f63a85ef9540f1da1a02f76
 
-COCOAPODS: 1.10.1
+COCOAPODS: 1.11.2

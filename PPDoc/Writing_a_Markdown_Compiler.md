@@ -17,6 +17,7 @@
 > Backus Normal Form，BNF：巴科斯范式，又称为巴科斯-诺尔范式，是一种用于表示上下文无关文法的语言，上下文无关文法描述了一类形式语言。它是由约翰·巴科斯（John Backus）和彼得·诺尔（Peter Naur）首先引入的用来描述计算机语言语法的符号集。
 >
 > emphasis 强调、重音、加重（斜体）
+> Peek:（计算机）读取数据，从前到后检查每个元素
 
 # Part1
 
@@ -651,7 +652,7 @@ end
 ```
 
 Once again, we just check the token sequence is valid and return a node. The `peek_or` method lives in a `TokenList` object, it takes any amount of arrays as input and tries the tokens defined in each array one by one. It stops whenever it finds a match, returning true, otherwise it returns false. As you might imagine, the order of the arrays are very important, as it’s first-in-first-matched.
-再一次，我们只是检查token序列是否有效并返回一个节点。`peek_or是`TokenList`对象的方法，它接受任何数量的数组作为输入，并逐一尝试每个数组中定义的标记。只要找到一个匹配的，它就停止，返回true，否则就返回false。数组的顺序非常重要，因为它是先来的先匹配的。
+我们只检查token序列是否有效并返回一个节点对象（Node）。`peek_or`是`TokenList`对象的方法，它的输入参数是token数组，逐一检查输入参数的每个数组的token是不是跟tokens数组相匹配，如果匹配它就停止，并返回true，否则返回false。数组的顺序非常重要，因为它是先来的先匹配的。
 
 The emphasis parser is quite similar to this one, so let’s move onto something more interesting: The sentence parser. Our rule is `Sentence := EmphasizedText | BoldText | Text`. Seems simple enough, `match_first` does the trick fos us:
 强调文字解析器和这个解析器很相似，让我们看看更有趣的东西：句子分析器。我们的规则是 `Sentence := EmphasizedText | BoldText | Text`。看上去很简单，`match_first`方法能帮我们解决这个问题：
@@ -665,7 +666,7 @@ end
 ```
 
 `match_first` is a concern which is included whenever needed. It’s somewhat like an *or*, it will try the given parsers and return the first valid node it finds. As usual, the order of the parsers is very important as they get tested in the given order.
-`match_first`是一个concern，在需要的时候会被包含进去。它有点像一个or，它将尝试给定的分析器并返回它发现的第一个有效节点。像往常一样，分析器的顺序是非常重要的，因为它们会按照给定的顺序进行测试。
+`match_first`是一个concern，在需要的时候会被包含进去。它有点像or，它将尝试给定的解析器并返回它发现的第一个有效节点。像往常一样，分析器的顺序是非常重要的，因为它们会按照给定的顺序进行测试。
 
 Now, onto the next rule: `SentenceAndNewline := Sentence+ NEWLINE NEWLINE`.
 现在，进入下一条规则： `SentenceAndNewline := Sentence+ NEWLINE NEWLINE`
@@ -692,7 +693,7 @@ Similar to `match_first`, we now have another concern, `match_star`, which match
 > 注意 我们可以在这里做一个新的辅助工具，即 match_plus。为了使事情简单，我决定 "手动 "完成它。如果你想玩玩代码，实现 match_plus 是一个很好的练习。
 
 Our little concerns take away most of the job, as the remaining parsers are quite trivial. For example, this is our `Body` parser:
-我们的小concerns带走了大部分的工作，因为剩下的解析器是非常微不足道的。例如，这是我们的Body解析器。
+我们的小concerns做了大部分的工作，剩下的解析器是非常微不足道的。例如，这是我们的Body解析器。
 
 ```ruby
 class BodyParser < BaseParser
@@ -707,7 +708,7 @@ end
 ```
 
 Now what’s missing is something to start calling up parsers. Let’s wrap the whole parsing functionality into a `Parser` object which abstracts away all the complicated stuff into a simple API:
-现在所缺少的是开始调用解析器的东西。让我们把整个解析功能包装成一个解析器对象，把所有复杂的东西抽象成一个简单的API
+上面写的这么多解析器，我们该怎么调用呢？我们把整个解析功能封装成一个解析器对象，把所有复杂的东西抽象成一个简单的API就行了：
 
 ```ruby
 class Parser

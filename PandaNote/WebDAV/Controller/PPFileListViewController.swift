@@ -25,6 +25,7 @@ class PPFileListViewController: PPBaseViewController,UITextFieldDelegate,UITable
     
     var pathStr = "/"
     var dataSource:Array<PPFileObject> = []
+    var imageArray = [PPFileObject]()
     var tableView = UITableView()
 
     var currentImageURL = ""
@@ -125,8 +126,8 @@ class PPFileListViewController: PPBaseViewController,UITextFieldDelegate,UITable
             self.navigationController?.pushViewController(vc, animated: true)
         }
         else if (fileObj.name.pp_isImageFile())  {
-            loadAndCacheImage(imageURL: fileObj.path,fileID: fileObj.fileID) { (imageData) in
-                self.showImage(contents: imageData, image: nil, imageName: fileObj.path,imageURL:fileObj.path) {
+            loadAndCacheImage(imageURL: fileObj.path,fileID: fileObj.fileID) { (imageData,imageLocalPath) in
+                self.showImage(contents: imageData, image: nil, imageName: fileObj.path,imageURL:imageLocalPath) {
                     tableView.reloadRows(at: [indexPath], with: .none)//下载成功后再刷新
                 }
             }
@@ -282,53 +283,48 @@ class PPFileListViewController: PPBaseViewController,UITextFieldDelegate,UITable
 //            PPShareManager.shared().weixinShareEmoji(imageData ?? Data.init(), type: PPSharePlatform.weixinSession.rawValue)
         }
     }
+    
+    //在滑到第index页的时候，下载当前页的图片并且让SKPhotoBrowser刷新
+    func didScrollToIndex(_ browser: SKPhotoBrowser, index: Int) {
+        debugPrint(index)
+        let obj = self.imageArray[index];
+        loadAndCacheImage(imageURL: obj.path, fileID: obj.fileID) { data, url in
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.2, execute: {
+                let obj2 = browser.photos[index]
+                obj2.loadUnderlyingImageAndNotify()
+                // browser.reloadData()
+            })
+        }
+    }
+    //根据参数加载显示图片 Load photo according to the parameters
     func showImage(contents:Data,image:UIImage?,imageName:String,imageURL:String,completion: (() -> Void)? = nil) -> Void {
-        DispatchQueue.main.async {
-            if let image_down = UIImage.init(data: contents) {
-                // 1. create SKPhoto Array from UIImage
-                var images = [SKPhoto]()
-                let photo = SKPhoto.photoWithImage(image_down)// add some UIImage
-                photo.caption = imageName
-                photo.photoURL = imageURL
-                images.append(photo)
-                
-                // 2. create PhotoBrowser Instance, and present from your viewController.
-                self.photoBrowser = SKPhotoBrowser(photos: images)
-                self.photoBrowser.initializePageIndex(0)
-                self.photoBrowser.delegate = self
-                SKPhotoBrowserOptions.actionButtonTitles = ["微信原图分享","作为微信表情分享😄","UIActivityViewController分享"]
-                
-                self.present(self.photoBrowser, animated: true, completion: {})
-                if let completion = completion {
-                    completion()
-                }
-                
-                /*
-                DispatchQueue.main.asyncAfter(deadline: .now()+1, execute: {
-                    for subview in self.photoBrowser.view.subviews {
-                        if subview is UIScrollView {
-                            for subsubview in subview.subviews {
-//                                print(subsubview)
-                                if subsubview is UIScrollView {
-                                    for subsubsubview in subsubview.subviews {
-                                        print(subsubsubview)
-                                        if subsubsubview is UIImageView {
-                                            let imageShow:UIImageView = subsubsubview as! UIImageView
-                                            imageShow.kf.setImage(with: <#T##Resource?#>, placeholder: <#T##Placeholder?#>, options: <#T##KingfisherOptionsInfo?#>, progressBlock: <#T##DownloadProgressBlock?##DownloadProgressBlock?##(Int64, Int64) -> Void#>, completionHandler: <#T##CompletionHandler?##CompletionHandler?##(Image?, NSError?, CacheType, URL?) -> Void#>)
-                                            print("i found it ")
-                                            print(subsubsubview)
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    
-                })
-                */
-                
-                
+        var photos = [SKPhoto]()
+        let imageToSKPhoto = imageArray.map { imageObj -> SKPhoto in
+            let path2 = "\(PPDiskCache.shared.path)/\(PPUserInfo.shared.webDAVRemark)/\(imageObj.path)"
+            let url2 = URL(fileURLWithPath: path2)
+            let photo2 = SKPhoto.photoWithImageURL(url2.absoluteString)
+            photo2.caption = imageObj.path
+            return photo2
+        }
+        photos.append(contentsOf: imageToSKPhoto)
+        self.photoBrowser = SKPhotoBrowser(photos: photos)
+
+        var clickIndex = 0//点击的图片是第几张 The sequence number of the clicked photo
+        for i in 0..<imageArray.count {
+            let fileObj = imageArray[i]
+            if imageURL.contains(fileObj.path) {
+                clickIndex = i
+                break
             }
+        }
+        
+        self.photoBrowser.initializePageIndex(clickIndex)
+        self.photoBrowser.delegate = self
+        SKPhotoBrowserOptions.actionButtonTitles = ["微信原图分享","微信表情(Gif)分享😄","UIActivityViewController分享"]
+        
+        self.present(self.photoBrowser, animated: true, completion: {})
+        if let completion = completion {
+            completion()
         }
     }
     
@@ -442,7 +438,7 @@ class PPFileListViewController: PPBaseViewController,UITextFieldDelegate,UITable
         self.present(alertController, animated: true, completion: nil)
     }
     /// 加载图片并保存，如果本地不存在就从服务器获取
-    func loadAndCacheImage(imageURL:String,fileID:String,completionHandler: ((Data) -> Void)? = nil) {
+    func loadAndCacheImage(imageURL:String,fileID:String,completionHandler: ((Data,String) -> Void)? = nil) {
 //        let cache = ImageCache.default//KingFisher用
         let imagePath = "\(PPDiskCache.shared.path)/\(PPUserInfo.shared.webDAVRemark)/\(imageURL)"
         self.currentImageURL = imagePath
@@ -452,7 +448,9 @@ class PPFileListViewController: PPBaseViewController,UITextFieldDelegate,UITable
         PPFileManager.shared.getFileData(path: imageURL, fileID: fileID,cacheToDisk:true) { (contents: Data?,isFromCache, error) in
             guard let contents = contents else { return }
             if let handler = completionHandler {
-                handler(contents)
+                DispatchQueue.main.async {
+                    handler(contents,imagePath)
+                }
             }
         }        
     }
@@ -476,6 +474,7 @@ class PPFileListViewController: PPBaseViewController,UITextFieldDelegate,UITable
         if isRecentFiles {
             self.dataSource.removeAll()
             self.dataSource.append(contentsOf: PPUserInfo.shared.pp_RecentFiles)
+            self.imageArray = self.dataSource.filter{$0.name.pp_isImageFile()}
             self.tableView.endRefreshing()
             self.tableView.reloadData()
             PPHUD.showHUDFromTop("暂无最近文件")
@@ -496,6 +495,7 @@ class PPFileListViewController: PPBaseViewController,UITextFieldDelegate,UITable
 
             self.dataSource.removeAll()
             self.dataSource.append(contentsOf: contents)
+            self.imageArray = self.dataSource.filter{$0.name.pp_isImageFile()}
             self.tableView.endRefreshing()
             self.tableView.reloadData()
             
@@ -526,6 +526,8 @@ extension PPFileListViewController {
         #if !USE_YPImagePicker
         print("targetEnvironment(macCatalyst)")
         let picker = TZImagePickerController()
+        picker.allowPickingMultipleVideo = true
+        picker.maxImagesCount = 999//一次最多可选择999张图片
         picker.didFinishPickingPhotosWithInfosHandle = { (photos, assets, isSelectOriginalPhoto, infoArr) -> (Void) in
             // debugPrint("\(photos?.count) ---\(assets?.count)")
             guard let photoAssets = assets as? [PHAsset] else { return }

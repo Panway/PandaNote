@@ -19,6 +19,7 @@ class PPFileManager: NSObject,FileProviderDelegate {
     var webdavService : PPWebDAVService?
     var dropbox: PPDropboxService?//未配置服务器地址时刷新可能为空
     var localFileService: PPLocalFileService?
+    var oneDriveService: PPOneDriveService?
     var baiduwangpan : BaiduyunAPITool?
     var currentPath = ""
     var baiduFSID = 0
@@ -37,6 +38,8 @@ class PPFileManager: NSObject,FileProviderDelegate {
                 return dropbox
             case .webdav:
                 return webdavService
+            case .onedrive:
+                return oneDriveService
             case .baiduyun:
                 return baiduwangpan
             default:
@@ -189,7 +192,9 @@ class PPFileManager: NSObject,FileProviderDelegate {
     /// 通过WebDAV上传到服务器
     func uploadFileViaWebDAV(path: String, contents: Data?, completionHandler:@escaping(_ error:Error?) -> Void) {
         guard let contents = contents else {
-            PPHUD.showHUDFromTop("空文件",isError: true)
+            DispatchQueue.main.async {
+                PPHUD.showHUDFromTop("空文件",isError: true)
+            }
             return
         }
         currentService?.createFile(atPath: path, contents: contents, completionHandler: { error in
@@ -260,6 +265,10 @@ class PPFileManager: NSObject,FileProviderDelegate {
         else if PPUserInfo.shared.cloudServiceType == .baiduyun {
             baiduwangpan = BaiduyunAPITool(access_token: password)
         }
+        else if PPUserInfo.shared.cloudServiceType == .onedrive {
+            let refresh_token = PPUserInfo.shared.cloudServiceExtra
+            oneDriveService = PPOneDriveService(access_token: password, refresh_token: refresh_token)
+        }
         else if PPUserInfo.shared.cloudServiceType == .local {
             localFileService = PPLocalFileService()
         }
@@ -292,6 +301,12 @@ class PPFileManager: NSObject,FileProviderDelegate {
 //                }
 //            }
 //        } else {
+        if asset.mediaType == .video {
+            requestVideoURL(with: asset) { url in
+                completion(nil,url?.absoluteString ?? "",[:])
+            }
+            return
+        }
         // 如果上传前需要压缩图片
         if PPUserInfo.pp_boolValue("pp_compressImageBeforeUpload") {
             manager.requestImage(for: asset, targetSize: PHImageManagerMaximumSize, contentMode: .aspectFill, options: options) { (restulImage, imageInfo) in
@@ -310,6 +325,8 @@ class PPFileManager: NSObject,FileProviderDelegate {
                 if let compressionQ = PPUserInfo.shared.pp_Setting["pp_imageCompressionQuality"] as? String {
                     compressionQuality = NumberFormatter().number(from: compressionQ) as? CGFloat ?? CGFloat(0.5)
                 }
+                //"IMG_0111.HEIC" -> "IMG_0111.jpg"
+                originalFilename = String(originalFilename.split(separator: ".")[0]) + ".jpg"
                 if let imageData = restulImage?.jpegData(compressionQuality: compressionQuality) {
                     completion(imageData as NSData, originalFilename, [:])
                 } else {
@@ -320,8 +337,8 @@ class PPFileManager: NSObject,FileProviderDelegate {
         }
         manager.requestImageData(for: asset, options: options) { (imgData, string, orientation, info) -> Void in
             var url = ""
-            if let imageFileURL = info?["PHImageFileURLKey"] {
-                url = imageFileURL as! String
+            if let imageFileURL = info?["PHImageFileURLKey"] as? NSURL {
+                url = imageFileURL.absoluteString ?? ""
             }
             else {
                 url = asset.value(forKey: "filename") as! String
@@ -339,6 +356,20 @@ class PPFileManager: NSObject,FileProviderDelegate {
 //        }
         
         
+    }
+    func requestVideoURL(with asset: PHAsset?, success: @escaping (_ videoURL: URL?) -> Void) {
+        if let asset = asset {
+            let options = PHVideoRequestOptions()
+            options.deliveryMode = .automatic
+            options.isNetworkAccessAllowed = true
+            PHImageManager.default().requestAVAsset(forVideo: asset, options: options, resultHandler: { avasset, audioMix, info in
+                // NSLog(@"AVAsset URL: %@",myAsset.URL);
+                if avasset is AVURLAsset {
+                    let url = (avasset as? AVURLAsset)?.url
+                        success(url)
+                }
+            })
+        }
     }
     //https://stackoverflow.com/a/59869659
     ///删除相册图片

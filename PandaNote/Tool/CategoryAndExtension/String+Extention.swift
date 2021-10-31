@@ -31,7 +31,8 @@ extension String {
         return String(self[indexRange])
     }
     func pp_isImageFile() -> Bool {
-        if(self.lowercased().hasSuffix("jpg")||self.lowercased().hasSuffix("jpeg")||self.lowercased().hasSuffix("png")||self.lowercased().hasSuffix("gif")||self.lowercased().hasSuffix("webp")) {
+        let imageName = self.lowercased();
+        if(imageName.hasSuffix("jpg")||imageName.hasSuffix("jpeg")||imageName.hasSuffix("png")||imageName.hasSuffix("gif")||imageName.hasSuffix("webp")||imageName.hasSuffix("heic")) {
         return true
         }
         return false
@@ -84,6 +85,13 @@ extension String {
     func pp_valueOf(_ queryParamaterName: String) -> String? {
         guard let url = URLComponents(string: self) else { return nil }
         return url.queryItems?.first(where: { $0.name == queryParamaterName })?.value
+    }
+    
+//    func pp_fileExtension() -> String {
+//        return (self as NSString).pathExtension
+//    }
+    internal var pp_fileExtension: String {
+        return (self as NSString).pathExtension
     }
     //MARK: 布尔值
     var bool: Bool {
