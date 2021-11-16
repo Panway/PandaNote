@@ -10,9 +10,6 @@
 
 import UIKit
 
-#if DEBUG
-import DoraemonKit
-#endif
 import MonkeyKing
 
 

@@ -3,11 +3,6 @@ PODS:
   - BTNavigationDropdownMenu (0.7)
   - ContextMenu (0.4.0)
   - CryptoSwift (1.4.2)
-  - DoraemonKit/Core (3.0.7):
-    - FMDB
-    - GCDWebServer
-    - GCDWebServer/WebDAV
-    - GCDWebServer/WebUploader
   - Down (0.11.0)
   - DropDown (2.3.13)
   - FilesProvider (0.26.0)
@@ -16,13 +11,6 @@ PODS:
   - FMDB (2.7.5):
     - FMDB/standard (= 2.7.5)
   - FMDB/standard (2.7.5)
-  - GCDWebServer (3.5.4):
-    - GCDWebServer/Core (= 3.5.4)
-  - GCDWebServer/Core (3.5.4)
-  - GCDWebServer/WebDAV (3.5.4):
-    - GCDWebServer/Core
-  - GCDWebServer/WebUploader (3.5.4):
-    - GCDWebServer/Core
   - IQKeyboardManager (6.5.6)
   - Kanna (5.2.7)
   - Kingfisher (6.3.1)
@@ -55,7 +43,6 @@ DEPENDENCIES:
   - BTNavigationDropdownMenu
   - ContextMenu
   - CryptoSwift
-  - DoraemonKit/Core (= 3.0.7)
   - Down
   - DropDown
   - FilesProvider
@@ -86,14 +73,12 @@ SPEC REPOS:
     - BTNavigationDropdownMenu
     - ContextMenu
     - CryptoSwift
-    - DoraemonKit
     - Down
     - DropDown
     - FilesProvider
     - FLAnimatedImage
     - FLEX
     - FMDB
-    - GCDWebServer
     - IQKeyboardManager
     - Kanna
     - Kingfisher
@@ -123,14 +108,12 @@ SPEC CHECKSUMS:
   BTNavigationDropdownMenu: 57a72c74dc211db3564f5be168f4f7643491a7de
   ContextMenu: f835e09a93f1c28c631b76ee94396d9570397fd1
   CryptoSwift: a532e74ed010f8c95f611d00b8bbae42e9fe7c17
-  DoraemonKit: 32fb97f3aa82efa133111d193080ca5462cef135
   Down: b6ba1bc985c9d2f4e15e3b293d2207766fa12612
   DropDown: 8a2116376c1981888557f72ec2ffc9a5e0e456ec
   FilesProvider: 2a8ae17d8b9c23a6feadb1308ee638fa31d21065
   FLAnimatedImage: 8f3e854ebf9680b71f0b6e700939687fc4d82b4b
   FLEX: 6223ad3d853fb6177a6ab1cda85f372a72768da8
   FMDB: 2ce00b547f966261cd18927a3ddb07cb6f3db82a
-  GCDWebServer: 2c156a56c8226e2d5c0c3f208a3621ccffbe3ce4
   IQKeyboardManager: 2a6e97afdafc7becf0cb17a9a8d795e3a980717f
   Kanna: 01cfbddc127f5ff0963692f285fcbc8a9d62d234
   Kingfisher: 016c8b653a35add51dd34a3aba36b580041acc74
@@ -147,6 +130,6 @@ SPEC CHECKSUMS:
   TZImagePickerController: edf61b8e87f26e3e445aa50eb66254bd7f4859db
   YYText: 5c461d709e24d55a182d1441c41dc639a18a4849
 
-PODFILE CHECKSUM: b43150e8d6c8cc3b1f63a85ef9540f1da1a02f76
+PODFILE CHECKSUM: c0f83bb481393c982649c262f9907acded54e419
 
 COCOAPODS: 1.11.2

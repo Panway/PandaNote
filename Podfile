@@ -60,7 +60,7 @@ target 'PandaNote' do
   pod 'FMDB'
   pod 'IQKeyboardManager'
   #滴滴开源的应用内调试工具，界面比较美观 https://github.com/didi/DoraemonKit
-  pod 'DoraemonKit/Core', '3.0.7', :configurations => ['Debug']
+  #pod 'DoraemonKit/Core', '3.0.7', :configurations => ['Debug']
 #  pod 'Weibo_SDK', :git => 'https://github.com/sinaweibosdk/weibo_ios_sdk.git'
   # XML解析 https://github.com/tid-kijyun/Kanna
   pod 'Kanna', '~> 5.2.2'
