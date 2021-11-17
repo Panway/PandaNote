@@ -11,14 +11,14 @@ def fix_deployment_target(your_target,min_surpport_version)
     full_proj_path = full_proj_path + "/Pods/*.xcodeproj"
     puts full_proj_path
     all_file = Dir[full_proj_path]
-    puts "==========="
+    puts "fix_deployment_target 如果出错请再执行一遍命令"
     # puts all_file
     all_file.each do |file_name|
-        puts file_name
+        puts "fix:#{file_name}"
         project = Xcodeproj::Project.open(file_name)
         project.targets.each do |target|
             target.build_configurations.each do |config|
-            puts target.name
+            # puts target.name
             # puts "config.name is #{config.name}"
             if config.name == 'Release'
                 if config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'].to_f < min_surpport_version.to_f
@@ -31,12 +31,11 @@ def fix_deployment_target(your_target,min_surpport_version)
                 end
             end
 
-                
             end
         end
         project.save
     end
-
+    puts "fix deployment target finished"
 end
 
 # 禁止该死的Documentation Issue

@@ -51,7 +51,7 @@ DEPENDENCIES:
   - FMDB
   - IQKeyboardManager
   - Kanna (~> 5.2.2)
-  - Kingfisher
+  - Kingfisher (~> 6.3.1)
   - MBProgressHUD
   - MJRefresh
   - MonkeyKing
@@ -130,6 +130,6 @@ SPEC CHECKSUMS:
   TZImagePickerController: edf61b8e87f26e3e445aa50eb66254bd7f4859db
   YYText: 5c461d709e24d55a182d1441c41dc639a18a4849
 
-PODFILE CHECKSUM: c0f83bb481393c982649c262f9907acded54e419
+PODFILE CHECKSUM: 422dc6694ab30d81c2ee13a516b900ec3678699f
 
 COCOAPODS: 1.11.2
