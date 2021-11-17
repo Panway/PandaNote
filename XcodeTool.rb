@@ -100,10 +100,45 @@ end
 # disableRecommendedIssue("PandaNote",true,"1230")
 
 # fix_deployment_target("PandaNote","10.0")
+def testfunc(version)
+    puts "this is a test function:#{version}"
+end
 
 
+def handleCommand(command,param)
+    if command == "fix_deployment_target"
+        fix_deployment_target("PandaNote",param)
+    else
+        puts "sorry your command is not found"
+    end
+end
 
 
+# 命令行的参数
+v1 = ARGV[0]
+v2 = ARGV[1]
+
+order_name = -1
+
+if v1.instance_of? String
+    handleCommand(v1,v2)
+else
+    puts "你想要我做什么？ Please enter your command:\n
+1.消除第三方库 deployment target警告 fix_deployment_target
+2.testfunc"
+    # 等待用户输入
+    order_name = gets
+    # 指令转换成整数
+    order_num = order_name.to_i(base=10)
+    if order_num == 1
+        puts "input min deployment target version:"
+        v2 = gets
+        v2 = v2.to_i()
+        fix_deployment_target(param)
+    elsif order_num == 2
+        testfunc(v2)
+    end
+end
 
 
 

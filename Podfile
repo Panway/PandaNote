@@ -101,8 +101,8 @@ end
 
 
 post_install do |installer|
-  puts '在pod install之后执行的脚本'
-  output = %x( #{"ruby XcodeTool.rb"} ) #执行 XcodeTool.rb 脚本文件消除警告
+  puts '在pod install之后执行脚本，修复警告或错误'
+  output = %x( #{"ruby XcodeTool.rb fix_deployment_target 10"} ) #执行 XcodeTool.rb 脚本文件消除警告
   #支持Mac Catalyst
   output = %x( #{"curl https://p.agolddata.com/l/h/src/iOS/DoraemonAppInfoViewController.m -o DoraemonAppInfoViewController.m && cp -v -f DoraemonAppInfoViewController.m Pods/DoraemonKit/iOS/DoraemonKit/Src/Core/Plugin/Common/AppInfo/DoraemonAppInfoViewController.m"})
 #  output = %x( #{"sh ios_tool.sh correct_import"} )# 执行shell脚本文件
