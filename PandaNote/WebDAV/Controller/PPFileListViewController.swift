@@ -382,7 +382,7 @@ class PPFileListViewController: PPBaseViewController,UITextFieldDelegate,UITable
             else if index == 3 {
                 self.newTextFile(isDir: true)
             }
-            else {
+            else if index == 4 {
                 self.addCloudService()
             }
         }

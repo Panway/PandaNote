@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		1E03F8052748FF730085ACFB /* UITextView+PPTool.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E03F8042748FF730085ACFB /* UITextView+PPTool.swift */; };
 		1E0DE3E82612153A002BA5D9 /* web in Resources */ = {isa = PBXBuildFile; fileRef = 1E0DE3E72612153A002BA5D9 /* web */; };
 		1E179BF925B549B0006C3A56 /* UIView+PPTool.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E179BF825B549B0006C3A56 /* UIView+PPTool.swift */; };
 		1E1B5894257B8118000860F6 /* NSAttributedString+PPTool.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E1B5893257B8118000860F6 /* NSAttributedString+PPTool.swift */; };
@@ -106,6 +107,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		1E03F8042748FF730085ACFB /* UITextView+PPTool.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UITextView+PPTool.swift"; sourceTree = "<group>"; };
 		1E0DE3E72612153A002BA5D9 /* web */ = {isa = PBXFileReference; lastKnownFileType = folder; path = web; sourceTree = "<group>"; };
 		1E179BF825B549B0006C3A56 /* UIView+PPTool.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIView+PPTool.swift"; sourceTree = "<group>"; };
 		1E1B5893257B8118000860F6 /* NSAttributedString+PPTool.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NSAttributedString+PPTool.swift"; sourceTree = "<group>"; };
@@ -302,6 +304,7 @@
 			isa = PBXGroup;
 			children = (
 				1E179BF825B549B0006C3A56 /* UIView+PPTool.swift */,
+				1E03F8042748FF730085ACFB /* UITextView+PPTool.swift */,
 			);
 			path = Extension;
 			sourceTree = "<group>";
@@ -860,6 +863,7 @@
 				60766BCB23F2A81700D24CEA /* PPSettingCell.swift in Sources */,
 				6056024823177736000809CD /* PPSettingViewController.swift in Sources */,
 				60560224231771E2000809CD /* UIScrollView+XDTool.m in Sources */,
+				1E03F8052748FF730085ACFB /* UITextView+PPTool.swift in Sources */,
 				605602562317796F000809CD /* XDWebViewController.m in Sources */,
 				6001B6362462BF3400A40593 /* UIImage+PPTool.swift in Sources */,
 				1E92F0B1258A1847009374C9 /* BaiduFileObject.swift in Sources */,

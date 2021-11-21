@@ -26,6 +26,7 @@ class PPMarkdownViewController: PPBaseViewController,UITextViewDelegate {
 //    var webdav: WebDAVFileProvider?
     var closeAfterSave : Bool = false
     var textChanged : Bool = false//文本改变的话就不需要再比较字符串了
+    var splitMode = false//分栏模式
     //MARK: Life Cycle
     override func viewDidLoad() {
         pp_initView()
@@ -149,6 +150,9 @@ class PPMarkdownViewController: PPBaseViewController,UITextViewDelegate {
     // MARK:UITextViewDelegate 文本框代理
     func textViewDidChange(_ textView: PPPTextView) {
 //        debugPrint(textView.text)
+        if splitMode {
+            PPUserInfo.shared.webViewController.renderMardownWithJS(self.textView.text)
+        }
     }
     func textViewShouldBeginEditing(_ textView: PPPTextView) -> Bool {
         debugPrint("====Start")
@@ -171,8 +175,83 @@ class PPMarkdownViewController: PPBaseViewController,UITextViewDelegate {
         let offsetKey = PPFileManager.shared.currentServerUniqueID().pp_md5
         debugPrint("滚动偏移量:\(scrollView.contentOffset.y)")
         PPCacheManeger.shared.set("\(scrollView.contentOffset.y)", key: offsetKey)
+        if splitMode {
+            self.scrollToSameTextAsTextView()
+        }
+    }
+    ///结束拖动更新y偏移量
+    func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
+        debugPrint("scrollViewDidEndDragging")
+        if splitMode {
+            self.scrollToSameTextAsTextView()
+        }
     }
     //MARK: Private 私有方法
+    
+    ///定位到与 TextView 相同的文本
+    func scrollToSameTextAsTextView() {
+        let range = Range(self.textView.pp_visibleRange())!
+        let visibleTextTop = self.textView.text.substring(range)
+        let array = visibleTextTop.split(separator: "\n")
+        if array.count > 0 {
+            let firstLineTextOfScreen = String(array[0])
+            debugPrint("屏幕第一行文字-->\(firstLineTextOfScreen)")
+            PPUserInfo.shared.webViewController.scrollToText(firstLineTextOfScreen) { offsetYFromJS in
+                if offsetYFromJS != 0 {
+                    debugPrint("JS没滚动到指定位置，滚动到百分比")
+                    let percentage = self.textView.contentOffset.y / self.textView.contentSize.height
+                    PPUserInfo.shared.webViewController.scrollToProportion(proportion: max(percentage,0))
+                }
+            }
+        }
+    }
+    ///分栏模式
+    @objc func switchSplitMode()  {
+        splitMode = !splitMode
+        if !splitMode {
+            self.pp_viewEdgeEqualToSafeArea(textView)
+            PPUserInfo.shared.webViewController.view.removeFromSuperview()
+            self.textView.backgroundColor = .white
+            return
+        }
+        self.textView.backgroundColor = UIColor.init(hexRGBValue: 0xf0f0f0)
+        self.textView.snp.remakeConstraints { maker in
+            maker.top.equalTo(self.pp_safeLayoutGuideTop())
+            maker.left.right.equalTo(self.view)
+            if #available(iOS 11.0, *) {
+                maker.height.equalTo(self.view.safeAreaLayoutGuide.layoutFrame.height/2)
+            } else {
+                maker.height.equalTo(self.view).multipliedBy(0.5)
+            }
+        }
+        
+        let webVC = PPUserInfo.shared.webViewController//PPWebViewController()
+        var path = ""
+        if self.filePathStr.hasSuffix("html") {//HTML文件直接显示
+            path = PPDiskCache.shared.path + self.filePathStr
+            webVC.fileURLStr = path
+        }
+        else {
+            path = Bundle.main.url(forResource: "markdown", withExtension:"html")?.absoluteString ?? ""
+            webVC.markdownStr = self.textView.text
+            webVC.urlString = path // file:///....
+            webVC.markdownName = self.filePathStr
+        }
+
+        self.addChild(webVC)
+//        webVC.view.frame = self.view.frame
+        self.view.addSubview(webVC.view)
+        webVC.view.snp.makeConstraints { maker in
+            maker.bottom.left.right.equalTo(self.view)
+            maker.height.equalTo(self.view.frame.size.height/2)
+        }
+        webVC.didMove(toParent: self)
+        
+        PPUserInfo.shared.webViewController.markdownStr = self.textView.text
+        PPUserInfo.shared.webViewController.loadURL()
+        
+    }
+
     /// 预览markdown
     @objc func previewAction(sender:UIButton)  {
         self.textView.resignFirstResponder()
@@ -224,6 +303,19 @@ class PPMarkdownViewController: PPBaseViewController,UITextViewDelegate {
         
 
     }
+    @objc func moreAction(sender:UIButton?)  {
+        let menuTitile = ["分享文本","分栏模式"]
+        PPAlertAction.showSheet(withTitle: "更多操作", message: nil, cancelButtonTitle: "取消", destructiveButtonTitle: nil, otherButtonTitle: menuTitile) { (index) in
+            debugPrint(index)
+            if index == 1 {
+                self.shareTextAction(sender: nil)
+            }
+            else if index == 2 {
+                self.switchSplitMode()
+            }
+            
+        }
+    }
     @objc func keyboardDownAction(sender:UIButton)  {
         //保存
         self.textView.resignFirstResponder()
@@ -238,17 +330,17 @@ class PPMarkdownViewController: PPBaseViewController,UITextViewDelegate {
     }()
     
     lazy var button1 : UIButton = {
-        let button1 = UIButton.init(type: UIButton.ButtonType.custom)
-        button1.frame = CGRect.init(x: 40, y: 0, width: 40, height: 40)
-        button1.setImage(UIImage.init(named: "share"), for: UIControl.State.normal)
-        button1.addTarget(self, action: #selector(shareTextAction(sender:)), for: UIControl.Event.touchUpInside)
+        let button1 = UIButton(type: .custom)
+        button1.frame = CGRect(x: 40, y: 0, width: 40, height: 40)
+        button1.setImage(UIImage(named: "done"), for: .normal)
+        button1.addTarget(self, action: #selector(saveTextAction(sender:)), for: .touchUpInside)
         return button1
     }()
     lazy var button2 : UIButton = {
-        let button2 = UIButton.init(type: UIButton.ButtonType.custom)
-        button2.frame = CGRect.init(x: 80, y: 0, width: 40, height: 40)
-        button2.setImage(UIImage.init(named: "done"), for: UIControl.State.normal)
-        button2.addTarget(self, action: #selector(saveTextAction(sender:)), for: UIControl.Event.touchUpInside)
+        let button2 = UIButton(type: .custom)
+        button2.frame = CGRect(x: 80, y: 0, width: 40, height: 40)
+        button2.setImage(UIImage(named: "toolbar_more"), for: .normal)
+        button2.addTarget(self, action: #selector(moreAction(sender:)), for: .touchUpInside)
         return button2
     }()
     

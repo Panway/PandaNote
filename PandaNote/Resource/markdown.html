@@ -264,6 +264,44 @@
       document.documentElement.scrollTop = document.body.scrollTop = parseInt(offset);
     }, 100);
   }
+  function scrollToText(text) {
+    var body = document.body,
+    html = document.documentElement;
+    // get document total height https://stackoverflow.com/a/1147768/4493393
+    // var height = Math.max( body.scrollHeight, body.offsetHeight, html.clientHeight, html.scrollHeight, html.offsetHeight );
+    console.log("search text:",text)
+    let pArray = [];
+
+    let tags = ["p", "ol", "ul","pre","table"];
+    tags.forEach(tag => {
+      const obj = Array.from(document.querySelectorAll(tag));
+      pArray = pArray.concat(obj);
+    });
+
+    for (let i = 0; i < pArray.length; i++) {
+      const element = pArray[i];
+      if (element.innerText.includes(text)) {
+        console.log("scrollToText",element.offsetTop);
+        element.scrollIntoView();
+        return element.offsetTop
+      }
+    }
+    return 0;
+  }
+  function highlight(text) {
+    console.log('search')
+    var paragraph = document.getElementById('content');
+    let opar = paragraph.innerHTML;
+    var search = text;
+    search = search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); //https://stackoverflow.com/questions/3446170/escape-string-for-use-in-javascript-regex
+
+    var re = new RegExp(search, 'g');
+    var m;
+
+    if (search.length > 0)
+      paragraph.innerHTML = opar.replace(re, `<mark>$&</mark>`);
+    else paragraph.innerHTML = opar;
+  }
   document.getElementById('content').innerHTML = ppmarked(string);
   </script>
   <script>

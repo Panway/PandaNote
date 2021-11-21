@@ -121,6 +121,7 @@ class PPWebDAVConfigViewController: PPBaseViewController {
         PPUserInfo.shared.initConfig()
         //新添加的配置设为当前服务器配置（选中最后一个）
         PPUserInfo.shared.pp_lastSeverInfoIndex = PPUserInfo.shared.pp_serverInfoList.count - 1
+        PPUserInfo.shared.pp_Setting["pp_lastSeverInfoIndex"] = PPUserInfo.shared.pp_lastSeverInfoIndex
         PPFileManager.shared.initCloudServiceSetting()
         if let home = self.navigationController?.viewControllers[0] {
             let vc = home as! PPFileListViewController

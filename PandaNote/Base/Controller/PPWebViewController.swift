@@ -2,8 +2,8 @@
 //  PPWebViewController.swift
 //  PandaNote
 //
-//  Created by panwei on 2020/4/4.
-//  Copyright © 2020 WeirdPan. All rights reserved.
+//  Created by Panway on 2020/4/4.
+//  Copyright © 2020 Panway. All rights reserved.
 //  bug:https://stackoverflow.com/a/28676439/4493393
 //  WKWebView时序图  https://www.jianshu.com/p/55f5ac1ab817
 
@@ -91,6 +91,7 @@ class PPWebViewController: UIViewController,WKUIDelegate,WKNavigationDelegate,WK
             self.loadURL()
         }
     }
+    //MARK: Public 公开方法
     func loadURL() {
         if let urlString = self.urlString {
             if let url = URL(string: urlString) {
@@ -110,6 +111,31 @@ class PPWebViewController: UIViewController,WKUIDelegate,WKNavigationDelegate,WK
         }
         
         
+    }
+    ///滚动到总高度的某个比例
+    func scrollToProportion(proportion:CGFloat) {
+        let offsetY = wkWebView.scrollView.contentSize.height * proportion
+        wkWebView.scrollView.setContentOffset(CGPoint(x: 0, y: offsetY), animated: true)
+    }
+    ///JS滚动到第一个搜索到的文本，返回0代表失败或没匹配到
+    func scrollToText(_ text: String,completionHandler:((_ videoURL: Int) -> Void)? = nil) {
+        let js = "scrollToText('\(text)');"
+        wkWebView.evaluateJavaScript(js, completionHandler: { result, error in
+            if let completionHandler = completionHandler {
+                if let result_number = result as? Int {
+                    completionHandler(result_number)
+                }
+            }
+        })
+    }
+    ///用JS渲染Markdown文本
+    func renderMardownWithJS(_ markdown:String) {
+        let hash = self.markdownName?.hash ?? 0
+        let markdown2JS = markdown.pp_replaceEscapeCharacter()
+        let js = "document.getElementById('content').innerHTML = ppmarked('\(markdown2JS)');document.getElementById('ppTOCContent').innerHTML = ppGenerateTOC('\(markdown2JS)');setFileHash(\(hash));"
+        wkWebView.evaluateJavaScript(js, completionHandler: { result, error in
+            debugPrint(error)
+        })
     }
     override func didReceiveMemoryWarning() {
         debugPrint("==内存警告！")
@@ -140,11 +166,7 @@ class PPWebViewController: UIViewController,WKUIDelegate,WKNavigationDelegate,WK
             self.navigationItem.title = result as? String
         }
         if let markdown = self.markdownStr {
-            let hash = self.markdownName?.hash ?? 0
-            let markdown2JS = markdown.pp_replaceEscapeCharacter()
-            let js = "document.getElementById('content').innerHTML = ppmarked('\(markdown2JS)');document.getElementById('ppTOCContent').innerHTML = ppGenerateTOC('\(markdown2JS)');setFileHash(\(hash));"
-            webView.evaluateJavaScript(js, completionHandler: { result, error in
-                debugPrint(error)
+            self.renderMardownWithJS(markdown)
             })
         }
     }

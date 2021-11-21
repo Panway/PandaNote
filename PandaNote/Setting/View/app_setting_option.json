@@ -16,7 +16,7 @@
   },
   {
     "name": "markdown文本解析器设置",
-    "detail": "试验性功能，请谨慎使用(默认none)",
+    "detail": "试验性功能，请谨慎使用(不推荐Down)",
     "key": "pp_markdownParseMethod",
   }],
   [
