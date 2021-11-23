@@ -18,6 +18,10 @@
     "name": "markdown文本解析器设置",
     "detail": "试验性功能，请谨慎使用(不推荐Down)",
     "key": "pp_markdownParseMethod",
+  },
+  {
+    "name": "编辑器主题样式",
+    "key": "pp_markdownEditorStyle",
   }],
   [
   {

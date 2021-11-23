@@ -8,6 +8,14 @@
 
 /* Begin PBXBuildFile section */
 		1E03F8052748FF730085ACFB /* UITextView+PPTool.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E03F8042748FF730085ACFB /* UITextView+PPTool.swift */; };
+		1E03F83F274C7B940085ACFB /* Data+PPTool.swift.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E03F83E274C7B940085ACFB /* Data+PPTool.swift.swift */; };
+		1E03F841274C7C640085ACFB /* PPThemeModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E03F840274C7C640085ACFB /* PPThemeModel.swift */; };
+		1E03F843274C7E510085ACFB /* chuizi.json in Resources */ = {isa = PBXBuildFile; fileRef = 1E03F842274C7E510085ACFB /* chuizi.json */; };
+		1E03F845274C87120085ACFB /* String+PPTool.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E03F844274C87110085ACFB /* String+PPTool.swift */; };
+		1E03F847274C89ED0085ACFB /* default.json in Resources */ = {isa = PBXBuildFile; fileRef = 1E03F846274C89ED0085ACFB /* default.json */; };
+		1E03F84A274CA8220085ACFB /* dark.json in Resources */ = {isa = PBXBuildFile; fileRef = 1E03F848274CA8220085ACFB /* dark.json */; };
+		1E03F84B274CA8220085ACFB /* black.json in Resources */ = {isa = PBXBuildFile; fileRef = 1E03F849274CA8220085ACFB /* black.json */; };
+		1E03F84D274CB1A00085ACFB /* vue.json in Resources */ = {isa = PBXBuildFile; fileRef = 1E03F84C274CB1A00085ACFB /* vue.json */; };
 		1E0DE3E82612153A002BA5D9 /* web in Resources */ = {isa = PBXBuildFile; fileRef = 1E0DE3E72612153A002BA5D9 /* web */; };
 		1E179BF925B549B0006C3A56 /* UIView+PPTool.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E179BF825B549B0006C3A56 /* UIView+PPTool.swift */; };
 		1E1B5894257B8118000860F6 /* NSAttributedString+PPTool.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E1B5893257B8118000860F6 /* NSAttributedString+PPTool.swift */; };
@@ -108,6 +116,14 @@
 
 /* Begin PBXFileReference section */
 		1E03F8042748FF730085ACFB /* UITextView+PPTool.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UITextView+PPTool.swift"; sourceTree = "<group>"; };
+		1E03F83E274C7B940085ACFB /* Data+PPTool.swift.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Data+PPTool.swift.swift"; sourceTree = "<group>"; };
+		1E03F840274C7C640085ACFB /* PPThemeModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPThemeModel.swift; sourceTree = "<group>"; };
+		1E03F842274C7E510085ACFB /* chuizi.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = chuizi.json; sourceTree = "<group>"; };
+		1E03F844274C87110085ACFB /* String+PPTool.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+PPTool.swift"; sourceTree = "<group>"; };
+		1E03F846274C89ED0085ACFB /* default.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = default.json; sourceTree = "<group>"; };
+		1E03F848274CA8220085ACFB /* dark.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = dark.json; sourceTree = "<group>"; };
+		1E03F849274CA8220085ACFB /* black.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = black.json; sourceTree = "<group>"; };
+		1E03F84C274CB1A00085ACFB /* vue.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = vue.json; sourceTree = "<group>"; };
 		1E0DE3E72612153A002BA5D9 /* web */ = {isa = PBXFileReference; lastKnownFileType = folder; path = web; sourceTree = "<group>"; };
 		1E179BF825B549B0006C3A56 /* UIView+PPTool.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIView+PPTool.swift"; sourceTree = "<group>"; };
 		1E1B5893257B8118000860F6 /* NSAttributedString+PPTool.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NSAttributedString+PPTool.swift"; sourceTree = "<group>"; };
@@ -242,6 +258,18 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		1E03F83D274BE23A0085ACFB /* theme */ = {
+			isa = PBXGroup;
+			children = (
+				1E03F849274CA8220085ACFB /* black.json */,
+				1E03F84C274CB1A00085ACFB /* vue.json */,
+				1E03F842274C7E510085ACFB /* chuizi.json */,
+				1E03F848274CA8220085ACFB /* dark.json */,
+				1E03F846274C89ED0085ACFB /* default.json */,
+			);
+			path = theme;
+			sourceTree = "<group>";
+		};
 		1E3158F526B79567008F432D /* OneDrive */ = {
 			isa = PBXGroup;
 			children = (
@@ -303,8 +331,10 @@
 		1ECEE1CB25BD225D00454966 /* Extension */ = {
 			isa = PBXGroup;
 			children = (
-				1E179BF825B549B0006C3A56 /* UIView+PPTool.swift */,
+				1E03F83E274C7B940085ACFB /* Data+PPTool.swift.swift */,
+				1E03F844274C87110085ACFB /* String+PPTool.swift */,
 				1E03F8042748FF730085ACFB /* UITextView+PPTool.swift */,
+				1E179BF825B549B0006C3A56 /* UIView+PPTool.swift */,
 			);
 			path = Extension;
 			sourceTree = "<group>";
@@ -403,6 +433,7 @@
 			children = (
 				60A1F92B24398B23009E390C /* PPFileObject.swift */,
 				1EDE20952521E71A001331FE /* DouyinVideoModel.swift */,
+				1E03F840274C7C640085ACFB /* PPThemeModel.swift */,
 			);
 			path = Model;
 			sourceTree = "<group>";
@@ -502,6 +533,7 @@
 		6056027623177C4F000809CD /* Resource */ = {
 			isa = PBXGroup;
 			children = (
+				1E03F83D274BE23A0085ACFB /* theme */,
 				1E0DE3E72612153A002BA5D9 /* web */,
 				60249C68231D1DB100223F1A /* vue.css */,
 				6056027723177C73000809CD /* markdown.html */,
@@ -720,10 +752,15 @@
 				1E0DE3E82612153A002BA5D9 /* web in Resources */,
 				1EE5A41A25B2DBB500429CB8 /* app_setting_option.json in Resources */,
 				60F5691B22F2ADCA00874994 /* LaunchScreen.storyboard in Resources */,
+				1E03F84A274CA8220085ACFB /* dark.json in Resources */,
+				1E03F847274C89ED0085ACFB /* default.json in Resources */,
+				1E03F84B274CA8220085ACFB /* black.json in Resources */,
 				60F5691822F2ADCA00874994 /* Assets.xcassets in Resources */,
 				60F5691622F2ADC700874994 /* Main.storyboard in Resources */,
+				1E03F84D274CB1A00085ACFB /* vue.json in Resources */,
 				6056027823177C73000809CD /* markdown.html in Resources */,
 				60249C69231D1DB100223F1A /* vue.css in Resources */,
+				1E03F843274C7E510085ACFB /* chuizi.json in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -843,6 +880,7 @@
 				60A1F8DA24388391009E390C /* PPWebViewController.swift in Sources */,
 				1EC4F0342608D66600377D97 /* Data+PPTool.swift in Sources */,
 				60A1F92C24398B23009E390C /* PPFileObject.swift in Sources */,
+				1E03F83F274C7B940085ACFB /* Data+PPTool.swift.swift in Sources */,
 				6056022823177274000809CD /* PPBaseTableViewCell.swift in Sources */,
 				1E1DE37C2567BA0A00BB2D1C /* PPFileListViewController+Search.swift in Sources */,
 				60E6141E243DA27700630B4B /* PPBaseView.swift in Sources */,
@@ -862,6 +900,7 @@
 				6056027A23178017000809CD /* PPWebDAVConfigViewController.swift in Sources */,
 				60766BCB23F2A81700D24CEA /* PPSettingCell.swift in Sources */,
 				6056024823177736000809CD /* PPSettingViewController.swift in Sources */,
+				1E03F845274C87120085ACFB /* String+PPTool.swift in Sources */,
 				60560224231771E2000809CD /* UIScrollView+XDTool.m in Sources */,
 				1E03F8052748FF730085ACFB /* UITextView+PPTool.swift in Sources */,
 				605602562317796F000809CD /* XDWebViewController.m in Sources */,
@@ -876,6 +915,7 @@
 				60F5691322F2ADC700874994 /* ViewController.swift in Sources */,
 				1E526EC226B6788A0026DC67 /* PPCloudService.swift in Sources */,
 				60F5D042232751D8004E988B /* PPShareManager.m in Sources */,
+				1E03F841274C7C640085ACFB /* PPThemeModel.swift in Sources */,
 				60011E41243A29E000BC6458 /* PlayerView.swift in Sources */,
 				60F5691122F2ADC700874994 /* AppDelegate.swift in Sources */,
 				60E61426243DC16E00630B4B /* PPPDFViewController.swift in Sources */,

@@ -48,11 +48,7 @@ class PPAddCloudServiceViewController : PPBaseViewController,UITableViewDataSour
             vc.cloudType = obj
             vc.serverURL = "http://dav.jianguoyun.com/dav"
             #if DEBUG
-            vc.serverURL = "http://192.168.123.46:5005"
-            vc.userName = "panda"
-            vc.password = "Pan10000"
-//            vc.userName = "948567749@qq.com"
-//            vc.password = "ajvb68qgqp75n9br"//pj
+
             #endif
             vc.remark = obj
             self.navigationController?.pushViewController(vc, animated: true)

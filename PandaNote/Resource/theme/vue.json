@@ -1,0 +1,11 @@
+{
+  "baseTextColor": "#555555",
+  "backgroundColor": "#f9f9f9",
+  "codeBackgroundColor":"#f8f8f8",
+  "lightTextColor": "#6e5032",
+  "titleTextColor": "#6e5032",
+  "linkTextColor": "#42b983",
+  "backgroundImageName": "default.npg",
+  "selectedTextBackgroundColor": "#f8f8f8",
+  "quoteTextColor": "#6e5032"
+}

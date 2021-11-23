@@ -19,6 +19,7 @@ class PPMarkdownViewController: PPBaseViewController,UITextViewDelegate {
     var markdownStr = "I support a *lot* of custom Markdown **Elements**, even `code`!"
     var historyList = [String]()
     var textView = PPPTextView()
+    let backgroundImage  = UIImageView()
     ///文件相对路径
     var filePathStr: String = ""
     ///文件ID（仅百度网盘）
@@ -27,8 +28,10 @@ class PPMarkdownViewController: PPBaseViewController,UITextViewDelegate {
     var closeAfterSave : Bool = false
     var textChanged : Bool = false//文本改变的话就不需要再比较字符串了
     var splitMode = false//分栏模式
+    var theme : PPThemeModel!
     //MARK: Life Cycle
     override func viewDidLoad() {
+        initStyle()
         pp_initView()
         self.title = self.filePathStr.split(string: "/").last
         PPFileManager.shared.getFileData(path: filePathStr, fileID: fileID,cacheToDisk:true,downloadIfCached:true) { (contents: Data?,isFromCache, error) in
@@ -53,8 +56,9 @@ class PPMarkdownViewController: PPBaseViewController,UITextViewDelegate {
                 let method = selectedIndex as! String
                 if method == "NSAttributedString+Markdown" {
                     //NSAttributedString+Markdown 解析
-                    self.textView.attributedText = NSAttributedString(markdownRepresentation: self.markdownStr, attributes: [.font : UIFont.systemFont(ofSize: 17.0), .foregroundColor: UIColor.darkText ])
-                    
+                    self.textView.attributedText = NSAttributedString(markdownRepresentation: self.markdownStr, attributes: [.font : UIFont.systemFont(ofSize: 17.0), .foregroundColor: self.theme.baseTextColor.pp_HEXColor()])
+                    self.textView.linkTextAttributes = [.foregroundColor:self.theme.linkTextColor.pp_HEXColor()]
+
                 }
                 else if method == "Down" {
                     //MARK:Down渲染
@@ -88,10 +92,12 @@ class PPMarkdownViewController: PPBaseViewController,UITextViewDelegate {
 
     }
     func pp_initView() {
+        self.view.addSubview(backgroundImage)
+        self.pp_viewEdgeEqualToSafeArea(backgroundImage)
+
         self.view.addSubview(textView)
         textView.textContainerInset = UIEdgeInsets(top: 0, left: 8, bottom: 0, right: 8)//Padding,内边距
         self.pp_viewEdgeEqualToSafeArea(textView)
-        textView.backgroundColor = UIColor.white
         textView.font = UIFont.systemFont(ofSize: 16.0)
         
         textView.delegate = self
@@ -171,6 +177,10 @@ class PPMarkdownViewController: PPBaseViewController,UITextViewDelegate {
         historyList.append(self.textView.text)
         debugPrint("historyList= \(historyList.count)")
     }
+    func textView(_ textView: UITextView, shouldInteractWith URL: URL, in characterRange: NSRange, interaction: UITextItemInteraction) -> Bool {
+        debugPrint("\(URL)")
+        return true
+    }
     func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
         let offsetKey = PPFileManager.shared.currentServerUniqueID().pp_md5
         debugPrint("滚动偏移量:\(scrollView.contentOffset.y)")
@@ -211,10 +221,8 @@ class PPMarkdownViewController: PPBaseViewController,UITextViewDelegate {
         if !splitMode {
             self.pp_viewEdgeEqualToSafeArea(textView)
             PPUserInfo.shared.webViewController.view.removeFromSuperview()
-            self.textView.backgroundColor = .white
             return
         }
-        self.textView.backgroundColor = UIColor.init(hexRGBValue: 0xf0f0f0)
         self.textView.snp.remakeConstraints { maker in
             maker.top.equalTo(self.pp_safeLayoutGuideTop())
             maker.left.right.equalTo(self.view)
@@ -320,7 +328,41 @@ class PPMarkdownViewController: PPBaseViewController,UITextViewDelegate {
         //保存
         self.textView.resignFirstResponder()
     }
-    
+    //初始化样式
+    func initStyle() {
+        if let theme = PPUserInfo.shared.pp_Setting["pp_markdownEditorStyle"] as? String {
+            if theme == "锤子便签" {
+                useTheme("chuizi.json")
+            }
+            if theme == "Vue" {
+                useTheme("vue.json")
+            }
+            else {
+                useTheme("default.json")
+            }
+        }
+        else {
+            useTheme("default.json")
+        }
+    }
+    //选择主题样式
+    func useTheme(_ configJSONFile:String) {
+        guard let themeConfig = Bundle.main.url(forResource: configJSONFile, withExtension: nil) else { return }
+        guard let data = try? Data(contentsOf: themeConfig) else { return }
+        guard let themeObj = data.pp_JSONObject() else { return }
+        guard let theme = PPThemeModel(JSON: themeObj) else { return }
+        self.theme = theme
+        if let data = try? Data(contentsOf: URL(fileURLWithPath: PPUserInfo.shared.pp_mainDirectory+"/"+theme.backgroundImageName)) {
+            backgroundImage.image = UIImage(data: data)
+            textView.backgroundColor = .clear
+        }
+        else {
+            textView.backgroundColor = theme.backgroundColor.pp_HEXColor()
+        }
+        textView.textColor = theme.baseTextColor.pp_HEXColor()
+        
+        
+    }
     lazy var button0 : UIButton = {
         let button0 = UIButton.init(type: UIButton.ButtonType.custom)
         button0.frame = CGRect.init(x: 0, y: 0, width: 40, height: 40)

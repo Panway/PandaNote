@@ -141,6 +141,19 @@ class PPSettingViewController: PPBaseViewController,UITableViewDataSource,UITabl
             DropDown.appearance().setupCornerRadius(10)
             dropDown.show()
         }
+        else if obj == "编辑器主题样式" {
+            let dropDown = DropDown()
+            dropDown.anchorView = tableView.cellForRow(at: indexPath) // UIView or UIBarButtonItem
+            dropDown.direction = .bottom
+            dropDown.bottomOffset = CGPoint(x: 200, y: 0)
+            dropDown.width = 100;
+            dropDown.dataSource = ["默认", "锤子便签", "深黑", "浅黑","Vue"]
+            dropDown.selectionAction = { (index: Int, item: String) in
+                PPUserInfo.shared.pp_Setting.updateValue(dropDown.dataSource[index], forKey:"pp_markdownEditorStyle")
+            }
+            DropDown.appearance().setupCornerRadius(10)
+            dropDown.show()
+        }
         else if obj == "图片压缩质量" {
             let dropDown = DropDown()
             dropDown.anchorView = tableView.cellForRow(at: indexPath)
