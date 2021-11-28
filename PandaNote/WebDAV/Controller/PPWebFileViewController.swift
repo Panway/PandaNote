@@ -35,7 +35,10 @@ class PPWebFileViewController: PPBaseViewController,UITableViewDataSource,UITabl
         
         for item in PPUserInfo.shared.pp_WebViewResource {
             let name = item.split(string: "?").first ?? ""
-            let ppFile = PPFileObject(name: name, path: item,size: 0,isDirectory: false,modifiedDate: "2020")
+            let ppFile = PPFileObject()
+            ppFile.name = name
+            ppFile.path = item
+//            let ppFile = PPFileObject(name: name, path: item,size: 0,isDirectory: false,modifiedDate: "2020")
             dataSource.append(ppFile)
             
         }

@@ -17,6 +17,9 @@ protocol PPCloudServiceProtocol {
     /// 获取文件列表
     func contentsOfDirectory(_ path: String, completionHandler:@escaping(_ data:[PPFileObject],_ error:Error?) -> Void)
     
+    /// 获取文件列表（可选）
+    func contentsOfPathID(_ pathID: String, completionHandler:@escaping(_ data:[PPFileObject],_ error:Error?) -> Void)
+    
     /// 获取文件二进制数据
     func contentsOfFile(_ path: String, completionHandler:@escaping(_ data:Data?,_ error:Error?) -> Void)
 

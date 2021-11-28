@@ -29,8 +29,7 @@ class PPOneDriveService: PPFilesProvider, PPCloudServiceProtocol {
         let userCredential = URLCredential(user: "anonymous",
                                            password: access_token,
                                            persistence: .forSession)
-        self.access_token = access_token//"EwBoA8l6BAAUwihrrCrmQ4wuIJX5mbj7rQla6TUAAW/MktkjZEo4HOKg/fD0hXlCKnXG12Gxn2U/SNZzFpjAQiKFV20h3bje8+4lTWqg9FzIEg6aYt4lCfAisWgnZirmDeQYKTpfm3wUtK5Hje1PYYHlQhgsSiIVlWDgyhDGVkkrRYujmkxswd83rlziy63ALbdHj4mBSDwGX4Vialmd2quhS69K0pyJxqddegO2+DRo+wPaVFKS4ZLSlr8bVLt7wLHSCj7WSEZ9qYbGcbLSwo/mE6WNCkqmPYhlHEYHcLnGYx36I6oq/1QJEFFrX4VZso/h0uq+mwzg+i/H5TPGV5CCc273Oop+ART4HU3k46GlH1kxg8tFUSue+Mgv9UQDZgAACFw0dEnICpadOAL1DODpGrVs8Al/K52SEbV0+9BtkK2ka3KseFOVyjqc5fPZg5zNLFRYbexPEwKCr/z5RpvpGN9c9r8Yzqpo8y5GzY8XwTNBhAjMVEpOnD8B/ZJvKmH9WEnW0np9Lt0ildc/Jx77/fLFyQmPUKUBEQzyqXhzWY+2wNcVLgSVN3qEndrVOTjGWhFlO9hy46MsD2NV797waEBPVZZYRNBbjhE+AHe3Gho/pnApOo7pyHd+p3yVrQFJAaVfBd5f3mhX1TBcDx3AZ8SgYUm96Gdx+d5BD/M/6kBY4WYtejo24bVZSVNAz+wYJ7DYDbutkY8ppdljK2bM3ma6OZZfTlCRZMXDm3y/1vEx7yL+H1ov4qnOFVB7fFJKKfCgAml/+XdO2eEVXl8WuAhSvV8fkiVAae3ialfRxNnEVw/eoDilRCQ0HBuLbQtXBNCeM7OTPKQqFKajyowkDOeiaWq+u5/YOtwAbDzxcAWyGzX7I2vhucGI1FGQtmPF1FxdOR/6sKu2/lGLmarbsQmeYXIqiMw/9eXQVV3LjrV4Ujg7WWWIe/qAbyJx/ZaLkg1paK14l0JLBUzJNcKshtK885eb8/Mj7+RlgLBUotlZ+x7b/LFS0VNYXywRyc2aF4eBJIDeSlY+yoxJO4P8kv1HLq52JpNKkm4DOV22XVIiYZnf/S2yBMnk6NoqvPdDc+13gYfq8nh22+JZCkG+8bTPqMmHUz452V7OzqET+UB2nFTC5l0fdyWasS6GRVMv4QnSdQI="
-//        self.access_token = "EwBoA8l6BAAUwihrrCrmQ4wuIJX5mbj7rQla6TUAAW/MktkjZEo4HOKg/fD0hXlCKnXG12Gxn2U/SNZzFpjAQiKFV20h3bje8+4lTWqg9FzIEg6aYt4lCfAisWgnZirmDeQYKTpfm3wUtK5Hje1PYYHlQhgsSiIVlWDgyhDGVkkrRYujmkxswd83rlziy63ALbdHj4mBSDwGX4Vialmd2quhS69K0pyJxqddegO2+DRo+wPaVFKS4ZLSlr8bVLt7wLHSCj7WSEZ9qYbGcbLSwo/mE6WNCkqmPYhlHEYHcLnGYx36I6oq/1QJEFFrX4VZso/h0uq+mwzg+i/H5TPGV5CCc273Oop+ART4HU3k46GlH1kxg8tFUSue+Mgv9UQDZgAACFw0dEnICpadOAL1DODpGrVs8Al/K52SEbV0+9BtkK2ka3KseFOVyjqc5fPZg5zNLFRYbexPEwKCr/z5RpvpGN9c9r8Yzqpo8y5GzY8XwTNBhAjMVEpOnD8B/ZJvKmH9WEnW0np9Lt0ildc/Jx77/fLFyQmPUKUBEQzyqXhzWY+2wNcVLgSVN3qEndrVOTjGWhFlO9hy46MsD2NV797waEBPVZZYRNBbjhE+AHe3Gho/pnApOo7pyHd+p3yVrQFJAaVfBd5f3mhX1TBcDx3AZ8SgYUm96Gdx+d5BD/M/6kBY4WYtejo24bVZSVNAz+wYJ7DYDbutkY8ppdljK2bM3ma6OZZfTlCRZMXDm3y/1vEx7yL+H1ov4qnOFVB7fFJKKfCgAml/+XdO2eEVXl8WuAhSvV8fkiVAae3ialfRxNnEVw/eoDilRCQ0HBuLbQtXBNCeM7OTPKQqFKajyowkDOeiaWq+u5/YOtwAbDzxcAWyGzX7I2vhucGI1FGQtmPF1FxdOR/6sKu2/lGLmarbsQmeYXIqiMw/9eXQVV3LjrV4Ujg7WWWIe/qAbyJx/ZaLkg1paK14l0JLBUzJNcKshtK885eb8/Mj7+RlgLBUotlZ+x7b/LFS0VNYXywRyc2aF4eBJIDeSlY+yoxJO4P8kv1HLq52JpNKkm4DOV22XVIiYZnf/S2yBMnk6NoqvPdDc+13gYfq8nh22+JZCkG+8bTPqMmHUz452V7OzqET+UB2nFTC5l0fdyWasS6GRVMv4QnSdQI="
+        self.access_token = access_token
         self.refresh_token = refresh_token
         onedrive = OneDriveFileProvider(credential: userCredential)
     }
@@ -42,7 +41,7 @@ class PPOneDriveService: PPFilesProvider, PPCloudServiceProtocol {
             "refresh_token": self.refresh_token,
             "grant_type": "refresh_token"
         ]
-        debugPrint("1==========\(parameters)")
+//        debugPrint("getNewToken==\(parameters)")
         let url = "https://login.microsoftonline.com/common/oauth2/v2.0/token"
         AF.request(url, method: .post, parameters: parameters).responseJSON { response in
             debugPrint(response.value)
@@ -54,9 +53,10 @@ class PPOneDriveService: PPFilesProvider, PPCloudServiceProtocol {
                                                    password: access_token,
                                                    persistence: .forSession)
                 self.refresh_token = refresh_token
+                self.access_token = access_token
                 self.onedrive = OneDriveFileProvider(credential: userCredential)
-                debugPrint("2==========\n\(refresh_token)")
-                debugPrint("2==========access_token\(access_token)")
+                print("=====refresh_token=====\n\(refresh_token)")
+                print("=====access_token=====\n\(access_token)")
 
                 
                 //更新
@@ -81,18 +81,14 @@ class PPOneDriveService: PPFilesProvider, PPCloudServiceProtocol {
         return
     }
     func contentsOfDirectory(_ path: String, completionHandler: @escaping ([PPFileObject], Error?) -> Void) {
-        var requestURL = "https://graph.microsoft.com/v1.0/me/drive/items/\(path)/children?%24expand=thumbnails&%24top=200"
-        if path == "/" {
+        contentsOfPathID(path, completionHandler: completionHandler)
+    }
+
+    func contentsOfPathID(_ pathID: String, completionHandler: @escaping ([PPFileObject], Error?) -> Void) {
+        var requestURL = "https://graph.microsoft.com/v1.0/me/drive/items/\(pathID)/children?%24expand=thumbnails&%24top=200"
+        if pathID == "/" {
             requestURL = "https://graph.microsoft.com/v1.0/me/drive/root/children?%24expand=thumbnails&%24top=200"
         }
-//        let parameters: [String: String] = [
-//            "client_id": onedrive_client_id_es,
-//            "redirect_uri": onedrive_redirect_uri_es,
-//            "refresh_token": self.refresh_token,
-//            "grant_type": "refresh_token"
-//        ]
-//        debugPrint("1==========\(parameters)")
-//        let url = "https://graph.microsoft.com/v1.0/me/drive/items/1F2FE956E16FEC61!106/children?%24expand=thumbnails&%24top=200"
         let headers: HTTPHeaders = [
             "Authorization": "bearer " + self.access_token
         ]
@@ -103,28 +99,17 @@ class PPOneDriveService: PPFilesProvider, PPCloudServiceProtocol {
                 return
             }
             
-            if let fileList = jsonDic?["value"] as? Array<[String:Any]> {
+            if let fileList = jsonDic?["value"] as? [[String:Any]] {
                 var dataSource = [PPFileObject]()
                 
                 for oneDriveFile in fileList {
-                    debugPrint("----------\(oneDriveFile)")
-                    if let item = PPOneDriveFileObject(JSON: oneDriveFile) {
-                        item.downloadLink = oneDriveFile["@microsoft.graph.downloadUrl"] as? String ?? ""
-                        debugPrint("-----2222-----\(item)")
-                        var isDir = false;
-                        var path_ = item.downloadLink
+//                    debugPrint("----------\(oneDriveFile)")
+                    if let item = PPOneDriveFile(JSON: oneDriveFile) {
+                        item.downloadURL = oneDriveFile["@microsoft.graph.downloadUrl"] as? String ?? ""
                         if item.folder != nil {
-                            isDir = true
-                            path_ = item.fs_id
+                            item.isDirectory = true
                         }
-                        let ppFile = PPFileObject(name: item.name,
-                                                  path: path_,
-                                                  size: item.size,
-                                                  isDirectory: isDir,
-                                                  modifiedDate: item.modifiedDate ?? "",
-                                                  fileID: "\(item.fs_id)",
-                                                  serverID: "")
-                        dataSource.append(ppFile)
+                        dataSource.append(item)
                     }
                     //@microsoft.graph.downloadUrl  name   size   lastModifiedDateTime
                     
@@ -154,11 +139,7 @@ class PPOneDriveService: PPFilesProvider, PPCloudServiceProtocol {
     func contentsOfFile(_ path: String, completionHandler: @escaping (Data?, Error?) -> Void) {
         AF.request(path).response { response in
             completionHandler(response.data, nil)
-//                    let archieveKey = "baidu_" + "\(path)"
-//            PPDiskCache.shared.setData(response.data, key: path)
-
         }
-//        onedrive.contents(path: path, completionHandler: completionHandler)
     }
     
     func createDirectory(_ folderName: String, at atPath: String, completionHandler: @escaping (Error?) -> Void) {

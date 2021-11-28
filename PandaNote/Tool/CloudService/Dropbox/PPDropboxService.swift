@@ -34,6 +34,10 @@ class PPDropboxService: PPFilesProvider, PPCloudServiceProtocol {
         })
     }
     
+    func contentsOfPathID(_ pathID: String, completionHandler: @escaping ([PPFileObject], Error?) -> Void) {
+            
+    }
+    
     func contentsOfFile(_ path: String, completionHandler: @escaping (Data?, Error?) -> Void) {
         dropbox?.contents(path: path, completionHandler: completionHandler)
     }

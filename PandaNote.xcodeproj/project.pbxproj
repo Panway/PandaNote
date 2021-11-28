@@ -24,7 +24,6 @@
 		1E1F2DEB25384C75002B0426 /* PPDebugViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E1F2DEA25384C75002B0426 /* PPDebugViewController.swift */; };
 		1E289EF2258E125A003E1042 /* PPCloudServiceAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E289EF1258E125A003E1042 /* PPCloudServiceAPI.swift */; };
 		1E3158F726B795DF008F432D /* PPOneDriveService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E3158F626B795DF008F432D /* PPOneDriveService.swift */; };
-		1E347B7C272E3ED6007770C2 /* PPOneDriveFileObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E347B7B272E3ED6007770C2 /* PPOneDriveFileObject.swift */; };
 		1E50942824DBB15B00238678 /* PPWebViewBottomToolbar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E50942724DBB15A00238678 /* PPWebViewBottomToolbar.swift */; };
 		1E526EC226B6788A0026DC67 /* PPCloudService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E526EC126B6788A0026DC67 /* PPCloudService.swift */; };
 		1E526EC526B699FB0026DC67 /* PPWebDAVService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E526EC426B699FB0026DC67 /* PPWebDAVService.swift */; };
@@ -41,6 +40,8 @@
 		1EDF714D24C3F1E600A12EC9 /* NSRegularExpression+PPTool.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1EDF714C24C3F1E600A12EC9 /* NSRegularExpression+PPTool.swift */; };
 		1EE5A41525B2947000429CB8 /* PPTableViewHeaderFooterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1EE5A41425B2947000429CB8 /* PPTableViewHeaderFooterView.swift */; };
 		1EE5A41A25B2DBB500429CB8 /* app_setting_option.json in Resources */ = {isa = PBXBuildFile; fileRef = 1EE5A41925B2DBB500429CB8 /* app_setting_option.json */; };
+		1EEB0FF02753456E006A5E26 /* PPFileModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1EEB0FEF2753456E006A5E26 /* PPFileModel.swift */; };
+		1EEB0FF327538771006A5E26 /* PPOneDriveFile.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1EEB0FF227538771006A5E26 /* PPOneDriveFile.swift */; };
 		60011E40243A29E000BC6458 /* PlayerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60011E3E243A29E000BC6458 /* PlayerViewController.swift */; };
 		60011E41243A29E000BC6458 /* PlayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60011E3F243A29E000BC6458 /* PlayerView.swift */; };
 		6001B6342461A82400A40593 /* PPWebFileViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6001B6332461A82400A40593 /* PPWebFileViewController.swift */; };
@@ -132,7 +133,6 @@
 		1E1F2DEA25384C75002B0426 /* PPDebugViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPDebugViewController.swift; sourceTree = "<group>"; };
 		1E289EF1258E125A003E1042 /* PPCloudServiceAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPCloudServiceAPI.swift; sourceTree = "<group>"; };
 		1E3158F626B795DF008F432D /* PPOneDriveService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPOneDriveService.swift; sourceTree = "<group>"; };
-		1E347B7B272E3ED6007770C2 /* PPOneDriveFileObject.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPOneDriveFileObject.swift; sourceTree = "<group>"; };
 		1E50942724DBB15A00238678 /* PPWebViewBottomToolbar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPWebViewBottomToolbar.swift; sourceTree = "<group>"; };
 		1E526EC126B6788A0026DC67 /* PPCloudService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPCloudService.swift; sourceTree = "<group>"; };
 		1E526EC426B699FB0026DC67 /* PPWebDAVService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPWebDAVService.swift; sourceTree = "<group>"; };
@@ -151,6 +151,8 @@
 		1EDF714C24C3F1E600A12EC9 /* NSRegularExpression+PPTool.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NSRegularExpression+PPTool.swift"; sourceTree = "<group>"; };
 		1EE5A41425B2947000429CB8 /* PPTableViewHeaderFooterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPTableViewHeaderFooterView.swift; sourceTree = "<group>"; };
 		1EE5A41925B2DBB500429CB8 /* app_setting_option.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = app_setting_option.json; sourceTree = "<group>"; };
+		1EEB0FEF2753456E006A5E26 /* PPFileModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPFileModel.swift; sourceTree = "<group>"; };
+		1EEB0FF227538771006A5E26 /* PPOneDriveFile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPOneDriveFile.swift; sourceTree = "<group>"; };
 		1EFF08AA24E50B8000E84AD1 /* PandaNote.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = PandaNote.entitlements; sourceTree = "<group>"; };
 		445FC61B8328A513BADB990E /* Pods-PandaNoteTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-PandaNoteTests.release.xcconfig"; path = "Target Support Files/Pods-PandaNoteTests/Pods-PandaNoteTests.release.xcconfig"; sourceTree = "<group>"; };
 		5FC90B3D04D0AB60B2DBFED0 /* Pods-PandaNoteUITests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-PandaNoteUITests.release.xcconfig"; path = "Target Support Files/Pods-PandaNoteUITests/Pods-PandaNoteUITests.release.xcconfig"; sourceTree = "<group>"; };
@@ -270,15 +272,6 @@
 			path = theme;
 			sourceTree = "<group>";
 		};
-		1E3158F526B79567008F432D /* OneDrive */ = {
-			isa = PBXGroup;
-			children = (
-				1E3158F626B795DF008F432D /* PPOneDriveService.swift */,
-				1E347B7B272E3ED6007770C2 /* PPOneDriveFileObject.swift */,
-			);
-			path = OneDrive;
-			sourceTree = "<group>";
-		};
 		1E526EBF26B673720026DC67 /* Tool */ = {
 			isa = PBXGroup;
 			children = (
@@ -290,6 +283,8 @@
 		1E526EC026B6781E0026DC67 /* PPCloudService */ = {
 			isa = PBXGroup;
 			children = (
+				1EEB0FEC27534498006A5E26 /* Base */,
+				1EEB0FF127538758006A5E26 /* OneDrive */,
 				1E526EC126B6788A0026DC67 /* PPCloudService.swift */,
 			);
 			path = PPCloudService;
@@ -345,7 +340,6 @@
 				1E289EF1258E125A003E1042 /* PPCloudServiceAPI.swift */,
 				1E526EC626B6BD360026DC67 /* PPLocalFileService.swift */,
 				1E526ECA26B6C0E90026DC67 /* PPFilesProvider.swift */,
-				1E3158F526B79567008F432D /* OneDrive */,
 				1E526ECC26B6F1DB0026DC67 /* Dropbox */,
 				1E526EC326B699D60026DC67 /* WebDAV */,
 				1ED298E72589F85400735B6B /* BaiduYun */,
@@ -360,6 +354,23 @@
 				1E92F0B0258A1847009374C9 /* BaiduFileObject.swift */,
 			);
 			path = BaiduYun;
+			sourceTree = "<group>";
+		};
+		1EEB0FEC27534498006A5E26 /* Base */ = {
+			isa = PBXGroup;
+			children = (
+				1EEB0FEF2753456E006A5E26 /* PPFileModel.swift */,
+			);
+			path = Base;
+			sourceTree = "<group>";
+		};
+		1EEB0FF127538758006A5E26 /* OneDrive */ = {
+			isa = PBXGroup;
+			children = (
+				1E3158F626B795DF008F432D /* PPOneDriveService.swift */,
+				1EEB0FF227538771006A5E26 /* PPOneDriveFile.swift */,
+			);
+			path = OneDrive;
 			sourceTree = "<group>";
 		};
 		3D039401EBEA015E67B87EC9 /* Pods */ = {
@@ -883,6 +894,7 @@
 				1E03F83F274C7B940085ACFB /* Data+PPTool.swift.swift in Sources */,
 				6056022823177274000809CD /* PPBaseTableViewCell.swift in Sources */,
 				1E1DE37C2567BA0A00BB2D1C /* PPFileListViewController+Search.swift in Sources */,
+				1EEB0FF327538771006A5E26 /* PPOneDriveFile.swift in Sources */,
 				60E6141E243DA27700630B4B /* PPBaseView.swift in Sources */,
 				6056024A231778B5000809CD /* PPFileListTableViewCell.swift in Sources */,
 				1E289EF2258E125A003E1042 /* PPCloudServiceAPI.swift in Sources */,
@@ -892,6 +904,7 @@
 				607150CC2459ACF300E2FDEB /* PPWebResourceProtocol.swift in Sources */,
 				605602822317A0DB000809CD /* PPHUD.swift in Sources */,
 				605601FA23176FAE000809CD /* PPTabBarController.swift in Sources */,
+				1EEB0FF02753456E006A5E26 /* PPFileModel.swift in Sources */,
 				1EE5A41525B2947000429CB8 /* PPTableViewHeaderFooterView.swift in Sources */,
 				6056015723166F99000809CD /* PPBaseViewController.swift in Sources */,
 				607150CA2459ABE900E2FDEB /* NSURLProtocol+WebKitSupport.m in Sources */,
@@ -920,7 +933,6 @@
 				60F5691122F2ADC700874994 /* AppDelegate.swift in Sources */,
 				60E61426243DC16E00630B4B /* PPPDFViewController.swift in Sources */,
 				1E526EC526B699FB0026DC67 /* PPWebDAVService.swift in Sources */,
-				1E347B7C272E3ED6007770C2 /* PPOneDriveFileObject.swift in Sources */,
 				6056022A231772AE000809CD /* PPMarkdownViewController.swift in Sources */,
 				60A1F8DC24388C98009E390C /* ViewController+PPTool.swift in Sources */,
 				1E1B58A7257B9480000860F6 /* PPAddCloudServiceViewController.swift in Sources */,

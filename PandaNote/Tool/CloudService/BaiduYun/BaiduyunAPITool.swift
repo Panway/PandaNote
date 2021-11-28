@@ -42,7 +42,7 @@ open class BaiduyunAPITool: NSObject, PPCloudServiceProtocol {
     
     //MARK:获取文件列表
     ///获取文件列表
-    func getFileList(path: String, completionHandler:@escaping(_ data:[PPFileObject],_ isFromCache:Bool,_ error:Error?) -> Void) {
+    func getFileList(path: String, completionHandler:@escaping(_ data:[PPFileModel],_ isFromCache:Bool,_ error:Error?) -> Void) {
         let parameters = ["access_token": access_token,
                           "desc": "1",
                           "dir": path.length>0 ? path : "/",
@@ -68,9 +68,11 @@ open class BaiduyunAPITool: NSObject, PPCloudServiceProtocol {
             }
             debugPrint("百度网盘获取文件数量：\(list.count)")
             //如果list有数据，可以拿去显示了
-            var dataSource = [PPFileObject]()
+            var dataSource = [PPFileModel]()
             for baiduFile in list {
                 if let item = BDFileObject(JSON: baiduFile) {
+                    item.modifiedDate = item.server_ctime?.pp_stringFromDate() ?? ""
+                    /*
                     let ppFile = PPFileObject(name: item.name,
                                               path: item.path,
                                               size: item.size,
@@ -78,7 +80,8 @@ open class BaiduyunAPITool: NSObject, PPCloudServiceProtocol {
                                               modifiedDate: item.modifiedDate?.pp_stringFromDate() ?? "",
                                               fileID: "\(item.fs_id)",
                                               serverID: "")
-                    dataSource.append(ppFile)
+                     */
+                    dataSource.append(item)
                 }
                 
             }
@@ -287,12 +290,14 @@ open class BaiduyunAPITool: NSObject, PPCloudServiceProtocol {
     }
     
     //MARK:PPCloudServiceProtocol
-    func contentsOfDirectory(_ path: String, completionHandler: @escaping ([PPFileObject], Error?) -> Void) {
+    func contentsOfDirectory(_ path: String, completionHandler: @escaping ([PPFileModel], Error?) -> Void) {
         self.getFileList(path: path) { fileList, isCache, error in
             completionHandler(fileList,error)
         }
     }
-    
+    func contentsOfPathID(_ pathID: String, completionHandler: @escaping ([PPFileObject], Error?) -> Void) {
+        
+    }
     func contentsOfFile(_ path: String, completionHandler: @escaping (Data?, Error?) -> Void) {
 
     }

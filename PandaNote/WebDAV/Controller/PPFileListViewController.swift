@@ -24,6 +24,7 @@ class PPFileListViewController: PPBaseViewController,UITextFieldDelegate,UITable
 {
     
     var pathStr = "/"
+    var pathID = ""
     var dataSource:Array<PPFileObject> = []
     var imageArray = [PPFileObject]()
     var tableView = UITableView()
@@ -73,13 +74,13 @@ class PPFileListViewController: PPBaseViewController,UITextFieldDelegate,UITable
         self.navigationItem.rightBarButtonItem = UIBarButtonItem.init(title: "更多", style: UIBarButtonItem.Style.plain, target: self, action: #selector(moreAction))
         
         
-        getWebDAVData()
+        getFileListData()
         
         setNavTitle()
         
 
         self.tableView.addRefreshHeader {
-            self.getWebDAVData()
+            self.getFileListData()
         }
         setupSearchController()
         if isMovingMode {//移动文件模式
@@ -91,7 +92,7 @@ class PPFileListViewController: PPBaseViewController,UITextFieldDelegate,UITable
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         if self.isRecentFiles || PPUserInfo.shared.refreshFileList {
-            self.getWebDAVData()//最近访问列表实时刷新
+            self.getFileListData()//最近访问列表实时刷新
             PPUserInfo.shared.refreshFileList = false
         }
     }
@@ -115,18 +116,19 @@ class PPFileListViewController: PPBaseViewController,UITextFieldDelegate,UITable
         
         if fileObj.isDirectory {
             let vc = PPFileListViewController()
-            vc.pathStr = fileObj.path + "/"
+            vc.pathStr = getPathNotEmpty(fileObj) + "/"
+            vc.pathID = fileObj.pathID
             vc.isMovingMode = self.isMovingMode
             self.navigationController?.pushViewController(vc, animated: true)
         }
         else if (fileObj.name.isTextFile())  {
             let vc = PPMarkdownViewController()
             vc.filePathStr = fileObj.path
-            vc.fileID = fileObj.fileID
+            vc.fileID = fileObj.pathID
             self.navigationController?.pushViewController(vc, animated: true)
         }
         else if (fileObj.name.pp_isImageFile())  {
-            loadAndCacheImage(imageURL: fileObj.path,fileID: fileObj.fileID) { (imageData,imageLocalPath) in
+            loadAndCacheImage(fileObj) { (imageData,imageLocalPath) in
                 self.showImage(contents: imageData, image: nil, imageName: fileObj.path,imageURL:imageLocalPath) {
                     tableView.reloadRows(at: [indexPath], with: .none)//下载成功后再刷新
                 }
@@ -136,14 +138,14 @@ class PPFileListViewController: PPBaseViewController,UITextFieldDelegate,UITable
             if #available(iOS 11.0, *) {
                 let vc = PPPDFViewController()
                 vc.filePathStr = fileObj.path
-                vc.fileID = fileObj.fileID
+                vc.fileID = fileObj.pathID
                 self.navigationController?.pushViewController(vc, animated: true)
             } else {
                 PPHUD.showHUDFromTop("抱歉，暂不支持iOS11以下系统预览PDF哟")
             }
         }
         else if (fileObj.name.hasSuffix("mp3")||fileObj.name.lowercased().hasSuffix("mp4"))  {
-            PPFileManager.shared.getFileData(path: fileObj.path, fileID: fileObj.fileID,cacheToDisk:true,onlyCheckIfFileExist:true) { (contents: Data?,isFromCache, error) in
+            PPFileManager.shared.getFileData(path: fileObj.path, fileID: fileObj.pathID,cacheToDisk:true,onlyCheckIfFileExist:true) { (contents: Data?,isFromCache, error) in
                 if error != nil {
                     return
                 }
@@ -188,7 +190,7 @@ class PPFileListViewController: PPBaseViewController,UITextFieldDelegate,UITable
                 else {
                     PPHUD.showHUDFromTop("文件删除成功")// (message: "删除成功哟！", view: self.view)
                     PPUserInfo.shared.removeFileInRecentFiles(fileObj)
-                    self.getWebDAVData()
+                    self.getFileListData()
                 }
             }
         }
@@ -288,7 +290,7 @@ class PPFileListViewController: PPBaseViewController,UITextFieldDelegate,UITable
     func didScrollToIndex(_ browser: SKPhotoBrowser, index: Int) {
         debugPrint(index)
         let obj = self.imageArray[index];
-        loadAndCacheImage(imageURL: obj.path, fileID: obj.fileID) { data, url in
+        loadAndCacheImage(obj) { data, url in
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.2, execute: {
                 let obj2 = browser.photos[index]
                 obj2.loadUnderlyingImageAndNotify()
@@ -300,7 +302,7 @@ class PPFileListViewController: PPBaseViewController,UITextFieldDelegate,UITable
     func showImage(contents:Data,image:UIImage?,imageName:String,imageURL:String,completion: (() -> Void)? = nil) -> Void {
         var photos = [SKPhoto]()
         let imageToSKPhoto = imageArray.map { imageObj -> SKPhoto in
-            let path2 = "\(PPDiskCache.shared.path)/\(PPUserInfo.shared.webDAVRemark)/\(imageObj.path)"
+            let path2 = "\(PPDiskCache.shared.path)/\(PPUserInfo.shared.webDAVRemark)/\(getPathNotEmpty(imageObj))"
             let url2 = URL(fileURLWithPath: path2)
             let photo2 = SKPhoto.photoWithImageURL(url2.absoluteString)
             photo2.caption = imageObj.path
@@ -356,7 +358,7 @@ class PPFileListViewController: PPBaseViewController,UITextFieldDelegate,UITable
                     PPUserInfo.shared.pp_RecentFiles.remove(at: index)
                     PPUserInfo.shared.insertToRecentFiles(fileNew)
                 }
-                self.getWebDAVData()
+                self.getFileListData()
             }
         })
         let cancelAction = UIAlertAction(title: "取消", style: UIAlertAction.Style.default, handler: {(action : UIAlertAction!) -> Void in })
@@ -412,7 +414,7 @@ class PPFileListViewController: PPBaseViewController,UITextFieldDelegate,UITable
                 PPFileManager.shared.createFolderViaWebDAV(folder: newName, at: self.pathStr) { (error) in
                     if error == nil {
                         PPHUD.showHUDFromTop("新建成功")
-                        self.getWebDAVData()
+                        self.getFileListData()
                     }
                     else {
                         PPHUD.showHUDFromTop("新建失败", isError: true)
@@ -426,7 +428,7 @@ class PPFileListViewController: PPBaseViewController,UITextFieldDelegate,UITable
                 }
                 else {
                     PPHUD.showHUDFromTop("新建成功")
-                    self.getWebDAVData()
+                    self.getFileListData()
                 }
             }
                 
@@ -438,14 +440,19 @@ class PPFileListViewController: PPBaseViewController,UITextFieldDelegate,UITable
         self.present(alertController, animated: true, completion: nil)
     }
     /// 加载图片并保存，如果本地不存在就从服务器获取
-    func loadAndCacheImage(imageURL:String,fileID:String,completionHandler: ((Data,String) -> Void)? = nil) {
+    func loadAndCacheImage(_ file:PPFileModel,completionHandler: ((Data,String) -> Void)? = nil) {
 //        let cache = ImageCache.default//KingFisher用
+        let imageURL = file.path
+        let fileID = file.pathID
+        
+        // /Library/Caches/PandaCache/OneDrive/path/to/example.png
         let imagePath = "\(PPDiskCache.shared.path)/\(PPUserInfo.shared.webDAVRemark)/\(imageURL)"
         self.currentImageURL = imagePath
         
 //        let filePath = cache.cachePath(forComputedKey: imageURL)//KingFisher用
 //        let cachedData = try?Data(contentsOf: URL(fileURLWithPath: filePath))//KingFisher用
-        PPFileManager.shared.getFileData(path: imageURL, fileID: fileID,cacheToDisk:true) { (contents: Data?,isFromCache, error) in
+        
+        PPFileManager.shared.getFileData(path: getPathNotEmpty(file), fileID: fileID,downloadURL:file.downloadURL,cacheToDisk:true) { (contents: Data?,isFromCache, error) in
             guard let contents = contents else { return }
             if let handler = completionHandler {
                 DispatchQueue.main.async {
@@ -455,7 +462,14 @@ class PPFileListViewController: PPBaseViewController,UITextFieldDelegate,UITable
         }        
     }
     
-    
+    func getPathNotEmpty(_ fileObj:PPFileModel) -> String {
+        if fileObj.path.length < 1 {
+            return self.pathStr + fileObj.name
+        }
+        else {
+            return fileObj.path
+        }
+    }
     func fileNameInvalidResult(_ fileName:String?) -> String? {
         guard let fileName = fileName else {
             return "亲，名字不能为空"
@@ -470,7 +484,7 @@ class PPFileListViewController: PPBaseViewController,UITextFieldDelegate,UITable
         return nil
     }
     //MARK:获取文件列表
-    func getWebDAVData() -> Void {
+    func getFileListData() -> Void {
         if isRecentFiles {
             self.dataSource.removeAll()
             self.dataSource.append(contentsOf: PPUserInfo.shared.pp_RecentFiles)
@@ -484,7 +498,8 @@ class PPFileListViewController: PPBaseViewController,UITextFieldDelegate,UITable
         if (PPUserInfo.shared.webDAVServerURL.length < 1) {
             PPFileManager.shared.initCloudServiceSetting()
         }
-        PPFileManager.shared.pp_getFileList(path: self.pathStr) { (contents,isFromCache, error) in
+        
+        PPFileManager.shared.pp_getFileList(path: self.pathStr, pathID:self.pathID) { (contents,isFromCache, error) in
             self.isCachedFile = isFromCache
             if error != nil {
                 PPHUD.showHUDFromTop("加载失败，请配置服务器", isError: true)
@@ -532,7 +547,7 @@ extension PPFileListViewController {
             // debugPrint("\(photos?.count) ---\(assets?.count)")
             guard let photoAssets = assets as? [PHAsset] else { return }
             PPFileManager.shared.uploadPhotos(photoAssets, completion: { photoAssets in
-                self.getWebDAVData()
+                self.getFileListData()
             })
         }
         self.present(picker, animated: true, completion: nil)
@@ -573,7 +588,7 @@ extension PPFileListViewController {
             }
             
             PPFileManager.shared.uploadPhotos(photoAssets, completion: { photoAssets in
-                self.getWebDAVData()
+                self.getFileListData()
             })
 
             picker.dismiss(animated: true, completion: nil)

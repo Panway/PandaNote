@@ -11,6 +11,7 @@ import FilesProvider
 
 class PPFilesProvider {
     //MARK:- 数据处理
+    /// FileObject is not what I want
     func myPPFileArrayFrom(_ contents:[FileObject]) -> [PPFileObject] {
         var fileArray = [PPFileObject]()
         var dirCount = 0
@@ -19,12 +20,13 @@ class PPFilesProvider {
         for item in contents {
             let localDate = item.modifiedDate?.addingTimeInterval(TimeInterval(PPUserInfo.shared.pp_timezoneOffset))
             let dateStr = String(describing: localDate).substring(9..<25)
-            
-            let ppFile = PPFileObject(name: item.name,
-                                      path: item.path,
-                                      size: item.size,
-                                      isDirectory: item.isDirectory,
-                                      modifiedDate: dateStr)
+            let ppFile = PPFileObject()
+            ppFile.name = item.name
+            ppFile.path = item.path
+            ppFile.size = item.size
+            ppFile.isDirectory = item.isDirectory
+            ppFile.modifiedDate = dateStr
+
             //添加到结果数组
             if item.isDirectory && directoryFirst {
                 fileArray.insert(ppFile, at: dirCount)

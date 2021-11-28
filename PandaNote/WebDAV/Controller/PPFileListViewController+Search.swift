@@ -223,12 +223,13 @@ extension PPFileListViewController {
     }
     func popMenuDidSelectItem(_ popMenuViewController: PopMenuViewController, at index: Int) {
         debugPrint(index)
+        // 记住上次选中第几个
         PPUserInfo.shared.pp_Setting["pp_lastSeverInfoIndex"] = index
         PPUserInfo.shared.pp_lastSeverInfoIndex = index
         let info = PPUserInfo.shared.pp_serverInfoList[index]
         setNavTitle(info["PPWebDAVRemark"])
         PPUserInfo.shared.updateCurrentServerInfo(index: index)
         PPFileManager.shared.initCloudServiceSetting()
-        getWebDAVData()
+        getFileListData()
     }
 }

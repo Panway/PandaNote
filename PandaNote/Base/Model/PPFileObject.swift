@@ -12,7 +12,7 @@ import FilesProvider
 //class Person: Codable {
 //}
 
-struct PPFileObject:Equatable {
+struct PPFileObject2020:Equatable {
     var name: String
     var path: String//文件相对路径，比如`/我的坚果云/me.jpg`
     var size: Int64
@@ -23,13 +23,13 @@ struct PPFileObject:Equatable {
     //当前属于哪个云服务的标识
     var serverID = ""
     ///遵循Equatable协议，判断两个对象是否相等
-    static func ==(lhs: PPFileObject, rhs: PPFileObject) -> Bool {
+    static func ==(lhs: PPFileObject2020, rhs: PPFileObject2020) -> Bool {
         return lhs.name == rhs.name && lhs.path == rhs.path
     }
 }
 
 
-extension PPFileObject: Codable {
+extension PPFileObject2020: Codable {
     enum CodingKeys: String, CodingKey {
         case name
         case path

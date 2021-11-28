@@ -32,6 +32,10 @@ class PPLocalFileService:PPFilesProvider, PPCloudServiceProtocol {
         })
     }
     
+    func contentsOfPathID(_ pathID: String, completionHandler: @escaping ([PPFileObject], Error?) -> Void) {
+        
+    }
+    
     func contentsOfFile(_ path: String, completionHandler: @escaping (Data?, Error?) -> Void) {
         fileProvider.contents(path: path, completionHandler: completionHandler)
     }

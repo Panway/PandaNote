@@ -9,6 +9,7 @@
 import Foundation
 import Photos
 import FilesProvider
+import Alamofire
 //import PINCache
 
 class PPFileManager: NSObject,FileProviderDelegate {
@@ -55,7 +56,23 @@ class PPFileManager: NSObject,FileProviderDelegate {
         initCloudServiceSetting()//初始化服务器配置
     }
     /// 获取文件列表对象数组然后缓存
-    private func getFileListThenCache(path:String,archieveKey:String,completionHandler:@escaping(_ data:[PPFileObject],_ isFromCache:Bool,_ error:Error?) -> Void) {
+    private func getFileListThenCache(path:String,
+                                      pathID:String? = "",
+                                      archieveKey:String,
+                                      completionHandler:@escaping(_ data:[PPFileObject],_ isFromCache:Bool,_ error:Error?) -> Void) {
+        if let pathID = pathID,pathID.length > 0 {
+            currentService?.contentsOfPathID(pathID, completionHandler: { fileList, error in
+                do {
+                    let encoded = try JSONEncoder().encode(fileList)
+                    PPDiskCache.shared.setData(encoded, key:archieveKey)
+                } catch {
+                    debugPrint(error.localizedDescription)
+                }
+                DispatchQueue.main.async {
+                    completionHandler(fileList,false,error)
+                }
+            })
+        }
         //获取本地缓存失败就去服务器获取
         currentService?.contentsOfDirectory(path, completionHandler: { fileList, error in
             do {
@@ -72,9 +89,9 @@ class PPFileManager: NSObject,FileProviderDelegate {
     }
     //MARK:- 文件列表操作
     /// 获取文件列表（先取本地再获取最新）
-    func pp_getFileList(path:String,completionHandler:@escaping(_ data:[PPFileObject],_ isFromCache:Bool,_ error:Error?) -> Void) {
+    func pp_getFileList(path:String,pathID:String,completionHandler:@escaping(_ data:[PPFileObject],_ isFromCache:Bool,_ error:Error?) -> Void) {
         self.currentPath = path
-        //先从本地缓存获取数据
+        //先获取本地缓存数据
         let archieveKey = self.apiCachePrefix + "\(self.currentService?.baseURL ?? "")\(path)".pp_md5
         PPDiskCache.shared.fetchData(key: archieveKey, failure: { (error) in
             //哎，忘了为啥这么写
@@ -86,8 +103,6 @@ class PPFileManager: NSObject,FileProviderDelegate {
 //                    }
 //                }
 //            }
-            //获取本地缓存失败就去服务器获取
-            self.getFileListThenCache(path: path, archieveKey: archieveKey, completionHandler: completionHandler)
         }) { (data) in
             guard let fileData = data else {
                 debugPrint("获取文件数据失败")
@@ -102,9 +117,9 @@ class PPFileManager: NSObject,FileProviderDelegate {
             } catch {
                 debugPrint(error.localizedDescription)
             }
-            //获取本地缓存成功了还是去服务器获取一下,保证数据最新
-            self.getFileListThenCache(path: path, archieveKey: archieveKey, completionHandler: completionHandler)
         }
+        //获取本地缓存成功了还是去服务器获取一下,保证数据最新
+        self.getFileListThenCache(path: path,pathID:pathID, archieveKey: archieveKey, completionHandler: completionHandler)
     }
     
     //MARK:- 文件操作
@@ -159,10 +174,20 @@ class PPFileManager: NSObject,FileProviderDelegate {
     ///   - completionHandler: 完成的回调
     func getFileData(path: String,
                      fileID:String?,
+                     downloadURL:String? = nil,
                      cacheToDisk:Bool?=false ,
                      downloadIfCached:Bool?=false ,
                      onlyCheckIfFileExist : Bool? = false,
                      completionHandler: @escaping ((_ contents: Data?, _ isFromCache:Bool, _ error: Error?) -> Void)) {
+        if let downloadURL = downloadURL {
+            AF.request(downloadURL).response { response in
+                var localPath = PPUserInfo.shared.webDAVRemark + "/" + path
+                localPath = localPath.replacingOccurrences(of: "//", with: "/")
+                PPDiskCache.shared.setData(response.data, key: localPath)
+                completionHandler(response.data, false,nil)
+            }
+            return
+        }
         if PPUserInfo.shared.cloudServiceType == .baiduyun {
             let downloadIfCached = path.pp_isImageFile() || path.pp_isVideoFile()
             baiduwangpan?.contents(path: path,

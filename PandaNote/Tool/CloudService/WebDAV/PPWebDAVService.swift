@@ -45,6 +45,10 @@ class PPWebDAVService: PPFilesProvider, PPCloudServiceProtocol {
         })
     }
     
+    func contentsOfPathID(_ pathID: String, completionHandler: @escaping ([PPFileObject], Error?) -> Void) {
+        
+    }
+    
     func contentsOfFile(_ path: String, completionHandler: @escaping (Data?, Error?) -> Void) {
         webdav?.contents(path: path, completionHandler: completionHandler)
     }
