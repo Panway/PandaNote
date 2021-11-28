@@ -24,6 +24,7 @@ class PPMarkdownViewController: PPBaseViewController,UITextViewDelegate {
     var filePathStr: String = ""
     ///文件ID（仅百度网盘）
     var fileID = ""
+    var downloadURL = ""
 //    var webdav: WebDAVFileProvider?
     var closeAfterSave : Bool = false
     var textChanged : Bool = false//文本改变的话就不需要再比较字符串了
@@ -34,7 +35,11 @@ class PPMarkdownViewController: PPBaseViewController,UITextViewDelegate {
         initStyle()
         pp_initView()
         self.title = self.filePathStr.split(string: "/").last
-        PPFileManager.shared.getFileData(path: filePathStr, fileID: fileID,cacheToDisk:true,downloadIfCached:true) { (contents: Data?,isFromCache, error) in
+        PPFileManager.shared.getFileData(path: filePathStr,
+                                         fileID: fileID,
+                                         downloadURL:downloadURL,
+                                         cacheToDisk:true,
+                                         downloadIfCached:true) { (contents: Data?,isFromCache, error) in
             guard let contents = contents else {
                 return
             }

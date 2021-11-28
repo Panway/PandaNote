@@ -123,8 +123,9 @@ class PPFileListViewController: PPBaseViewController,UITextFieldDelegate,UITable
         }
         else if (fileObj.name.isTextFile())  {
             let vc = PPMarkdownViewController()
-            vc.filePathStr = fileObj.path
+            vc.filePathStr = getPathNotEmpty(fileObj)
             vc.fileID = fileObj.pathID
+            vc.downloadURL = fileObj.downloadURL
             self.navigationController?.pushViewController(vc, animated: true)
         }
         else if (fileObj.name.pp_isImageFile())  {
@@ -137,7 +138,7 @@ class PPFileListViewController: PPBaseViewController,UITextFieldDelegate,UITable
         else if (fileObj.name.hasSuffix("pdf"))  {
             if #available(iOS 11.0, *) {
                 let vc = PPPDFViewController()
-                vc.filePathStr = fileObj.path
+                vc.filePathStr = getPathNotEmpty(fileObj)
                 vc.fileID = fileObj.pathID
                 self.navigationController?.pushViewController(vc, animated: true)
             } else {
@@ -145,12 +146,12 @@ class PPFileListViewController: PPBaseViewController,UITextFieldDelegate,UITable
             }
         }
         else if (fileObj.name.hasSuffix("mp3")||fileObj.name.lowercased().hasSuffix("mp4"))  {
-            PPFileManager.shared.getFileData(path: fileObj.path, fileID: fileObj.pathID,cacheToDisk:true,onlyCheckIfFileExist:true) { (contents: Data?,isFromCache, error) in
+            PPFileManager.shared.getFileData(path: getPathNotEmpty(fileObj), fileID: fileObj.pathID,cacheToDisk:true,onlyCheckIfFileExist:true) { (contents: Data?,isFromCache, error) in
                 if error != nil {
                     return
                 }
                 let vc = PlayerViewController()
-                let filePath = "\(PPDiskCache.shared.path)/\(PPUserInfo.shared.webDAVRemark)/\(fileObj.path)"
+                let filePath = "\(PPDiskCache.shared.path)/\(PPUserInfo.shared.webDAVRemark)/\(self.getPathNotEmpty(fileObj))"
                 vc.localFileURL = URL(fileURLWithPath: filePath)
                 self.navigationController?.pushViewController(vc, animated: true)
             }
@@ -159,7 +160,7 @@ class PPFileListViewController: PPBaseViewController,UITextFieldDelegate,UITable
             PPAlertAction.showAlert(withTitle: "暂不支持", msg: "是否以纯文本方式打开", buttonsStatement: ["打开","不了"]) { (index) in
                 if index == 0 {
                     let vc = PPMarkdownViewController()
-                    vc.filePathStr = fileObj.path
+                    vc.filePathStr = self.getPathNotEmpty(fileObj)
                     self.navigationController?.pushViewController(vc, animated: true)
                 }
             }

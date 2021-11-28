@@ -179,7 +179,7 @@ class PPFileManager: NSObject,FileProviderDelegate {
                      downloadIfCached:Bool?=false ,
                      onlyCheckIfFileExist : Bool? = false,
                      completionHandler: @escaping ((_ contents: Data?, _ isFromCache:Bool, _ error: Error?) -> Void)) {
-        if let downloadURL = downloadURL {
+        if let downloadURL = downloadURL,downloadURL.length > 1 {
             AF.request(downloadURL).response { response in
                 var localPath = PPUserInfo.shared.webDAVRemark + "/" + path
                 localPath = localPath.replacingOccurrences(of: "//", with: "/")
