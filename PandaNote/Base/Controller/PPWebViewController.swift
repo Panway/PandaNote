@@ -167,7 +167,6 @@ class PPWebViewController: UIViewController,WKUIDelegate,WKNavigationDelegate,WK
         }
         if let markdown = self.markdownStr {
             self.renderMardownWithJS(markdown)
-            })
         }
     }
     func webView(_ webView: WKWebView, runJavaScriptAlertPanelWithMessage message: String, initiatedByFrame frame: WKFrameInfo, completionHandler: @escaping () -> Void) {

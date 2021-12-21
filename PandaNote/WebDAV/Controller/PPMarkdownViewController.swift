@@ -12,7 +12,11 @@ import Down
 
 typealias PPPTextView = UITextView
 
-
+enum PPSplitMode {
+    case none
+    case leftAndRight
+    case upAndDown
+}
 //UITextViewDelegate
 class PPMarkdownViewController: PPBaseViewController,UITextViewDelegate {
 //    let markdownParser = MarkdownParser()
@@ -28,7 +32,7 @@ class PPMarkdownViewController: PPBaseViewController,UITextViewDelegate {
 //    var webdav: WebDAVFileProvider?
     var closeAfterSave : Bool = false
     var textChanged : Bool = false//文本改变的话就不需要再比较字符串了
-    var splitMode = false//分栏模式
+    var splitMode = PPSplitMode.none //分栏模式
     var theme : PPThemeModel!
     //MARK: Life Cycle
     override func viewDidLoad() {
@@ -161,7 +165,7 @@ class PPMarkdownViewController: PPBaseViewController,UITextViewDelegate {
     // MARK:UITextViewDelegate 文本框代理
     func textViewDidChange(_ textView: PPPTextView) {
 //        debugPrint(textView.text)
-        if splitMode {
+        if splitMode != .none {
             PPUserInfo.shared.webViewController.renderMardownWithJS(self.textView.text)
         }
     }
@@ -190,14 +194,14 @@ class PPMarkdownViewController: PPBaseViewController,UITextViewDelegate {
         let offsetKey = PPFileManager.shared.currentServerUniqueID().pp_md5
         debugPrint("滚动偏移量:\(scrollView.contentOffset.y)")
         PPCacheManeger.shared.set("\(scrollView.contentOffset.y)", key: offsetKey)
-        if splitMode {
+        if splitMode != .none {
             self.scrollToSameTextAsTextView()
         }
     }
     ///结束拖动更新y偏移量
     func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
         debugPrint("scrollViewDidEndDragging")
-        if splitMode {
+        if splitMode != .none {
             self.scrollToSameTextAsTextView()
         }
     }
@@ -222,20 +226,36 @@ class PPMarkdownViewController: PPBaseViewController,UITextViewDelegate {
     }
     ///分栏模式
     @objc func switchSplitMode()  {
-        splitMode = !splitMode
-        if !splitMode {
+        if splitMode == .none {
             self.pp_viewEdgeEqualToSafeArea(textView)
             PPUserInfo.shared.webViewController.view.removeFromSuperview()
             return
         }
-        self.textView.snp.remakeConstraints { maker in
-            maker.top.equalTo(self.pp_safeLayoutGuideTop())
-            maker.left.right.equalTo(self.view)
-            if #available(iOS 11.0, *) {
-                maker.height.equalTo(self.view.safeAreaLayoutGuide.layoutFrame.height/2)
-            } else {
-                maker.height.equalTo(self.view).multipliedBy(0.5)
+        else if splitMode == .leftAndRight {
+            self.textView.snp.remakeConstraints { maker in
+                maker.top.equalTo(self.pp_safeLayoutGuideTop())
+                if #available(iOS 11.0, *) {
+                    maker.left.equalTo(self.view.safeAreaLayoutGuide.snp.left)
+                    maker.bottom.equalTo(self.view.safeAreaLayoutGuide.snp.bottom)
+                    maker.width.equalTo(self.view.safeAreaLayoutGuide).multipliedBy(0.5)
+                } else {
+                    maker.width.equalTo(self.view).multipliedBy(0.5)
+                }
             }
+
+        }
+        else if splitMode == .upAndDown {
+            self.textView.snp.remakeConstraints { maker in
+                maker.top.equalTo(self.pp_safeLayoutGuideTop())
+                if #available(iOS 11.0, *) {
+                    maker.left.right.equalTo(self.view.safeAreaLayoutGuide)
+                    maker.height.equalTo(self.view.safeAreaLayoutGuide.layoutFrame.height/2)
+                } else {
+                    maker.left.right.equalTo(self.view)
+                    maker.height.equalTo(self.view).multipliedBy(0.5)
+                }
+            }
+            
         }
         
         let webVC = PPUserInfo.shared.webViewController//PPWebViewController()
@@ -252,11 +272,19 @@ class PPMarkdownViewController: PPBaseViewController,UITextViewDelegate {
         }
 
         self.addChild(webVC)
-//        webVC.view.frame = self.view.frame
         self.view.addSubview(webVC.view)
-        webVC.view.snp.makeConstraints { maker in
-            maker.bottom.left.right.equalTo(self.view)
-            maker.height.equalTo(self.view.frame.size.height/2)
+        if splitMode == .leftAndRight {
+            webVC.view.snp.makeConstraints { maker in
+                maker.top.right.bottom.equalTo(self.view)
+                maker.width.equalTo(self.view).multipliedBy(0.5)
+            }
+        }
+        else if splitMode == .upAndDown {
+            webVC.view.snp.makeConstraints { maker in
+                maker.bottom.left.right.equalTo(self.view)
+                maker.height.equalTo(self.view).multipliedBy(0.5)
+            }
+            
         }
         webVC.didMove(toParent: self)
         
@@ -317,13 +345,22 @@ class PPMarkdownViewController: PPBaseViewController,UITextViewDelegate {
 
     }
     @objc func moreAction(sender:UIButton?)  {
-        let menuTitile = ["分享文本","分栏模式"]
+        let menuTitile = ["分享文本","左右分栏模式","上下分栏模式","关闭分栏"]
         PPAlertAction.showSheet(withTitle: "更多操作", message: nil, cancelButtonTitle: "取消", destructiveButtonTitle: nil, otherButtonTitle: menuTitile) { (index) in
             debugPrint(index)
             if index == 1 {
                 self.shareTextAction(sender: nil)
             }
             else if index == 2 {
+                self.splitMode = .leftAndRight
+                self.switchSplitMode()
+            }
+            else if index == 3 {
+                self.splitMode = .upAndDown
+                self.switchSplitMode()
+            }
+            else if index == 4 {
+                self.splitMode = .none
                 self.switchSplitMode()
             }
             

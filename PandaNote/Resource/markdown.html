@@ -269,10 +269,17 @@
     html = document.documentElement;
     // get document total height https://stackoverflow.com/a/1147768/4493393
     // var height = Math.max( body.scrollHeight, body.offsetHeight, html.clientHeight, html.scrollHeight, html.offsetHeight );
+
+    //防止 `**boldText**` 无法匹配 `<p><strong>boldText</strong></p>`
+    text = text.replace(/^[\* ]+/,"")
+    text = text.replace(/[\* ]+$/,"")
+    //防止 `## title` 无法匹配 `<h2>title</h2>`
+    text = text.replace(/^[# ]+/,"")
+
     console.log("search text:",text)
     let pArray = [];
 
-    let tags = ["p", "ol", "ul","pre","table"];
+    let tags = ["p", "ol", "ul","pre","table","h1","h2","h3","h4","h5"];
     tags.forEach(tag => {
       const obj = Array.from(document.querySelectorAll(tag));
       pArray = pArray.concat(obj);
