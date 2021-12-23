@@ -295,6 +295,21 @@
     }
     return 0;
   }
+
+  function replaceImgPath(rootPath) {
+    const obj = Array.from(document.querySelectorAll("img"));
+    console.log("rootPath:",rootPath);
+    for (var i = obj.length - 1; i >= 0; i--) {
+      let element = obj[i]
+      //如果是App包里的markdown.html文件
+      if (element.src.includes("PandaNote.app") || element.src.includes("127.0.0.1:8083")) {
+        let filePath = element.src.split("PandaNote.app")[1];
+        // let filePath = element.src.split("127.0.0.1:8083")[1];// debug path
+        filePath = rootPath + filePath
+        element.src = filePath
+      }
+    }
+  }
   function highlight(text) {
     console.log('search')
     var paragraph = document.getElementById('content');

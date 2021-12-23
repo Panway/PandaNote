@@ -16,6 +16,7 @@
 		1E03F84A274CA8220085ACFB /* dark.json in Resources */ = {isa = PBXBuildFile; fileRef = 1E03F848274CA8220085ACFB /* dark.json */; };
 		1E03F84B274CA8220085ACFB /* black.json in Resources */ = {isa = PBXBuildFile; fileRef = 1E03F849274CA8220085ACFB /* black.json */; };
 		1E03F84D274CB1A00085ACFB /* vue.json in Resources */ = {isa = PBXBuildFile; fileRef = 1E03F84C274CB1A00085ACFB /* vue.json */; };
+		1E0D9E0C27736E9700E3AA73 /* PPMarkdownEditorToolBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E0D9E0B27736E9700E3AA73 /* PPMarkdownEditorToolBar.swift */; };
 		1E0DE3E82612153A002BA5D9 /* web in Resources */ = {isa = PBXBuildFile; fileRef = 1E0DE3E72612153A002BA5D9 /* web */; };
 		1E179BF925B549B0006C3A56 /* UIView+PPTool.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E179BF825B549B0006C3A56 /* UIView+PPTool.swift */; };
 		1E1B5894257B8118000860F6 /* NSAttributedString+PPTool.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E1B5893257B8118000860F6 /* NSAttributedString+PPTool.swift */; };
@@ -125,6 +126,7 @@
 		1E03F848274CA8220085ACFB /* dark.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = dark.json; sourceTree = "<group>"; };
 		1E03F849274CA8220085ACFB /* black.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = black.json; sourceTree = "<group>"; };
 		1E03F84C274CB1A00085ACFB /* vue.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = vue.json; sourceTree = "<group>"; };
+		1E0D9E0B27736E9700E3AA73 /* PPMarkdownEditorToolBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPMarkdownEditorToolBar.swift; sourceTree = "<group>"; };
 		1E0DE3E72612153A002BA5D9 /* web */ = {isa = PBXFileReference; lastKnownFileType = folder; path = web; sourceTree = "<group>"; };
 		1E179BF825B549B0006C3A56 /* UIView+PPTool.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIView+PPTool.swift"; sourceTree = "<group>"; };
 		1E1B5893257B8118000860F6 /* NSAttributedString+PPTool.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NSAttributedString+PPTool.swift"; sourceTree = "<group>"; };
@@ -270,6 +272,22 @@
 				1E03F846274C89ED0085ACFB /* default.json */,
 			);
 			path = theme;
+			sourceTree = "<group>";
+		};
+		1E0D9E0927736E2A00E3AA73 /* Markdown */ = {
+			isa = PBXGroup;
+			children = (
+				1E0D9E0A27736E4B00E3AA73 /* View */,
+			);
+			path = Markdown;
+			sourceTree = "<group>";
+		};
+		1E0D9E0A27736E4B00E3AA73 /* View */ = {
+			isa = PBXGroup;
+			children = (
+				1E0D9E0B27736E9700E3AA73 /* PPMarkdownEditorToolBar.swift */,
+			);
+			path = View;
 			sourceTree = "<group>";
 		};
 		1E526EBF26B673720026DC67 /* Tool */ = {
@@ -599,6 +617,7 @@
 				60F5691222F2ADC700874994 /* ViewController.swift */,
 				1ECEE1C025BD20EC00454966 /* Public */,
 				6056014F23166BAE000809CD /* Base */,
+				1E0D9E0927736E2A00E3AA73 /* Markdown */,
 				6056014923166B70000809CD /* WebDAV */,
 				60560246231776FC000809CD /* Setting */,
 				6056015323166CA6000809CD /* Tool */,
@@ -943,6 +962,7 @@
 				6056025823177A30000809CD /* PPFileListViewController.swift in Sources */,
 				1E556A0E25639BEF00A4653F /* PPResultsTableController.swift in Sources */,
 				1E1B5894257B8118000860F6 /* NSAttributedString+PPTool.swift in Sources */,
+				1E0D9E0C27736E9700E3AA73 /* PPMarkdownEditorToolBar.swift in Sources */,
 				1E526ECE26B6F20B0026DC67 /* PPDropboxService.swift in Sources */,
 				60560252231778FF000809CD /* XDRefreshHeader.m in Sources */,
 				1E179BF925B549B0006C3A56 /* UIView+PPTool.swift in Sources */,

@@ -236,7 +236,7 @@ class PPFileManager: NSObject,FileProviderDelegate {
                     PPHUD.showHUDFromTop("移动文件失败",isError: true)
                     return
                 }
-                let downloadPath = PPFileManager.shared.downloadPath
+                let downloadPath = "\(PPDiskCache.shared.path)/\(PPUserInfo.shared.webDAVRemark)"
                 //移动本地的文件
                 if FileManager.default.fileExists(atPath: downloadPath + pathOld) {
                     try? FileManager.default.moveItem(atPath: downloadPath + pathOld,
@@ -428,16 +428,14 @@ class PPFileManager: NSObject,FileProviderDelegate {
         for asset in mediaItems {
             group.enter() // 将以下任务添加进group，相当于把某个任务添加到组队列中执行
             PPFileManager.shared.getImageDataFromAsset(asset: asset, completion: { (imageData,urlString,imageInfo) in
-                let imageLocalURL = URL(fileURLWithPath: urlString)
-                var uploadName = imageLocalURL.lastPathComponent
-                //使用创建时间当文件名
-                if let creationDate = imageInfo["creationDate"], PPUserInfo.pp_boolValue("uploadImageNameUseCreationDate") == true {
-                    uploadName = creationDate.replacingOccurrences(of: ":", with: ".") + "." + imageLocalURL.lastPathComponent.split(separator: ".").last!
-                }
+                let uploadName = PPFileManager.imageVideoName(urlString: urlString, imageInfo: imageInfo)
                 let remotePath = path + uploadName
-                debugPrint(imageLocalURL)
+//                debugPrint(imageLocalURL)
                 PPFileManager.shared.uploadFileViaWebDAV(path: remotePath, contents: imageData as Data?) { (error) in
-                    if error != nil { return }//上传出错
+                    if let error = error {
+                        debugPrint("上传出错:\(error.localizedDescription)")
+                        return
+                    }
                     PPHUD.showHUDFromTop("上传+1")
                     assetsToDeleteFromDevice.append(asset)
                     group.leave() //本次任务完成（即本次for循环任务完成），将任务从group中移除
@@ -465,7 +463,16 @@ class PPFileManager: NSObject,FileProviderDelegate {
     func currentServerUniqueID() -> String {
         return "\(PPUserInfo.shared.webDAVServerURL)_\(PPUserInfo.shared.webDAVUserName ?? "")"
     }
-    //MARK:- FileProviderDelegate
+    class func imageVideoName(urlString:String,imageInfo:[String:String]) -> String{
+        let imageLocalURL = URL(fileURLWithPath: urlString)
+        var uploadName = imageLocalURL.lastPathComponent
+        //使用创建时间当文件名
+        if let creationDate = imageInfo["creationDate"], PPUserInfo.pp_boolValue("uploadImageNameUseCreationDate") {
+            uploadName = creationDate.replacingOccurrences(of: ":", with: ".") + "." + imageLocalURL.lastPathComponent.split(separator: ".").last!
+        }
+        return uploadName
+    }
+    //MARK: - FileProviderDelegate（暂未使用）
     func fileproviderSucceed(_ fileProvider: FileProviderOperations, operation: FileOperationType) {
         switch operation {
         case .copy(source: let source, destination: let dest):

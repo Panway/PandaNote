@@ -352,7 +352,7 @@ class PPFileListViewController: PPBaseViewController,UITextFieldDelegate,UITable
             guard let newName = firstTextField.text else { return }
             PPFileManager.shared.moveRemoteFile(pathOld: pathPrefix+fileObj.name, pathNew: pathPrefix + newName) { (error) in
                 PPHUD.showHUDFromTop("修改成功")
-                var fileNew = fileObj
+                let fileNew = fileObj
                 fileNew.name = newName
                 fileNew.path = pathPrefix + newName
                 if let index = PPUserInfo.shared.pp_RecentFiles.firstIndex(of: fileObj) {
@@ -377,7 +377,11 @@ class PPFileListViewController: PPBaseViewController,UITextFieldDelegate,UITable
         PPAlertAction.showSheet(withTitle: "更多操作", message: nil, cancelButtonTitle: "取消", destructiveButtonTitle: nil, otherButtonTitle: menuTitile) { (index) in
             debugPrint(index)
             if index == 1 {
-                self.showImagePicker()
+                self.showImagePicker { selectedAssets in
+                    PPFileManager.shared.uploadPhotos(selectedAssets, completion: { photoAssets in
+                        self.getFileListData()
+                    })
+                }
             }
             else if index == 2 {
                 self.newTextFile()
@@ -534,68 +538,4 @@ class PPFileListViewController: PPBaseViewController,UITextFieldDelegate,UITable
     
 
 }
-//MARK: - 照片上传等处理
-extension PPFileListViewController {
-    //显示图片选择器
-    func showImagePicker() {
-        //#if targetEnvironment(macCatalyst)
-        #if !USE_YPImagePicker
-        print("targetEnvironment(macCatalyst)")
-        let picker = TZImagePickerController()
-        picker.allowPickingMultipleVideo = true
-        picker.maxImagesCount = 999//一次最多可选择999张图片
-        picker.didFinishPickingPhotosWithInfosHandle = { (photos, assets, isSelectOriginalPhoto, infoArr) -> (Void) in
-            // debugPrint("\(photos?.count) ---\(assets?.count)")
-            guard let photoAssets = assets as? [PHAsset] else { return }
-            PPFileManager.shared.uploadPhotos(photoAssets, completion: { photoAssets in
-                self.getFileListData()
-            })
-        }
-        self.present(picker, animated: true, completion: nil)
-        #else
-        var config = YPImagePickerConfiguration()
-        config.library.maxNumberOfItems = 99
-//        config.library.mediaType = .photoAndVideo//支持上传图片和视频
-        config.showsPhotoFilters = false
-        config.startOnScreen = YPPickerScreen.library
-        config.hidesStatusBar = false
-        let picker = YPImagePicker(configuration: config)
-        picker.didFinishPicking { [unowned picker] items, cancelled in
-            if cancelled {
-                //点击左上角的取消让选择器消失
-                picker.dismiss(animated: true, completion: nil)
-                return
-            }
-            guard let photo = items.singlePhoto else {
-                return
-            }
-            if photo.fromCamera == true {
-                debugPrint("====\(photo.originalImage.imageOrientation.rawValue)")
-                return
-            }
-            //遍历每个assets
-            let photoAssets = items.map { item -> PHAsset in
-                switch item {
-                case .photo(let photo):
-                    if let asset = photo.asset {
-                        return asset
-                    }
-                case .video(let video):
-                    if let asset = video.asset {
-                        return asset
-                    }
-                }
-                return PHAsset()//这种情况一般不存在
-            }
-            
-            PPFileManager.shared.uploadPhotos(photoAssets, completion: { photoAssets in
-                self.getFileListData()
-            })
 
-            picker.dismiss(animated: true, completion: nil)
-        }
-        self.present(picker, animated: true, completion: nil)
-        #endif
-    }
-
-}

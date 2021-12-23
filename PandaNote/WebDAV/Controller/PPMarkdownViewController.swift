@@ -18,7 +18,11 @@ enum PPSplitMode {
     case upAndDown
 }
 //UITextViewDelegate
-class PPMarkdownViewController: PPBaseViewController,UITextViewDelegate {
+class PPMarkdownViewController: PPBaseViewController,
+                                UITextViewDelegate,
+                                PPEditorToolBarDelegate {
+    
+    
 //    let markdownParser = MarkdownParser()
     var markdownStr = "I support a *lot* of custom Markdown **Elements**, even `code`!"
     var historyList = [String]()
@@ -111,16 +115,11 @@ class PPMarkdownViewController: PPBaseViewController,UITextViewDelegate {
         
         textView.delegate = self
         
-        let inputAccessoryView = UIView.init(frame: CGRect.init(x: 0, y: 0, width: self.view.frame.width, height: 25))
-
-        let keyboardDown = UIButton.init(frame: CGRect.init(x: self.view.frame.width-25, y: 0, width: 25, height: 25))
-        keyboardDown.setImage(UIImage.init(named: "btn_down"), for: UIControl.State.normal)
-        keyboardDown.addTarget(self, action: #selector(keyboardDownAction(sender:)), for: UIControl.Event.touchUpInside)
-        keyboardDown.backgroundColor = UIColor.white
-        inputAccessoryView.addSubview(keyboardDown)
         
         
-        textView.inputAccessoryView = inputAccessoryView
+        let editorToolBar = PPMarkdownEditorToolBar(frame: CGRect(x: 0,y: 0,width: self.view.frame.size.width,height: 40))
+        editorToolBar.delegate = self
+        textView.inputAccessoryView = editorToolBar
         
         let topToolView = UIView.init(frame: CGRect.init(x: 0, y: 0, width: 120, height: 40))
         
@@ -205,7 +204,7 @@ class PPMarkdownViewController: PPBaseViewController,UITextViewDelegate {
             self.scrollToSameTextAsTextView()
         }
     }
-    //MARK: Private 私有方法
+    //MARK: - Private 私有方法
     
     ///定位到与 TextView 相同的文本
     func scrollToSameTextAsTextView() {
@@ -306,7 +305,11 @@ class PPMarkdownViewController: PPBaseViewController,UITextViewDelegate {
             path = Bundle.main.url(forResource: "markdown", withExtension:"html")?.absoluteString ?? ""
             webVC.markdownStr = self.textView.text
             webVC.urlString = path // file:///....
+//            webVC.urlString = "http://127.0.0.1:8083/markdown.html"//调试用 for Debug use
             webVC.markdownName = self.filePathStr
+            let lastPath = (self.filePathStr as NSString).lastPathComponent
+            webVC.imageRootPath = "\(PPDiskCache.shared.path)/\(PPUserInfo.shared.webDAVRemark)\(self.filePathStr.replacingOccurrences(of: lastPath, with: ""))"
+            webVC.imageRootPath = URL(fileURLWithPath: webVC.imageRootPath ?? "").absoluteString//主要是为了转码路径的中文
         }
         
 //        let fileURL = URL.init(fileURLWithPath: <#T##String#>)
@@ -366,10 +369,6 @@ class PPMarkdownViewController: PPBaseViewController,UITextViewDelegate {
             
         }
     }
-    @objc func keyboardDownAction(sender:UIButton)  {
-        //保存
-        self.textView.resignFirstResponder()
-    }
     //初始化样式
     func initStyle() {
         if let theme = PPUserInfo.shared.pp_Setting["pp_markdownEditorStyle"] as? String {
@@ -427,6 +426,26 @@ class PPMarkdownViewController: PPBaseViewController,UITextViewDelegate {
         button2.addTarget(self, action: #selector(moreAction(sender:)), for: .touchUpInside)
         return button2
     }()
-    
+    // MARK: PPEditorToolBarDelegate
+    func didClickEditorToolBar(sender: UIButton, index: Int,totalCount: Int) {
+        debugPrint("didClickEditorToolBar:\(index)")
+        if index == 0 {
+            self.showImagePicker { selectedAssets in
+                PPFileManager.shared.uploadPhotos(selectedAssets, completion: { photoAssets in
+                    debugPrint(photoAssets)
+                    for asset in photoAssets {
+                        PPFileManager.shared.getImageDataFromAsset(asset: asset, completion: { (imageData,urlString,imageInfo) in
+                            let uploadName = PPFileManager.imageVideoName(urlString: urlString, imageInfo: imageInfo)
+                            debugPrint("uploadName:",uploadName)
+                            self.textView.insertText("![ ](./\(uploadName))\n")
+                        })
+                    }
+                })
+            }
+        }
+        if totalCount - 1 == index {
+            self.textView.resignFirstResponder()
+        }
+    }
     
 }

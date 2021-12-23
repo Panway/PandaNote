@@ -22,4 +22,26 @@ extension String {
         Scanner(string: hexStr[4..<6]).scanHexInt32(&blue)
         return UIColor(red: CGFloat(red)/255.0, green: CGFloat(green)/255.0, blue: CGFloat(blue)/255.0, alpha: 1.0)
     }
+
+    
+    /// 插入字符
+    /// - Parameters:
+    ///   - text: 字符
+    ///   - index: 位置
+    /// - Returns: self
+    mutating func insertCharacter(text:Character,index:Int) -> String{
+        let start = self.index(self.startIndex, offsetBy: index)
+        self.insert(text, at: start)
+        return self
+    }
+    /// 插入字符串
+    /// - Parameters:
+    ///   - text: 字符串
+    ///   - index: 位置
+    /// - Returns: self
+    mutating func insertString(text:String,index:Int) -> String{
+        let start = self.index(self.startIndex, offsetBy: index)
+        self.insert(contentsOf: text, at: start)
+        return self
+    }
 }

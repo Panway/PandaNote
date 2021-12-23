@@ -20,6 +20,7 @@ class PPWebViewController: UIViewController,WKUIDelegate,WKNavigationDelegate,WK
     var fileName: String?
     var titleStr: String?
     var markdownStr: String?
+    var imageRootPath: String? //markdown 图片资源绝对路径 file:///path/to/image
     var markdownName: String?
     ///Main Bundle里预加载的js
     var preloadJSNameInBundle: String?
@@ -132,7 +133,12 @@ class PPWebViewController: UIViewController,WKUIDelegate,WKNavigationDelegate,WK
     func renderMardownWithJS(_ markdown:String) {
         let hash = self.markdownName?.hash ?? 0
         let markdown2JS = markdown.pp_replaceEscapeCharacter()
-        let js = "document.getElementById('content').innerHTML = ppmarked('\(markdown2JS)');document.getElementById('ppTOCContent').innerHTML = ppGenerateTOC('\(markdown2JS)');setFileHash(\(hash));"
+        let js = """
+        document.getElementById('content').innerHTML = ppmarked('\(markdown2JS)');
+        document.getElementById('ppTOCContent').innerHTML = ppGenerateTOC('\(markdown2JS)');
+        setFileHash(\(hash));
+        replaceImgPath('\(self.imageRootPath ?? "")')
+        """
         wkWebView.evaluateJavaScript(js, completionHandler: { result, error in
             debugPrint(error)
         })

@@ -30,5 +30,20 @@ extension UITextView {
         let endIndex = self.offset(from: startPosition, to: endPosition)
         return NSMakeRange(startIndex, endIndex)
     }
+    
+    /// a replacement of `insetText` method
+    func pp_insertText(_ text: String) {
+        if let selectedRange = self.selectedTextRange {
+            let cursorPosition = self.offset(from: self.beginningOfDocument, to: selectedRange.start)
+            // insert
+            let start = self.text.index(self.text.startIndex, offsetBy: cursorPosition)
+            self.text.insert(contentsOf: text, at: start)
+            // move cursor
+            if let from = self.position(from: self.beginningOfDocument, offset: cursorPosition + text.length) {
+                self.selectedTextRange = self.textRange(from: from, to: from)
+            }
+        }
+        
+    }
 
 }

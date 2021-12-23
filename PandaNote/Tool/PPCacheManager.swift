@@ -17,7 +17,7 @@ import PINCache
 class PPDiskCache {
     static let shared = PPDiskCache()
     
-    ///缓存路径`/Library/Caches/PPAPICache`
+    ///缓存路径`/Library/Caches/PandaCache`
     public let path = NSSearchPathForDirectoriesInDomains(.cachesDirectory, .userDomainMask, true).first! + "/PandaCache"
 
 
