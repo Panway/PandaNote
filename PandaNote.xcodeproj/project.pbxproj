@@ -17,6 +17,7 @@
 		1E03F84B274CA8220085ACFB /* black.json in Resources */ = {isa = PBXBuildFile; fileRef = 1E03F849274CA8220085ACFB /* black.json */; };
 		1E03F84D274CB1A00085ACFB /* vue.json in Resources */ = {isa = PBXBuildFile; fileRef = 1E03F84C274CB1A00085ACFB /* vue.json */; };
 		1E0D9E0C27736E9700E3AA73 /* PPMarkdownEditorToolBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E0D9E0B27736E9700E3AA73 /* PPMarkdownEditorToolBar.swift */; };
+		1E0D9EB42774C1C700E3AA73 /* PPAppConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E0D9EB32774C1C700E3AA73 /* PPAppConfig.swift */; };
 		1E0DE3E82612153A002BA5D9 /* web in Resources */ = {isa = PBXBuildFile; fileRef = 1E0DE3E72612153A002BA5D9 /* web */; };
 		1E179BF925B549B0006C3A56 /* UIView+PPTool.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E179BF825B549B0006C3A56 /* UIView+PPTool.swift */; };
 		1E1B5894257B8118000860F6 /* NSAttributedString+PPTool.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E1B5893257B8118000860F6 /* NSAttributedString+PPTool.swift */; };
@@ -127,6 +128,7 @@
 		1E03F849274CA8220085ACFB /* black.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = black.json; sourceTree = "<group>"; };
 		1E03F84C274CB1A00085ACFB /* vue.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = vue.json; sourceTree = "<group>"; };
 		1E0D9E0B27736E9700E3AA73 /* PPMarkdownEditorToolBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPMarkdownEditorToolBar.swift; sourceTree = "<group>"; };
+		1E0D9EB32774C1C700E3AA73 /* PPAppConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPAppConfig.swift; sourceTree = "<group>"; };
 		1E0DE3E72612153A002BA5D9 /* web */ = {isa = PBXFileReference; lastKnownFileType = folder; path = web; sourceTree = "<group>"; };
 		1E179BF825B549B0006C3A56 /* UIView+PPTool.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIView+PPTool.swift"; sourceTree = "<group>"; };
 		1E1B5893257B8118000860F6 /* NSAttributedString+PPTool.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NSAttributedString+PPTool.swift"; sourceTree = "<group>"; };
@@ -498,19 +500,20 @@
 		6056015323166CA6000809CD /* Tool */ = {
 			isa = PBXGroup;
 			children = (
-				1ED298E62589F83500735B6B /* CloudService */,
-				60F5D03F232751C8004E988B /* Share */,
-				605602802317A0C4000809CD /* UI */,
 				6056021923177122000809CD /* CategoryAndExtension */,
-				6056015423166CC5000809CD /* PPUserInfo.swift */,
-				1E670AAA24F62D23002DB57C /* PPPublicTool.swift */,
-				6080D3F223333C3500F582B1 /* PPFileManager.swift */,
-				60D27790238AA52C00D8BA0C /* PPCacheManager.swift */,
-				60AA154D23DEBAC900A68FAA /* PPSQLiteManager.swift */,
-				60A4CD322447325700367DA7 /* PPPasteboardTool.swift */,
+				1ED298E62589F83500735B6B /* CloudService */,
 				6001B63B2465804000A40593 /* MyURLProtocol.swift */,
+				1E0D9EB32774C1C700E3AA73 /* PPAppConfig.swift */,
+				60D27790238AA52C00D8BA0C /* PPCacheManager.swift */,
+				6080D3F223333C3500F582B1 /* PPFileManager.swift */,
+				60A4CD322447325700367DA7 /* PPPasteboardTool.swift */,
+				1E670AAA24F62D23002DB57C /* PPPublicTool.swift */,
+				60AA154D23DEBAC900A68FAA /* PPSQLiteManager.swift */,
+				6056015423166CC5000809CD /* PPUserInfo.swift */,
 				607150CB2459ACF200E2FDEB /* PPWebResourceProtocol.swift */,
 				6056024D231778FF000809CD /* RefreshControl */,
+				60F5D03F232751C8004E988B /* Share */,
+				605602802317A0C4000809CD /* UI */,
 			);
 			path = Tool;
 			sourceTree = "<group>";
@@ -952,6 +955,7 @@
 				60F5691122F2ADC700874994 /* AppDelegate.swift in Sources */,
 				60E61426243DC16E00630B4B /* PPPDFViewController.swift in Sources */,
 				1E526EC526B699FB0026DC67 /* PPWebDAVService.swift in Sources */,
+				1E0D9EB42774C1C700E3AA73 /* PPAppConfig.swift in Sources */,
 				6056022A231772AE000809CD /* PPMarkdownViewController.swift in Sources */,
 				60A1F8DC24388C98009E390C /* ViewController+PPTool.swift in Sources */,
 				1E1B58A7257B9480000860F6 /* PPAddCloudServiceViewController.swift in Sources */,
