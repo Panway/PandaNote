@@ -68,4 +68,14 @@ extension UIViewController {
             }
         }
     }
+    func pp_updateEdgeToSafeArea(_ yourView:UIView) {
+        yourView.snp.remakeConstraints { (make) in
+            if #available(iOS 11.0, *) {
+                make.edges.equalTo(self.view.safeAreaLayoutGuide.snp.margins)
+            } else {
+                make.edges.equalToSuperview()
+            }
+        }
+    }
+    
 }

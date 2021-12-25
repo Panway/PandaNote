@@ -11,6 +11,9 @@ PODS:
   - FMDB (2.7.5):
     - FMDB/standard (= 2.7.5)
   - FMDB/standard (2.7.5)
+  - GCDWebServer (3.5.4):
+    - GCDWebServer/Core (= 3.5.4)
+  - GCDWebServer/Core (3.5.4)
   - IQKeyboardManager (6.5.6)
   - Kanna (5.2.7)
   - Kingfisher (6.3.1)
@@ -49,6 +52,7 @@ DEPENDENCIES:
   - FLAnimatedImage
   - FLEX
   - FMDB
+  - GCDWebServer
   - IQKeyboardManager
   - Kanna (~> 5.2.2)
   - Kingfisher (~> 6.3.1)
@@ -79,6 +83,7 @@ SPEC REPOS:
     - FLAnimatedImage
     - FLEX
     - FMDB
+    - GCDWebServer
     - IQKeyboardManager
     - Kanna
     - Kingfisher
@@ -114,6 +119,7 @@ SPEC CHECKSUMS:
   FLAnimatedImage: 8f3e854ebf9680b71f0b6e700939687fc4d82b4b
   FLEX: 6223ad3d853fb6177a6ab1cda85f372a72768da8
   FMDB: 2ce00b547f966261cd18927a3ddb07cb6f3db82a
+  GCDWebServer: 2c156a56c8226e2d5c0c3f208a3621ccffbe3ce4
   IQKeyboardManager: 2a6e97afdafc7becf0cb17a9a8d795e3a980717f
   Kanna: 01cfbddc127f5ff0963692f285fcbc8a9d62d234
   Kingfisher: 016c8b653a35add51dd34a3aba36b580041acc74
@@ -130,6 +136,6 @@ SPEC CHECKSUMS:
   TZImagePickerController: edf61b8e87f26e3e445aa50eb66254bd7f4859db
   YYText: 5c461d709e24d55a182d1441c41dc639a18a4849
 
-PODFILE CHECKSUM: 422dc6694ab30d81c2ee13a516b900ec3678699f
+PODFILE CHECKSUM: 2473a0ce37b570cef53ca809755fb75d8a890869
 
 COCOAPODS: 1.11.2

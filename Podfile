@@ -70,7 +70,9 @@ target 'PandaNote' do
   # 安全加密算法 https://github.com/krzyzanowskim/CryptoSwift
   # 在这里发现的 https://github.com/topics/md5?l=swift
   pod 'CryptoSwift'
-
+  # HTTP Server https://github.com/swisspol/GCDWebServer
+  pod "GCDWebServer"
+  
   #----------私有----------
   #0行代码实现右滑pop返回
   pod 'PPiOSKit/SwipePopGesture', :git=>'https://github.com/Panway/CodeSnipetCollection.git'
@@ -101,7 +103,7 @@ end
 
 
 post_install do |installer|
-  puts '在pod install之后执行脚本，修复警告或错误'
+  puts '在pod install之后执行脚本，修复警告或错误，如果出错请再执行一遍 pod install'
   output = %x( #{"ruby XcodeTool.rb fix_deployment_target 10"} ) #执行 XcodeTool.rb 脚本文件消除警告
   puts output
   #支持Mac Catalyst

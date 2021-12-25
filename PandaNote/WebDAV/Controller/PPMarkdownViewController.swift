@@ -12,7 +12,7 @@ import Down
 
 typealias PPPTextView = UITextView
 
-enum PPSplitMode {
+@objc enum PPSplitMode : UInt8 {
     case none
     case leftAndRight
     case upAndDown
@@ -36,7 +36,7 @@ class PPMarkdownViewController: PPBaseViewController,
 //    var webdav: WebDAVFileProvider?
     var closeAfterSave : Bool = false
     var textChanged : Bool = false//文本改变的话就不需要再比较字符串了
-    var splitMode = PPSplitMode.none //分栏模式
+    var splitMode = PPSplitMode.none //上次的分栏模式 last mode
     var theme : PPThemeModel!
     //MARK: Life Cycle
     override func viewDidLoad() {
@@ -103,6 +103,9 @@ class PPMarkdownViewController: PPBaseViewController,
         
         self.view.backgroundColor = UIColor.white
 
+    }
+    deinit {
+        self.switchSplitMode(.none)//好像不加也行
     }
     func pp_initView() {
         self.view.addSubview(backgroundImage)
@@ -224,10 +227,18 @@ class PPMarkdownViewController: PPBaseViewController,
         }
     }
     ///分栏模式
-    @objc func switchSplitMode()  {
+    @objc func switchSplitMode(_ mode: PPSplitMode)  {
+        if splitMode == mode {
+            return
+        }
+        splitMode = mode
+        let webVC = PPUserInfo.shared.webViewController
         if splitMode == .none {
-            self.pp_viewEdgeEqualToSafeArea(textView)
-            PPUserInfo.shared.webViewController.view.removeFromSuperview()
+            self.pp_updateEdgeToSafeArea(textView)
+            webVC.willMove(toParent: nil)
+            webVC.view.removeFromSuperview()
+            webVC.view.frame = self.view.bounds
+            webVC.removeFromParent()
             return
         }
         else if splitMode == .leftAndRight {
@@ -257,7 +268,6 @@ class PPMarkdownViewController: PPBaseViewController,
             
         }
         
-        let webVC = PPUserInfo.shared.webViewController//PPWebViewController()
         var path = ""
         if self.filePathStr.hasSuffix("html") {//HTML文件直接显示
             path = PPDiskCache.shared.path + self.filePathStr
@@ -272,20 +282,25 @@ class PPMarkdownViewController: PPBaseViewController,
 
         self.addChild(webVC)
         self.view.addSubview(webVC.view)
+        webVC.view.frame = self.view.frame
+        webVC.didMove(toParent: self)
+        let width = self.view.frame.size.width
+        let height = self.view.frame.size.height
         if splitMode == .leftAndRight {
-            webVC.view.snp.makeConstraints { maker in
-                maker.top.right.bottom.equalTo(self.view)
-                maker.width.equalTo(self.view).multipliedBy(0.5)
-            }
+            webVC.view.frame = CGRect(x: width/2, y: 0, width: width/2, height: height)
+//            webVC.view.snp.remakeConstraints { maker in
+//                maker.top.right.bottom.equalTo(self.view)
+//                maker.width.equalTo(self.view).multipliedBy(0.5)
+//            }
         }
         else if splitMode == .upAndDown {
-            webVC.view.snp.makeConstraints { maker in
-                maker.bottom.left.right.equalTo(self.view)
-                maker.height.equalTo(self.view).multipliedBy(0.5)
-            }
-            
+            webVC.view.frame = CGRect(x: 0, y: self.view.frame.size.height/2, width: self.view.frame.size.width, height: self.view.frame.size.height/2)
+            // 不能用自动布局，不然再次push进入webVC就是一片黑,webVC.view不会复原
+//            webVC.view.snp.remakeConstraints { maker in
+//                maker.bottom.left.right.equalTo(self.view)
+//                maker.height.equalTo(self.view).multipliedBy(0.5)
+//            }
         }
-        webVC.didMove(toParent: self)
         
         PPUserInfo.shared.webViewController.markdownStr = self.textView.text
         PPUserInfo.shared.webViewController.loadURL()
@@ -294,6 +309,8 @@ class PPMarkdownViewController: PPBaseViewController,
 
     /// 预览markdown
     @objc func previewAction(sender:UIButton)  {
+//        self.splitMode = .none
+        self.switchSplitMode(.none)
         self.textView.resignFirstResponder()
         let webVC = PPUserInfo.shared.webViewController//PPWebViewController()
         var path = ""
@@ -355,16 +372,13 @@ class PPMarkdownViewController: PPBaseViewController,
                 self.shareTextAction(sender: nil)
             }
             else if index == 2 {
-                self.splitMode = .leftAndRight
-                self.switchSplitMode()
+                self.switchSplitMode(.leftAndRight)
             }
             else if index == 3 {
-                self.splitMode = .upAndDown
-                self.switchSplitMode()
+                self.switchSplitMode(.upAndDown)
             }
             else if index == 4 {
-                self.splitMode = .none
-                self.switchSplitMode()
+                self.switchSplitMode(.none)
             }
             
         }

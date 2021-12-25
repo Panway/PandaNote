@@ -104,5 +104,19 @@ class PPHUD: NSObject {
         waitHUb = nil
     }
     
+    func showAlertInput(title:String,viewController:UIViewController,handler: ((UIAlertAction) -> Void)? = nil) {
+        let alertController = UIAlertController(title: "修改文件（夹）名", message: "", preferredStyle: UIAlertController.Style.alert)
+        alertController.addTextField { (textField : UITextField!) -> Void in
+            textField.placeholder = "输入文件名"
+//            textField.text = fileObj.name
+            textField.delegate = viewController as? UITextFieldDelegate
+//            textField.tag = 233
+        }
+        let saveAction = UIAlertAction(title: "保存", style: UIAlertAction.Style.default, handler: handler)
+        let cancelAction = UIAlertAction(title: "取消", style: UIAlertAction.Style.default, handler: nil)
+        alertController.addAction(saveAction)
+        alertController.addAction(cancelAction)
+        viewController.present(alertController, animated: true, completion: nil)
+    }
     
 }
