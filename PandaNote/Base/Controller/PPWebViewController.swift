@@ -9,6 +9,7 @@
 
 import UIKit
 import WebKit.WKWebView
+import PDFKit
 
 class PPWebViewController: UIViewController,WKUIDelegate,WKNavigationDelegate,WKScriptMessageHandler, UIScrollViewDelegate {
     
@@ -204,7 +205,7 @@ class PPWebViewController: UIViewController,WKUIDelegate,WKNavigationDelegate,WK
             self.bottomView.isHidden = false
         }
     }
-    //MARK:Public
+    //MARK: - Public
     //清除所有的WebView缓存数据 /Library/Webkit/com.xxx.xxx/WebsiteData 和/Library/Caches/com.xxx.xxx/Webkit
     //可以调用fetchDataRecordsOfTypes方法获取浏览记录,然后通过对域名的筛选决定如何删除缓存
     class func clearAllWebsiteData() {
@@ -285,7 +286,8 @@ class PPWebViewController: UIViewController,WKUIDelegate,WKNavigationDelegate,WK
         }
     }
     @objc func moreAction()  {
-        PPAlertAction.showSheet(withTitle: "更多操作", message: nil, cancelButtonTitle: "取消", destructiveButtonTitle: nil, otherButtonTitle: ["提取本页面资源","刷新","复制当前网址URL"]) { (index) in
+        let items = ["提取本页面资源","刷新","复制当前网址URL","导出为PDF"]
+        PPAlertAction.showSheet(withTitle: "更多操作", message: nil, cancelButtonTitle: "取消", destructiveButtonTitle: nil, otherButtonTitle: items) { (index) in
             debugPrint(index)
             if index == 1 {
                 let vc = PPWebFileViewController()
@@ -296,6 +298,12 @@ class PPWebViewController: UIViewController,WKUIDelegate,WKNavigationDelegate,WK
             }
             else if index == 3 {
                 UIPasteboard.general.string = self.wkWebView.url?.absoluteString
+            }
+            else if index == 4 {
+                self.wkWebView.exportToPdf { data in
+                    let shareSheet = UIActivityViewController(activityItems: [data], applicationActivities: nil)
+                    self.present(shareSheet, animated: true)
+                }
             }
         }
     }

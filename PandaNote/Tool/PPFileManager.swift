@@ -304,7 +304,7 @@ class PPFileManager: NSObject,FileProviderDelegate {
     }
     //MARK: 图片（PHAsset）相关处理
     /// 从PHAsset获取NSData
-    func getImageDataFromAsset(asset: PHAsset, completion: @escaping (_ data: NSData?,_ fileURL:String,_ imageInfo:[String:String]) -> Void) {
+    func getImageDataFromAsset(asset: PHAsset, completion: @escaping (_ data: Data?,_ fileURL:String,_ imageInfo:[String:String]) -> Void) {
         let manager = PHImageManager.default()
         let options = PHImageRequestOptions()
         options.isNetworkAccessAllowed = true
@@ -326,9 +326,17 @@ class PPFileManager: NSObject,FileProviderDelegate {
 //                }
 //            }
 //        } else {
+        let imageInfoDict = ["creationDate":(asset.creationDate != nil) ? asset.creationDate!.pp_stringFromDate() : "",
+                             "modificationDate":(asset.modificationDate != nil) ? asset.creationDate!.pp_stringFromDate() : "",
+                             "pixelWidth":"\(asset.pixelWidth)",
+                             "pixelHeight":"\(asset.pixelHeight)"]
+        //如果是视频
         if asset.mediaType == .video {
             requestVideoURL(with: asset) { url in
-                completion(nil,url?.absoluteString ?? "",[:])
+                if let vURL = url {
+                    let videoData = try? Data(contentsOf: vURL)
+                    completion(videoData,url?.absoluteString ?? "",imageInfoDict)
+                }
             }
             return
         }
@@ -342,7 +350,7 @@ class PPFileManager: NSObject,FileProviderDelegate {
                    return//降级的，低质量的图片略缩图不要 https://stackoverflow.com/a/52355835/4493393
                 }
                 debugPrint(restulImage?.size)
-                var originalFilename = "noname.jpg"
+                var originalFilename = "noname.jpg" //默认值，实际上不会出现
                 if let name = PHAssetResource.assetResources(for: asset).first?.originalFilename {
                     originalFilename = name
                 }
@@ -353,32 +361,29 @@ class PPFileManager: NSObject,FileProviderDelegate {
                 //"IMG_0111.HEIC" -> "IMG_0111.jpg"
                 originalFilename = String(originalFilename.split(separator: ".")[0]) + ".jpg"
                 if let imageData = restulImage?.jpegData(compressionQuality: compressionQuality) {
-                    completion(imageData as NSData, originalFilename, [:])
+                    completion(imageData, originalFilename, imageInfoDict)
                 } else {
-                    completion(nil, originalFilename, [:])
+                    completion(nil, originalFilename, [:]) //理论上不会走
                 }
             }
             return
         }
+        
+        // 原图上传
         manager.requestImageData(for: asset, options: options) { (imgData, string, orientation, info) -> Void in
-            var url = ""
-            if let imageFileURL = info?["PHImageFileURLKey"] as? NSURL {
-                url = imageFileURL.absoluteString ?? ""
-            }
-            else {
-                url = asset.value(forKey: "filename") as! String
-            }
-            let imageInfo = ["creationDate":(asset.creationDate != nil) ? asset.creationDate!.pp_stringFromDate() : "",
-                             "modificationDate":(asset.modificationDate != nil) ? asset.creationDate!.pp_stringFromDate() : "",
-                             "pixelWidth":"\(asset.pixelWidth)",
-                             "pixelHeight":"\(asset.pixelHeight)"]
-            if let imageData = imgData {
-                completion(imageData as NSData,url,imageInfo)
-            } else {
-                completion(nil,url,imageInfo)
+            asset.pp_getURL { responseURL in
+                var url = responseURL?.absoluteString ?? ""
+                if url.length < 1 {
+                    url = asset.value(forKey: "filename") as! String //理论上不会走
+                }
+                if let imageData = imgData {
+                    completion(imageData,url,imageInfoDict)
+                } else {
+                    completion(nil,url,imageInfoDict)
+                }
             }
         }
-//        }
+
         
         
     }
@@ -431,7 +436,8 @@ class PPFileManager: NSObject,FileProviderDelegate {
                 let uploadName = PPFileManager.imageVideoName(urlString: urlString, imageInfo: imageInfo)
                 let remotePath = path + uploadName
 //                debugPrint(imageLocalURL)
-                PPFileManager.shared.uploadFileViaWebDAV(path: remotePath, contents: imageData as Data?) { (error) in
+                
+                PPFileManager.shared.uploadFileViaWebDAV(path: remotePath, contents: imageData) { (error) in
                     if let error = error {
                         debugPrint("上传出错:\(error.localizedDescription)")
                         return
@@ -463,12 +469,16 @@ class PPFileManager: NSObject,FileProviderDelegate {
     func currentServerUniqueID() -> String {
         return "\(PPUserInfo.shared.webDAVServerURL)_\(PPUserInfo.shared.webDAVUserName ?? "")"
     }
+    //"file:///var/mobile/Media/DCIM/119APPLE/IMG_9828.JPG" --> "IMG_9828.JPG"
     class func imageVideoName(urlString:String,imageInfo:[String:String]) -> String{
-        let imageLocalURL = URL(fileURLWithPath: urlString)
-        var uploadName = imageLocalURL.lastPathComponent
+        var uploadName = urlString
+        if urlString.starts(with: "/") || urlString.starts(with: "file:///") {
+            let imageLocalURL = URL(fileURLWithPath: urlString)
+            uploadName = imageLocalURL.lastPathComponent
+        }
         //使用创建时间当文件名
         if let creationDate = imageInfo["creationDate"], PPUserInfo.pp_boolValue("uploadImageNameUseCreationDate") {
-            uploadName = creationDate.replacingOccurrences(of: ":", with: ".") + "." + imageLocalURL.lastPathComponent.split(separator: ".").last!
+            uploadName = creationDate.replacingOccurrences(of: ":", with: ".") + "." + uploadName.split(separator: ".").last!
         }
         return uploadName
     }

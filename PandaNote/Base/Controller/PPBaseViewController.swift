@@ -95,9 +95,9 @@ extension PPBaseViewController {
                 return PHAsset()//这种情况一般不存在
             }
             
-            PPFileManager.shared.uploadPhotos(photoAssets, completion: { photoAssets in
-                self.getFileListData()
-            })
+            if let completion = completion {
+                completion(photoAssets)
+            }
             
             picker.dismiss(animated: true, completion: nil)
         }
