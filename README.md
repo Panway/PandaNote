@@ -2,8 +2,13 @@
 
 ## Why ？
 
-锤子便签还凑合，但是同步功能却经常出现错误（文件容易重复），好用的Bear熊掌记觉得不值得买，且只支持iCloud，无法同步到安卓、Windows、Mac设备。
-因为坚果云有文件历史版本功能，所以想基于坚果云的WebDAV服务做个简易笔记App
+市面上有那么多markdown笔记，为什么还要做一个？
+
+一部分原因是自己想用Swift练手，另一部分原因是市面上的笔记要么付费，要么没法满足我的需求，比如锤子便签很精简，但是同步功能却经常出现错误（文件重复），好用的Bear熊掌记觉得不值得买，且只支持iCloud，无法同步到安卓、Windows、Mac设备。
+
+因为坚果云有文件历史版本功能，所以想基于坚果云的WebDAV服务做个简易的笔记App。
+
+由于本人是重度拖延症，所以进度缓慢，希望各位多担待，欢迎提出自己的建议和反馈。
 
 ## What ？
 
@@ -11,26 +16,28 @@
 
 **设备兼容性：**
 
-iOS、macOS（初步支持，使用了Mac Catalyst）
+iOS 10.0、macOS（初步支持，使用了Mac Catalyst）
 
 **已支持的网盘（协议）**：
 
-- [x] WebDAV（坚果云或自己搭建WebDAV服务）
+- [x] WebDAV（坚果云等）
 - [x] Dropbox
+- [x] OneDrive
 - [x] 百度网盘
 
-**已支持的文本编辑功能**：
+**支持的markdown相关功能**：
 
 - [x] markdown 原生渲染（待优化）
-- [x] markdown 使用 [marked.js](https://github.com/markedjs/marked) 渲染、目录生成、代码高亮
+- [x] markdown 使用 [marked.js](https://github.com/markedjs/marked) 渲染、目录生成、代码高亮、导出成PDF
 - [x] markdown 等纯文本的新建、编辑、保存
+- [ ] 公众号等网页文章一键保存为markdown
 
 **其他功能**：
 
 - [x] 支持预览mp3、mp4、pdf
 - [x] WebDAV HTTP响应和下载的文件缓存到磁盘，无网状态也可以查看文件
 - [x] 文件移动、删除、重命名、新建文件夹
-- [x] 上传相册原始图片到指定目录
+- [x] 上传相册原始图片或视频到指定目录
 - [x] 图片预览、原图和Gif（微信表情）分享到微信
 - [ ] 读取剪切板查看淘宝京东价格曲线
 - [x] 抖音视频无水印下载，微博等视频解析下载
@@ -39,7 +46,9 @@ iOS、macOS（初步支持，使用了Mac Catalyst）
 
 坚果云用户可在[安全选项](https://www.jianguoyun.com/#/safety)里添加应用并获取应用密码，密码是独立的，可以随时撤销，自己也可以定时修改保证账号安全
 
-### Build and Run
+### 如何运行
+
+项目基于最新Xcode13构建
 
 ```bash
 #克隆仓库到本地
