@@ -1,22 +1,28 @@
 # 一个iOS markdown笔记应用
 
-## Why ？
+## 预览
+
+右侧网页预览可关闭
+
+![preview](https://s2.loli.net/2022/03/15/zMlfrHWapvC1n84.gif)
+
+
 
 市面上有那么多markdown笔记，为什么还要做一个？
 
-一部分原因是自己想用Swift练手，另一部分原因是市面上的笔记要么付费，要么没法满足我的需求，比如锤子便签很精简，但是同步功能却经常出现错误（文件重复），好用的Bear熊掌记觉得不值得买，且只支持iCloud，无法同步到安卓、Windows、Mac设备。
+一部分原因是自己想用Swift练手，另一部分原因是市面上的笔记要么付费，要么没法满足我的需求，比如锤子便签同步功能却经常出现错误（文件重复），Bear熊掌记觉得不值得花钱，且只支持iCloud，无法同步到安卓、Windows、Mac设备。
 
 因为坚果云有文件历史版本功能，所以想基于坚果云的WebDAV服务做个简易的笔记App。
 
-由于本人是重度拖延症，所以进度缓慢，希望各位多担待，欢迎提出自己的建议和反馈。
+由于本人是重度拖延症，所以进度缓慢，欢迎提出自己的建议和反馈，项目会龟速完善。
 
-## What ？
+## 功能
 
-主要用来写 markdown 笔记，可使用坚果云等网盘实现云同步，所有文件保存在第三方服务器
+可使用坚果云等网盘实现云同步，所有文件保存在第三方服务器
 
 **设备兼容性：**
 
-iOS 10.0、macOS（初步支持，使用了Mac Catalyst）
+iOS 10.0+、macOS（初步支持，使用了Mac Catalyst）
 
 **已支持的网盘（协议）**：
 
@@ -42,11 +48,10 @@ iOS 10.0、macOS（初步支持，使用了Mac Catalyst）
 - [ ] 读取剪切板查看淘宝京东价格曲线
 - [x] 抖音视频无水印下载，微博等视频解析下载
 
-##  How ？
 
-坚果云用户可在[安全选项](https://www.jianguoyun.com/#/safety)里添加应用并获取应用密码，密码是独立的，可以随时撤销，自己也可以定时修改保证账号安全
 
-### 如何运行
+
+## 如何运行
 
 项目基于最新Xcode13构建
 
@@ -61,13 +66,13 @@ pod install
 open PandaNote.xcworkspace
 ```
 
-# 预览
 
-![preview](https://i.loli.net/2019/09/03/ClPQ842ZIzpXUrc.gif)
+## 说明
+
+坚果云用户可在[安全选项](https://www.jianguoyun.com/#/safety)里添加应用并获取应用密码，密码是独立的，可以随时撤销，自己也可以定时修改保证账号安全
 
 
-
-# 解析markdown相关资源
+## 解析markdown相关
 
 AFNetworking作者的： https://github.com/mattt/CommonMarkAttributedString
 

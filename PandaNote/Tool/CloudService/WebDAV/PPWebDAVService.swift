@@ -22,7 +22,10 @@ class PPWebDAVService: PPFilesProvider, PPCloudServiceProtocol {
                                            password: password,
                                            persistence: .permanent)
         
-        let server = URL(string: url)!
+        guard let server = URL(string: url.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)) else {
+            debugPrint("初始化\(url)错误", true)
+            return
+        }
         webdav = WebDAVFileProvider(baseURL: server, credential: userCredential)!//不能加`,cache: URLCache.shared`,要不然无法保存markdown！！！
         // webdav.useCache = true
         // 注意：不修改鉴权方式，会导致每次请求两次，一次401失败，一次带token成功
