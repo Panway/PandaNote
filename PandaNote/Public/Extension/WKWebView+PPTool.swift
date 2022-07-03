@@ -3,7 +3,7 @@
 //  PandaNote
 //
 //  Created by Panway on 2022/3/1.
-//  Copyright © 2022 WeirdPan. All rights reserved.
+//  Copyright © 2022 Panway. All rights reserved.
 //
 
 import Foundation
@@ -22,9 +22,9 @@ extension WKWebView {
                     if let completion = completion {
                         completion(data)
                     }
-//                    print("create pdf success: \(data)")
+                    debugPrint("create pdf success")
                 case .failure(let error):
-                    print("create pdf failure: \(error)")
+                    debugPrint("create pdf failure: \(error)")
                 }
             }
             

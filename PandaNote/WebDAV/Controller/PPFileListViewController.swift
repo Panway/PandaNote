@@ -20,14 +20,20 @@ import MonkeyKing
 
 class PPFileListViewController: PPBaseViewController,UITextFieldDelegate,UITableViewDataSource,UITableViewDelegate
     ,SKPhotoBrowserDelegate
-    ,PopMenuViewControllerDelegate
+,PopMenuViewControllerDelegate,
+UICollectionViewDelegate, UICollectionViewDataSource,UICollectionViewDelegateFlowLayout
 {
     
     var pathStr = "/"
     var pathID = ""
     var dataSource:Array<PPFileObject> = []
     var imageArray = [PPFileObject]()
-    var tableView = UITableView()
+    var collectionView : UICollectionView!
+    var cellStyle = PPFileListCellViewMode.list
+    lazy var dropdown : PPDropDown = {
+        let drop = PPDropDown()
+        return drop
+    }()
 
     var currentImageURL = ""
     var photoBrowser: SKPhotoBrowser!
@@ -52,23 +58,28 @@ class PPFileListViewController: PPBaseViewController,UITextFieldDelegate,UITable
 //        self.init(nibName:nil, bundle:nil)
 //    }
     
+        
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
         
-        tableView = UITableView.init(frame: self.view.bounds)//稚嫩的写法
-        self.view.addSubview(tableView)
-        tableView.snp.makeConstraints { (make) in
+        let layout = UICollectionViewFlowLayout();
+        layout.scrollDirection = .vertical;
+        layout.minimumLineSpacing = 0;
+        layout.minimumInteritemSpacing = 0;
+        
+        collectionView = UICollectionView(frame: self.view.bounds, collectionViewLayout: layout)
+        self.view.addSubview(collectionView)
+        collectionView.snp.makeConstraints { make in
             make.top.equalTo(self.pp_safeLayoutGuideTop())
             make.left.right.equalTo(self.view)
-            make.bottom.equalTo(self.view).offset(0);
+            make.bottom.equalTo(self.pp_safeLayoutGuideBottom());
         }
-        tableView.dataSource = self
-        tableView.delegate = self
-        self.tableView.register(PPFileListTableViewCell.self, forCellReuseIdentifier: kPPBaseCellIdentifier)
-        tableView.tableFooterView = UIView.init()
-        
-        
+        collectionView.delegate = self
+        collectionView.dataSource = self
+        collectionView.register(PPFileListCell.self, forCellWithReuseIdentifier: kPPCollectionViewCellID)
+        self.cellStyle = PPFileListCellViewMode(rawValue: PPAppConfig.shared.getItem("fileViewMode")) ?? .list
         
         
         self.navigationItem.rightBarButtonItem = UIBarButtonItem.init(title: "更多", style: UIBarButtonItem.Style.plain, target: self, action: #selector(moreAction))
@@ -79,7 +90,7 @@ class PPFileListViewController: PPBaseViewController,UITextFieldDelegate,UITable
         setNavTitle()
         
 
-        self.tableView.addRefreshHeader {
+        self.collectionView.addRefreshHeader {
             self.getFileListData()
         }
         setupSearchController()
@@ -96,6 +107,45 @@ class PPFileListViewController: PPBaseViewController,UITextFieldDelegate,UITable
             PPUserInfo.shared.refreshFileList = false
         }
     }
+    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        return dataSource.count
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        let cell = collectionView.dequeueReusableCell(
+            withReuseIdentifier: kPPCollectionViewCellID,
+            for: indexPath) as! PPFileListCell
+        //        cell.backgroundColor = .black
+        // Configure the cell
+        let fileObj = self.dataSource[indexPath.row]
+        cell.updateLayout(self.cellStyle)
+        cell.updateUIWithData(fileObj as AnyObject)
+        
+        return cell
+    }
+    // 1 告诉布局给定单元格的大小
+    func collectionView(
+        _ collectionView: UICollectionView,
+        layout collectionViewLayout: UICollectionViewLayout,
+        sizeForItemAt indexPath: IndexPath
+    ) -> CGSize {
+        let cell = collectionView.dequeueReusableCell(
+            withReuseIdentifier: kPPCollectionViewCellID,
+            for: indexPath) as! PPFileListCell
+        return cell.getSize(self.cellStyle)
+    }
+    // 3 返回单元格、页眉和页脚之间的间距
+//    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, insetForSectionAt section: Int
+//    ) -> UIEdgeInsets {
+//        return sectionInsets
+//    }
+    
+    // 4 每行之间的间距
+    func collectionView(_ collectionView: UICollectionView,layout collectionViewLayout: UICollectionViewLayout,minimumLineSpacingForSectionAt section: Int
+    ) -> CGFloat {
+        return 0
+    }
+    
     //MARK: - UITableViewDataSource UITableViewDelegate
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return dataSource.count
@@ -108,8 +158,10 @@ class PPFileListViewController: PPBaseViewController,UITextFieldDelegate,UITable
         cell.updateCacheStatus(self.isCachedFile)
         return cell
     }
-    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        tableView.deselectRow(at: indexPath, animated: true)
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+//    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+//        tableView.deselectRow(at: indexPath, animated: true)
+        collectionView.deselectItem(at: indexPath, animated: true)
         let fileObj = self.dataSource[indexPath.row]
 //        debugPrint("文件：\(fileObj.path)")
         PPUserInfo.shared.insertToRecentFiles(fileObj)
@@ -131,19 +183,24 @@ class PPFileListViewController: PPBaseViewController,UITextFieldDelegate,UITable
         else if (fileObj.name.pp_isImageFile())  {
             loadAndCacheImage(fileObj) { (imageData,imageLocalPath) in
                 self.showImage(contents: imageData, image: nil, imageName: fileObj.path,imageURL:imageLocalPath) {
-                    tableView.reloadRows(at: [indexPath], with: .none)//下载成功后再刷新
+                    collectionView.reloadItems(at: [indexPath]) //下载成功后再刷新
                 }
             }
         }
         else if (fileObj.name.hasSuffix("pdf"))  {
-            if #available(iOS 11.0, *) {
-                let vc = PPPDFViewController()
-                vc.filePathStr = getPathNotEmpty(fileObj)
-                vc.fileID = fileObj.pathID
-                self.navigationController?.pushViewController(vc, animated: true)
-            } else {
-                PPHUD.showHUDFromTop("抱歉，暂不支持iOS11以下系统预览PDF哟")
+            PPFileManager.shared.getFileData(path: getPathNotEmpty(fileObj), fileID: fileObj.pathID,cacheToDisk:true,onlyCheckIfFileExist:true) { (contents: Data?,isFromCache, error) in
+                if error != nil {
+                    return
+                }
+                if #available(iOS 11.0, *) {
+                    let vc = PPPDFViewController()
+                    vc.filePathStr = PPDiskCache.shared.fullPath(forKey: PPUserInfo.shared.webDAVRemark + fileObj.path)
+                    self.navigationController?.pushViewController(vc, animated: true)
+                } else {
+                    PPHUD.showHUDFromTop("抱歉，暂不支持iOS11以下系统预览PDF哟")
+                }
             }
+            
         }
         else if (fileObj.name.hasSuffix("mp3")||fileObj.name.lowercased().hasSuffix("mp4"))  {
             PPFileManager.shared.getFileData(path: getPathNotEmpty(fileObj), fileID: fileObj.pathID,cacheToDisk:true,onlyCheckIfFileExist:true) { (contents: Data?,isFromCache, error) in
@@ -179,7 +236,7 @@ class PPFileListViewController: PPBaseViewController,UITextFieldDelegate,UITable
             if (self.isRecentFiles) {
                 self.dataSource.remove(at: indexPath.row)
                 PPUserInfo.shared.removeFileInRecentFiles(fileObj)
-                self.tableView.reloadData()
+                self.collectionView.reloadData()
                 PPHUD.showHUDFromTop("已删除访问记录")
                 return
             }
@@ -494,8 +551,8 @@ class PPFileListViewController: PPBaseViewController,UITextFieldDelegate,UITable
             self.dataSource.removeAll()
             self.dataSource.append(contentsOf: PPUserInfo.shared.pp_RecentFiles)
             self.imageArray = self.dataSource.filter{$0.name.pp_isImageFile()}
-            self.tableView.endRefreshing()
-            self.tableView.reloadData()
+            self.collectionView.endRefreshing()
+            self.collectionView.reloadData()
             PPHUD.showHUDFromTop("暂无最近文件")
             return
         }
@@ -508,7 +565,7 @@ class PPFileListViewController: PPBaseViewController,UITextFieldDelegate,UITable
             self.isCachedFile = isFromCache
             if error != nil {
                 PPHUD.showHUDFromTop("加载失败，请配置服务器", isError: true)
-                self.tableView.endRefreshing()
+                self.collectionView.endRefreshing()
                 return
             }
             PPHUD.showHUDFromTop(isFromCache ? "已加载缓存":"已加载最新")
@@ -516,8 +573,8 @@ class PPFileListViewController: PPBaseViewController,UITextFieldDelegate,UITable
             self.dataSource.removeAll()
             self.dataSource.append(contentsOf: contents)
             self.imageArray = self.dataSource.filter{$0.name.pp_isImageFile()}
-            self.tableView.endRefreshing()
-            self.tableView.reloadData()
+            self.collectionView.endRefreshing()
+            self.collectionView.reloadData()
             
 
         }

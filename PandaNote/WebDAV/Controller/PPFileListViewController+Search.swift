@@ -2,8 +2,8 @@
 //  PPFileListViewController+Search.swift
 //  PandaNote
 //
-//  Created by topcheer on 2020/11/20.
-//  Copyright © 2020 WeirdPan. All rights reserved.
+//  Created by Panway on 2020/11/20.
+//  Copyright © 2020 Panway. All rights reserved.
 //
 
 import Foundation
@@ -35,7 +35,7 @@ extension PPFileListViewController {
         } else {
             // Fallback on earlier versions
         }
-        self.tableView.tableHeaderView = searchController.searchBar;
+//        self.tableView.tableHeaderView = searchController.searchBar;
 
         definesPresentationContext = true
     }
