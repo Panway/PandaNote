@@ -44,6 +44,7 @@
 		1EDD7D0F287042D100EEDFCB /* PPFileListCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1EDD7D0E287042D100EEDFCB /* PPFileListCell.swift */; };
 		1EDD7D112870615200EEDFCB /* PPDropDown.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1EDD7D102870615200EEDFCB /* PPDropDown.swift */; };
 		1EDD7D1328714CE600EEDFCB /* MarkdownSample.md in Resources */ = {isa = PBXBuildFile; fileRef = 1EDD7D1228714CE600EEDFCB /* MarkdownSample.md */; };
+		1EDD7D4D2871A7F700EEDFCB /* PPFileListToolBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1EDD7D4C2871A7F700EEDFCB /* PPFileListToolBar.swift */; };
 		1EDE20962521E71A001331FE /* DouyinVideoModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1EDE20952521E71A001331FE /* DouyinVideoModel.swift */; };
 		1EDF714D24C3F1E600A12EC9 /* NSRegularExpression+PPTool.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1EDF714C24C3F1E600A12EC9 /* NSRegularExpression+PPTool.swift */; };
 		1EE5A41525B2947000429CB8 /* PPTableViewHeaderFooterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1EE5A41425B2947000429CB8 /* PPTableViewHeaderFooterView.swift */; };
@@ -163,6 +164,7 @@
 		1EDD7D0E287042D100EEDFCB /* PPFileListCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPFileListCell.swift; sourceTree = "<group>"; };
 		1EDD7D102870615200EEDFCB /* PPDropDown.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPDropDown.swift; sourceTree = "<group>"; };
 		1EDD7D1228714CE600EEDFCB /* MarkdownSample.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = MarkdownSample.md; sourceTree = "<group>"; };
+		1EDD7D4C2871A7F700EEDFCB /* PPFileListToolBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPFileListToolBar.swift; sourceTree = "<group>"; };
 		1EDE20952521E71A001331FE /* DouyinVideoModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DouyinVideoModel.swift; sourceTree = "<group>"; };
 		1EDF714C24C3F1E600A12EC9 /* NSRegularExpression+PPTool.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NSRegularExpression+PPTool.swift"; sourceTree = "<group>"; };
 		1EE5A41425B2947000429CB8 /* PPTableViewHeaderFooterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPTableViewHeaderFooterView.swift; sourceTree = "<group>"; };
@@ -443,6 +445,7 @@
 				60E6141F243DA3B500630B4B /* PPBottomToolBarView.swift */,
 				1EDD7D0E287042D100EEDFCB /* PPFileListCell.swift */,
 				60560249231778B5000809CD /* PPFileListTableViewCell.swift */,
+				1EDD7D4C2871A7F700EEDFCB /* PPFileListToolBar.swift */,
 				6056027E23178C2C000809CD /* PPTextFieldTableViewCell.swift */,
 			);
 			path = View;
@@ -988,6 +991,7 @@
 				1E670AAB24F62D23002DB57C /* PPPublicTool.swift in Sources */,
 				6056025823177A30000809CD /* PPFileListViewController.swift in Sources */,
 				1E556A0E25639BEF00A4653F /* PPResultsTableController.swift in Sources */,
+				1EDD7D4D2871A7F700EEDFCB /* PPFileListToolBar.swift in Sources */,
 				1E1B5894257B8118000860F6 /* NSAttributedString+PPTool.swift in Sources */,
 				1E0D9E0C27736E9700E3AA73 /* PPMarkdownEditorToolBar.swift in Sources */,
 				1E526ECE26B6F20B0026DC67 /* PPDropboxService.swift in Sources */,
