@@ -8,6 +8,7 @@
 
 import UIKit
 import MBProgressHUD
+
 extension UILabel {
     func getSize(constrainedWidth: CGFloat) -> CGSize {
         return systemLayoutSizeFitting(CGSize(width: constrainedWidth, height: UIView.layoutFittingCompressedSize.height), withHorizontalFittingPriority: .required, verticalFittingPriority: .fittingSizeLevel)
@@ -15,9 +16,31 @@ extension UILabel {
 }
 class PPHUD: NSObject {
     
-    static let shareInstance = PPHUD()
+    static let shared = PPHUD()
     
     var waitHUb:MBProgressHUD?
+    let deleteBGView = UIView()
+    let annularView = MBRoundProgressView()
+    var canceled = false
+    
+    lazy var revokeBtn : UIButton = {
+        let button = UIButton(type: .custom)
+        button.frame = CGRect(x: 0, y: 0, width: 40, height: 40)
+        button.setTitle("撤销", for: .normal)
+        button.setTitleColor("#3eaf7c".pp_HEXColor(), for: .normal) // #4abf8a 浅色
+//        button.setImage(UIImage(named: "revoke"), for: .normal)
+        button.addTarget(self, action: #selector(revoke), for: .touchUpInside)
+        return button
+    }()
+    
+    private var deleteLabel : UILabel = {
+        let label = UILabel();
+        label.text = "文件已删除"
+        label.textColor = "FFFFFF".HEXColor()
+        label.font = UIFont.boldSystemFont(ofSize: 15)
+        label.frame = CGRect(x: 55, y: 5, width: 88, height: 35)
+        return label
+    }()
     //MARK: 顶部提示信息框
     class func showHUDFromTop(_ message:String, isError:Bool?=false) -> Void {
         let lastView = UIApplication.shared.keyWindow?.viewWithTag(9999)
@@ -103,7 +126,60 @@ class PPHUD: NSObject {
         waitHUb?.hide(animated: true, afterDelay: 0)
         waitHUb = nil
     }
+    func doSomeWorkWithProgress(view:UIView) {
+        canceled = false
+        var progress: Float = 0.0
+        while progress < 1.0 {
+            if canceled {
+                DispatchQueue.main.async(execute: {
+                    self.deleteBGView.removeFromSuperview()
+                })
+                break
+            }
+            progress += 0.01
+            DispatchQueue.main.async(execute: {
+                self.annularView.progress = progress
+            })
+            usleep(50000) //50ms
+        }
+    }
+    @objc func revoke() {
+        canceled = true
+    }
+    @objc func aaa() {
+        deleteBGView.removeFromSuperview()
+    }
     
+    func showDelayTaskHUD(completion: (() -> Void)? = nil) {
+        let bottomPadding: CGFloat
+        if #available(iOS 11.0, *) {
+            bottomPadding = UIApplication.shared.keyWindow?.safeAreaInsets.bottom ?? 0
+        } else {
+            bottomPadding = 0
+        }
+        deleteBGView.frame = CGRect(x: 20, y: UIScreen.main.bounds.height - 45 - bottomPadding, width: UIScreen.main.bounds.width-40, height: 45)
+        deleteBGView.backgroundColor = UIColor(white: 0, alpha: 0.8)
+        UIApplication.shared.keyWindow?.addSubview(deleteBGView)
+        deleteBGView.addSubview(annularView)
+        annularView.frame = CGRect(x: 20, y: 10, width: 25, height: 25)
+        
+        deleteBGView.addSubview(revokeBtn)
+        revokeBtn.frame = CGRect(x: deleteBGView.bounds.width - 15 - 60, y: 5, width: 60, height: 35)
+        deleteBGView.addSubview(deleteLabel)
+
+        
+        DispatchQueue.global(qos: .default).async(execute: { [self] in
+            doSomeWorkWithProgress(view: deleteBGView)
+            DispatchQueue.main.async(execute: {
+                deleteBGView.removeFromSuperview()
+                if !canceled {
+                    if let completion = completion {
+                        completion()
+                    }
+                }
+            })
+        })
+    }
     func showAlertInput(title:String,viewController:UIViewController,handler: ((UIAlertAction) -> Void)? = nil) {
         let alertController = UIAlertController(title: "修改文件（夹）名", message: "", preferredStyle: UIAlertController.Style.alert)
         alertController.addTextField { (textField : UITextField!) -> Void in

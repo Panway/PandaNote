@@ -10,6 +10,7 @@ import Foundation
 import UIKit
 
 let PPCOLOR_GREEN = UIColor(red:0.27, green:0.68, blue:0.49, alpha:1.00)
+let PPCOLOR_GREEN_LIGHT = UIColor(red:0.27, green:0.68, blue:0.49, alpha:0.5)
 
 class PPBaseViewController: UIViewController {
     

@@ -16,19 +16,25 @@ import YPImagePicker
 import PopMenu
 import Photos
 import MonkeyKing
-
+import SnapKit
 
 class PPFileListViewController: PPBaseViewController,UITextFieldDelegate,UITableViewDataSource,UITableViewDelegate
     ,SKPhotoBrowserDelegate
 ,PopMenuViewControllerDelegate,
-UICollectionViewDelegate, UICollectionViewDataSource,UICollectionViewDelegateFlowLayout
+UICollectionViewDelegate, UICollectionViewDataSource,UICollectionViewDelegateFlowLayout,
+PPFileListCellDelegate,PPFileListToolBarDelegate
 {
+    
+    
     
     var pathStr = "/"
     var pathID = ""
     var dataSource:Array<PPFileObject> = []
     var imageArray = [PPFileObject]()
+    let topToolBar = PPFileListToolBar()
+    var topToolBarHeight: Constraint? = nil
     var collectionView : UICollectionView!
+    var multipleSelectionMode = false
     var cellStyle = PPFileListCellViewMode.list
     lazy var dropdown : PPDropDown = {
         let drop = PPDropDown()
@@ -62,27 +68,10 @@ UICollectionViewDelegate, UICollectionViewDataSource,UICollectionViewDelegateFlo
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        
-        let layout = UICollectionViewFlowLayout();
-        layout.scrollDirection = .vertical;
-        layout.minimumLineSpacing = 0;
-        layout.minimumInteritemSpacing = 0;
-        
-        collectionView = UICollectionView(frame: self.view.bounds, collectionViewLayout: layout)
-        self.view.addSubview(collectionView)
-        collectionView.snp.makeConstraints { make in
-            make.top.equalTo(self.pp_safeLayoutGuideTop())
-            make.left.right.equalTo(self.view)
-            make.bottom.equalTo(self.pp_safeLayoutGuideBottom());
-        }
-        collectionView.delegate = self
-        collectionView.dataSource = self
-        collectionView.register(PPFileListCell.self, forCellWithReuseIdentifier: kPPCollectionViewCellID)
+
+        self.initSubViews()
         self.cellStyle = PPFileListCellViewMode(rawValue: PPAppConfig.shared.getItem("fileViewMode")) ?? .list
-        
-        
-        self.navigationItem.rightBarButtonItem = UIBarButtonItem.init(title: "更多", style: UIBarButtonItem.Style.plain, target: self, action: #selector(moreAction))
+        self.navigationItem.rightBarButtonItem = UIBarButtonItem(title: "更多", style: .plain, target: self, action: #selector(moreAction))
         
         
         getFileListData()
@@ -107,6 +96,35 @@ UICollectionViewDelegate, UICollectionViewDataSource,UICollectionViewDelegateFlo
             PPUserInfo.shared.refreshFileList = false
         }
     }
+    //MARK: - UI
+    func initSubViews() {
+        self.view.addSubview(topToolBar)
+        topToolBar.delegate = self
+        topToolBar.snp.makeConstraints { make in
+            make.top.equalTo(self.pp_safeLayoutGuideTop())
+            make.left.right.equalTo(self.view)
+            //https://snapkit.github.io/SnapKit/docs/#:~:text=1.-,References,-You%20can%20hold
+            self.topToolBarHeight = make.height.equalTo(44).constraint
+        }
+        
+        let layout = UICollectionViewFlowLayout();
+        layout.scrollDirection = .vertical;
+        layout.minimumLineSpacing = 0;
+        layout.minimumInteritemSpacing = 0;
+        
+        collectionView = UICollectionView(frame: self.view.bounds, collectionViewLayout: layout)
+        self.view.addSubview(collectionView)
+        collectionView.snp.makeConstraints { make in
+            make.top.equalTo(topToolBar.snp.bottom)
+            make.left.right.equalTo(self.view)
+            make.bottom.equalTo(self.pp_safeLayoutGuideBottom());
+        }
+        collectionView.delegate = self
+        collectionView.dataSource = self
+        collectionView.register(PPFileListCell.self, forCellWithReuseIdentifier: kPPCollectionViewCellID)
+        collectionView.allowsMultipleSelection = true
+    }
+    //MARK: - UICollectionView 数据源及回调
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         return dataSource.count
     }
@@ -118,9 +136,10 @@ UICollectionViewDelegate, UICollectionViewDataSource,UICollectionViewDelegateFlo
         //        cell.backgroundColor = .black
         // Configure the cell
         let fileObj = self.dataSource[indexPath.row]
+        cell.cellIndex = indexPath.row
         cell.updateLayout(self.cellStyle)
         cell.updateUIWithData(fileObj as AnyObject)
-        
+        cell.delegate = self
         return cell
     }
     // 1 告诉布局给定单元格的大小
@@ -146,6 +165,61 @@ UICollectionViewDelegate, UICollectionViewDataSource,UICollectionViewDelegateFlo
         return 0
     }
     
+    func didClickMoreBtn(cellIndex: Int, sender:UIButton) {
+        debugPrint("==\(cellIndex)")
+        if self.isMovingMode {
+            return
+        }
+        self.dropdown.dataSource = ["删除","重命名","移动","多选"]
+        self.dropdown.selectionAction = { (index: Int, item: String) in
+            if item == "删除" {
+                PPHUD.shared.showDelayTaskHUD {
+                    self.deleteFile(cellIndex)
+                }
+            }
+            else if item == "重命名" {
+                let fileObj = self.dataSource[cellIndex]
+                self.renameFile(fileObj)
+            }
+            else if item == "移动" {
+                debugPrint("移动")
+                let fileObj = self.dataSource[cellIndex]
+                let popVC = PPFileListViewController()
+                popVC.isMovingMode = true
+                popVC.filePathToBeMove = fileObj.path
+                let nav = UINavigationController(rootViewController: popVC)
+                self.present(nav, animated: true, completion: nil)
+            }
+            else if item == "多选" {
+                self.multipleSelectionMode = true
+//                self.topToolBarHeight?.updateOffset(amount: 99)
+            }
+        }
+        self.dropdown.anchorView = sender
+        self.dropdown.show()
+    }
+    //MARK: 顶部工具条
+    func didClickFileListToolBar(index: Int, title: String, button:UIButton) {
+        debugPrint("===\(index)==\(title)")
+        if index == 0 {
+            self.dropdown.dataSource = ["列表（小）","列表（中）","列表（大）","图标（小）","图标（中）","图标（大）"]
+            self.dropdown.selectionAction = { (index: Int, item: String) in
+                self.cellStyle = PPFileListCellViewMode(rawValue: index) ?? .list
+                PPAppConfig.shared.setItem("fileViewMode","\(index)")
+                self.collectionView.reloadData()
+            }
+            self.dropdown.anchorView = button
+            self.dropdown.show()
+        }
+        else if index == 1 {
+            
+        }
+        else if index == 2 {
+            self.multipleSelectionMode = true
+            self.navigationItem.rightBarButtonItem = UIBarButtonItem(title: "取消选择", style: .plain, target: self, action: #selector(self.cancelMultiSelect))
+        }
+    }
+    
     //MARK: - UITableViewDataSource UITableViewDelegate
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return dataSource.count
@@ -158,7 +232,18 @@ UICollectionViewDelegate, UICollectionViewDataSource,UICollectionViewDelegateFlo
         cell.updateCacheStatus(self.isCachedFile)
         return cell
     }
+    func collectionView(_ collectionView: UICollectionView, didDeselectItemAt indexPath: IndexPath) {
+        if multipleSelectionMode {
+            let cell = collectionView.cellForItem(at: indexPath)
+            cell?.backgroundColor = .clear
+        }
+    }
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        if multipleSelectionMode {
+            let cell = collectionView.cellForItem(at: indexPath)
+            cell?.backgroundColor = "4abf8a66".pp_HEXColor()
+            return
+        }
 //    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
 //        tableView.deselectRow(at: indexPath, animated: true)
         collectionView.deselectItem(at: indexPath, animated: true)
@@ -232,45 +317,15 @@ UICollectionViewDelegate, UICollectionViewDataSource,UICollectionViewDelegateFlo
             return []
         }
         let delete = UITableViewRowAction(style: .default, title: "删除") { (action, indexPath) in
-            let fileObj = self.dataSource[indexPath.row]
-            if (self.isRecentFiles) {
-                self.dataSource.remove(at: indexPath.row)
-                PPUserInfo.shared.removeFileInRecentFiles(fileObj)
-                self.collectionView.reloadData()
-                PPHUD.showHUDFromTop("已删除访问记录")
-                return
-            }
-            //相对路径
-            PPFileManager.shared.deteteRemoteFile(path: fileObj.path) { (error) in
-                if let errorNew = error {
-                    PPHUD.showHUDFromTop("删除失败: \(String(describing: errorNew))", isError: true)
-                }
-                else {
-                    PPHUD.showHUDFromTop("文件删除成功")// (message: "删除成功哟！", view: self.view)
-                    PPUserInfo.shared.removeFileInRecentFiles(fileObj)
-                    self.getFileListData()
-                }
-            }
         }
         delete.backgroundColor = UIColor.red
         
         let complete = UITableViewRowAction(style: .default, title: "重命名") { (action, indexPath) in
-            // Do you complete operation
-            debugPrint("==重命名")
-            //MARK:重命名
-            let fileObj = self.dataSource[indexPath.row]
-            self.renameFile(fileObj)
 
         }
         complete.backgroundColor = PPCOLOR_GREEN
         let move = UITableViewRowAction(style: .default, title: "移动") { (action, indexPath) in
-            debugPrint("移动")
-            let fileObj = self.dataSource[indexPath.row]
-            let popVC = PPFileListViewController()
-            popVC.isMovingMode = true
-            popVC.filePathToBeMove = fileObj.path
-            let nav = UINavigationController(rootViewController: popVC)
-            self.present(nav, animated: true, completion: nil)
+            
         }
         move.backgroundColor = UIColor(hexRGBValue: 0x98acf8)
         return [delete, move ,complete]
@@ -295,6 +350,28 @@ UICollectionViewDelegate, UICollectionViewDataSource,UICollectionViewDelegateFlo
             return true
         }
         return true
+    }
+
+    func deleteFile(_ index:Int) {
+        let fileObj = self.dataSource[index]
+        if (self.isRecentFiles) {
+            self.dataSource.remove(at: index)
+            PPUserInfo.shared.removeFileInRecentFiles(fileObj)
+            self.collectionView.reloadData()
+            PPHUD.showHUDFromTop("已删除访问记录，文件未删除")
+            return
+        }
+        //相对路径
+        PPFileManager.shared.deteteRemoteFile(path: fileObj.path) { (error) in
+            if let errorNew = error {
+                PPHUD.showHUDFromTop("删除失败: \(String(describing: errorNew))", isError: true)
+            }
+            else {
+                PPHUD.showHUDFromTop("文件删除成功")
+                PPUserInfo.shared.removeFileInRecentFiles(fileObj)
+                self.getFileListData()
+            }
+        }
     }
     //MARK:照片分享代理
     func didDismissActionSheetWithButtonIndex(_ buttonIndex: Int, photoIndex: Int) {
@@ -450,6 +527,10 @@ UICollectionViewDelegate, UICollectionViewDataSource,UICollectionViewDelegateFlo
                 self.addCloudService()
             }
         }
+    }
+    @objc func cancelMultiSelect() {
+        multipleSelectionMode = false //取消多选
+        self.navigationItem.rightBarButtonItem = UIBarButtonItem(title: "更多", style: .plain, target: self, action: #selector(moreAction))
     }
     //MARK:新建文本文档 & 上传照片
     func newTextFile(isDir:Bool = false) {

@@ -17,10 +17,16 @@ extension String {
         }
         
         var red:UInt32 = 0, green:UInt32 = 0, blue:UInt32 = 0
+        var alpha:CGFloat = 1.0
         Scanner(string: hexStr[0..<2]).scanHexInt32(&red)
         Scanner(string: hexStr[2..<4]).scanHexInt32(&green)
         Scanner(string: hexStr[4..<6]).scanHexInt32(&blue)
-        return UIColor(red: CGFloat(red)/255.0, green: CGFloat(green)/255.0, blue: CGFloat(blue)/255.0, alpha: 1.0)
+        if hexStr.length == 8 {
+            var alphaValue:UInt32 = 255
+            Scanner(string: hexStr[6..<8]).scanHexInt32(&alphaValue)
+            alpha = CGFloat(alphaValue) / 255.0
+        }
+        return UIColor(red: CGFloat(red)/255.0, green: CGFloat(green)/255.0, blue: CGFloat(blue)/255.0, alpha: alpha)
     }
 
     

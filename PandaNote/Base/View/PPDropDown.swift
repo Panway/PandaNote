@@ -14,7 +14,9 @@ class PPDropDown: NSObject {
     let dropDown = DropDown()
     override init() {
         super.init()
+        DropDown.appearance().cellHeight = 50
         DropDown.appearance().setupCornerRadius(10)
+//        DropDown.appearance().dimmedBackgroundColor = UIColor.lightGray
     }
     
     public var dataSource = [String]() {
@@ -22,6 +24,12 @@ class PPDropDown: NSObject {
             dropDown.dataSource = dataSource;
         }
     }
+    
+    public weak var anchorView: AnchorView? {
+        didSet {  dropDown.anchorView = anchorView; }
+    }
+    
+    
 
     var selectionAction: ((_ index : Int, _ string: String) -> ())? {
         didSet {

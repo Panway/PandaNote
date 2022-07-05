@@ -31,11 +31,20 @@ class PPAppConfig: NSObject {
             }
         }
 
-        if let path = Bundle.main.path(forResource: "What_is_markdown", ofType:"md") {
+        if let path = Bundle.main.path(forResource: "MarkdownSample", ofType:"md") {
             try? FileManager.default.copyItem(atPath: path, toPath: NSHomeDirectory() + "/Documents/MarkdownSample.md")
         }
     }
     
+    func initDataBase() {
+        let dbModel = PPPriceDBModel()
+        let sqliteManager = PPSQLiteManager(delegate: dbModel)
+//        let sqliteManager = PPSQLiteManager.shared
+        sqliteManager.createDB()
+        let sql = "create table if not exists pp_price(id integer primary key autoincrement,code varchar(20) not null,price varchar(20) default 0,name varchar(50), whole_price varchar(20) ,remark varchar(20),category varchar(20) )"
+        
+        sqliteManager.operation(process: sql, value: [])
+    }
     func getItem(_ key:String) -> String {
         return config[key] ?? ""
     }

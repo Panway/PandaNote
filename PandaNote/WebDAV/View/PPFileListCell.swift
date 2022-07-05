@@ -18,19 +18,26 @@ import Kingfisher
     case gridSuperLarge
 }
 
+public protocol PPFileListCellDelegate:AnyObject {
+    func didClickMoreBtn(cellIndex:Int, sender:UIButton)
+
+}
+
 class PPFileListCell: PPBaseCollectionViewCell {
     var itemsPerRow: CGFloat = 3
+    weak var delegate: PPFileListCellDelegate?
     private let imageWidth = 50.0
+    var cellIndex = 0
+    
     private var viewMode = PPFileListCellViewMode.list //默认是列表
     private var cellPadding = 8
     private let screenWidth: CGFloat = UIScreen.main.bounds.width
-
-    var iconImage : UIImageView = {
+    private var iconImage : UIImageView = {
         let img = UIImageView()
         return img
     }()
     
-    var titleLabel : UILabel = {
+    private var titleLabel : UILabel = {
         let label = UILabel();
         label.textColor = "333333".HEXColor()
         label.font = UIFont.boldSystemFont(ofSize: 15)
@@ -38,7 +45,7 @@ class PPFileListCell: PPBaseCollectionViewCell {
         return label
     }()
     
-    var timeLabel : UILabel = {
+    private var timeLabel : UILabel = {
         let label = UILabel();
         label.textColor = "999999".HEXColor()
         label.font = UIFont.systemFont(ofSize: 11)
@@ -51,23 +58,34 @@ class PPFileListCell: PPBaseCollectionViewCell {
         self.contentView.addSubview(self.iconImage)
         self.contentView.addSubview(self.titleLabel)
         self.contentView.addSubview(self.timeLabel)
-        timeLabel.snp.remakeConstraints { (make) in
+        timeLabel.snp.makeConstraints { (make) in
             make.left.equalTo(self.titleLabel)
             make.top.equalTo(self.titleLabel.snp.bottom).offset(8)
         }
         self.contentView.clipsToBounds = true
+        
+        let moreBtn = UIButton(type: .custom)
+        self.contentView.addSubview(moreBtn)
+        moreBtn.snp.makeConstraints { make in
+            make.right.equalTo(self.contentView).offset(-5)
+            make.centerY.equalTo(self.contentView)
+        }
+        moreBtn.addTarget(self, action: #selector(moreBtnClick(sender:)), for: .touchUpInside)
+        moreBtn.setTitle("·", for: .normal)
+        moreBtn.setTitleColor(.lightGray, for: .normal)
+        moreBtn.titleLabel?.font = UIFont.systemFont(ofSize: 30)
         pp_listMode()
     }
     
     func pp_listMode() {
-        //But for way too brief moment, UITableView was 0-wide sometime along the way and that caused the error output. -- https://aplus.rs/2017/one-solution-for-90pct-auto-layout/
-        //eg:
+        //https://aplus.rs/2017/one-solution-for-90pct-auto-layout/
+        //But for way too brief moment, UICollectionViewCell was 0-wide sometime along the way and that caused the error output. eg:
 //        "<NSAutoresizingMaskLayoutConstraint:0x280f88050 h=--& v=--& UIView:0x1033d6280.minX == 0   (active, names: '|':PandaNote.PPFileListCell:0x1033d6850 )>",
 //        "<NSAutoresizingMaskLayoutConstraint:0x280f880a0 h=--& v=--& UIView:0x1033d6280.width == 0   (active)>",
         iconImage.snp.remakeConstraints { (make) in
 //set priority to 999 for half of your constraints in horizontal and/or vertical dimension
             make.top.equalTo(self.contentView).offset(8).priority(999)
-            make.left.equalTo(self.snp.left).offset(15).priority(999)
+            make.left.equalTo(self.snp.left).offset(8).priority(999)
             make.bottom.equalTo(self.contentView).offset(-8)
             make.width.equalTo(iconImage.snp.height)//.multipliedBy(1)
         }
@@ -78,7 +96,7 @@ class PPFileListCell: PPBaseCollectionViewCell {
         titleLabel.snp.remakeConstraints { (make) in
             make.top.equalTo(iconImage).offset(0)
             make.left.equalTo(iconImage.snp.right).offset(8)
-            make.right.equalTo(self.contentView).offset(-15)
+            make.right.equalTo(self.contentView).offset(-25)
         }
         
         timeLabel.isHidden = false
@@ -158,13 +176,13 @@ class PPFileListCell: PPBaseCollectionViewCell {
     func getSize(_ mode:PPFileListCellViewMode) -> CGSize {
         viewMode = mode
         if viewMode == .list {
-            return CGSize(width: screenWidth, height: 60)
+            return CGSize(width: screenWidth, height: 50)
         }
         else if viewMode == .listLarge {
-            return CGSize(width: screenWidth, height: 70)
+            return CGSize(width: screenWidth, height: 60)
         }
         else if viewMode == .listSuperLarge {
-            return CGSize(width: screenWidth, height: 80)
+            return CGSize(width: screenWidth, height: 70)
         }
         else if viewMode == .grid {
             itemsPerRow = CGFloat(Int(screenWidth / 70.0))
@@ -182,5 +200,10 @@ class PPFileListCell: PPBaseCollectionViewCell {
             return CGSize(width: widthPerItem, height: widthPerItem + 52)
         }
         return CGSize.zero
+    }
+    
+    @objc func moreBtnClick(sender:UIButton) {
+        debugPrint("moreBtnClick:\(cellIndex)")
+        self.delegate?.didClickMoreBtn(cellIndex: cellIndex,sender: sender)
     }
 }
