@@ -103,6 +103,8 @@ end
 
 
 post_install do |installer|
+  puts '因Personal Team账户不支持，默认关闭UniversalLink选项，如果你知道如何配置请撤销PandaNote.entitlements的改动'
+  output = %x( #{"sed -i '' -e '/associated-domains/,+3d' PandaNote/PandaNote.entitlements"} )
   puts '在pod install之后执行脚本，修复警告或错误，如果出错请再执行一遍 pod install'
   output = %x( #{"ruby XcodeTool.rb fix_deployment_target 10"} ) #执行 XcodeTool.rb 脚本文件消除警告
   puts output

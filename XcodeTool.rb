@@ -11,10 +11,10 @@ def fix_deployment_target(your_target,min_surpport_version)
     full_proj_path = full_proj_path + "/Pods/*.xcodeproj"
     puts full_proj_path
     all_file = Dir[full_proj_path]
-    puts "fix_deployment_target 如果出错请再执行一遍命令"
+    puts "\n\n\nfix_deployment_target\n如果上面出现Traceback错误（白色加粗字体），请再执行一遍pod install命令\n\n\n"
     # puts all_file
     all_file.each do |file_name|
-        puts "fix:#{file_name}"
+        # puts "fix:#{file_name}"
         project = Xcodeproj::Project.open(file_name)
         project.targets.each do |target|
             target.build_configurations.each do |config|
@@ -35,7 +35,7 @@ def fix_deployment_target(your_target,min_surpport_version)
         end
         project.save
     end
-    puts "fix deployment target finished"
+    puts "fix deployment target finished 已设置工程支持的最低版本为#{min_surpport_version.to_s}"
 end
 
 # 禁止该死的Documentation Issue

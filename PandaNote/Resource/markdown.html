@@ -41,7 +41,7 @@
     border-radius: 6px;
   }
 
-  .sidebar-button {
+  .toc-button {
     display: block;
     width: 20px;/*1.25rem;*/
     height: 20px;
@@ -56,9 +56,11 @@
     /*border: 1px solid rgba(66, 185, 131, 0.45);*/
     border-radius: 5px;
     background-color:rgba(66, 185, 131, 0.15);
+    /* 点击没有黑色的背景闪一下 */
+    -webkit-tap-highlight-color: transparent;
   }
 
-  .sidebar-button .icon {
+  .toc-button .icon {
     display: block;
     width: 1.25rem;
     height: 1.25rem;
@@ -135,7 +137,7 @@
 </head>
 
 <body>
-  <div class="sidebar-button" onclick="displayTOC()" style="position: fixed;">
+  <div class="toc-button" onclick="displayTOC()" style="position: fixed;">
     <!-- 内联使用SVG this is sometimes called putting your SVG inline, or inlining SVG -->
     <!--     <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" role="img" viewBox="0 0 448 512" class="icon">
       <path fill="currentColor" d="M436 124H12c-6.627 0-12-5.373-12-12V80c0-6.627 5.373-12 12-12h424c6.627 0 12 5.373 12 12v32c0 6.627-5.373 12-12 12zm0 160H12c-6.627 0-12-5.373-12-12v-32c0-6.627 5.373-12 12-12h424c6.627 0 12 5.373 12 12v32c0 6.627-5.373 12-12 12zm0 160H12c-6.627 0-12-5.373-12-12v-32c0-6.627 5.373-12 12-12h424c6.627 0 12 5.373 12 12v32c0 6.627-5.373 12-12 12z"></path>
@@ -269,27 +271,38 @@
     html = document.documentElement;
     // get document total height https://stackoverflow.com/a/1147768/4493393
     // var height = Math.max( body.scrollHeight, body.offsetHeight, html.clientHeight, html.scrollHeight, html.offsetHeight );
-
+    console.log("first Line in UITextView:",text)
     //防止 `**boldText**` 无法匹配 `<p><strong>boldText</strong></p>`
     text = text.replace(/^[\* ]+/,"")
     text = text.replace(/[\* ]+$/,"")
-    //防止 `## title` 无法匹配 `<h2>title</h2>`
+    //去掉开头的`#`，防止 `## title` 无法匹配 `<h2>title</h2>`
     text = text.replace(/^[# ]+/,"")
-
-    console.log("search text:",text)
+    //去掉开头的`1.`有序列表数字
+    text = text.replace(/^[\d. ]+/,"")
+    //去掉开头的`- `无序列表数字
+    text = text.replace(/^[- ]+/,"")
+    //去掉开头的`> `引用文字
+    text = text.replace(/^[> ]+/,"")  
+    console.log("处理后要匹配的文字:",text)
+    if (text.length == 0) {
+      return;
+    }
     let pArray = [];
 
-    let tags = ["p", "ol", "ul","pre","table","h1","h2","h3","h4","h5"];
+    let tags = ["p", "li","pre","table","h1","h2","h3","h4","h5"];
     tags.forEach(tag => {
-      const obj = Array.from(document.querySelectorAll(tag));
+      const obj = Array.from(document.getElementById("content").querySelectorAll(tag));
       pArray = pArray.concat(obj);
     });
 
     for (let i = 0; i < pArray.length; i++) {
       const element = pArray[i];
-      // console.log(element.innerText);
+      if (element.className === "pptoclist"||element.className === "pptocitem") {
+        console.warn("pptoclist")
+        continue;
+      }
       if (element.innerText.includes(text)) {
-        console.log("scrollToText",element.offsetTop);
+        console.log("scrollToText", element.innerText, element.offsetTop);
         element.scrollIntoView();
         return element.offsetTop
       }

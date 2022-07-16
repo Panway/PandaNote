@@ -504,27 +504,37 @@ PPFileListCellDelegate,PPFileListToolBarDelegate
     
     
     @objc func moreAction()  {
-        var menuTitile = ["从🏞添加照骗","新建文本文档📃","新建文件夹📂"]
+        var menuTitile = ["从相册添加图片","新建文本文档","新建文件夹"]
         if self.navigationController?.viewControllers.count == 1 {
             menuTitile.append("添加云服务")
         }
+        if isRecentFiles {
+            menuTitile.append("清空访问历史")
+        }
         PPAlertAction.showSheet(withTitle: "更多操作", message: nil, cancelButtonTitle: "取消", destructiveButtonTitle: nil, otherButtonTitle: menuTitile) { (index) in
-            debugPrint(index)
-            if index == 1 {
+            if index == 0 {
+                return //0是取消按钮，不处理
+            }
+            let title = menuTitile[index - 1]
+            if title == "从相册添加图片" {
                 self.showImagePicker { selectedAssets in
                     PPFileManager.shared.uploadPhotos(selectedAssets, completion: { photoAssets in
                         self.getFileListData()
                     })
                 }
             }
-            else if index == 2 {
+            else if title == "新建文本文档" {
                 self.newTextFile()
             }
-            else if index == 3 {
+            else if title == "新建文件夹" {
                 self.newTextFile(isDir: true)
             }
-            else if index == 4 {
+            else if title == "添加云服务" {
                 self.addCloudService()
+            }
+            else if title == "清空访问历史" {
+                PPUserInfo.shared.pp_RecentFiles.removeAll()
+                self.getFileListData()
             }
         }
     }
