@@ -7,18 +7,18 @@ PODS:
   - DropDown (2.3.13)
   - FilesProvider (0.26.0)
   - FLAnimatedImage (1.0.16)
-  - FLEX (4.6.0)
+  - FLEX (4.7.0)
   - FMDB (2.7.5):
     - FMDB/standard (= 2.7.5)
   - FMDB/standard (2.7.5)
   - GCDWebServer (3.5.4):
     - GCDWebServer/Core (= 3.5.4)
   - GCDWebServer/Core (3.5.4)
-  - IQKeyboardManager (6.5.6)
+  - IQKeyboardManager (6.5.10)
   - Kanna (5.2.7)
   - Kingfisher (6.3.1)
   - MBProgressHUD (1.2.0)
-  - MJRefresh (3.7.2)
+  - MJRefresh (3.7.5)
   - MonkeyKing (2.2.1)
   - NewPopMenu (2.1.2)
   - ObjectMapper (4.2.0)
@@ -36,9 +36,13 @@ PODS:
   - PPiOSKit/PPAlertAction (0.0.1)
   - PPiOSKit/RuntimeTool (0.0.1)
   - PPiOSKit/SwipePopGesture (0.0.1)
-  - SKPhotoBrowser (7.0.0)
-  - SnapKit (5.0.1)
-  - TZImagePickerController (3.6.6)
+  - SKPhotoBrowser (7.1.0)
+  - SnapKit (5.6.0)
+  - TZImagePickerController (3.8.3):
+    - TZImagePickerController/Basic (= 3.8.3)
+    - TZImagePickerController/Location (= 3.8.3)
+  - TZImagePickerController/Basic (3.8.3)
+  - TZImagePickerController/Location (3.8.3)
   - YYText (1.0.7)
 
 DEPENDENCIES:
@@ -117,23 +121,23 @@ SPEC CHECKSUMS:
   DropDown: 8a2116376c1981888557f72ec2ffc9a5e0e456ec
   FilesProvider: 2a8ae17d8b9c23a6feadb1308ee638fa31d21065
   FLAnimatedImage: 8f3e854ebf9680b71f0b6e700939687fc4d82b4b
-  FLEX: 6223ad3d853fb6177a6ab1cda85f372a72768da8
+  FLEX: bdc9ac7d4a239e3d04c298c01221203257d63a80
   FMDB: 2ce00b547f966261cd18927a3ddb07cb6f3db82a
   GCDWebServer: 2c156a56c8226e2d5c0c3f208a3621ccffbe3ce4
-  IQKeyboardManager: 2a6e97afdafc7becf0cb17a9a8d795e3a980717f
+  IQKeyboardManager: 45a1fa55c1a5b02c61ac0fd7fd5b62bb4ad20d97
   Kanna: 01cfbddc127f5ff0963692f285fcbc8a9d62d234
   Kingfisher: 016c8b653a35add51dd34a3aba36b580041acc74
   MBProgressHUD: 3ee5efcc380f6a79a7cc9b363dd669c5e1ae7406
-  MJRefresh: 30997d30b347c8e9508a4db11e3a690da0c9b85a
+  MJRefresh: fdf5e979eb406a0341468932d1dfc8b7f9fce961
   MonkeyKing: 196838a3b4c97e95915f3e7046fb2d6044f06101
   NewPopMenu: c6129e08e8192f6257ceb5f9a4357e1b59c6e2e7
   ObjectMapper: 1eb41f610210777375fa806bf161dc39fb832b81
   PINCache: 7a8fc1a691173d21dbddbf86cd515de6efa55086
   PINOperation: 00c935935f1e8cf0d1e2d6b542e75b88fc3e5e20
   PPiOSKit: 9f049cf7ff47cefda7f747a404254ee1a5ae7f85
-  SKPhotoBrowser: 6aaa8f232752e87c7e76bace183bead0a137097d
-  SnapKit: 97b92857e3df3a0c71833cce143274bf6ef8e5eb
-  TZImagePickerController: edf61b8e87f26e3e445aa50eb66254bd7f4859db
+  SKPhotoBrowser: cd95b95a6f352fc2a50992721299f75ead77f9ab
+  SnapKit: e01d52ebb8ddbc333eefe2132acf85c8227d9c25
+  TZImagePickerController: e9909edbadf7381140efc5b5c9f5bdbfd630f7d4
   YYText: 5c461d709e24d55a182d1441c41dc639a18a4849
 
 PODFILE CHECKSUM: a57a80120e230d6253877a7b013744887fecfcd6

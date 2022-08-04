@@ -49,7 +49,7 @@ class PPHUD: NSObject {
             lastViewExist = true
 //            lastView?.removeFromSuperview()
         }
-        let width = UIApplication.shared.keyWindow!.frame.width
+        let width = UIApplication.shared.keyWindow?.frame.width ?? 400
         let aLB = UILabel(frame: CGRect(x: 80, y: -40.0, width: width-160, height: 140.0))
 //        aLB.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         if let isError = isError, isError {//isError存在且值为true

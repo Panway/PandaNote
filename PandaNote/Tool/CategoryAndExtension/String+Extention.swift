@@ -30,16 +30,7 @@ extension String {
         let indexRange = Range<String.Index>(uncheckedBounds: (lower: fromIndex, upper: toIndex))
         return String(self[indexRange])
     }
-    func pp_isImageFile() -> Bool {
-        let imageName = self.lowercased();
-        if(imageName.hasSuffix("jpg")||imageName.hasSuffix("jpeg")||imageName.hasSuffix("png")||imageName.hasSuffix("gif")||imageName.hasSuffix("webp")||imageName.hasSuffix("heic")) {
-        return true
-        }
-        return false
-    }
-    func pp_isVideoFile() -> Bool {
-        return self.lowercased().hasSuffix("mp4")
-    }
+    
     /// 可能包含中文编码的字符串data ==> 字符串
     init?(textData gbkData: Data) {
         if let utf8Text = String(data: gbkData, encoding: .utf8) {
@@ -611,7 +602,7 @@ extension String{
 
 
 
-//MARK:Your Logic 自己的业务逻辑
+//MARK: Your Logic 自己的业务逻辑
 extension String {
     func isTextFile() -> Bool {
         let textSuffixs = ["md","txt","js","css","json",
@@ -620,6 +611,35 @@ extension String {
                            "go","mm","plist","xml"]
         let existedFile = textSuffixs.filter{self.hasSuffix($0)}
         return existedFile.count > 0
+    }
+    /// 是图片文件
+    func pp_isImageFile() -> Bool {
+        let name = self.lowercased();
+        if(name.hasSuffix("jpg") ||
+           name.hasSuffix("jpeg") ||
+           name.hasSuffix("png") ||
+           name.hasSuffix("gif") ||
+           name.hasSuffix("webp") ||
+           name.hasSuffix("heic")) {
+            return true
+        }
+        return false
+    }
+    func pp_isVideoFile() -> Bool {
+        return self.lowercased().hasSuffix("mp4")
+    }
+    /// 是音视频媒体文件
+    func pp_isMediaFile() -> Bool {
+        let l = self.lowercased();
+        if (l.hasSuffix("mp14") ||
+            l.hasSuffix("mov") ||
+            l.hasSuffix("mp3") ||
+            l.hasSuffix("wav") ||
+            l.hasSuffix("flac") ||
+            l.hasSuffix("m4a")) {
+            return true
+        }
+        return false
     }
 }
 extension Int {

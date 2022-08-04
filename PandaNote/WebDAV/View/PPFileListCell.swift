@@ -31,7 +31,7 @@ class PPFileListCell: PPBaseCollectionViewCell {
     
     private var viewMode = PPFileListCellViewMode.list //默认是列表
     private var cellPadding = 8
-    private let screenWidth: CGFloat = UIScreen.main.bounds.width
+//    private let screenWidth: CGFloat = UIScreen.main.bounds.width
     private var iconImage : UIImageView = {
         let img = UIImageView()
         return img
@@ -172,8 +172,9 @@ class PPFileListCell: PPBaseCollectionViewCell {
         let sizeStr = (fileObj.size>0) ? " - \(Int(fileObj.size).pp_SizeString())" :""
         self.timeLabel.text = fileObj.modifiedDate + sizeStr
     }
-    
-    func getSize(_ mode:PPFileListCellViewMode) -> CGSize {
+    //macOS 改变App窗口大小后，屏幕宽度还是固定值，不能用
+    func getSize(_ mode:PPFileListCellViewMode,_ screenWidth:CGFloat) -> CGSize {
+//        print("===\(screenWidth)")
         viewMode = mode
         if viewMode == .list {
             return CGSize(width: screenWidth, height: 50)

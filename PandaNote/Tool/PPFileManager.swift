@@ -131,7 +131,7 @@ class PPFileManager: NSObject,FileProviderDelegate {
                 return
             }
             if let shouldCacheToDisk = cacheToDisk, shouldCacheToDisk == true {
-                PPDiskCache.shared.setData(data, key:  PPUserInfo.shared.webDAVRemark + path)
+                PPDiskCache.shared.setDataSynchronously(data, key:  PPUserInfo.shared.webDAVRemark + path)
             }
             DispatchQueue.main.async {
                 completionHandler(data,false,error)
@@ -145,7 +145,7 @@ class PPFileManager: NSObject,FileProviderDelegate {
     /// - Parameters:
     ///   - path: 远程文件路径
     ///   - completionHandler: 完成回调
-    private func getFileFromWebDAV(path: String,
+    private func getFileViaWebDAV(path: String,
                             downloadIfExist : Bool? = false,
                             onlyCheckIfFileExist : Bool? = false,
                             completionHandler: @escaping ((_ contents: Data?, _ isFromCache:Bool, _ error: Error?) -> Void)) {
@@ -153,12 +153,11 @@ class PPFileManager: NSObject,FileProviderDelegate {
         PPDiskCache.shared.fetchData(key: PPUserInfo.shared.webDAVRemark + path,onlyCheckIfFileExist:onlyCheckIfFileExist, failure: { (error) in
             // 2-2 本地磁盘没有，就从服务器获取最新的
             self.downloadFile(path: path, cacheToDisk: true, completionHandler: completionHandler)
-            
         }) { (data) in
             // 2-1 本地磁盘有，按需从服务器获取最新的
-            debugPrint("loading local file success")
+            debugPrint("local file loaded")
             completionHandler(data,true,nil)
-            if let down = downloadIfExist,down == true {
+            if downloadIfExist == true {//即使本地有文件也重新下载
                 self.downloadFile(path: path, cacheToDisk: true, completionHandler: completionHandler)
             }
         }
@@ -208,10 +207,22 @@ class PPFileManager: NSObject,FileProviderDelegate {
             })
         }
         else {
-            getFileFromWebDAV(path: path,
+            getFileViaWebDAV(path: path,
                                downloadIfExist:downloadIfCached,
                                onlyCheckIfFileExist:onlyCheckIfFileExist,
                                completionHandler: completionHandler)
+        }
+    }
+    /// 无法修改的图片视频等文件，缓存到本地后返回本地URL
+    func getFileURL(path:String,
+                    fileID:String?,
+                    completion: @escaping (( _ url:String) -> Void)) {
+        getFileData(path: path, fileID: fileID,cacheToDisk:true,onlyCheckIfFileExist:true) { (contents: Data?,isFromCache, error) in
+            if error != nil {
+                return
+            }
+            let filePath = "\(PPDiskCache.shared.path)/\(PPUserInfo.shared.webDAVRemark)/\(path)"
+            completion(filePath)
         }
     }
     /// 通过WebDAV上传到服务器

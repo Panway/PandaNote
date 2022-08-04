@@ -36,6 +36,7 @@ PPFileListCellDelegate,PPFileListToolBarDelegate
     var collectionView : UICollectionView!
     var multipleSelectionMode = false
     var cellStyle = PPFileListCellViewMode.list
+    var lastResizeWidth = 300.0
     lazy var dropdown : PPDropDown = {
         let drop = PPDropDown()
         return drop
@@ -65,7 +66,15 @@ PPFileListCellDelegate,PPFileListToolBarDelegate
 //    }
     
         
-    
+    // iOS & mac catalyst window resize event
+    override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
+        super.viewWillTransition(to: size, with: coordinator)
+        debugPrint("new size: \(size)")
+        if(abs(lastResizeWidth - size.width) > 20) { //窗口宽度变化大于20才刷新，不要太频繁
+            self.collectionView?.reloadData()
+            lastResizeWidth = size.width
+        }
+    }
     override func viewDidLoad() {
         super.viewDidLoad()
 
@@ -96,6 +105,11 @@ PPFileListCellDelegate,PPFileListToolBarDelegate
             PPUserInfo.shared.refreshFileList = false
         }
     }
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+
+    }
+    
     //MARK: - UI
     func initSubViews() {
         self.view.addSubview(topToolBar)
@@ -151,7 +165,7 @@ PPFileListCellDelegate,PPFileListToolBarDelegate
         let cell = collectionView.dequeueReusableCell(
             withReuseIdentifier: kPPCollectionViewCellID,
             for: indexPath) as! PPFileListCell
-        return cell.getSize(self.cellStyle)
+        return cell.getSize(self.cellStyle, lastResizeWidth)
     }
     // 3 返回单元格、页眉和页脚之间的间距
 //    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, insetForSectionAt section: Int
@@ -170,7 +184,7 @@ PPFileListCellDelegate,PPFileListToolBarDelegate
         if self.isMovingMode {
             return
         }
-        self.dropdown.dataSource = ["删除","重命名","移动","多选"]
+        self.dropdown.dataSource = ["删除","重命名","移动","多选","QuickLook预览"]
         self.dropdown.selectionAction = { (index: Int, item: String) in
             if item == "删除" {
                 PPHUD.shared.showDelayTaskHUD {
@@ -193,6 +207,10 @@ PPFileListCellDelegate,PPFileListToolBarDelegate
             else if item == "多选" {
                 self.multipleSelectionMode = true
 //                self.topToolBarHeight?.updateOffset(amount: 99)
+            }
+            else if item == "QuickLook预览" {
+                let fileObj = self.dataSource[cellIndex]
+                self.fileQuickLookPreview(fileObj)
             }
         }
         self.dropdown.anchorView = sender
@@ -273,37 +291,33 @@ PPFileListCellDelegate,PPFileListToolBarDelegate
             }
         }
         else if (fileObj.name.hasSuffix("pdf"))  {
-            PPFileManager.shared.getFileData(path: getPathNotEmpty(fileObj), fileID: fileObj.pathID,cacheToDisk:true,onlyCheckIfFileExist:true) { (contents: Data?,isFromCache, error) in
-                if error != nil {
-                    return
-                }
+            PPFileManager.shared.getFileURL(path: getPathNotEmpty(fileObj), fileID: fileObj.pathID) { filePath in
                 if #available(iOS 11.0, *) {
                     let vc = PPPDFViewController()
-                    vc.filePathStr = PPDiskCache.shared.fullPath(forKey: PPUserInfo.shared.webDAVRemark + fileObj.path)
+                    vc.filePathStr = filePath
                     self.navigationController?.pushViewController(vc, animated: true)
                 } else {
-                    PPHUD.showHUDFromTop("抱歉，暂不支持iOS11以下系统预览PDF哟")
+                    PPHUD.showHUDFromTop("暂不支持iOS11以下系统预览PDF")
                 }
             }
-            
         }
-        else if (fileObj.name.hasSuffix("mp3")||fileObj.name.lowercased().hasSuffix("mp4"))  {
-            PPFileManager.shared.getFileData(path: getPathNotEmpty(fileObj), fileID: fileObj.pathID,cacheToDisk:true,onlyCheckIfFileExist:true) { (contents: Data?,isFromCache, error) in
-                if error != nil {
-                    return
-                }
+        else if (fileObj.name.pp_isMediaFile())  {
+            PPFileManager.shared.getFileURL(path: getPathNotEmpty(fileObj), fileID: fileObj.pathID) { filePath in
                 let vc = PlayerViewController()
-                let filePath = "\(PPDiskCache.shared.path)/\(PPUserInfo.shared.webDAVRemark)/\(self.getPathNotEmpty(fileObj))"
                 vc.localFileURL = URL(fileURLWithPath: filePath)
                 self.navigationController?.pushViewController(vc, animated: true)
             }
         }
         else {
-            PPAlertAction.showAlert(withTitle: "暂不支持", msg: "是否以纯文本方式打开", buttonsStatement: ["打开","不了"]) { (index) in
-                if index == 0 {
+            // 打开为「图片」、「文字」...
+            PPAlertAction.showSheet(withTitle: "打开为", message: nil, cancelButtonTitle: "取消", destructiveButtonTitle: nil, otherButtonTitle: ["markdown文本","其他"]) { openIndex in
+                if openIndex == 1 {
                     let vc = PPMarkdownViewController()
                     vc.filePathStr = self.getPathNotEmpty(fileObj)
                     self.navigationController?.pushViewController(vc, animated: true)
+                }
+                else if openIndex == 2 {
+                    self.fileQuickLookPreview(fileObj)
                 }
             }
         }
@@ -635,6 +649,13 @@ PPFileListCellDelegate,PPFileListToolBarDelegate
             return "亲，文件已存在哦"
         }
         return nil
+    }
+    func fileQuickLookPreview(_ fileObj:PPFileObject) {
+        PPFileManager.shared.getFileURL(path: self.getPathNotEmpty(fileObj), fileID: fileObj.pathID) { filePath in
+            let vc = PPPreviewController() //QuickLook框架预览
+            vc.filePathArray = [filePath]
+            self.present(vc, animated: true)
+        }
     }
     //MARK:获取文件列表
     func getFileListData() -> Void {
