@@ -73,7 +73,7 @@ class PPWebDAVService: PPFilesProvider, PPCloudServiceProtocol {
     }
     
     
-    func searchFileViaWebDAV(path: String, searchText: String?,completionHandler: @escaping ((_ files: [PPFileObject], _ isFromCache:Bool, _ error: Error?) -> Void)) {
+    func searchFile(path: String, searchText: String?,completionHandler: @escaping ((_ files: [PPFileObject], _ isFromCache:Bool, _ error: Error?) -> Void)) {
         //创建谓词，默认是TRUEPREDICATE
         var query = NSPredicate(format: "TRUEPREDICATE")
         let searchFile:[URLResourceKey] = []//[.fileSizeKey,.creationDateKey]

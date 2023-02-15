@@ -55,6 +55,7 @@ class PPFileManager: NSObject,FileProviderDelegate {
         PPFileManager.dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
         initCloudServiceSetting()//初始化服务器配置
     }
+    //MARK: get file
     /// 获取文件列表对象数组然后缓存
     private func getFileListThenCache(path:String,
                                       pathID:String? = "",
@@ -145,7 +146,7 @@ class PPFileManager: NSObject,FileProviderDelegate {
     /// - Parameters:
     ///   - path: 远程文件路径
     ///   - completionHandler: 完成回调
-    private func getFileViaWebDAV(path: String,
+    private func getRemoteOrLocalFile(path: String,
                             downloadIfExist : Bool? = false,
                             onlyCheckIfFileExist : Bool? = false,
                             completionHandler: @escaping ((_ contents: Data?, _ isFromCache:Bool, _ error: Error?) -> Void)) {
@@ -164,7 +165,7 @@ class PPFileManager: NSObject,FileProviderDelegate {
 
     }
     
-    /// 获取文件内容
+    /// 获取文件二进制Data
     /// - Parameters:
     ///   - path: 路径
     ///   - fileID: 文件ID，百度网盘是fs_id
@@ -207,7 +208,7 @@ class PPFileManager: NSObject,FileProviderDelegate {
             })
         }
         else {
-            getFileViaWebDAV(path: path,
+            getRemoteOrLocalFile(path: path,
                                downloadIfExist:downloadIfCached,
                                onlyCheckIfFileExist:onlyCheckIfFileExist,
                                completionHandler: completionHandler)
@@ -225,8 +226,9 @@ class PPFileManager: NSObject,FileProviderDelegate {
             completion(filePath)
         }
     }
+    //MARK: add file
     /// 通过WebDAV上传到服务器
-    func uploadFileViaWebDAV(path: String, contents: Data?, completionHandler:@escaping(_ error:Error?) -> Void) {
+    func createFile(path: String, contents: Data?, completionHandler:@escaping(_ error:Error?) -> Void) {
         guard let contents = contents else {
             DispatchQueue.main.async {
                 PPHUD.showHUDFromTop("空文件",isError: true)
@@ -258,7 +260,7 @@ class PPFileManager: NSObject,FileProviderDelegate {
         })
     }
     /// 通过WebDAV 新建文件夹
-    func createFolderViaWebDAV(folder folderName: String, at atPath: String, completionHandler:@escaping(_ error:Error?) -> Void) {
+    func createFolder(folder folderName: String, at atPath: String, completionHandler:@escaping(_ error:Error?) -> Void) {
         currentService?.createDirectory(folderName, at: atPath, completionHandler: { error in
             DispatchQueue.main.async {
                 completionHandler(error)
@@ -266,7 +268,7 @@ class PPFileManager: NSObject,FileProviderDelegate {
         })
     }
     //删除远程服务器的文件
-    func deteteRemoteFile(path: String, completionHandler:@escaping(_ error:Error?) -> Void) {
+    func deteteFile(path: String, completionHandler:@escaping(_ error:Error?) -> Void) {
         currentService?.removeItem(atPath: path, completionHandler: { error in
             DispatchQueue.main.async {
                 completionHandler(error)
@@ -275,7 +277,7 @@ class PPFileManager: NSObject,FileProviderDelegate {
     }
     
     /// 从WebDAV下载文件获取Data
-    func searchFileViaWebDAV(path: String, searchText: String?,completionHandler: @escaping ((_ files: [PPFileObject], _ isFromCache:Bool, _ error: Error?) -> Void)) {
+    func searchFile(path: String, searchText: String?,completionHandler: @escaping ((_ files: [PPFileObject], _ isFromCache:Bool, _ error: Error?) -> Void)) {
         //TODO:webdav
             
     }
@@ -448,7 +450,7 @@ class PPFileManager: NSObject,FileProviderDelegate {
                 let remotePath = path + uploadName
 //                debugPrint(imageLocalURL)
                 
-                PPFileManager.shared.uploadFileViaWebDAV(path: remotePath, contents: imageData) { (error) in
+                PPFileManager.shared.createFile(path: remotePath, contents: imageData) { (error) in
                     if let error = error {
                         debugPrint("上传出错:\(error.localizedDescription)")
                         return

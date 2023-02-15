@@ -22,7 +22,7 @@ class PPFileListViewController: PPBaseViewController,UITextFieldDelegate,UITable
     ,SKPhotoBrowserDelegate
 ,PopMenuViewControllerDelegate,
 UICollectionViewDelegate, UICollectionViewDataSource,UICollectionViewDelegateFlowLayout,
-PPFileListCellDelegate,PPFileListToolBarDelegate
+PPFileListCellDelegate,PPFileListToolBarDelegate, PPDocumentDelegate
 {
     
     
@@ -60,6 +60,8 @@ PPFileListCellDelegate,PPFileListToolBarDelegate
     var filePathToBeMove = ""
     //---------------移动文件（夹）到其他文件夹功能↑---------------
     var titleViewButton : UIButton!
+    var documentPicker: PPFilePicker!
+
     //MARK:Life Cycle
 //    convenience init() {
 //        self.init(nibName:nil, bundle:nil)
@@ -376,7 +378,7 @@ PPFileListCellDelegate,PPFileListToolBarDelegate
             return
         }
         //相对路径
-        PPFileManager.shared.deteteRemoteFile(path: fileObj.path) { (error) in
+        PPFileManager.shared.deteteFile(path: fileObj.path) { (error) in
             if let errorNew = error {
                 PPHUD.showHUDFromTop("删除失败: \(String(describing: errorNew))", isError: true)
             }
@@ -516,9 +518,8 @@ PPFileListCellDelegate,PPFileListToolBarDelegate
         self.present(alertController, animated: true, completion: nil)
     }
     
-    
     @objc func moreAction()  {
-        var menuTitile = ["从相册添加图片","新建文本文档","新建文件夹"]
+        var menuTitile = ["添加文件","从相册添加图片","新建文本文档","新建文件夹"]
         if self.navigationController?.viewControllers.count == 1 {
             menuTitile.append("添加云服务")
         }
@@ -539,6 +540,10 @@ PPFileListCellDelegate,PPFileListToolBarDelegate
             }
             else if title == "新建文本文档" {
                 self.newTextFile()
+            }
+            else if title == "添加文件" {
+                self.documentPicker = PPFilePicker(presentationController: self, delegate: self)
+                self.documentPicker.showFilePicker()
             }
             else if title == "新建文件夹" {
                 self.newTextFile(isDir: true)
@@ -578,7 +583,7 @@ PPFileListCellDelegate,PPFileListToolBarDelegate
                 return
             }
             if isDir {
-                PPFileManager.shared.createFolderViaWebDAV(folder: newName, at: self.pathStr) { (error) in
+                PPFileManager.shared.createFolder(folder: newName, at: self.pathStr) { (error) in
                     if error == nil {
                         PPHUD.showHUDFromTop("新建成功")
                         self.getFileListData()
@@ -589,7 +594,7 @@ PPFileListCellDelegate,PPFileListToolBarDelegate
                 }
             }
             else {
-            PPFileManager.shared.uploadFileViaWebDAV(path: self.pathStr+newName, contents: "# 标题".data(using:.utf8)) { (error) in
+            PPFileManager.shared.createFile(path: self.pathStr+newName, contents: "# 标题".data(using:.utf8)) { (error) in
                 if error != nil {
                     PPHUD.showHUDFromTop("新建失败", isError: true)
                 }
@@ -605,6 +610,23 @@ PPFileListCellDelegate,PPFileListToolBarDelegate
         alertController.addAction(saveAction)
         alertController.addAction(cancelAction)
         self.present(alertController, animated: true, completion: nil)
+    }
+    //MARK: 添加文件回调
+    func didPickDocuments(documents: [PPDocument]?) {
+        debugPrint(documents)
+        guard let documents = documents else { return }//为空返回
+        for obj in documents {
+            guard let objData = try? Data(contentsOf: obj.fileURL) else { return }//为空返回
+            PPFileManager.shared.createFile(path: self.pathStr + obj.fileURL.lastPathComponent, contents: objData) { (error) in
+                if error != nil {
+                    PPHUD.showHUDFromTop("新建失败", isError: true)
+                }
+                else {
+                    PPHUD.showHUDFromTop("新建成功")
+                    self.getFileListData()
+                }
+            }
+        }
     }
     /// 加载图片并保存，如果本地不存在就从服务器获取
     func loadAndCacheImage(_ file:PPFileModel,completionHandler: ((Data,String) -> Void)? = nil) {

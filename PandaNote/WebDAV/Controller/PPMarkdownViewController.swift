@@ -334,8 +334,6 @@ class PPMarkdownViewController: PPBaseViewController,
         
     }
     @objc func shareTextAction(sender:UIButton?)  {
-        UIPasteboard.general.string = textView.text
-        PPHUD.showHUDFromTop("已复制到剪贴板，你还可以通过其他方式分享")
         let fileURL = URL(fileURLWithPath: PPDiskCache.shared.path + self.filePathStr)
         let shareSheet = UIActivityViewController(activityItems: [fileURL], applicationActivities: nil)
         present(shareSheet, animated: true)
@@ -349,7 +347,7 @@ class PPMarkdownViewController: PPBaseViewController,
         debugPrint("保存的是===\(stringToUpload)")
         //MARK:保存
         self.textView.resignFirstResponder()
-        PPFileManager.shared.uploadFileViaWebDAV(path: self.filePathStr, contents: stringToUpload.data(using: .utf8), completionHandler: { (error) in
+        PPFileManager.shared.createFile(path: self.filePathStr, contents: stringToUpload.data(using: .utf8), completionHandler: { (error) in
             if error != nil {
                 PPHUD.showHUDFromTop("保存失败", isError: true)
                 return

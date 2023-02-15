@@ -9,9 +9,10 @@
 import Foundation
 import WebKit.WKWebView
 
-/// thanks to https://stackoverflow.com/a/55160117/4493393
+
 extension WKWebView {
     
+    /// from: https://stackoverflow.com/a/55160117/4493393
     // Call this function when WKWebView finish loading
     func exportToPdf(completion: ((Data) -> Void)? = nil) {
         if #available(iOS 14.0, *) {

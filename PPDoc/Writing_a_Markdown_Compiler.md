@@ -22,7 +22,7 @@
 # Part1
 
 Have you ever wanted to make your own programming language? Maybe a template engine? A JSON parser? If you have ever built any of those, you might have noticed it’s not exactly easy to get started. There are a lot of concepts to digest before you get going. That’s why lots of devs just give up. We’d like to help with that.
-你想过创建自己的编程语言吗？或者一个模板引擎、一个 JSON 解析器？如果你构建过其中的任何一个，你可能已经注意到它不是那么容易开始。在开始之前，有很多概念需要理解。这就是为什么很多开发者会放弃。现在我们很乐意帮帮你。
+你想过创建自己的编程语言吗？或者一个模板引擎、一个 JSON 解析器？如果你构建过其中的任何一个，你可能已经注意到它不是那么容易。在开始之前，有很多概念需要理解。这就是为什么很多开发者会放弃。现在我们很乐意帮帮你。
 
 At Beezwax, a few years ago we built [a WordPress plugin](https://github.com/beezwax/WP-Publish-to-Apple-News) which allows users to upload their blog posts to [the Apple News platform](https://www.apple.com/news/). In order to do this, we had to translate HTML to some particular format. What we wrote is, at its core, a compiler. Compilers are not only for programming languages, they are in many more places than you might think!
 在 Beezwax，几年前我们建立了一个 WordPress 插件，允许用户将他们的博客文章上传到 Apple News 平台。为了做到这一点，我们必须将 HTML 翻译成某种特定的格式。我们写的核心是一个编译器，编译器不仅适用于编程语言，它们的使用场景比你想象的要多得多！
@@ -36,11 +36,11 @@ What exactly is a compiler, anyways? 编译器到底是什么
 
 Let’s start from the beginning and define what a compiler is. A compiler is just a black box which translates input in a given language to output in another language. The input and output languages can be anything. If you’ve been in the Javascript world for the past few years you might have seen something called _transpiler_. A transpiler is actually a compiler, it transforms, for example, _Coffeescript_ source code into _Javascript_ source code or _SASS_ into _CSS_.
 
-编译器就是一个黑盒子，它将给定的一种语言输入翻译成另一种语言输出。输入和输出语言可以是任何语言。如果你已经在 Javascript 世界呆了几年，你可能会看到一些叫做 _transpiler_ 的东西。Transpiler 实际上是一个编译器，例如它把 Coffeescript 源代码转换成 Javascript 源代码或者 SASS 转换成 CSS。
+编译器就是一个黑盒子，将一种语言的输入翻译成另一种语言的输出。输入和输出语言可以是任何语言。如果你已经在 Javascript 世界呆了几年，你可能会看到一些叫做 _transpiler_ 的东西。Transpiler 实际上是一个编译器，例如它把 Coffeescript 源代码转换成 Javascript 源代码或者 SASS 转换成 CSS。
 
 > **NOTE** Compilers can’t take any language as input. With these techniques, you cannot write an english-to-machine-code compiler. But for _simple_ languages, we can. Once we get into parsing we’ll learn more about those kind of languages, for now, just know that every programming language you know can be an input language for a compiler.
 >
-> **注意**：编译器不能将任何语言作为输入。您无法写一个英语到机器代码的编译器。但是对于*简单的*语言，我们可以。一旦我们开始解析，我们将了解更多关于这些类型的语言，现在，你只需知道每一种编程语言都可以作为编译器的输入语言。
+> **注意**：编译器不能将任何语言作为输入：您无法写一个英语到机器代码的编译器。但是对于*简单的*语言是可以的。一旦我们开始解析，我们将了解更多关于这些类型的语言，现在你只需知道每一种编程语言都可以作为编译器的输入语言。
 
 What we’ll build 我们将构建什么
 ----------------
@@ -91,7 +91,7 @@ Our compiler will mimic the most common compiler structure out there, and we’l
 
 A token is just a name for the basic building blocks of our language. For example an underscore, an asterisk, a new line, or just some words. This will make things easier for us later on.
 
-token 只是我们语言的基本构建块的名称。例如下划线、星号、新行或只是一些单词。这将使我们以后的事情变得更容易。
+token 只是我们语言的基本构建块的名称。例如下划线、星号、换行符或一些词语。这将使我们以后的事情变得更容易。
 
 ```
 [UNDERSCORE, TEXT="Hello,World!", UNDERSCORE] --> PARSER --> #<EmphasisText "Hello,World!">
@@ -99,8 +99,8 @@ token 只是我们语言的基本构建块的名称。例如下划线、星号�
 
 Next, we take those tokens and pass them into a parser. That parser will give us a tree data-structure representing our tokens organized in certain way.
 
-接下来，我们获取这些 token 并将它们传递给解析器。
-解析器将为我们提供一个树数据结构，表示以某种方式组织的令牌。
+接下来，我们把这些 token 传递给解析器。
+解析器将为我们提供一个树数据结构，表示以某种方式组织的token。
 
 ```
 #<EmphasisText "Hello,World!"> --> CODEGEN --> <em>Hello,World!</em>
@@ -142,7 +142,7 @@ A paragraph __with__ some *text*
 As we are only going to match paragraphs, emphasized text and bold text — no links, lists, quotes, etc — it makes sense to have only the following tokens: `UNDERSCORE`; `STAR`; `NEWLINE`; `TEXT` and `EOF`.
 So, for example, for the input `_Hello*` our tokenizer should return `[<UNDERSCORE>, <TEXT="Hello">, <STAR>]`.
 
-由于我们只匹配段落、斜体强调文本和粗体文本，没有链接、列表、引号等，所以只有以下标记才有意义：`UNDERSCORE`; `STAR`; `NEWLINE`; `TEXT`和`EOF`。
+由于我们只匹配段落、强调文本（斜体）和粗体文本，没有链接、列表、引号等，所以只有以下标记才有意义：`UNDERSCORE`; `STAR`; `NEWLINE`; `TEXT`和`EOF`。
 因此对于输入`_Hello*`，我们的分词器应该返回`[<UNDERSCORE>, <TEXT="Hello">, <STAR>]`。
 
 Let’s start with a test which defines what our Tokenizer should do. We’ll use [Minitest](https://github.com/seattlerb/minitest) for the specs.
@@ -233,8 +233,6 @@ class Tokenizer
   end
 end
 ```
-
-
 
 The method of interest here is `scan_one_token`. It takes a plain markdown string and returns a single token, matching the first character of the input string. To do so, it iterates though the scanners, and if the token matched is not null — i.e., if it’s valid — it will return that token. Otherwise, it will keep trying scanners. We fail if we consume the whole array and return nothing.
 

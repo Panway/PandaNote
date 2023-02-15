@@ -43,14 +43,15 @@ class PPPasteboardTool: NSObject {
         }
 //        let input = "https://m.weibo.cn/1098618600/4494272029733190"
 //        let input = "This is a test with the URL https://www.smzdm.com/p/20405394/?send_by=3716913905&from=other to be detected."
-        let detector = try! NSDataDetector(types: NSTextCheckingResult.CheckingType.link.rawValue)
+        let detector = try? NSDataDetector(types: NSTextCheckingResult.CheckingType.link.rawValue)
+        guard let detector = detector else { return }
         let matches = detector.matches(in: input, options: [], range: NSRange(location: 0, length: input.utf16.count))
         var urlString = ""
         for match in matches {
             guard let range = Range(match.range, in: input) else { continue }
             let url = input[range]
             urlString = String(url)
-            break
+            break // only match FIRST URL 仅匹配第一个URL
         }
         if matches.count > 1 {
             PPHUD.showHUDFromTop("URL太多，已为你解析第一个URL")
@@ -62,9 +63,7 @@ class PPPasteboardTool: NSObject {
         
         debugPrint(urlString)
         AF.request(urlString).responseJSON { response in
-            //if let 改成 guard let可以减少缩进。至于下面为啥没改？是历史遗留问题，改动的时候再提交。
-//            if let data = response.data, let utf8Text = String(data: data, encoding: .utf8) {
-//            }
+            //不为空检查
             guard let data = response.data, let utf8Text = String(textData: data) else {
                 return
             }
@@ -78,7 +77,7 @@ class PPPasteboardTool: NSObject {
                 title = title + "\n" + urlString
                 UIPasteboard.general.string = title
                 PPUserInfo.shared.pp_Setting.updateValue(title, forKey: "PPLastPasteBoardContent")
-                debugPrint("新的分享内容====" + title)
+            debugPrint("新的分享内容:" + title)
             var userActions = ["🍀去微信分享","🌏打开网页"]
             var douyinVideoID = "" //抖音视频ID
             if urlString.contains("v.douyin.com") {
@@ -184,6 +183,7 @@ class PPPasteboardTool: NSObject {
                 return
             }
             let jsonDic:Dictionary = value as! Dictionary<String, Any>
+            //目的：取jsonDic["item_list"][0]["video"]["play_addr"]["url_list"][0]
             guard let item_list = jsonDic["item_list"] else {
                 return
             }

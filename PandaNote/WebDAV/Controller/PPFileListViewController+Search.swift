@@ -47,7 +47,7 @@ extension PPFileListViewController: UISearchBarDelegate {
     // 键盘的搜索按钮点击后
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
         searchBar.resignFirstResponder()
-        PPFileManager.shared.searchFileViaWebDAV(path: self.pathStr, searchText: searchBar.text) { (files, isF, error) in
+        PPFileManager.shared.searchFile(path: self.pathStr, searchText: searchBar.text) { (files, isF, error) in
 //            let _ = files.map {
 //                debugPrint($0.name)
 //            }
@@ -130,7 +130,7 @@ extension PPFileListViewController {
                 if (first.filePathToBeMove.contains(PPUserInfo.shared.pp_mainDirectory)) {
                     let path = URL(fileURLWithPath: PPUserInfo.shared.pp_mainDirectory+"/PP_JSONConfig.json")
                     let jsonData = try? Data(contentsOf: path)
-                    PPFileManager.shared.uploadFileViaWebDAV(path: self.pathStr + fileName, contents: jsonData) { (error) in
+                    PPFileManager.shared.createFile(path: self.pathStr + fileName, contents: jsonData) { (error) in
                         if error != nil {
                             PPHUD.showHUDFromTop("上传配置失败", isError: true)
                         }
@@ -208,6 +208,8 @@ extension PPFileListViewController {
         
         // Customize appearance
         controller.appearance.popMenuFont = UIFont(name: "AvenirNext-DemiBold", size: 16)!
+        controller.appearance.popMenuColor = PopMenuColor.configure(background: PopMenuActionBackgroundColor.solid(fill: PPCOLOR_GREEN), action: PopMenuActionColor.tint(UIColor.red))
+
 //        controller.appearance.popMenuBackgroundStyle = .blurred(.dark)
         // Configure options
         controller.shouldDismissOnSelection = true//选择后是否自动消失

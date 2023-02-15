@@ -22,6 +22,10 @@ class PPAppConfig: NSObject {
 
     
     func initSetting() {
+#if DEBUG
+        FLEXManager.shared.showExplorer() //调试期间开启FLEX工具
+#endif
+
         initWebServer()
         self.pp_mainDirectory = NSSearchPathForDirectoriesInDomains(.libraryDirectory, .userDomainMask, true)[0]
         self.pp_mainDirectory += "/PandaNote"
