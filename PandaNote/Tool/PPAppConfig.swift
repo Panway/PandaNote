@@ -14,11 +14,12 @@ class PPAppConfig: NSObject {
     static let shared = PPAppConfig()
     
     // https://github.com/swisspol/GCDWebServer/issues/143
-    let webServer = GCDWebServer() // 必须保存实例防止对象被释放
     var fileViewMode = 0 //文件列表显示方式，列表或图标
-    var config = [String:String]()
+    var fileListOrder = PPFileListOrder.nameAsc //文件列表排序方式
+    private var config = [String:String]()
     /// 沙盒Sandbox/Library/PandaCache
-    var pp_mainDirectory:String!
+    private var pp_mainDirectory:String!
+    private let webServer = GCDWebServer() // 必须保存实例防止对象被释放
 
     
     func initSetting() {
@@ -38,6 +39,7 @@ class PPAppConfig: NSObject {
         if let path = Bundle.main.path(forResource: "MarkdownSample", ofType:"md") {
             try? FileManager.default.copyItem(atPath: path, toPath: NSHomeDirectory() + "/Documents/MarkdownSample.md")
         }
+        self.fileListOrder = PPFileListOrder(rawValue: getItem("fileListOrder")) ?? .type
     }
     
     func initDataBase() {
@@ -58,6 +60,10 @@ class PPAppConfig: NSObject {
     
     func setItem(_ key:String, _ value:String) {
         config[key] = value
+        saveToJSONFile()
+    }
+    
+    func saveToJSONFile() {
         if let jsonData = try? JSONSerialization.data(withJSONObject: config, options: JSONSerialization.WritingOptions.prettyPrinted) {
             do {
                 try jsonData.write(to: URL(fileURLWithPath: self.pp_mainDirectory + "/Panda_AppConfig.json"), options: .atomic)

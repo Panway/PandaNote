@@ -9,7 +9,15 @@
 import Foundation
 import PopMenu
 
-
+@objc enum PPFileListOrder : Int {
+    case timeDesc //时间降序
+    case timeAsc //时间升序
+    case nameAsc //名字升序
+    case nameDesc //名字降序
+    case sizeDesc //大小降序
+    case sizeAsc //大小升序
+    case type //文件夹在前面（不排序的结果）
+}
 extension PPFileListViewController {
     //设置搜索控制器
     func setupSearchController() {
@@ -152,6 +160,39 @@ extension PPFileListViewController {
                 
             }
         }
+    }
+    //排序
+    func sort(array:[PPFileObject], orderBy:PPFileListOrder) -> Array<PPFileObject> {
+        var res = [PPFileObject]()
+        switch orderBy {
+        case .timeDesc:
+            res = array.sorted { a, b in
+                a.modifiedDate > b.modifiedDate
+            }
+        case .timeAsc:
+            res = array.sorted { a, b in
+                a.modifiedDate < b.modifiedDate
+            }
+        case .nameAsc:
+            res = array.sorted { a, b in
+                a.name < b.name
+            }
+        case .nameDesc:
+            res = array.sorted { a, b in
+                a.name > b.name
+            }
+        case .sizeAsc:
+            res = array.sorted { a, b in
+                a.size < b.size
+            }
+        case .sizeDesc:
+            res = array.sorted { a, b in
+                a.size > b.size
+            }
+        case .type:
+            res = array
+        }
+        return res;
     }
     
 }

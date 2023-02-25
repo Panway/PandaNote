@@ -232,7 +232,15 @@ PPFileListCellDelegate,PPFileListToolBarDelegate, PPDocumentDelegate
             self.dropdown.show()
         }
         else if index == 1 {
-            
+            self.dropdown.dataSource = ["最新","最旧","名字升序(A-Z)","名字降序(Z-A)","最大","最小"]
+            self.dropdown.selectionAction = { (index: Int, item: String) in
+                let order = PPFileListOrder(rawValue: index) ?? .type
+                PPAppConfig.shared.setItem("fileListOrder","\(index)")
+                self.dataSource = self.sort(array: self.dataSource, orderBy: order)
+                self.collectionView.reloadData()
+            }
+            self.dropdown.anchorView = button
+            self.dropdown.show()
         }
         else if index == 2 {
             self.multipleSelectionMode = true
@@ -703,9 +711,8 @@ PPFileListCellDelegate,PPFileListToolBarDelegate, PPDocumentDelegate
                 return
             }
             PPHUD.showHUDFromTop(isFromCache ? "已加载缓存":"已加载最新")
-
-            self.dataSource.removeAll()
-            self.dataSource.append(contentsOf: contents)
+            
+            self.dataSource = self.sort(array: contents, orderBy: PPAppConfig.shared.fileListOrder);
             self.imageArray = self.dataSource.filter{$0.name.pp_isImageFile()}
             self.collectionView.endRefreshing()
             self.collectionView.reloadData()
