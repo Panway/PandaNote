@@ -31,7 +31,20 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         #endif
 
         window = UIWindow(frame: UIScreen.main.bounds)
-        window?.rootViewController = PPTabBarController.ppTabBar()
+        if UIDevice.current.userInterfaceIdiom != .phone {
+            // macOS和iPad使用左右分屏
+            let splitViewController = UISplitViewController()
+            // splitViewController.delegate = self
+            let masterVC = PPTabBarController.ppTabBar()
+            let detailVC = DetailViewController()
+            let masterNavController = UINavigationController(rootViewController: masterVC)
+            let detailNavController = UINavigationController(rootViewController: detailVC)
+            splitViewController.viewControllers = [masterNavController,detailNavController]
+            window?.rootViewController = splitViewController
+        }
+        else {
+            window?.rootViewController = PPTabBarController.ppTabBar()
+        }
         window?.makeKeyAndVisible()
         #if DEBUG
         self.debugSetting()
@@ -104,6 +117,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     // "paths": ["/pandanote/*","/wechat/*"]
     // 测试链接 ： https://p.agolddata.com/pandanote
     //代码来源：https://developer.apple.com/documentation/xcode/allowing_apps_and_websites_to_link_to_your_content/supporting_universal_links_in_your_app
+    // 查看Team ID:https://developer.apple.com/account/#!/membership
     func application(_ application: UIApplication,
                      continue userActivity: NSUserActivity,
                      restorationHandler: @escaping ([UIUserActivityRestoring]?) -> Void) -> Bool

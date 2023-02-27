@@ -73,8 +73,8 @@ PPFileListCellDelegate,PPFileListToolBarDelegate, PPDocumentDelegate
         super.viewWillTransition(to: size, with: coordinator)
         debugPrint("new size: \(size)")
         if(abs(lastResizeWidth - size.width) > 20) { //窗口宽度变化大于20才刷新，不要太频繁
-            self.collectionView?.reloadData()
             lastResizeWidth = size.width
+            self.collectionView?.reloadData()
         }
     }
     override func viewDidLoad() {
@@ -167,7 +167,8 @@ PPFileListCellDelegate,PPFileListToolBarDelegate, PPDocumentDelegate
         let cell = collectionView.dequeueReusableCell(
             withReuseIdentifier: kPPCollectionViewCellID,
             for: indexPath) as! PPFileListCell
-        return cell.getSize(self.cellStyle, lastResizeWidth)
+        let width = view.frame.size.width
+        return cell.getSize(self.cellStyle, width)
     }
     // 3 返回单元格、页眉和页脚之间的间距
 //    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, insetForSectionAt section: Int
@@ -287,6 +288,16 @@ PPFileListCellDelegate,PPFileListToolBarDelegate, PPDocumentDelegate
             self.navigationController?.pushViewController(vc, animated: true)
         }
         else if (fileObj.name.isTextFile())  {
+            if UIDevice.current.userInterfaceIdiom != .phone {
+                //macOS和iPad使用左右分屏
+                let detailVC = DetailViewController()
+                detailVC.filePathStr = getPathNotEmpty(fileObj)
+                detailVC.fileID = fileObj.pathID
+                detailVC.downloadURL = fileObj.downloadURL
+                detailVC.title = getPathNotEmpty(fileObj)
+                self.splitViewController?.showDetailViewController(detailVC, sender: self)
+                return
+            }
             let vc = PPMarkdownViewController()
             vc.filePathStr = getPathNotEmpty(fileObj)
             vc.fileID = fileObj.pathID

@@ -16,6 +16,7 @@
 		1E03F84A274CA8220085ACFB /* dark.json in Resources */ = {isa = PBXBuildFile; fileRef = 1E03F848274CA8220085ACFB /* dark.json */; };
 		1E03F84B274CA8220085ACFB /* black.json in Resources */ = {isa = PBXBuildFile; fileRef = 1E03F849274CA8220085ACFB /* black.json */; };
 		1E03F84D274CB1A00085ACFB /* vue.json in Resources */ = {isa = PBXBuildFile; fileRef = 1E03F84C274CB1A00085ACFB /* vue.json */; };
+		1E07779C29AB3168005619E4 /* PPDetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E07779B29AB3167005619E4 /* PPDetailViewController.swift */; };
 		1E0D9E0C27736E9700E3AA73 /* PPMarkdownEditorToolBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E0D9E0B27736E9700E3AA73 /* PPMarkdownEditorToolBar.swift */; };
 		1E0D9EB42774C1C700E3AA73 /* PPAppConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E0D9EB32774C1C700E3AA73 /* PPAppConfig.swift */; };
 		1E0DE3E82612153A002BA5D9 /* web in Resources */ = {isa = PBXBuildFile; fileRef = 1E0DE3E72612153A002BA5D9 /* web */; };
@@ -60,7 +61,6 @@
 		6001B6362462BF3400A40593 /* UIImage+PPTool.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6001B6352462BF3400A40593 /* UIImage+PPTool.swift */; };
 		6001B63C2465804100A40593 /* MyURLProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6001B63B2465804000A40593 /* MyURLProtocol.swift */; };
 		60249C69231D1DB100223F1A /* vue.css in Resources */ = {isa = PBXBuildFile; fileRef = 60249C68231D1DB100223F1A /* vue.css */; };
-		604FFA4623DDE77B0059BBC9 /* PPPriceTagViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 604FFA4523DDE77B0059BBC9 /* PPPriceTagViewController.swift */; };
 		604FFA4823DDEBCF0059BBC9 /* PPScanViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 604FFA4723DDEBCF0059BBC9 /* PPScanViewController.swift */; };
 		6056015523166CC5000809CD /* PPUserInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6056015423166CC5000809CD /* PPUserInfo.swift */; };
 		6056015723166F99000809CD /* PPBaseViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6056015623166F99000809CD /* PPBaseViewController.swift */; };
@@ -137,6 +137,7 @@
 		1E03F848274CA8220085ACFB /* dark.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = dark.json; sourceTree = "<group>"; };
 		1E03F849274CA8220085ACFB /* black.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = black.json; sourceTree = "<group>"; };
 		1E03F84C274CB1A00085ACFB /* vue.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = vue.json; sourceTree = "<group>"; };
+		1E07779B29AB3167005619E4 /* PPDetailViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPDetailViewController.swift; sourceTree = "<group>"; };
 		1E0D9E0B27736E9700E3AA73 /* PPMarkdownEditorToolBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPMarkdownEditorToolBar.swift; sourceTree = "<group>"; };
 		1E0D9EB32774C1C700E3AA73 /* PPAppConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPAppConfig.swift; sourceTree = "<group>"; };
 		1E0DE3E72612153A002BA5D9 /* web */ = {isa = PBXFileReference; lastKnownFileType = folder; path = web; sourceTree = "<group>"; };
@@ -479,13 +480,13 @@
 		6056014C23166B92000809CD /* Controller */ = {
 			isa = PBXGroup;
 			children = (
+				1E1B58A6257B9480000860F6 /* PPAddCloudServiceViewController.swift */,
 				6056025723177A2F000809CD /* PPFileListViewController.swift */,
 				1E1DE37B2567BA0A00BB2D1C /* PPFileListViewController+Search.swift */,
-				1E556A0D25639BEF00A4653F /* PPResultsTableController.swift */,
 				60560229231772AE000809CD /* PPMarkdownViewController.swift */,
-				1E1B58A6257B9480000860F6 /* PPAddCloudServiceViewController.swift */,
-				6056027923178017000809CD /* PPWebDAVConfigViewController.swift */,
 				60E61425243DC16E00630B4B /* PPPDFViewController.swift */,
+				1E556A0D25639BEF00A4653F /* PPResultsTableController.swift */,
+				6056027923178017000809CD /* PPWebDAVConfigViewController.swift */,
 				6001B6332461A82400A40593 /* PPWebFileViewController.swift */,
 			);
 			path = Controller;
@@ -536,6 +537,7 @@
 				60011E3F243A29E000BC6458 /* PlayerView.swift */,
 				60011E3E243A29E000BC6458 /* PlayerViewController.swift */,
 				1E1F2DEA25384C75002B0426 /* PPDebugViewController.swift */,
+				1E07779B29AB3167005619E4 /* PPDetailViewController.swift */,
 				605602542317796F000809CD /* XDWebViewController.h */,
 				605602552317796F000809CD /* XDWebViewController.m */,
 			);
@@ -968,6 +970,7 @@
 				1EDD7D0F287042D100EEDFCB /* PPFileListCell.swift in Sources */,
 				1EAA7F0727CDC48F008318E6 /* WKWebView+PPTool.swift in Sources */,
 				1EDD7D0D2870420600EEDFCB /* PPBaseCollectionViewCell.swift in Sources */,
+				1E07779C29AB3168005619E4 /* PPDetailViewController.swift in Sources */,
 				60E6141E243DA27700630B4B /* PPBaseView.swift in Sources */,
 				6056024A231778B5000809CD /* PPFileListTableViewCell.swift in Sources */,
 				1E289EF2258E125A003E1042 /* PPCloudServiceAPI.swift in Sources */,
@@ -1014,7 +1017,6 @@
 				1E1B58A7257B9480000860F6 /* PPAddCloudServiceViewController.swift in Sources */,
 				1E92F0AC258A0B54009374C9 /* BaiduyunAPITool.swift in Sources */,
 				1E526EC726B6BD360026DC67 /* PPLocalFileService.swift in Sources */,
-				604FFA4623DDE77B0059BBC9 /* PPPriceTagViewController.swift in Sources */,
 				1E670AAB24F62D23002DB57C /* PPPublicTool.swift in Sources */,
 				6056025823177A30000809CD /* PPFileListViewController.swift in Sources */,
 				1E556A0E25639BEF00A4653F /* PPResultsTableController.swift in Sources */,
