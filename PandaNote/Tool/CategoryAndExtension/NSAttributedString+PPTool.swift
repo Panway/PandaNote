@@ -35,9 +35,12 @@ extension NSMutableAttributedString {
         let attrStringWithImage = NSAttributedString(attachment: imageAttachment)
 
         //间隔
+        /*
         let spaceAttachment = NSTextAttachment()
         spaceAttachment.bounds = CGRect(x: imageAttachment.image?.size.width ?? 0.0, y: yOffset, width: space, height: imageAttachment.image?.size.height ?? 0.0)
         let attrStringWithSpace = NSAttributedString(attachment: spaceAttachment)
+         */
+        let attrStringWithSpace = NSAttributedString(string: " ")
 
         text.append(attrStringWithSpace)
 

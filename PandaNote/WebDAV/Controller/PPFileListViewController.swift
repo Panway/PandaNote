@@ -29,6 +29,7 @@ PPFileListCellDelegate,PPFileListToolBarDelegate, PPDocumentDelegate
     
     var pathStr = "/"
     var pathID = ""
+    var rawDataSource:Array<PPFileObject> = [] ///< 原始数据源，筛选过滤时用到
     var dataSource:Array<PPFileObject> = []
     var imageArray = [PPFileObject]()
     let topToolBar = PPFileListToolBar()
@@ -60,7 +61,7 @@ PPFileListCellDelegate,PPFileListToolBarDelegate, PPDocumentDelegate
     var filePathToBeMove = ""
     //---------------移动文件（夹）到其他文件夹功能↑---------------
     var titleViewButton : UIButton!
-    var documentPicker: PPFilePicker!
+    var documentPicker: PPFilePicker! //必须强引用
 
     //MARK:Life Cycle
 //    convenience init() {
@@ -81,7 +82,7 @@ PPFileListCellDelegate,PPFileListToolBarDelegate, PPDocumentDelegate
         super.viewDidLoad()
 
         self.initSubViews()
-        self.cellStyle = PPFileListCellViewMode(rawValue: PPAppConfig.shared.getItem("fileViewMode")) ?? .list
+        self.cellStyle = PPFileListCellViewMode(rawValue: PPAppConfig.shared.getIntItem("fileViewMode")) ?? .list
         self.navigationItem.rightBarButtonItem = UIBarButtonItem(title: "更多", style: .plain, target: self, action: #selector(moreAction))
         
         
@@ -222,8 +223,10 @@ PPFileListCellDelegate,PPFileListToolBarDelegate, PPDocumentDelegate
     //MARK: 顶部工具条
     func didClickFileListToolBar(index: Int, title: String, button:UIButton) {
         debugPrint("===\(index)==\(title)")
-        if index == 0 {
-            self.dropdown.dataSource = ["列表（小）","列表（中）","列表（大）","图标（小）","图标（中）","图标（大）"]
+        if index == 1 {
+            let dataS = ["列表（小）","列表（中）","列表（大）","图标（小）","图标（中）","图标（大）"]
+            let selectStr = dataS[PPAppConfig.shared.getIntItem("fileViewMode")];
+            self.dropdown.dataSource = dataS.map({$0 == selectStr ? "\($0) ✅" : $0});
             self.dropdown.selectionAction = { (index: Int, item: String) in
                 self.cellStyle = PPFileListCellViewMode(rawValue: index) ?? .list
                 PPAppConfig.shared.setItem("fileViewMode","\(index)")
@@ -232,10 +235,13 @@ PPFileListCellDelegate,PPFileListToolBarDelegate, PPDocumentDelegate
             self.dropdown.anchorView = button
             self.dropdown.show()
         }
-        else if index == 1 {
-            self.dropdown.dataSource = ["最新","最旧","名字升序(A-Z)","名字降序(Z-A)","最大","最小"]
+        else if index == 0 {
+            let dataS = ["最新","最旧","名字升序(A-Z)","名字降序(Z-A)","最大","最小","最常访问"]
+            let selectStr = dataS[PPAppConfig.shared.fileListOrder.rawValue];
+            self.dropdown.dataSource = dataS.map({$0 == selectStr ? "\($0) ✅" : $0});
             self.dropdown.selectionAction = { (index: Int, item: String) in
                 let order = PPFileListOrder(rawValue: index) ?? .type
+                PPAppConfig.shared.fileListOrder = order
                 PPAppConfig.shared.setItem("fileListOrder","\(index)")
                 self.dataSource = self.sort(array: self.dataSource, orderBy: order)
                 self.collectionView.reloadData()
@@ -277,6 +283,7 @@ PPFileListCellDelegate,PPFileListToolBarDelegate, PPDocumentDelegate
 //        tableView.deselectRow(at: indexPath, animated: true)
         collectionView.deselectItem(at: indexPath, animated: true)
         let fileObj = self.dataSource[indexPath.row]
+        fileObj.clickCount = (fileObj.clickCount ?? 0) + 1
 //        debugPrint("文件：\(fileObj.path)")
         PPUserInfo.shared.insertToRecentFiles(fileObj)
         
@@ -537,19 +544,16 @@ PPFileListCellDelegate,PPFileListToolBarDelegate, PPDocumentDelegate
         self.present(alertController, animated: true, completion: nil)
     }
     
-    @objc func moreAction()  {
+    @objc func moreAction(_ sender:UIButton)  {
         var menuTitile = ["添加文件","从相册添加图片","新建文本文档","新建文件夹"]
         if self.navigationController?.viewControllers.count == 1 {
             menuTitile.append("添加云服务")
         }
         if isRecentFiles {
-            menuTitile.append("清空访问历史")
+            menuTitile = ["清空访问历史"]
         }
-        PPAlertAction.showSheet(withTitle: "更多操作", message: nil, cancelButtonTitle: "取消", destructiveButtonTitle: nil, otherButtonTitle: menuTitile) { (index) in
-            if index == 0 {
-                return //0是取消按钮，不处理
-            }
-            let title = menuTitile[index - 1]
+        self.dropdown.dataSource = menuTitile
+        self.dropdown.selectionAction = { (index: Int, title: String) in
             if title == "从相册添加图片" {
                 self.showImagePicker { selectedAssets in
                     PPFileManager.shared.uploadPhotos(selectedAssets, completion: { photoAssets in
@@ -575,10 +579,13 @@ PPFileListCellDelegate,PPFileListToolBarDelegate, PPDocumentDelegate
                 self.getFileListData()
             }
         }
+        
+        self.dropdown.anchorView = sender
+        self.dropdown.show()
     }
     @objc func cancelMultiSelect() {
         multipleSelectionMode = false //取消多选
-        self.navigationItem.rightBarButtonItem = UIBarButtonItem(title: "更多", style: .plain, target: self, action: #selector(moreAction))
+        self.navigationItem.rightBarButtonItem = UIBarButtonItem(title: "更多", style: .plain, target: self, action: #selector(moreAction(_:)))
     }
     //MARK:新建文本文档 & 上传照片
     func newTextFile(isDir:Bool = false) {
@@ -701,10 +708,11 @@ PPFileListCellDelegate,PPFileListToolBarDelegate, PPDocumentDelegate
     //MARK:获取文件列表
     func getFileListData() -> Void {
         if isRecentFiles {
-            self.dataSource.removeAll()
-            self.dataSource.append(contentsOf: PPUserInfo.shared.pp_RecentFiles)
-            self.imageArray = self.dataSource.filter{$0.name.pp_isImageFile()}
+            self.rawDataSource = PPUserInfo.shared.pp_RecentFiles
+            self.dataSource = self.sort(array: self.rawDataSource, orderBy: PPAppConfig.shared.fileListOrder);
+            self.imageArray = self.rawDataSource.filter{$0.name.pp_isImageFile()}
             self.collectionView.endRefreshing()
+            self.sortRecentFileList()
             self.collectionView.reloadData()
             PPHUD.showHUDFromTop("暂无最近文件")
             return
@@ -722,13 +730,11 @@ PPFileListCellDelegate,PPFileListToolBarDelegate, PPDocumentDelegate
                 return
             }
             PPHUD.showHUDFromTop(isFromCache ? "已加载缓存":"已加载最新")
-            
+            self.rawDataSource = contents
             self.dataSource = self.sort(array: contents, orderBy: PPAppConfig.shared.fileListOrder);
             self.imageArray = self.dataSource.filter{$0.name.pp_isImageFile()}
             self.collectionView.endRefreshing()
             self.collectionView.reloadData()
-            
-
         }
         
     }

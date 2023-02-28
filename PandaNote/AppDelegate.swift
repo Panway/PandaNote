@@ -22,6 +22,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
+        PPAppConfig.shared.initSetting()
         PPUserInfo.shared.initConfig()
         #if targetEnvironment(macCatalyst)
         print("targetEnvironment(macCatalyst)")
@@ -60,8 +61,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         NotificationCenter.default.addObserver(self, selector: #selector(appDidBecomeActiveAction), name: NSNotification.Name("NSApplicationDidBecomeActiveNotification"),object: nil)
         #endif
         
-        
-        PPAppConfig.shared.initSetting()
+        PPAppConfig.shared.initSettingAfterLoadMainUI() 
         URLProtocol.registerClass(PPReplacingImageURLProtocol.self)//当你的应用程序启动时，它会向 URL 加载系统注册协议。 这意味着它将有机会处理每个发送到 URL加载系统的请求。
         //PPWebViewController.registerHTTPScheme()
         return true

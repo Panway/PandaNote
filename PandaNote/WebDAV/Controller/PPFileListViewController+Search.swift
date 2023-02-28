@@ -16,6 +16,7 @@ import PopMenu
     case nameDesc //名字降序
     case sizeDesc //大小降序
     case sizeAsc //大小升序
+    case clickCountDesc //最常访问
     case type //文件夹在前面（不排序的结果）
 }
 extension PPFileListViewController {
@@ -189,10 +190,41 @@ extension PPFileListViewController {
             res = array.sorted { a, b in
                 a.size > b.size
             }
+        case .clickCountDesc:
+            res = array.sorted { a, b in
+                a.clickCount > b.clickCount
+            }
         case .type:
             res = array
         }
         return res;
+    }
+    func sortRecentFileList() {
+        if PPAppConfig.shared.showMarkdownOnly {
+            self.dataSource = self.rawDataSource.filter({ fileObj in
+                fileObj.name.hasSuffix(".md") || fileObj.name.hasSuffix(".markdown")
+            })
+        }
+        else {
+            self.dataSource = self.rawDataSource
+        }
+        
+        
+    }
+    @objc func recentMore(sender:UIButton) {
+        debugPrint("recent more btn 最近")
+        let status = PPAppConfig.shared.showMarkdownOnly ? " ✅" : ""
+        self.dropdown.dataSource = ["仅显示Markdown" + status]
+        self.dropdown.selectionAction = { (index: Int, item: String) in
+            if(index == 0) {
+                PPAppConfig.shared.showMarkdownOnly = !PPAppConfig.shared.showMarkdownOnly
+                PPAppConfig.shared.setItem("showMarkdownOnly","\(PPAppConfig.shared.showMarkdownOnly ? 1 : 0)")
+                self.sortRecentFileList()
+                self.collectionView.reloadData()
+            }
+        }
+        self.dropdown.anchorView = sender
+        self.dropdown.show()
     }
     
 }
@@ -208,7 +240,7 @@ extension PPFileListViewController {
     func setNavTitle(_ title:String?=nil,_ showArrow:Bool?=false) {
         let title = (title != nil) ? title : String(self.pathStr.split(separator: "/").last ?? "" + PPUserInfo.shared.webDAVRemark)
         if isRecentFiles && showArrow == false {
-            self.title = "最近"
+            self.setTitle("最近", action: #selector(recentMore(sender:)))
             return
         }
         else if (self.navigationController?.viewControllers.count ?? 0) > 1 && showArrow == false {
@@ -218,20 +250,7 @@ extension PPFileListViewController {
         if PPUserInfo.shared.pp_serverInfoList.count < 1 {
             return//没有服务器信息就不显示下箭头
         }
-        titleViewButton = UIButton(type: .custom)
-        titleViewButton.frame = CGRect(x: 0, y: 0, width: 66, height: 44)
-        let attributes: [NSAttributedString.Key: Any] = [
-            .font: UIFont.systemFont(ofSize: 18),
-            .foregroundColor: UIColor.darkGray,
-        ]
-        
-        let image = UIImage(cgImage: (UIImage(named: "arrow_right")?.cgImage!)!, scale: UIScreen.main.scale, orientation: .right)
-        //#imageLiteral(resourceName: "arrow_right")
-        titleViewButton.setAttributedTitle(NSMutableAttributedString.pp_AttributedText(withTitle: title, titleAttributes: attributes, image: image, space: 8), for: .normal)
-        titleViewButton.setTitleColor(PPCOLOR_GREEN, for: .normal)
-        self.navigationItem.titleView = titleViewButton
-        titleViewButton.addTarget(self, action: #selector(showAddCloudServiceView), for: .touchUpInside)
-        
+        self.setTitle(self.title, action: #selector(showAddCloudServiceView))
         
         
     }
@@ -274,5 +293,24 @@ extension PPFileListViewController {
         PPUserInfo.shared.updateCurrentServerInfo(index: index)
         PPFileManager.shared.initCloudServiceSetting()
         getFileListData()
+    }
+}
+
+//MARK: - Style 样式
+extension PPFileListViewController {
+    func setTitle(_ title:String?, action: Selector) {
+        titleViewButton = UIButton(type: .custom)
+        titleViewButton.frame = CGRect(x: 0, y: 0, width: 66, height: 44)
+        let attributes: [NSAttributedString.Key: Any] = [
+            .font: UIFont.systemFont(ofSize: 18),
+            .foregroundColor: UIColor.darkGray,
+        ]
+        
+        let image = UIImage(cgImage: (UIImage(named: "arrow_right")?.cgImage!)!, scale: UIScreen.main.scale, orientation: .right)
+        //#imageLiteral(resourceName: "arrow_right")
+        titleViewButton.setAttributedTitle(NSMutableAttributedString.pp_AttributedText(withTitle: title, titleAttributes: attributes, image: image, space: 28), for: .normal)
+        self.navigationItem.titleView = titleViewButton
+        titleViewButton.addTarget(self, action: action, for: .touchUpInside)
+
     }
 }

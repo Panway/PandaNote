@@ -15,17 +15,18 @@ public class PPFileModel:Mappable,Codable,Equatable {
     
     var name: String!
     //relative path. 文件相对路径，比如`/Documents/me.txt`
-    var path: String = ""
-    var downloadURL: String = ""
+    var path = ""
+    var downloadURL = ""
     var size: Int64 = 0
     var isDirectory = false
-    var modifiedDate: String = ""
+    var modifiedDate = ""
     ///百度网盘、OneDrive等的文件（文件夹）唯一ID标识
     var pathID = ""
 //    var downloadURL:String?
     //当前属于哪个云服务的标识
     var serverID = ""
-    
+    var clickCount : Int64 = 0 ///< 用户点击次数，仅本地排序用
+
     
     ///遵循Equatable协议，判断两个对象是否相等
     public static func == (lhs: PPFileModel, rhs: PPFileModel) -> Bool {
@@ -58,8 +59,9 @@ public class PPFileModel:Mappable,Codable,Equatable {
         case isDirectory
         case pathID
         case serverID
+        case clickCount
     }
-    
+    // JSONDecoder().decode() 时调用，将转换成Data类型的json文本转换成对象
     required public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         name = try container.decode(String.self, forKey: .name)
@@ -68,8 +70,11 @@ public class PPFileModel:Mappable,Codable,Equatable {
         size = try container.decode(Int64.self, forKey: .size)
         isDirectory = try container.decode(Bool.self, forKey: .isDirectory)
         modifiedDate = try container.decode(String.self, forKey: .modifiedDate)
+        clickCount = try container.decodeIfPresent(Int64.self, forKey: .clickCount) ?? 0
         pathID = try container.decode(String.self, forKey: .pathID)
         serverID = try container.decode(String.self, forKey: .serverID)
+        // 在为PPFileModel新增加属性的时候，会导致之前的json文件不存在某个key，此时需要使用decodeIfPresent https://stackoverflow.com/a/66308592/4493393
+        // 排查container.decode异常 https://stackoverflow.com/a/55391123/4493393
     }
         
     public func encode(to encoder: Encoder) throws {
@@ -82,6 +87,7 @@ public class PPFileModel:Mappable,Codable,Equatable {
         try container.encode(modifiedDate, forKey: .modifiedDate)
         try container.encode(pathID, forKey: .pathID)
         try container.encode(serverID, forKey: .serverID)
+        try container.encode(clickCount, forKey: .clickCount)
     }
 }
 

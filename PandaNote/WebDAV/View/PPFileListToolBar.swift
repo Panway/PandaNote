@@ -18,13 +18,13 @@ class PPFileListToolBar: PPBaseView {
 
     override func pp_addSubviews() {
         self.backgroundColor = .white
-        generateButton("view_list")
         generateButton("order_ascend")
+        generateButton("view_list")
         generateButton("multi_select")
 
     }
     func generateButton(_ imageName:String) -> Void {
-        let width = 40
+        let width = 44
         let button = UIButton(type: .custom)
         button.setImage(UIImage(named: imageName), for: .normal)
         button.addTarget(self, action: #selector(toolButtonAction(sender:)), for:.touchUpInside)

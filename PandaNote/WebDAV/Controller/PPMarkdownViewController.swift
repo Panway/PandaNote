@@ -40,6 +40,9 @@ class PPMarkdownViewController: PPBaseViewController,
     var theme : PPThemeModel!
     //MARK: Life Cycle
     override func viewDidLoad() {
+        if self.filePathStr.length < 1 {
+            return //使用UISplitViewController的时候，没路径显示空白
+        }
         initStyle()
         pp_initView()
         self.title = self.filePathStr.split(string: "/").last

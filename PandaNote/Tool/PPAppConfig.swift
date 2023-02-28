@@ -16,6 +16,7 @@ class PPAppConfig: NSObject {
     // https://github.com/swisspol/GCDWebServer/issues/143
     var fileViewMode = 0 //文件列表显示方式，列表或图标
     var fileListOrder = PPFileListOrder.nameAsc //文件列表排序方式
+    var showMarkdownOnly = false ///< 最近文件仅显示markdown
     private var config = [String:String]()
     /// 沙盒Sandbox/Library/PandaCache
     private var pp_mainDirectory:String!
@@ -23,9 +24,7 @@ class PPAppConfig: NSObject {
 
     
     func initSetting() {
-#if DEBUG
-        FLEXManager.shared.showExplorer() //调试期间开启FLEX工具
-#endif
+
 
         initWebServer()
         self.pp_mainDirectory = NSSearchPathForDirectoriesInDomains(.libraryDirectory, .userDomainMask, true)[0]
@@ -39,9 +38,14 @@ class PPAppConfig: NSObject {
         if let path = Bundle.main.path(forResource: "MarkdownSample", ofType:"md") {
             try? FileManager.default.copyItem(atPath: path, toPath: NSHomeDirectory() + "/Documents/MarkdownSample.md")
         }
-        self.fileListOrder = PPFileListOrder(rawValue: getItem("fileListOrder")) ?? .type
+        self.fileListOrder = PPFileListOrder(rawValue: getIntItem("fileListOrder")) ?? .type
+        showMarkdownOnly = getIntItem("showMarkdownOnly") == 1 ? true : false
     }
-    
+    func initSettingAfterLoadMainUI() {
+#if DEBUG
+        FLEXManager.shared.showExplorer() //调试期间开启FLEX工具
+#endif
+    }
     func initDataBase() {
 //        let dbModel = PPPriceDBModel()
 //        let sqliteManager = PPSQLiteManager(delegate: dbModel)
@@ -54,7 +58,8 @@ class PPAppConfig: NSObject {
     func getItem(_ key:String) -> String {
         return config[key] ?? ""
     }
-    func getItem(_ key:String) -> Int {
+    
+    func getIntItem(_ key:String) -> Int {
         return Int(config[key] ?? "") ?? 0
     }
     
