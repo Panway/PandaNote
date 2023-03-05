@@ -206,15 +206,7 @@ class PPWebViewController: UIViewController,WKUIDelegate,WKNavigationDelegate,WK
         }
     }
     //MARK: - Public
-    //清除所有的WebView缓存数据 /Library/Webkit/com.xxx.xxx/WebsiteData 和/Library/Caches/com.xxx.xxx/Webkit
-    //可以调用fetchDataRecordsOfTypes方法获取浏览记录,然后通过对域名的筛选决定如何删除缓存
-    class func clearAllWebsiteData() {
-        let types = WKWebsiteDataStore.allWebsiteDataTypes()
-        let sinceDate = Date(timeIntervalSince1970: 0)
-        WKWebsiteDataStore.default().removeData(ofTypes: types, modifiedSince: sinceDate) {
-            debugPrint("清除record完成")
-        }
-    }
+
     class func registerHTTPScheme() {
         for scheme in ["http", "https"] {
             URLProtocol.self.wk_registerScheme(scheme)
@@ -312,7 +304,7 @@ class PPWebViewController: UIViewController,WKUIDelegate,WKNavigationDelegate,WK
 
 
 
-//MARK: - User 自己的业务逻辑
+//MARK: - Private 自己的业务逻辑
 extension PPWebViewController {
     func handleMyStartLoad(_ urlString:String) -> Bool {
         //获取Dropbox的access_token
@@ -338,7 +330,7 @@ extension PPWebViewController {
             let vc = PPWebDAVConfigViewController()
             vc.cloudType = "baiduyun"
             vc.serverURL = "https://pan.baidu.com/rest/2.0/xpan/file"
-            vc.remark = "百度云"
+            vc.remark = "百度网盘"
             vc.password = access_token ?? ""
             self.navigationController?.pushViewController(vc, animated: true)
         }

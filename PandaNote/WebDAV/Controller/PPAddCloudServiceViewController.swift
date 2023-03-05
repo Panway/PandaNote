@@ -13,10 +13,11 @@ class PPAddCloudServiceViewController : PPBaseViewController,UITableViewDataSour
     var dataSource:Array<String> = ["WebDAV（坚果云等）",
                                     "Dropbox",
                                     "OneDrive",
-                                    "蓝奏云",
-                                    "百度云"]
+//                                    "蓝奏云",
+                                    "百度网盘"]
     var tableView = UITableView()
     
+    let authMethods = ["OAuth授权登录","系统默认浏览器内授权登录","手动输入配置"]
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -59,15 +60,16 @@ class PPAddCloudServiceViewController : PPBaseViewController,UITableViewDataSour
 //            self.navigationController?.pushViewController(vc, animated: true)
             
             
-            PPAlertAction.showSheet(withTitle: "您想如何获取访问令牌（access_token）", message: nil, cancelButtonTitle: "取消", destructiveButtonTitle: nil, otherButtonTitle: ["Safari浏览器内授权","App内授权","手动输入（抓包获取）"]) { (index) in
-                if index == 3 {
+            PPAppConfig.shared.popMenu.showWithCallback(stringArray: authMethods, sourceVC: self) { index, string in
+                debugPrint("=====\(index)")
+                if index == 2 {
                     let vc = PPWebDAVConfigViewController()
                     vc.cloudType = "Dropbox"
                     vc.remark = "Dropbox"
                     vc.password = ""
                     self.navigationController?.pushViewController(vc, animated: true)
                 }
-                else if index == 2 {
+                else if index == 0 {
                     let vc = PPWebViewController()
                     vc.urlString = "https://www.dropbox.com/oauth2/authorize?client_id=pjmhj9rfhownr7z&redirect_uri=filemgr://oauth-callback/dropbox&response_type=token&state=DROPBOX"
                     self.navigationController?.pushViewController(vc, animated: true)
@@ -79,7 +81,9 @@ class PPAddCloudServiceViewController : PPBaseViewController,UITableViewDataSour
             }
         }
         else if obj == "OneDrive" {
-            PPAlertAction.showSheet(withTitle: "您想如何获取访问令牌（access_token）", message: nil, cancelButtonTitle: "取消", destructiveButtonTitle: nil, otherButtonTitle: ["Safari浏览器内授权","App内授权","手动输入（抓包获取）"]) { (index) in
+            PPAppConfig.shared.popMenu.showWithCallback(stringArray: authMethods, sourceVC: self) { index, string in
+
+//            PPAlertAction.showSheet(withTitle: "您想如何获取访问令牌（access_token）", message: nil, cancelButtonTitle: "取消", destructiveButtonTitle: nil, otherButtonTitle: ["Safari浏览器内授权","App内授权","手动输入（抓包获取）"]) { (index) in
                 
                 let url = "https://login.live.com/oauth20_authorize.srf?client_id=064f5b62-97a8-4dae-b5c1-aaf44439939d&scope=onedrive.readwrite%20offline_access&response_type=code&redirect_uri=pandanote://msredirect"//pandanote的
                 if index == 1 {
@@ -87,12 +91,12 @@ class PPAddCloudServiceViewController : PPBaseViewController,UITableViewDataSour
                     UIApplication.shared.open(authURL!, options: [:], completionHandler: nil)
 //                    PPAddCloudServiceViewController.handleCloudServiceRedirect(URL(string: "pandanote://msredirect/?code=XXX")!)
                 }
-                else if index == 2 {
+                else if index == 0 {
                     let vc = PPWebViewController()
                     vc.urlString = onedrive_login_url_es//ES的
                     self.navigationController?.pushViewController(vc, animated: true)
                 }
-                else if index == 3 {
+                else if index == 2 {
                     let vc = PPWebDAVConfigViewController()
                     vc.cloudType = "OneDrive"
                     vc.remark = "OneDrive"
@@ -103,15 +107,15 @@ class PPAddCloudServiceViewController : PPBaseViewController,UITableViewDataSour
             }
             
         }
-        else if obj == "百度云" {
-            PPAlertAction.showSheet(withTitle: "您想如何获取访问令牌（access_token）", message: nil, cancelButtonTitle: "取消", destructiveButtonTitle: nil, otherButtonTitle: ["Safari浏览器内授权","App内授权","手动输入（抓包获取）"]) { (index) in
-                if index == 3 {
+        else if obj == "百度网盘" {
+            PPAppConfig.shared.popMenu.showWithCallback(stringArray: authMethods, sourceVC: self) { index, string in
+                if index == 2 {
                     let vc = PPWebDAVConfigViewController()
                     vc.cloudType = "baiduyun"
                     vc.serverURL = "https://pan.baidu.com/rest/2.0/xpan/file"
-                    vc.remark = "百度云"
+                    vc.remark = "百度网盘"
                     self.navigationController?.pushViewController(vc, animated: true)                }
-                else if index == 2 {
+                else if index == 0 {
                     let vc = PPWebViewController()
                     vc.urlString = "https://openapi.baidu.com/oauth/2.0/authorize?response_type=token&client_id=NqOMXF6XGhGRIGemsQ9nG0Na&redirect_uri=http://www.estrongs.com&scope=basic,netdisk&display=mobile&state=STATE&force_login=1"
                     self.navigationController?.pushViewController(vc, animated: true)
@@ -218,7 +222,7 @@ class PPAddCloudServiceViewController : PPBaseViewController,UITableViewDataSour
                 let vc = PPWebDAVConfigViewController()
                 vc.cloudType = "baiduyun"
                 vc.serverURL = "https://pan.baidu.com/rest/2.0/xpan/file"
-                vc.remark = "百度云"
+                vc.remark = "百度网盘"
                 vc.password = access_token
                 UIViewController.pp_topViewController()?.navigationController?.pushViewController(vc, animated: true)
             }

@@ -22,6 +22,7 @@ class PPAppConfig: NSObject {
     private var pp_mainDirectory:String!
     private let webServer = GCDWebServer() // 必须保存实例防止对象被释放
 
+    let popMenu = PPPopMenu()
     
     func initSetting() {
 

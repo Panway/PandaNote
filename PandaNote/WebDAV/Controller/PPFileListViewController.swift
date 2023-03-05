@@ -18,15 +18,18 @@ import Photos
 import MonkeyKing
 import SnapKit
 
-class PPFileListViewController: PPBaseViewController,UITextFieldDelegate,UITableViewDataSource,UITableViewDelegate
-    ,SKPhotoBrowserDelegate
-,PopMenuViewControllerDelegate,
-UICollectionViewDelegate, UICollectionViewDataSource,UICollectionViewDelegateFlowLayout,
-PPFileListCellDelegate,PPFileListToolBarDelegate, PPDocumentDelegate
+class PPFileListViewController: PPBaseViewController,
+                                UITextFieldDelegate,
+                                UITableViewDelegate,
+                                UICollectionViewDelegate,
+                                UICollectionViewDataSource,
+                                UICollectionViewDelegateFlowLayout,
+                                SKPhotoBrowserDelegate,
+                                PopMenuViewControllerDelegate,
+                                PPFileListCellDelegate,
+                                PPFileListToolBarDelegate,
+                                PPDocumentDelegate
 {
-    
-    
-    
     var pathStr = "/"
     var pathID = ""
     var rawDataSource:Array<PPFileObject> = [] ///< 原始数据源，筛选过滤时用到
@@ -85,8 +88,9 @@ PPFileListCellDelegate,PPFileListToolBarDelegate, PPDocumentDelegate
         self.cellStyle = PPFileListCellViewMode(rawValue: PPAppConfig.shared.getIntItem("fileViewMode")) ?? .list
         self.navigationItem.rightBarButtonItem = UIBarButtonItem(title: "更多", style: .plain, target: self, action: #selector(moreAction))
         
-        
-        getFileListData()
+        if !isRecentFiles {
+            getFileListData() //最近页面在viewWillAppear里获取
+        }
         
         setNavTitle()
         
@@ -156,6 +160,8 @@ PPFileListCellDelegate,PPFileListToolBarDelegate, PPDocumentDelegate
         cell.cellIndex = indexPath.row
         cell.updateLayout(self.cellStyle)
         cell.updateUIWithData(fileObj as AnyObject)
+        cell.updateCacheStatus(self.isCachedFile)
+        cell.remarkLabel.isHidden = !isRecentFiles
         cell.delegate = self
         return cell
     }
@@ -236,18 +242,7 @@ PPFileListCellDelegate,PPFileListToolBarDelegate, PPDocumentDelegate
             self.dropdown.show()
         }
         else if index == 0 {
-            let dataS = ["最新","最旧","名字升序(A-Z)","名字降序(Z-A)","最大","最小","最常访问"]
-            let selectStr = dataS[PPAppConfig.shared.fileListOrder.rawValue];
-            self.dropdown.dataSource = dataS.map({$0 == selectStr ? "\($0) ✅" : $0});
-            self.dropdown.selectionAction = { (index: Int, item: String) in
-                let order = PPFileListOrder(rawValue: index) ?? .type
-                PPAppConfig.shared.fileListOrder = order
-                PPAppConfig.shared.setItem("fileListOrder","\(index)")
-                self.dataSource = self.sort(array: self.dataSource, orderBy: order)
-                self.collectionView.reloadData()
-            }
-            self.dropdown.anchorView = button
-            self.dropdown.show()
+            showSortPopMenu(anchorView: button)
         }
         else if index == 2 {
             self.multipleSelectionMode = true
@@ -255,18 +250,6 @@ PPFileListCellDelegate,PPFileListToolBarDelegate, PPDocumentDelegate
         }
     }
     
-    //MARK: - UITableViewDataSource UITableViewDelegate
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return dataSource.count
-    }
-    
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: kPPBaseCellIdentifier, for: indexPath) as! PPFileListTableViewCell
-        let fileObj = self.dataSource[indexPath.row]
-        cell.updateUIWithData(fileObj as AnyObject)
-        cell.updateCacheStatus(self.isCachedFile)
-        return cell
-    }
     func collectionView(_ collectionView: UICollectionView, didDeselectItemAt indexPath: IndexPath) {
         if multipleSelectionMode {
             let cell = collectionView.cellForItem(at: indexPath)
@@ -283,9 +266,15 @@ PPFileListCellDelegate,PPFileListToolBarDelegate, PPDocumentDelegate
 //        tableView.deselectRow(at: indexPath, animated: true)
         collectionView.deselectItem(at: indexPath, animated: true)
         let fileObj = self.dataSource[indexPath.row]
-        fileObj.clickCount = (fileObj.clickCount ?? 0) + 1
+        insertToRecentFiles(fileObj,isRecentFiles)
+        let objIndex = Int(fileObj.associatedServerID) ?? 0
+        if(objIndex != PPUserInfo.shared.pp_lastSeverInfoIndex) {
+            PPUserInfo.shared.updateCurrentServerInfo(index: objIndex)
+            PPFileManager.shared.initCloudServiceSetting()
+        }
+
+
 //        debugPrint("文件：\(fileObj.path)")
-        PPUserInfo.shared.insertToRecentFiles(fileObj)
         
         if fileObj.isDirectory {
             let vc = PPFileListViewController()
@@ -297,7 +286,7 @@ PPFileListCellDelegate,PPFileListToolBarDelegate, PPDocumentDelegate
         else if (fileObj.name.isTextFile())  {
             if UIDevice.current.userInterfaceIdiom != .phone {
                 //macOS和iPad使用左右分屏
-                let detailVC = DetailViewController()
+                let detailVC = PPDetailViewController()
                 detailVC.filePathStr = getPathNotEmpty(fileObj)
                 detailVC.fileID = fileObj.pathID
                 detailVC.downloadURL = fileObj.downloadURL
@@ -351,9 +340,7 @@ PPFileListCellDelegate,PPFileListToolBarDelegate, PPDocumentDelegate
         }
         
     }
-    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        return 60.0
-    }
+
     func tableView(_ tableView: UITableView, editActionsForRowAt indexPath: IndexPath) -> [UITableViewRowAction]? {
         if self.isMovingMode {
             return []
@@ -398,7 +385,7 @@ PPFileListCellDelegate,PPFileListToolBarDelegate, PPDocumentDelegate
         let fileObj = self.dataSource[index]
         if (self.isRecentFiles) {
             self.dataSource.remove(at: index)
-            PPUserInfo.shared.removeFileInRecentFiles(fileObj)
+            removeFromRecentFiles(fileObj)
             self.collectionView.reloadData()
             PPHUD.showHUDFromTop("已删除访问记录，文件未删除")
             return
@@ -410,7 +397,7 @@ PPFileListCellDelegate,PPFileListToolBarDelegate, PPDocumentDelegate
             }
             else {
                 PPHUD.showHUDFromTop("文件删除成功")
-                PPUserInfo.shared.removeFileInRecentFiles(fileObj)
+                self.removeFromRecentFiles(fileObj)
                 self.getFileListData()
             }
         }
@@ -531,10 +518,7 @@ PPFileListCellDelegate,PPFileListToolBarDelegate, PPDocumentDelegate
                 let fileNew = fileObj
                 fileNew.name = newName
                 fileNew.path = pathPrefix + newName
-                if let index = PPUserInfo.shared.pp_RecentFiles.firstIndex(of: fileObj) {
-                    PPUserInfo.shared.pp_RecentFiles.remove(at: index)
-                    PPUserInfo.shared.insertToRecentFiles(fileNew)
-                }
+                self.insertToRecentFiles(fileNew, self.isRecentFiles)
                 self.getFileListData()
             }
         })
@@ -575,7 +559,7 @@ PPFileListCellDelegate,PPFileListToolBarDelegate, PPDocumentDelegate
                 self.addCloudService()
             }
             else if title == "清空访问历史" {
-                PPUserInfo.shared.pp_RecentFiles.removeAll()
+                PPUserInfo.shared.recentFiles.removeAll()
                 self.getFileListData()
             }
         }
@@ -708,7 +692,7 @@ PPFileListCellDelegate,PPFileListToolBarDelegate, PPDocumentDelegate
     //MARK:获取文件列表
     func getFileListData() -> Void {
         if isRecentFiles {
-            self.rawDataSource = PPUserInfo.shared.pp_RecentFiles
+            self.rawDataSource = PPUserInfo.shared.recentFiles
             self.dataSource = self.sort(array: self.rawDataSource, orderBy: PPAppConfig.shared.fileListOrder);
             self.imageArray = self.rawDataSource.filter{$0.name.pp_isImageFile()}
             self.collectionView.endRefreshing()

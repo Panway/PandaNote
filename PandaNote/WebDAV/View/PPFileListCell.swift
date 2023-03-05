@@ -52,23 +52,28 @@ class PPFileListCell: PPBaseCollectionViewCell {
         return label
     }()
     
-    
+    var remarkLabel : UILabel = {
+        let label = UILabel();
+        label.textColor = "999999".HEXColor()
+        label.font = UIFont.systemFont(ofSize: 11)
+        return label
+    }()
     
     override func pp_addSubViews() {
         self.contentView.addSubview(self.iconImage)
         self.contentView.addSubview(self.titleLabel)
         self.contentView.addSubview(self.timeLabel)
-        timeLabel.snp.makeConstraints { (make) in
-            make.left.equalTo(self.titleLabel)
-            make.top.equalTo(self.titleLabel.snp.bottom).offset(8)
-        }
+        self.contentView.addSubview(self.remarkLabel)
+        
+        
         self.contentView.clipsToBounds = true
         
         let moreBtn = UIButton(type: .custom)
         self.contentView.addSubview(moreBtn)
         moreBtn.snp.makeConstraints { make in
-            make.right.equalTo(self.contentView).offset(-5)
+            make.right.equalTo(self.contentView)//.offset(-5)
             make.centerY.equalTo(self.contentView)
+            make.size.equalTo(CGSize(width: 25,height: 25))
         }
         moreBtn.addTarget(self, action: #selector(moreBtnClick(sender:)), for: .touchUpInside)
         moreBtn.setTitle("·", for: .normal)
@@ -96,16 +101,26 @@ class PPFileListCell: PPBaseCollectionViewCell {
         titleLabel.snp.remakeConstraints { (make) in
             make.top.equalTo(iconImage).offset(0)
             make.left.equalTo(iconImage.snp.right).offset(8)
-            make.right.equalTo(self.contentView).offset(-25)
+            make.right.equalToSuperview().offset(-25)
         }
         
-        timeLabel.isHidden = false
+//        timeLabel.isHidden = false
+        timeLabel.textAlignment = .left
+        timeLabel.snp.makeConstraints { (make) in
+            make.left.equalTo(self.titleLabel)
+            make.top.equalTo(self.titleLabel.snp.bottom).offset(8)
+        }
+        
+        remarkLabel.snp.remakeConstraints { (make) in
+            make.right.equalToSuperview().offset(-18)
+            make.bottom.equalTo(timeLabel)
+        }
         
     }
     
     func pp_gridMode() {
         self.iconImage.snp.remakeConstraints { (make) in
-            make.top.equalTo(self.contentView.snp.top).offset(6).priority(999)
+            make.top.equalTo(self.contentView.snp.top).offset(8).priority(999)
             make.left.equalTo(self.contentView).offset(8).priority(999)
             make.right.equalTo(self.contentView).offset(-8).priority(999)
             make.height.equalTo(iconImage.snp.width)//.multipliedBy(1)
@@ -115,12 +130,21 @@ class PPFileListCell: PPBaseCollectionViewCell {
         titleLabel.numberOfLines = 2
         titleLabel.font = UIFont.boldSystemFont(ofSize: 15)
         titleLabel.snp.remakeConstraints { (make) in
-            make.top.equalTo(iconImage.snp.bottom).offset(8)
+            make.top.equalTo(iconImage.snp.bottom).offset(1)
             make.left.equalTo(self.contentView).offset(5).priority(999)
             make.right.equalTo(self.contentView).offset(-5).priority(999)
         }
         
-        timeLabel.isHidden = true
+        remarkLabel.snp.remakeConstraints { (make) in
+            make.bottom.equalToSuperview().offset(-2)
+            make.centerX.equalToSuperview()
+        }
+//        timeLabel.isHidden = true
+        timeLabel.textAlignment = .center
+        timeLabel.snp.makeConstraints { (make) in
+            make.bottom.equalTo(self.remarkLabel.snp.top).offset(-5)
+            make.centerX.equalToSuperview()
+        }
     }
     
     func updateLayout(_ mode:PPFileListCellViewMode) {
@@ -171,10 +195,16 @@ class PPFileListCell: PPBaseCollectionViewCell {
         
         let sizeStr = (fileObj.size>0) ? " - \(Int(fileObj.size).pp_SizeString())" :""
         self.timeLabel.text = fileObj.modifiedDate + sizeStr
+        remarkLabel.text = fileObj.associatedServerName
     }
+    /// cached file alpha=0.5 ; newset file alpha=1
+    func updateCacheStatus(_ isCachedFile:Bool) {
+        self.contentView.alpha = isCachedFile ? 0.7 : 1.0;
+    }
+
     //macOS 改变App窗口大小后，屏幕宽度还是固定值，不能用
     func getSize(_ mode:PPFileListCellViewMode,_ screenWidth:CGFloat) -> CGSize {
-//        print("===\(screenWidth)")
+//        print("screenWidth===\(screenWidth)")
         viewMode = mode
         if viewMode == .list {
             return CGSize(width: screenWidth, height: 50)
@@ -188,17 +218,17 @@ class PPFileListCell: PPBaseCollectionViewCell {
         else if viewMode == .grid {
             itemsPerRow = CGFloat(Int(screenWidth / 70.0))
             let widthPerItem = screenWidth / itemsPerRow
-            return CGSize(width: widthPerItem, height: widthPerItem + 52)
+            return CGSize(width: widthPerItem, height: widthPerItem + 70)
         }
         else if viewMode == .gridLarge {
             itemsPerRow = CGFloat(Int(screenWidth / 110.0))
             let widthPerItem = screenWidth / itemsPerRow
-            return CGSize(width: widthPerItem, height: widthPerItem + 52)
+            return CGSize(width: widthPerItem, height: widthPerItem + 70)
         }
         else if viewMode == .gridSuperLarge {
             itemsPerRow = CGFloat(Int(screenWidth / 140.0))
             let widthPerItem = screenWidth / itemsPerRow
-            return CGSize(width: widthPerItem, height: widthPerItem + 52)
+            return CGSize(width: widthPerItem, height: widthPerItem + 70)
         }
         return CGSize.zero
     }

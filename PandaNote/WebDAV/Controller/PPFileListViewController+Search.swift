@@ -227,6 +227,88 @@ extension PPFileListViewController {
         self.dropdown.show()
     }
     
+    func getOrderSuffix(_ orderType:PPFileListOrder) {
+        var order = ""
+        switch orderType {
+        case .timeAsc, .nameAsc, .sizeAsc:
+            order = "↑"
+        case .timeDesc, .nameDesc, .sizeDesc:
+            order = "↓"
+        default:
+            order = ""
+        }
+    }
+    func showSortPopMenu(anchorView:UIView) {
+        let map = ["0":"时间↓","1":"时间↑","3":"名称↓","2":"名称↑","4":"大小↓","5":"大小↑"
+                   ,"6":"最常访问✅"]
+        var dataS = ["时间","名称","大小"]
+        if isRecentFiles {
+            dataS.append("最常访问")
+        }
+        let currentOrder = "\(PPAppConfig.shared.fileListOrder.rawValue)"
+        guard let selectStr = map[currentOrder] else {return}
+        self.dropdown.dataSource = dataS.map({selectStr.hasPrefix($0) ? selectStr : $0});
+        self.dropdown.selectionAction = { (index: Int, item: String) in
+            var newOrder = PPFileListOrder.timeDesc
+            if (item.contains("时间↓")) {
+                newOrder = .timeAsc
+            }
+            else if (item.contains("时间") || item.contains("时间↑")) {
+                newOrder = .timeDesc
+            }
+            else if (item.contains("名称↑")) {
+                newOrder = .nameDesc
+            }
+            else if (item.contains("名称") || item.contains("名称↓")) {
+                newOrder = .nameAsc
+            }
+            else if (item.contains("大小↓")) {
+                newOrder = .sizeAsc
+            }
+            else if (item.contains("大小") || item.contains("大小↑")) {
+                newOrder = .sizeDesc //未选择大小、或已选择大小升序
+            }
+            else if (item.contains("最常访问")) {
+                newOrder = .clickCountDesc
+            }
+            PPAppConfig.shared.setItem("fileListOrder","\(newOrder.rawValue)")
+            PPAppConfig.shared.fileListOrder = newOrder
+            self.dataSource = self.sort(array: self.dataSource, orderBy: newOrder)
+            self.collectionView.reloadData()
+        }
+        self.dropdown.anchorView = anchorView
+        self.dropdown.show()
+    }
+    //MARK:最近文件
+    /// 移除后返回删除前点击次数
+    @discardableResult
+    func removeFromRecentFiles(_ fileObj:PPFileObject) -> Int64 {
+        let list = PPUserInfo.shared.recentFiles
+        for i in 0..<list.count {
+            if fileObj == list[i] {
+                let clickCount = list[i].clickCount
+                PPUserInfo.shared.recentFiles.remove(at: i)
+                return clickCount
+            }
+        }
+        return 0
+    }
+    /// 插入最近浏览的文件或目录到最近浏览列表（如果有需要的话）
+    func insertToRecentFiles(_ fileObj:PPFileObject, _ isRecent:Bool) {
+        let oldCount = removeFromRecentFiles(fileObj)
+        fileObj.clickCount = oldCount + 1
+        
+        if let currentIndex = PPUserInfo.shared.serverNameIndexMap[PPUserInfo.shared.webDAVRemark],
+        isRecent == false {
+            fileObj.associatedServerName = PPUserInfo.shared.webDAVRemark
+            fileObj.associatedServerID = currentIndex
+        }
+
+        PPUserInfo.shared.recentFiles.insert(fileObj, at: 0)
+        if PPUserInfo.shared.recentFiles.count > 50 {
+            PPUserInfo.shared.recentFiles.removeLast()
+        }
+    }
 }
 
 //MARK: - 增加各种云服务功能
@@ -250,7 +332,7 @@ extension PPFileListViewController {
         if PPUserInfo.shared.pp_serverInfoList.count < 1 {
             return//没有服务器信息就不显示下箭头
         }
-        self.setTitle(self.title, action: #selector(showAddCloudServiceView))
+        self.setTitle(title, action: #selector(showAddCloudServiceView))
         
         
     }

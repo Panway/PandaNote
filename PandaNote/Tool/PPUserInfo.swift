@@ -33,6 +33,7 @@ class PPUserInfo: NSObject {
     var pp_fileIcon = [String:String]()
     /// 本地时间相对于格林尼治时间的差距
     var pp_timezoneOffset:Int!
+    /// App设置，不包含用户私密信息
     var pp_JSONConfig:String!
     /// webview资源
     var pp_WebViewResource = [String]()
@@ -44,10 +45,10 @@ class PPUserInfo: NSObject {
     var refreshFileList = false
 
     /// 最近访问文件列表
-     var pp_RecentFiles:Array<PPFileObject> = [] {
+     var recentFiles:Array<PPFileObject> = [] {
         didSet {
             do {
-                let encodedData = try JSONEncoder().encode(pp_RecentFiles)
+                let encodedData = try JSONEncoder().encode(recentFiles)
                 try? encodedData.write(to: URL(fileURLWithPath: self.pp_mainDirectory + "/PP_RecentFiles.json"))
             } catch {
                 debugPrint(error.localizedDescription)
@@ -59,7 +60,7 @@ class PPUserInfo: NSObject {
     /// App等跟哟用户隐私无关的设置
     public var pp_Setting : Dictionary<String, Any> = [:] {
         didSet {
-            debugPrint("旧值：\(String(describing: oldValue)) \n新值： \(String(describing: pp_Setting))")
+            debugPrint("AppConfig 旧值：\(String(describing: oldValue)) \n新值： \(String(describing: pp_Setting))")
 //            let data:NSData = NSKeyedArchiver.archivedData(withRootObject: pp_Setting) as NSData
 //            data.write(toFile: self.pp_mainDirectory+"/PP_UserPreference", atomically: true)
             if let jsonData = try? JSONSerialization.data(withJSONObject: pp_Setting, options: JSONSerialization.WritingOptions.prettyPrinted) {
@@ -76,18 +77,21 @@ class PPUserInfo: NSObject {
 //            }
         }
     }
-    /// 服务器信息（坚果云、Dropbox等）
+    /// 保存服务器配置（坚果云、Dropbox等）
     var pp_serverInfoList : [[String : String]] = [] {
         didSet {
             do {
                 let encodedData = try JSONEncoder().encode(pp_serverInfoList)
                 try? encodedData.write(to: URL(fileURLWithPath: self.pp_mainDirectory + "/PP_CloudServerSetting.json"))
+                updateRemarkIndexMap()
             } catch {
                 debugPrint(error.localizedDescription)
             }
         }
     }
-
+    //服务器配置对应的序号映射
+    var serverNameIndexMap : [String : String] = [:]
+    
     func initConfig() -> Void {
         self.pp_mainDirectory = NSSearchPathForDirectoriesInDomains(.libraryDirectory, .userDomainMask, true)[0]//documentDirectory
         self.pp_mainDirectory += "/PandaNote"
@@ -129,6 +133,7 @@ class PPUserInfo: NSObject {
         if let data = try? Data(contentsOf: URL(fileURLWithPath: self.pp_mainDirectory+"/PP_CloudServerSetting.json")) {
             if let json = try? JSONSerialization.jsonObject(with: data, options: .allowFragments) {
                 self.pp_serverInfoList = json as! [[String : String]]
+                updateRemarkIndexMap()
             }
         }
         else {
@@ -142,26 +147,14 @@ class PPUserInfo: NSObject {
         
         if let recentFileData = try? Data(contentsOf: URL(fileURLWithPath: self.pp_mainDirectory+"/PP_RecentFiles.json")) {
             let archieveArray = try? JSONDecoder().decode([PPFileObject].self, from: recentFileData)
-            self.pp_RecentFiles = archieveArray ?? []
+            self.recentFiles = archieveArray ?? []
         }
         
     }
-    //MARK:最近文件
-    func removeFileInRecentFiles(_ fileObj:PPFileObject) {
-        if let index = pp_RecentFiles.firstIndex(of: fileObj) {
-            pp_RecentFiles.remove(at: index)
-        }
-    }
-    /// 插入最近浏览的文件或目录到最近浏览列表（如果有需要的话）
-    func insertToRecentFiles(_ fileObj:PPFileObject) {
-        removeFileInRecentFiles(fileObj)
-        pp_RecentFiles.insert(fileObj, at: 0)
-        if pp_RecentFiles.count > 30 {
-            pp_RecentFiles.removeLast()
-        }
-    }
-    //MARK:更新云盘服务设置
+    
+    //MARK:更新云盘服务设置(切换云盘服务时force为false)
     func updateCurrentServerInfo(index:Int) {
+        PPUserInfo.shared.pp_lastSeverInfoIndex = index
         let webDAVInfoArray = PPUserInfo.shared.pp_serverInfoList
         if webDAVInfoArray.count < 1 {
             return
@@ -186,6 +179,14 @@ class PPUserInfo: NSObject {
     }
     class func saveObject(_ objcet:Any) {
         
+    }
+    func updateRemarkIndexMap() {
+        for i in 0..<pp_serverInfoList.count {
+            let obj = pp_serverInfoList[i]
+            if let remark = obj["PPWebDAVRemark"] {
+                serverNameIndexMap[remark] = "\(i)"
+            }
+        }
     }
     ///共享的网页，提高网页显示速度
     lazy var webViewController: PPWebViewController = {

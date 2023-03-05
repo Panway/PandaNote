@@ -34,10 +34,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         window = UIWindow(frame: UIScreen.main.bounds)
         if UIDevice.current.userInterfaceIdiom != .phone {
             // macOS和iPad使用左右分屏
-            let splitViewController = UISplitViewController()
+            let splitViewController = PPSplitViewController()
             // splitViewController.delegate = self
             let masterVC = PPTabBarController.ppTabBar()
-            let detailVC = DetailViewController()
+            let detailVC = PPDetailViewController()
             let masterNavController = UINavigationController(rootViewController: masterVC)
             let detailNavController = UINavigationController(rootViewController: detailVC)
             splitViewController.viewControllers = [masterNavController,detailNavController]

@@ -2,13 +2,13 @@
 //  PPDetailViewController.swift
 //  PandaNote
 //
-//  Created by topcheer on 2023/2/26.
-//  Copyright © 2023 WeirdPan. All rights reserved.
+//  Created by Panway on 2023/2/26.
+//  Copyright © 2023 Panway. All rights reserved.
 //
 
 import Foundation
 
-class DetailViewController: UIViewController {
+class PPDetailViewController: UIViewController {
     var filePathStr: String = ""
     var fileID = ""
     var downloadURL = ""
