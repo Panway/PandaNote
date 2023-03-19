@@ -43,6 +43,9 @@ class PPHUD: NSObject {
     }()
     //MARK: 顶部提示信息框
     class func showHUDFromTop(_ message:String, isError:Bool?=false) -> Void {
+        if(message.length < 1) {
+            return
+        }
         let lastView = UIApplication.shared.keyWindow?.viewWithTag(9999)
         var lastViewExist = false
         if lastView != nil {
@@ -61,16 +64,17 @@ class PPHUD: NSObject {
         aLB.textColor = UIColor.white
         aLB.textAlignment = NSTextAlignment.center
         aLB.numberOfLines = 3
-        aLB.font = UIFont.systemFont(ofSize: 22)
+        aLB.font = UIFont.systemFont(ofSize: 16)
         aLB.text = "\(message)"
         aLB.tag = 9999
         aLB.layer.masksToBounds = true
         aLB.layer.cornerRadius = 8
+        aLB.alpha = 0.7
         UIApplication.shared.keyWindow?.addSubview(aLB)
         let size = aLB.getSize(constrainedWidth: width - 160)
         
         UIView.animate(withDuration: 0.8, delay: 0, usingSpringWithDamping: 0.76, initialSpringVelocity: 25, options: [.curveEaseInOut,.beginFromCurrentState], animations: {
-            aLB.frame = CGRect(x: 80, y: lastViewExist ? 84 : 44.0, width: width-140, height: size.height + 20)
+            aLB.frame = CGRect(x: 80, y: lastViewExist ? 84 : 44.0, width: width-140, height: size.height + 10)
 
         }) { (complete) in
             

@@ -14,17 +14,17 @@ class PPSettingViewController: PPBaseViewController,UITableViewDataSource,UITabl
     
     var dataSource : [[[String:String]]] = []
     var headerList : [String] = []
-//        ["退出时自动保存文本",
-//                                    "上传图片名称使用创建日期",
-//                                    "上传照片后删除原照片",
-//                                    "保存设置到",
-//                                    "FLEX Debug Enable"]
     var tableView = UITableView()
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        self.navigationController?.navigationBar.barStyle = .black
         tableView = UITableView(frame: self.view.bounds,style: .grouped)
         self.view.addSubview(tableView)
+        tableView.snp.makeConstraints { make in
+            make.top.equalTo(self.pp_safeLayoutGuideTop())
+            make.left.right.bottom.equalToSuperview()
+        }
         tableView.dataSource = self
         tableView.delegate = self
         self.tableView.register(PPSettingCell.self, forCellReuseIdentifier: kPPBaseCellIdentifier)
@@ -176,7 +176,9 @@ class PPSettingViewController: PPBaseViewController,UITableViewDataSource,UITabl
         }
         return 44.0
     }
-
+    override var preferredStatusBarStyle: UIStatusBarStyle {
+        return .lightContent
+    }
     
     /*
     // MARK: - Navigation

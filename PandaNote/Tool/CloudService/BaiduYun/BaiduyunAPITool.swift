@@ -40,7 +40,7 @@ open class BaiduyunAPITool: NSObject, PPCloudServiceProtocol {
         fatalError("init(coder:) has not been implemented")
     }
     
-    //MARK:获取文件列表
+    //MARK: 获取文件列表
     ///获取文件列表
     func getFileList(path: String, completionHandler:@escaping(_ data:[PPFileModel],_ isFromCache:Bool,_ error:Error?) -> Void) {
         let parameters = ["access_token": access_token,
@@ -54,6 +54,7 @@ open class BaiduyunAPITool: NSObject, PPCloudServiceProtocol {
         AF.request(baiduURL, parameters: parameters,headers: headers).responseJSON { response in
             let result = self.hanldeResponse(response.value as? [String : Any])
             let jsonDic = result.responseJSONDic
+            // jsonDic.printJSON()
             //有错误
             if result.errorNum != 0 {
                 PPHUD.showHUDFromTop("百度云错误", isError: true)
@@ -72,6 +73,7 @@ open class BaiduyunAPITool: NSObject, PPCloudServiceProtocol {
             for baiduFile in list {
                 if let item = BDFileObject(JSON: baiduFile) {
                     item.modifiedDate = item.server_ctime?.pp_stringFromDate() ?? ""
+                    item.pathID = "\(item.fs_id)"
                     /*
                     let ppFile = PPFileObject(name: item.name,
                                               path: item.path,
@@ -98,26 +100,13 @@ open class BaiduyunAPITool: NSObject, PPCloudServiceProtocol {
     }
     
     
-    //MARK:获取文件
+    //MARK: 获取文件Data
     ///获取文件
     func contents(path: String,
                   fs_id:String,
                   downloadIfCached:Bool?=false,
                   completionHandler: @escaping ((_ contents: Data?, _ isFromCache:Bool, _ error: Error?) -> Void)) -> Void {
-        if let shouldDownload = downloadIfCached, shouldDownload == false {
-            //从本地缓存获取数据
-//            let archieveKey = "baidu_" + "\(path)"
-            PPDiskCache.shared.fetchData(key: path, failure: { (error) in
-                if error != nil {
-                    self.contents(path: path, fs_id: fs_id,downloadIfCached: true, completionHandler: completionHandler)
-//                    if (error as NSError).code != NSFileReadNoSuchFileError {
-//                    }
-                }
-            }) { (data) in
-                completionHandler(data,true,nil)
-            }
-            return
-        }
+        
 
         let reqURL = "https://pan.baidu.com/rest/2.0/xpan/multimedia"
         let parameters = ["access_token": access_token,
@@ -129,6 +118,8 @@ open class BaiduyunAPITool: NSObject, PPCloudServiceProtocol {
         AF.request(reqURL, parameters: parameters,headers: headers).responseJSON { response in
             let result = self.hanldeResponse(response.value as? [String : Any])
             let jsonDic = result.responseJSONDic
+            // jsonDic.printJSON()
+
             //如果有错误
             if result.errorNum != 0 {
                 PPHUD.showHUDFromTop("百度云错误", isError: true)
@@ -144,9 +135,6 @@ open class BaiduyunAPITool: NSObject, PPCloudServiceProtocol {
                 let model = BDFileObject(JSON: baiduFile )
                 AF.request(model?.downloadLink ?? "", parameters: parameters).response { response in
                     completionHandler(response.data,true, nil)
-//                    let archieveKey = "baidu_" + "\(path)"
-                    PPDiskCache.shared.setData(response.data, key: path)
-
                 }
                 break//只处理第一个
             }

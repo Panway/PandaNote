@@ -38,6 +38,11 @@ class PPMarkdownViewController: PPBaseViewController,
     var textChanged : Bool = false//文本改变的话就不需要再比较字符串了
     var splitMode = PPSplitMode.none //上次的分栏模式 last mode
     var theme : PPThemeModel!
+    lazy var dropdown : PPDropDown = {
+        let drop = PPDropDown()
+        return drop
+    }()
+    
     //MARK: Life Cycle
     override func viewDidLoad() {
         if self.filePathStr.length < 1 {
@@ -77,7 +82,7 @@ class PPMarkdownViewController: PPBaseViewController,
 
                 }
                 else if method == "Down" {
-                    //MARK:Down渲染
+                    //MARK: Down渲染
                     let down = Down(markdownString: self.markdownStr)
                     //DownAttributedStringRenderable 31行
                     let attributedString = try? down.toAttributedString(DownOptions.default, stylesheet: "* {font-family: Helvetica } code, pre { font-family: Menlo } code {position: relative;background-color: #f6f8fa;border-radius: 6px;} img {max-width: 100%;display: block;margin-left: auto;margin-right: auto;}")
@@ -106,6 +111,17 @@ class PPMarkdownViewController: PPBaseViewController,
         
         self.view.backgroundColor = UIColor.white
 
+    }
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        if !self.textChanged || changed() {
+            debugPrint("文本未修改")
+            return
+        }
+        if (UIDevice.current.userInterfaceIdiom != .phone) {
+            self.closeAfterSave = false
+            self.saveTextAction(sender: nil)
+        }
     }
     deinit {
         self.switchSplitMode(.none)//好像不加也行
@@ -150,24 +166,28 @@ class PPMarkdownViewController: PPBaseViewController,
             self.navigationController?.popViewController(animated: true)
             return
         }
-        if (PPUserInfo.pp_valueForSettingDict(key: "saveMarkdownWhenClose")) {
+        let isMaciPad = UIDevice.current.userInterfaceIdiom != .phone
+        if (isMaciPad || PPUserInfo.pp_valueForSettingDict(key: "saveMarkdownWhenClose")) {
             self.closeAfterSave = true
             self.saveTextAction(sender: nil)
         } else {
-            PPAlertAction.showAlert(withTitle: "是否保存已修改的文字", msg: "", buttonsStatement: ["不保存","要保存"]) { (index) in
+            self.dropdown.dataSource = ["是否保存已修改的文字？","不保存","要保存"]
+            self.dropdown.selectionAction = { (index: Int, item: String) in
                 debugPrint("\(index)")
-                if (index == 0) {
+                if (index == 1) {
                     self.navigationController?.popViewController(animated: true)
                 }
-                else {
+                else if (index == 2) {
                     self.closeAfterSave = true
                     self.saveTextAction(sender: nil)
                 }
             }
+            // self.dropdown.anchorView = sender
+            self.dropdown.show()
             
         }
     }
-    // MARK:UITextViewDelegate 文本框代理
+    // MARK: UITextViewDelegate 文本框代理
     func textViewDidChange(_ textView: PPPTextView) {
 //        debugPrint(textView.text)
         if splitMode != .none {
@@ -205,7 +225,7 @@ class PPMarkdownViewController: PPBaseViewController,
     }
     ///结束拖动更新y偏移量
     func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
-        debugPrint("scrollViewDidEndDragging")
+//        debugPrint("scrollViewDidEndDragging")
         if splitMode != .none {
             self.scrollToSameTextAsTextView()
         }
@@ -348,7 +368,7 @@ class PPMarkdownViewController: PPBaseViewController,
             return
         }
         debugPrint("保存的是===\(stringToUpload)")
-        //MARK:保存
+        //MARK: 保存
         self.textView.resignFirstResponder()
         PPFileManager.shared.createFile(path: self.filePathStr, contents: stringToUpload.data(using: .utf8), completionHandler: { (error) in
             if error != nil {
@@ -367,22 +387,24 @@ class PPMarkdownViewController: PPBaseViewController,
     }
     @objc func moreAction(sender:UIButton?)  {
         let menuTitile = ["分享文本","左右分栏模式","上下分栏模式","关闭分栏"]
-        PPAlertAction.showSheet(withTitle: "更多操作", message: nil, cancelButtonTitle: "取消", destructiveButtonTitle: nil, otherButtonTitle: menuTitile) { (index) in
-            debugPrint(index)
-            if index == 1 {
+        self.dropdown.dataSource = menuTitile
+        self.dropdown.selectionAction = { (index: Int, item: String) in
+            // debugPrint(index)
+            if index == 0 {
                 self.shareTextAction(sender: nil)
             }
-            else if index == 2 {
+            else if index == 1 {
                 self.switchSplitMode(.leftAndRight)
             }
-            else if index == 3 {
+            else if index == 2 {
                 self.switchSplitMode(.upAndDown)
             }
-            else if index == 4 {
+            else if index == 3 {
                 self.switchSplitMode(.none)
             }
-            
         }
+        self.dropdown.anchorView = sender
+        self.dropdown.show()
     }
     //初始化样式
     func initStyle() {

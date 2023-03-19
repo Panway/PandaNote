@@ -21,10 +21,17 @@ extension UIViewController {
     
     fileprivate class func _topViewController(_ vc: UIViewController?) -> UIViewController? {
         if (vc is UINavigationController) {
-            return self._topViewController((vc as? UINavigationController)?.topViewController)
+            return _topViewController((vc as? UINavigationController)?.topViewController)
         } else if (vc is UITabBarController) {
-            return self._topViewController((vc as? UITabBarController)?.selectedViewController)
-        } else {
+            return _topViewController((vc as? UITabBarController)?.selectedViewController)
+        }
+        else if (vc is UISplitViewController) {
+            if let splitVC = vc as? UISplitViewController, let navigationController = splitVC.viewControllers.last as? UINavigationController {
+                return navigationController.topViewController
+            }
+            return vc
+        }
+        else {
             return vc
         }
     }

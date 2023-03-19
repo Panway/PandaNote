@@ -173,6 +173,10 @@ class PPFileListCell: PPBaseCollectionViewCell {
             self.iconImage.image = UIImage(named: "ico_folder")
         }
         else if (fileObj.name.pp_isImageFile())  {
+            if fileObj.thumbnail.length > 0 {
+//                self.iconImage.kf.setImage(with: URL(string: fileObj.thumbnail))
+            }
+            else {
             let imagePath = "\(PPDiskCache.shared.path)/\(PPUserInfo.shared.webDAVRemark)/\(fileObj.path)"
             if FileManager.default.fileExists(atPath: imagePath) {
                 //使用略缩图 显示略缩图 减少内存占用
@@ -183,6 +187,7 @@ class PPFileListCell: PPBaseCollectionViewCell {
             else {
                 self.iconImage.image = UIImage(named: "ico_jpg")
             }
+            }
         }
         else {
             if let icon = PPUserInfo.shared.pp_fileIcon[fileObj.name.pp_fileExtension] {
@@ -192,7 +197,9 @@ class PPFileListCell: PPBaseCollectionViewCell {
                 self.iconImage.image = UIImage(named: "ico_jpg")
             }
         }
-        
+        if fileObj.thumbnail.length > 0 {
+            self.iconImage.kf.setImage(with: URL(string: fileObj.thumbnail))
+        }
         let sizeStr = (fileObj.size>0) ? " - \(Int(fileObj.size).pp_SizeString())" :""
         self.timeLabel.text = fileObj.modifiedDate + sizeStr
         remarkLabel.text = fileObj.associatedServerName

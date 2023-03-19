@@ -34,7 +34,7 @@ public final class BDFileObject: PPFileModel {
         size <- map["size"]
         isDirectory <- map["isdir"]
         server_ctime <- (map["server_ctime"], DateTransform())
-        pathID <- map["fs_id"]
+        fs_id <- map["fs_id"]
         downloadLink <- map["dlink"]
     }
 

@@ -257,8 +257,8 @@ class PPFileListViewController: PPBaseViewController,
         }
     }
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        let cell = collectionView.cellForItem(at: indexPath)
         if multipleSelectionMode {
-            let cell = collectionView.cellForItem(at: indexPath)
             cell?.backgroundColor = "4abf8a66".pp_HEXColor()
             return
         }
@@ -284,21 +284,20 @@ class PPFileListViewController: PPBaseViewController,
             self.navigationController?.pushViewController(vc, animated: true)
         }
         else if (fileObj.name.isTextFile())  {
-            if UIDevice.current.userInterfaceIdiom != .phone {
-                //macOS和iPad使用左右分屏
-                let detailVC = PPDetailViewController()
-                detailVC.filePathStr = getPathNotEmpty(fileObj)
-                detailVC.fileID = fileObj.pathID
-                detailVC.downloadURL = fileObj.downloadURL
-                detailVC.title = getPathNotEmpty(fileObj)
-                self.splitViewController?.showDetailViewController(detailVC, sender: self)
-                return
-            }
             let vc = PPMarkdownViewController()
             vc.filePathStr = getPathNotEmpty(fileObj)
             vc.fileID = fileObj.pathID
             vc.downloadURL = fileObj.downloadURL
-            self.navigationController?.pushViewController(vc, animated: true)
+            if UIDevice.current.userInterfaceIdiom != .phone {
+                //macOS和iPad使用左右分屏
+                if let navController = self.splitViewController?.viewControllers.last as? UINavigationController {
+                    navController.viewControllers = [vc]
+                    self.splitViewController?.showDetailViewController(navController, sender: self)
+                }
+            }
+            else {
+                self.navigationController?.pushViewController(vc, animated: true)
+            }
         }
         else if (fileObj.name.pp_isImageFile())  {
             loadAndCacheImage(fileObj) { (imageData,imageLocalPath) in
@@ -322,21 +321,32 @@ class PPFileListViewController: PPBaseViewController,
             PPFileManager.shared.getFileURL(path: getPathNotEmpty(fileObj), fileID: fileObj.pathID) { filePath in
                 let vc = PlayerViewController()
                 vc.localFileURL = URL(fileURLWithPath: filePath)
+                if UIDevice.current.userInterfaceIdiom != .phone {
+                    if let navController = self.splitViewController?.viewControllers.last as? UINavigationController {
+                        navController.viewControllers = [vc]
+                        self.splitViewController?.showDetailViewController(navController, sender: self)
+                    }
+                }
+                else {
                 self.navigationController?.pushViewController(vc, animated: true)
+                }
             }
         }
         else {
             // 打开为「图片」、「文字」...
-            PPAlertAction.showSheet(withTitle: "打开为", message: nil, cancelButtonTitle: "取消", destructiveButtonTitle: nil, otherButtonTitle: ["markdown文本","其他"]) { openIndex in
-                if openIndex == 1 {
+            self.dropdown.dataSource = ["打开为文本","系统自带预览"]
+            self.dropdown.selectionAction = { (index: Int, item: String) in
+                if index == 0 {
                     let vc = PPMarkdownViewController()
                     vc.filePathStr = self.getPathNotEmpty(fileObj)
                     self.navigationController?.pushViewController(vc, animated: true)
                 }
-                else if openIndex == 2 {
+                else if index == 1 {
                     self.fileQuickLookPreview(fileObj)
                 }
             }
+            self.dropdown.anchorView = cell
+            self.dropdown.show()
         }
         
     }
@@ -713,7 +723,7 @@ class PPFileListViewController: PPBaseViewController,
                 self.collectionView.endRefreshing()
                 return
             }
-            PPHUD.showHUDFromTop(isFromCache ? "已加载缓存":"已加载最新")
+            PPHUD.showHUDFromTop(isFromCache ? "":"已加载最新")
             self.rawDataSource = contents
             self.dataSource = self.sort(array: contents, orderBy: PPAppConfig.shared.fileListOrder);
             self.imageArray = self.dataSource.filter{$0.name.pp_isImageFile()}

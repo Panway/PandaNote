@@ -20,6 +20,7 @@ public class PPFileModel:NSObject,Mappable,Codable {
     var size: Int64 = 0
     var isDirectory = false
     var modifiedDate = ""
+    var thumbnail = "" ///< 略缩图URL
     ///百度网盘、OneDrive等的文件（文件夹）唯一ID标识
     var pathID = ""
 //    var downloadURL:String?
@@ -58,6 +59,7 @@ public class PPFileModel:NSObject,Mappable,Codable {
         case size
         case modifiedDate
         case isDirectory
+        case thumbnail
         case pathID
         case associatedServerID
         case associatedServerName
@@ -74,6 +76,7 @@ public class PPFileModel:NSObject,Mappable,Codable {
         modifiedDate = try container.decode(String.self, forKey: .modifiedDate)
         clickCount = try container.decodeIfPresent(Int64.self, forKey: .clickCount) ?? 0
         pathID = try container.decode(String.self, forKey: .pathID)
+        thumbnail = try container.decodeIfPresent(String.self, forKey: .thumbnail) ?? ""
         associatedServerID = try container.decodeIfPresent(String.self, forKey: .associatedServerID) ?? ""
         associatedServerName = try container.decodeIfPresent(String.self, forKey: .associatedServerName) ?? ""
         // 在为PPFileModel新增加属性的时候，会导致之前的json文件不存在某个key，此时需要使用decodeIfPresent https://stackoverflow.com/a/66308592/4493393
@@ -89,13 +92,14 @@ public class PPFileModel:NSObject,Mappable,Codable {
         try container.encode(isDirectory, forKey: .isDirectory)
         try container.encode(modifiedDate, forKey: .modifiedDate)
         try container.encode(pathID, forKey: .pathID)
+        try container.encode(thumbnail, forKey: .thumbnail)
         try container.encode(associatedServerID, forKey: .associatedServerID)
         try container.encode(associatedServerName, forKey: .associatedServerName)
         try container.encode(clickCount, forKey: .clickCount)
     }
     
     public override var description: String {
-        return "\(self.name ?? "") - \(self.path ?? "")"
+        return "\(self.name ?? "") - \(self.path)"
     }
     
     

@@ -9,7 +9,7 @@
 import UIKit
 
 class PPTextFieldTableViewCell: PandaFastTableViewCell {
-    var serverNameTF:UITextField = UITextField.init()
+    var serverNameTF = UITextField()
     let leftLB = UILabel()
     var textFieldNonnull = true
     override func awakeFromNib() {
@@ -41,7 +41,7 @@ class PPTextFieldTableViewCell: PandaFastTableViewCell {
         }
         serverNameTF.placeholder = "服务器地址"
         serverNameTF.clearButtonMode = .whileEditing
-        serverNameTF.borderStyle = .bezel
+//        serverNameTF.borderStyle = .bezel
     }
     override func updateUI(withData data: Any) {
         guard let model = data as? PPAddCloudServiceModel else {

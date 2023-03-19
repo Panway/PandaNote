@@ -17,6 +17,7 @@ class PPUserInfo: NSObject {
         case dropbox = "Dropbox"
         case baiduyun = "baiduyun"
         case onedrive = "OneDrive"
+        case alist = "alist"
     }
     static let shared = PPUserInfo()
 

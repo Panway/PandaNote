@@ -21,6 +21,7 @@ class PPFileManager: NSObject,FileProviderDelegate {
     var dropbox: PPDropboxService?//未配置服务器地址时刷新可能为空
     var localFileService: PPLocalFileService?
     var oneDriveService: PPOneDriveService?
+    var alistService: PPAlistService?
     var baiduwangpan : BaiduyunAPITool?
     var currentPath = ""
     var baiduFSID = 0
@@ -43,6 +44,8 @@ class PPFileManager: NSObject,FileProviderDelegate {
                 return oneDriveService
             case .baiduyun:
                 return baiduwangpan
+            case .alist:
+                return alistService
             default:
                 return localFileService
             }
@@ -125,8 +128,12 @@ class PPFileManager: NSObject,FileProviderDelegate {
     
     //MARK:- 文件操作
     /// 从WebDAV下载文件获取Data
-    func downloadFile(path: String, cacheToDisk: Bool? = false,completionHandler: @escaping ((_ contents: Data?, _ isFromCache:Bool, _ error: Error?) -> Void)) {
-        currentService?.contentsOfFile(path, completionHandler: { data, error in
+    func downloadFile(path: String,
+                      fileID: String?,
+                      cacheToDisk: Bool? = false,
+                      completionHandler: @escaping ((_ contents: Data?, _ isFromCache:Bool, _ error: Error?) -> Void)) {
+        // 局部闭包
+        let handleResult = { (_ data:Data?,_ error:Error?) -> Void in
             if let error = error {
                 debugPrint("下载失败：\(error.localizedDescription)")
                 return
@@ -137,6 +144,19 @@ class PPFileManager: NSObject,FileProviderDelegate {
             DispatchQueue.main.async {
                 completionHandler(data,false,error)
             }
+        }
+        
+        if PPUserInfo.shared.cloudServiceType == .baiduyun {
+            let downloadIfCached = path.pp_isImageFile() || path.pp_isVideoFile()
+            baiduwangpan?.contents(path: path,
+                                   fs_id:fileID ?? "",
+                                   downloadIfCached:!downloadIfCached,
+                                   completionHandler: { (data, isFromDisk, error) in
+                handleResult(data,error)
+            })
+        }
+        currentService?.contentsOfFile(path, completionHandler: { data, error in
+            handleResult(data, error)
         })
             
             
@@ -147,19 +167,20 @@ class PPFileManager: NSObject,FileProviderDelegate {
     ///   - path: 远程文件路径
     ///   - completionHandler: 完成回调
     private func getRemoteOrLocalFile(path: String,
+                                      fileID:String?,
                             downloadIfExist : Bool? = false,
                             onlyCheckIfFileExist : Bool? = false,
                             completionHandler: @escaping ((_ contents: Data?, _ isFromCache:Bool, _ error: Error?) -> Void)) {
         // 1 从本地磁盘获取文件缓存
         PPDiskCache.shared.fetchData(key: PPUserInfo.shared.webDAVRemark + path,onlyCheckIfFileExist:onlyCheckIfFileExist, failure: { (error) in
             // 2-2 本地磁盘没有，就从服务器获取最新的
-            self.downloadFile(path: path, cacheToDisk: true, completionHandler: completionHandler)
+            self.downloadFile(path: path, fileID:fileID, cacheToDisk: true, completionHandler: completionHandler)
         }) { (data) in
             // 2-1 本地磁盘有，按需从服务器获取最新的
             debugPrint("local file loaded")
             completionHandler(data,true,nil)
             if downloadIfExist == true {//即使本地有文件也重新下载
-                self.downloadFile(path: path, cacheToDisk: true, completionHandler: completionHandler)
+                self.downloadFile(path: path, fileID:fileID, cacheToDisk: true, completionHandler: completionHandler)
             }
         }
 
@@ -188,31 +209,11 @@ class PPFileManager: NSObject,FileProviderDelegate {
             }
             return
         }
-        if PPUserInfo.shared.cloudServiceType == .baiduyun {
-            let downloadIfCached = path.pp_isImageFile() || path.pp_isVideoFile()
-            baiduwangpan?.contents(path: path,
-                                   fs_id:fileID ?? "",
-                                   downloadIfCached:!downloadIfCached,
-                                   completionHandler: { (data, isFromDisk, error) in
-                if let error = error {
-                    debugPrint("下载失败：\(error.localizedDescription)")
-                    return
-                }
-                if let shouldCacheToDisk = cacheToDisk, shouldCacheToDisk == true {
-                    let archieveKey = "baidu_" + "\(self.baiduwangpan?.baiduURL ?? "")\(path)".pp_md5
-                    PPDiskCache.shared.setData(data, key: archieveKey)
-                }
-                DispatchQueue.main.async {
-                    completionHandler(data,false,error)
-                }
-            })
-        }
-        else {
-            getRemoteOrLocalFile(path: path,
+        getRemoteOrLocalFile(path: path,
+                             fileID:fileID,
                                downloadIfExist:downloadIfCached,
                                onlyCheckIfFileExist:onlyCheckIfFileExist,
                                completionHandler: completionHandler)
-        }
     }
     /// 无法修改的图片视频等文件，缓存到本地后返回本地URL
     func getFileURL(path:String,
@@ -306,6 +307,9 @@ class PPFileManager: NSObject,FileProviderDelegate {
         else if PPUserInfo.shared.cloudServiceType == .onedrive {
             let refresh_token = PPUserInfo.shared.cloudServiceExtra
             oneDriveService = PPOneDriveService(access_token: password, refresh_token: refresh_token)
+        }
+        else if PPUserInfo.shared.cloudServiceType == .alist {
+            alistService = PPAlistService(url:PPUserInfo.shared.webDAVServerURL, username: user, password: password)
         }
         else if PPUserInfo.shared.cloudServiceType == .local {
             localFileService = PPLocalFileService()

@@ -45,3 +45,16 @@ open class PPCloudService : NSObject {
         try? FileManager.default.createDirectory(at: URL(string: "")!, withIntermediateDirectories: true, attributes: [:])
     }
 }
+
+extension Dictionary {
+    func printJSON(_ shouldPrint:Bool = true) {
+        if shouldPrint == false {
+            return
+        }
+        if let jsonData = try? JSONSerialization.data(withJSONObject: self, options: .prettyPrinted) {
+            if let jsonString = String(data: jsonData, encoding: .utf8) {
+                print(jsonString)
+            }
+        }
+    }
+}

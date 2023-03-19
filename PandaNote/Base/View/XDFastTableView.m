@@ -34,13 +34,30 @@
 
 - (void)pp_addSubviews {
     self.itemHeight = 44.0;
-    self.tableView = [UITableView new];
-    [self addSubview:self.tableView];
+    UITableView *tableView = [UITableView new];
+    [self addSubview:tableView];
+    self.tableView = tableView;
     self.tableView.frame = CGRectMake(0, 0, PPScreenWidth, PPScreenHeight);
-//    [self.tableView mas_makeConstraints:^(MASConstraintMaker *make){
-//        make.left.right.bottom.equalTo(self.view);
-//        make.top.equalTo(self.view);
-//    }];
+    
+    tableView.translatesAutoresizingMaskIntoConstraints = NO;
+    //这里的 H: 和 V: 分别代表水平和垂直方向的约束。而 | 符号表示父视图的边缘。因此，H:|[tableView]| 表示 tableView 的左边和右边都与父视图对齐，V:|[tableView]| 表示 tableView 的顶部和底部都与父视图对齐。
+
+    //需要注意的是，在 Objective-C 中，字典的语法是用大括号 {} 括起来的键值对，因此在 views 参数中传递一个包含 tableView 的字典时，需要使用 @{@"tableView": tableView} 的语法。
+    NSArray *constraints = @[
+        @"H:|[tableView]|",
+        @"V:|[tableView]|"
+    ];
+
+    for (NSString *constraint in constraints) {
+        NSArray *format = [NSLayoutConstraint
+            constraintsWithVisualFormat:constraint
+                                options:0
+                                metrics:nil
+                                  views:@{@"tableView": tableView}];
+        [self addConstraints:format];
+    }
+
+
     //    self.automaticallyAdjustsScrollViewInsets = NO;
     self.tableView.delegate = self;
     self.tableView.dataSource = self;

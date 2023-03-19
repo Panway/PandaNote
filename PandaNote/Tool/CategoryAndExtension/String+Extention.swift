@@ -631,7 +631,7 @@ extension String {
     /// 是音视频媒体文件
     func pp_isMediaFile() -> Bool {
         let l = self.lowercased();
-        if (l.hasSuffix("mp14") ||
+        if (l.hasSuffix("mp4") ||
             l.hasSuffix("mov") ||
             l.hasSuffix("mp3") ||
             l.hasSuffix("wav") ||
@@ -653,6 +653,9 @@ extension Int {
             }
             else if self < 1024*1024*1024 {
                 return String(format: "%.2fMB",Float(self)/1024.0/1024.0 )
+            }
+            else {
+                return String(format: "%.2fGB",Float(self)/1024.0/1024.0/1024.0 )
             }
         }
         return ""
