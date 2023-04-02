@@ -21,6 +21,7 @@ static NSString *kXDFastTableViewCellReuseIdentifier = @"kXDFastTableViewCellReu
 - (void)pp_addSubviews;
 /// 选中某Item的回调block
 @property (nonatomic, copy) void(^didSelectRowAtIndexHandler)(NSInteger index);
+@property (nonatomic, copy) void(^didDeleteRowAtIndex)(NSInteger index);
 
 @end
 

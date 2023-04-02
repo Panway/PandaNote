@@ -10,10 +10,10 @@
 
 import Foundation
 import Alamofire
-import ObjectMapper
+//import ObjectMapper
 
 
-class PPAlistService: PPFilesProvider, PPCloudServiceProtocol {
+class PPAlistService: NSObject, PPCloudServiceProtocol {
     
     var url = ""
     var username = ""
@@ -49,9 +49,12 @@ class PPAlistService: PPFilesProvider, PPCloudServiceProtocol {
     }
     
     func getToken() {
-        var serverList = PPUserInfo.shared.pp_serverInfoList
-        var current = serverList[PPUserInfo.shared.pp_lastSeverInfoIndex]
+        let serverList = PPUserInfo.shared.pp_serverInfoList
+        let current = serverList[PPUserInfo.shared.pp_lastSeverInfoIndex]
         self.access_token = current["PPAccessToken"]
+        if access_token == nil || access_token?.length == 0 {
+            login(url: url, username: username, password: password)
+        }
     }
     func login(url:String, username:String, password:String) {
         let parameters: [String: String] = [
@@ -78,25 +81,6 @@ class PPAlistService: PPFilesProvider, PPCloudServiceProtocol {
                 print(error)
             }
             
-//                let userCredential = URLCredential(user: "anonymous",
-//                                                   password: access_token,
-//                                                   persistence: .forSession)
-//                self.refresh_token = refresh_token
-//                self.access_token = access_token
-////                self.onedrive = OneDriveFileProvider(credential: userCredential)
-//                print("=====refresh_token=====\n\(refresh_token)")
-//                print("=====access_token=====\n\(access_token)")
-//
-//
-//                //更新
-//                var serverList = PPUserInfo.shared.pp_serverInfoList
-//                var current = serverList[PPUserInfo.shared.pp_lastSeverInfoIndex]
-//                current["PPWebDAVPassword"] = access_token
-//                current["PPCloudServiceExtra"] = refresh_token
-//                #warning("todo")
-//                serverList.remove(at: PPUserInfo.shared.pp_lastSeverInfoIndex)
-//                serverList.insert(current, at: PPUserInfo.shared.pp_lastSeverInfoIndex)
-//                PPUserInfo.shared.pp_serverInfoList = serverList
 
                 
                 
@@ -106,51 +90,7 @@ class PPAlistService: PPFilesProvider, PPCloudServiceProtocol {
             
         }
     }
-    func getNewToken() {
-        let parameters: [String: String] = [
-            "client_id": onedrive_client_id_es,
-            "redirect_uri": onedrive_redirect_uri_es,
-            "refresh_token": self.refresh_token ?? "",
-            "grant_type": "refresh_token"
-        ]
-//        debugPrint("getNewToken==\(parameters)")
-        let url = "https://login.microsoftonline.com/common/oauth2/v2.0/token"
-//        AF.request(url, method: .post, parameters: parameters).responseJSON { response in
-//            debugPrint(response.value)
-//            let jsonDic = response.value as? [String : Any]
-////                    let access_token = jsonDic["access_token"] as? String
-//            if let access_token = jsonDic?["access_token"] as? String,let refresh_token = jsonDic?["refresh_token"] as? String {
-//                debugPrint("microsoft access_token is:",access_token)
-//                let userCredential = URLCredential(user: "anonymous",
-//                                                   password: access_token,
-//                                                   persistence: .forSession)
-//                self.refresh_token = refresh_token
-//                self.access_token = access_token
-////                self.onedrive = OneDriveFileProvider(credential: userCredential)
-//                print("=====refresh_token=====\n\(refresh_token)")
-//                print("=====access_token=====\n\(access_token)")
-//
-//
-//                //更新
-//                var serverList = PPUserInfo.shared.pp_serverInfoList
-//                var current = serverList[PPUserInfo.shared.pp_lastSeverInfoIndex]
-//                current["PPWebDAVPassword"] = access_token
-//                current["PPCloudServiceExtra"] = refresh_token
-////                        current["PPCloudServiceExtra"] =
-//                #warning("todo")
-////                        self.refresh_token = current["PPCloudServiceExtra"]!
-//                serverList.remove(at: PPUserInfo.shared.pp_lastSeverInfoIndex)
-//                serverList.insert(current, at: PPUserInfo.shared.pp_lastSeverInfoIndex)
-//                PPUserInfo.shared.pp_serverInfoList = serverList
-//
-//
-//
-//
-//            }
-//
-//
-//        }
-    }
+    //MARK: ls file list 文件列表
     func contentsOfDirectory(_ path: String, completionHandler: @escaping ([PPFileObject], Error?) -> Void) {
         contentsOfPathID(path, completionHandler: completionHandler)
     }
@@ -170,11 +110,11 @@ class PPAlistService: PPFilesProvider, PPCloudServiceProtocol {
         AF.request(requestURL, method: .post, parameters: parameters, encoding: JSONEncoding.default, headers: headers).responseJSON { response in
             let jsonDic = response.value as? [String : Any]
             jsonDic?.printJSON()
-            if let code = jsonDic?["code"] as? Int, code == 400 {
+            if let code = jsonDic?["code"] as? Int, code != 200 {
                 debugPrint("alist get list error")
                 completionHandler([], CocoaError(.fileNoSuchFile,
                                                   userInfo: [NSLocalizedDescriptionKey: "unknown"]))
-                //重新登录
+                //本来是要重新登录的，考虑到这个类只负责获取数据，就不搞其他的了
 //                self.login(url: self.url, username: self.username, password: self.password)
                 return
             }
@@ -184,12 +124,7 @@ class PPAlistService: PPFilesProvider, PPCloudServiceProtocol {
                   let fileList = data["content"] as? [[String:Any]] else {
                 return
             }
-            
-            if let modelsArray = Mapper<PPAlistFile>().mapArray(JSONObject: fileList) {
-                DispatchQueue.main.async {
-                    completionHandler(modelsArray,nil)
-                }
-            }
+            completionHandler(PPAlistFile.toModelArray(fileList), nil)
             
         }
         

@@ -11,9 +11,15 @@ import UIKit
 class PPWebDAVConfigViewController: PPBaseViewController {
 
     let table = XDFastTableView()
+    
+    var isEditMode = false
+    var editIndex = 0
+    
     var showServerURL = true
     var showUserName = true
-    var showPassword = true //密码或token
+    var showPassword = true //密码
+    var showToken = false //access token
+    var showRefreshToken = false //refresh token
     var showExtra = false
     var showRemark = true
     
@@ -21,7 +27,10 @@ class PPWebDAVConfigViewController: PPBaseViewController {
     var serverURL = ""
     var userName = ""
     var password = ""
+    var passwordDesc = "密码"
     var passwordRemark = "密码"
+    var accessToken = ""
+    var refreshToken = ""
     var remark = ""
     var extraString = "" //额外的字段
     var tips = ""
@@ -44,9 +53,19 @@ class PPWebDAVConfigViewController: PPBaseViewController {
             texts.append(userName)
         }
         if showPassword {
-            leftNames.append("密码")
+            leftNames.append(passwordDesc)
             placeHolders.append(passwordRemark)
             texts.append(password)
+        }
+        if showToken {
+            leftNames.append("access token")
+            placeHolders.append("access token")
+            texts.append(accessToken)
+        }
+        if showRefreshToken {
+            leftNames.append("refresh token")
+            placeHolders.append("refresh token")
+            texts.append(refreshToken)
         }
         if showExtra {
             leftNames.append("其他")
@@ -62,18 +81,19 @@ class PPWebDAVConfigViewController: PPBaseViewController {
         
         self.view.addSubview(table)
         table.snp.makeConstraints { (make) in
-            make.top.equalTo(self.view).offset(88)
+            make.top.equalTo(self.pp_safeLayoutGuideTop())
             make.left.right.bottom.equalToSuperview()
         }
         table.registerCellClass(PPTextFieldTableViewCell.self)
-        
+        var list = [PPAddCloudServiceModel]()
         for i in 0..<leftNames.count {
             let model = PPAddCloudServiceModel()
             model.leftName = leftNames[i]
             model.placeHolder = placeHolders[i]
             model.textValue = texts[i]
-            table.dataSource.append(model)
+            list.append(model)
         }
+        table.dataSource = list
         table.didSelectRowAtIndexHandler = {(index: Int) ->Void in
             print("click==\(index)")
         }
@@ -111,8 +131,16 @@ class PPWebDAVConfigViewController: PPBaseViewController {
         if tips.length > 1 {
             tipsLB.text = tips
         }
+        if cloudType == "alist" {
+            tipsLB.text = """
+        注意：
+        密码可不填
+        填写密码可以上传
+        """
+        }
     }
     
+    // MARK: 提交
     @objc func submit() -> Void {
 
         var keyValue = [String:String]()
@@ -130,15 +158,32 @@ class PPWebDAVConfigViewController: PPBaseViewController {
             }
         }
 
-        
+        if(keyValue["Token"] != nil) {
+            self.accessToken = keyValue["Token"] ?? ""
+        }
         let newServer = ["PPWebDAVServerURL":keyValue["URL"] ?? "",
                          "PPWebDAVUserName":keyValue["账号"] ?? "",
                          "PPWebDAVPassword":keyValue["密码"] ?? "",
                          "PPCloudServiceType":self.cloudType,
                          "PPCloudServiceExtra":self.extraString,
+                         "PPAccessToken": self.accessToken,
+                         "PPRefreshToken": self.refreshToken,
                          "PPWebDAVRemark":keyValue["备注"] ?? ""]
-        PPUserInfo.shared.pp_serverInfoList.append(newServer)
         
+        if isEditMode {
+            PPUserInfo.shared.pp_serverInfoList[editIndex] = newServer
+        }
+        else {
+            let duplicated = PPUserInfo.shared.pp_serverInfoList.filter {
+                $0["PPWebDAVRemark"] == newServer["PPWebDAVRemark"]// 找出重复的
+            }
+            if duplicated.count > 0 {
+                PPHUD.showHUDFromTop("备注不能重复")
+                return
+            }
+            // debugPrint(duplicated)
+            PPUserInfo.shared.pp_serverInfoList.append(newServer)
+        }
         PPHUD.showHUDFromTop("设置成功")
         PPUserInfo.shared.initConfig()
         //新添加的配置设为当前服务器配置（选中最后一个）

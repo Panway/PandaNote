@@ -22,6 +22,7 @@ class PPFileManager: NSObject,FileProviderDelegate {
     var localFileService: PPLocalFileService?
     var oneDriveService: PPOneDriveService?
     var alistService: PPAlistService?
+    var aliyunDriveService: PPAliyunDriveService?
     var baiduwangpan : BaiduyunAPITool?
     var currentPath = ""
     var baiduFSID = 0
@@ -46,6 +47,8 @@ class PPFileManager: NSObject,FileProviderDelegate {
                 return baiduwangpan
             case .alist:
                 return alistService
+            case .aliyundrive:
+                return aliyunDriveService
             default:
                 return localFileService
             }
@@ -76,15 +79,13 @@ class PPFileManager: NSObject,FileProviderDelegate {
                     completionHandler(fileList,false,error)
                 }
             })
+            return
         }
         //获取本地缓存失败就去服务器获取
         currentService?.contentsOfDirectory(path, completionHandler: { fileList, error in
-            do {
-                let encoded = try JSONEncoder().encode(fileList)
-//                debugPrint(String(decoding: encoded, as: UTF8.self))
+            if error == nil {
+                let encoded = try? JSONEncoder().encode(fileList)
                 PPDiskCache.shared.setData(encoded, key:archieveKey)
-            } catch {
-                debugPrint(error.localizedDescription)
             }
             DispatchQueue.main.async {
                 completionHandler(fileList,false,error)
@@ -218,8 +219,13 @@ class PPFileManager: NSObject,FileProviderDelegate {
     /// 无法修改的图片视频等文件，缓存到本地后返回本地URL
     func getFileURL(path:String,
                     fileID:String?,
+                    downloadURL:String? = nil,
                     completion: @escaping (( _ url:String) -> Void)) {
-        getFileData(path: path, fileID: fileID,cacheToDisk:true,onlyCheckIfFileExist:true) { (contents: Data?,isFromCache, error) in
+        getFileData(path: path,
+                    fileID: fileID,
+                    downloadURL: downloadURL,
+                    cacheToDisk:true,
+                    onlyCheckIfFileExist:true) { (contents: Data?,isFromCache, error) in
             if error != nil {
                 return
             }
@@ -229,7 +235,7 @@ class PPFileManager: NSObject,FileProviderDelegate {
     }
     //MARK: add file
     /// 通过WebDAV上传到服务器
-    func createFile(path: String, contents: Data?, completionHandler:@escaping(_ error:Error?) -> Void) {
+    func createFile(path: String, parentID:String? = nil,contents: Data?, completionHandler:@escaping(_ error:Error?) -> Void) {
         guard let contents = contents else {
             DispatchQueue.main.async {
                 PPHUD.showHUDFromTop("空文件",isError: true)
@@ -269,7 +275,12 @@ class PPFileManager: NSObject,FileProviderDelegate {
         })
     }
     //删除远程服务器的文件
-    func deteteFile(path: String, completionHandler:@escaping(_ error:Error?) -> Void) {
+    func deteteFile(path: String, pathID:String? = nil,completionHandler:@escaping(_ error:Error?) -> Void) {
+        if let pathID = pathID, pathID.length > 0,
+            PPUserInfo.shared.cloudServiceType == .aliyundrive {
+            currentService?.removeItemByID(pathID, completionHandler: completionHandler)
+            return
+        }
         currentService?.removeItem(atPath: path, completionHandler: { error in
             DispatchQueue.main.async {
                 completionHandler(error)
@@ -298,24 +309,29 @@ class PPFileManager: NSObject,FileProviderDelegate {
             PPHUD.showHUDFromTop("无法初始化服务器,请添加", isError: true)
             return false
         }
-        if PPUserInfo.shared.cloudServiceType == .dropbox {
+        switch PPUserInfo.shared.cloudServiceType {
+        case .dropbox:
             dropbox = PPDropboxService(access_token: password)
-        }
-        else if PPUserInfo.shared.cloudServiceType == .baiduyun {
+        case .baiduyun:
             baiduwangpan = BaiduyunAPITool(access_token: password)
-        }
-        else if PPUserInfo.shared.cloudServiceType == .onedrive {
+        case .onedrive:
             let refresh_token = PPUserInfo.shared.cloudServiceExtra
-            oneDriveService = PPOneDriveService(access_token: password, refresh_token: refresh_token)
-        }
-        else if PPUserInfo.shared.cloudServiceType == .alist {
-            alistService = PPAlistService(url:PPUserInfo.shared.webDAVServerURL, username: user, password: password)
-        }
-        else if PPUserInfo.shared.cloudServiceType == .local {
+            oneDriveService = PPOneDriveService(access_token: password,
+                                                refresh_token: refresh_token)
+        case .alist:
+            alistService = PPAlistService(url:PPUserInfo.shared.webDAVServerURL,
+                                          username: user,
+                                          password: password)
+        case .aliyundrive:
+            aliyunDriveService = PPAliyunDriveService(access_token: PPUserInfo.shared.cloudServiceToken, refresh_token: "")
+        case .local:
             localFileService = PPLocalFileService()
-        }
-        else if PPUserInfo.shared.cloudServiceType == .webdav {
-            webdavService = PPWebDAVService(url: PPUserInfo.shared.webDAVServerURL, username: user, password: password)
+        case .webdav:
+            webdavService = PPWebDAVService(url: PPUserInfo.shared.webDAVServerURL,
+                                            username: user,
+                                            password: password)
+        default:
+            debugPrint("not init Cloud Service")
         }
         return true
     }
@@ -366,7 +382,7 @@ class PPFileManager: NSObject,FileProviderDelegate {
                 if isDegraded {
                    return//降级的，低质量的图片略缩图不要 https://stackoverflow.com/a/52355835/4493393
                 }
-                debugPrint(restulImage?.size)
+                debugPrint("pick image size:",restulImage?.size)
                 var originalFilename = "noname.jpg" //默认值，实际上不会出现
                 if let name = PHAssetResource.assetResources(for: asset).first?.originalFilename {
                     originalFilename = name

@@ -318,6 +318,11 @@ extension PPFileListViewController {
         let vc = PPAddCloudServiceViewController()
         self.navigationController?.pushViewController(vc, animated: true)
     }
+    /// 编辑云服务
+    func editCloudService() {
+        let vc = PPEditCloudServiceVC()
+        self.navigationController?.pushViewController(vc, animated: true)
+    }
     ///设置导航栏标题
     func setNavTitle(_ title:String?=nil,_ showArrow:Bool?=false) {
         let title = (title != nil) ? title : String(self.pathStr.split(separator: "/").last ?? "" + PPUserInfo.shared.webDAVRemark)

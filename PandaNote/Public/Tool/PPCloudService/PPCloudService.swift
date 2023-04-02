@@ -17,7 +17,7 @@ protocol PPCloudServiceProtocol {
     /// 获取文件列表
     func contentsOfDirectory(_ path: String, completionHandler:@escaping(_ data:[PPFileObject],_ error:Error?) -> Void)
     
-    /// 获取文件列表（可选）
+    /// 获取文件列表（方式二，可选）
     func contentsOfPathID(_ pathID: String, completionHandler:@escaping(_ data:[PPFileObject],_ error:Error?) -> Void)
     
     /// 获取文件二进制数据
@@ -34,9 +34,17 @@ protocol PPCloudServiceProtocol {
     
     /// 删除文件
     func removeItem(atPath path: String, completionHandler:@escaping(_ error:Error?) -> Void)
+    /// 删除文件（可选）
+    func removeItemByID(_ fileID: String, completionHandler:@escaping(_ error:Error?) -> Void)
 
 }
 
+extension PPCloudServiceProtocol {
+    func removeItemByID(_ fileID: String, completionHandler:@escaping(_ error:Error?) -> Void) {
+        
+    }
+
+}
 
 
 open class PPCloudService : NSObject {

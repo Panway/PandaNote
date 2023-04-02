@@ -25,10 +25,11 @@ class PPTextFieldTableViewCell: PandaFastTableViewCell {
         self.contentView.addSubview(leftLB)
         leftLB.snp.makeConstraints { (make) in
             make.left.equalTo(self.contentView).offset(15)
-            make.width.equalTo(66)
+            make.width.equalTo(80)
             make.centerY.equalTo(self.contentView)
         }
         leftLB.text = "服务器"
+        leftLB.adjustsFontSizeToFitWidth = true
         
         serverNameTF = UITextField()
         self.contentView.addSubview(serverNameTF)

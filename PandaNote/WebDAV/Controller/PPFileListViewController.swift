@@ -157,6 +157,9 @@ class PPFileListViewController: PPBaseViewController,
         //        cell.backgroundColor = .black
         // Configure the cell
         let fileObj = self.dataSource[indexPath.row]
+        if fileObj.path.length == 0 {
+            fileObj.path = pathStr + fileObj.name
+        }
         cell.cellIndex = indexPath.row
         cell.updateLayout(self.cellStyle)
         cell.updateUIWithData(fileObj as AnyObject)
@@ -401,7 +404,7 @@ class PPFileListViewController: PPBaseViewController,
             return
         }
         //相对路径
-        PPFileManager.shared.deteteFile(path: fileObj.path) { (error) in
+        PPFileManager.shared.deteteFile(path: fileObj.path, pathID: fileObj.pathID) { (error) in
             if let errorNew = error {
                 PPHUD.showHUDFromTop("删除失败: \(String(describing: errorNew))", isError: true)
             }
@@ -542,6 +545,7 @@ class PPFileListViewController: PPBaseViewController,
         var menuTitile = ["添加文件","从相册添加图片","新建文本文档","新建文件夹"]
         if self.navigationController?.viewControllers.count == 1 {
             menuTitile.append("添加云服务")
+            menuTitile.append("编辑云服务")
         }
         if isRecentFiles {
             menuTitile = ["清空访问历史"]
@@ -567,6 +571,9 @@ class PPFileListViewController: PPBaseViewController,
             }
             else if title == "添加云服务" {
                 self.addCloudService()
+            }
+            else if title == "编辑云服务" {
+                self.editCloudService()
             }
             else if title == "清空访问历史" {
                 PPUserInfo.shared.recentFiles.removeAll()
@@ -693,13 +700,15 @@ class PPFileListViewController: PPBaseViewController,
         return nil
     }
     func fileQuickLookPreview(_ fileObj:PPFileObject) {
-        PPFileManager.shared.getFileURL(path: self.getPathNotEmpty(fileObj), fileID: fileObj.pathID) { filePath in
+        PPFileManager.shared.getFileURL(path: self.getPathNotEmpty(fileObj),
+                                        fileID: fileObj.pathID,
+                                        downloadURL: fileObj.downloadURL) { filePath in
             let vc = PPPreviewController() //QuickLook框架预览
             vc.filePathArray = [filePath]
             self.present(vc, animated: true)
         }
     }
-    //MARK:获取文件列表
+    //MARK: 获取文件列表
     func getFileListData() -> Void {
         if isRecentFiles {
             self.rawDataSource = PPUserInfo.shared.recentFiles
@@ -712,9 +721,9 @@ class PPFileListViewController: PPBaseViewController,
             return
         }
         
-        if (PPUserInfo.shared.webDAVServerURL.length < 1) {
-            PPFileManager.shared.initCloudServiceSetting()
-        }
+//        if (PPUserInfo.shared.webDAVServerURL.length < 1) {
+//            PPFileManager.shared.initCloudServiceSetting()
+//        }
         
         PPFileManager.shared.pp_getFileList(path: self.pathStr, pathID:self.pathID) { (contents,isFromCache, error) in
             self.isCachedFile = isFromCache
@@ -726,7 +735,13 @@ class PPFileListViewController: PPBaseViewController,
             PPHUD.showHUDFromTop(isFromCache ? "":"已加载最新")
             self.rawDataSource = contents
             self.dataSource = self.sort(array: contents, orderBy: PPAppConfig.shared.fileListOrder);
-            self.imageArray = self.dataSource.filter{$0.name.pp_isImageFile()}
+            self.imageArray = self.dataSource.filter {
+                if let name = $0.name { //防止name为空的情况：
+                    return name.pp_isImageFile()
+                } else {
+                    return false
+                }
+            }
             self.collectionView.endRefreshing()
             self.collectionView.reloadData()
         }

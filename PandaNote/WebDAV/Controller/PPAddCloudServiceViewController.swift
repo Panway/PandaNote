@@ -11,6 +11,7 @@ import Alamofire
 
 class PPAddCloudServiceViewController : PPBaseViewController,UITableViewDataSource,UITableViewDelegate {
     var dataSource:Array<String> = ["WebDAV（坚果云等）",
+                                    "阿里云盘",
                                     "Dropbox",
                                     "OneDrive",
                                     "alist",
@@ -21,6 +22,7 @@ class PPAddCloudServiceViewController : PPBaseViewController,UITableViewDataSour
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        self.title = "选择云服务类型"
         tableView = UITableView(frame: self.view.bounds,style: .grouped)
         self.view.addSubview(tableView)
         tableView.snp.makeConstraints { (make) in
@@ -57,6 +59,29 @@ class PPAddCloudServiceViewController : PPBaseViewController,UITableViewDataSour
             #endif
             vc.remark = obj
             self.navigationController?.pushViewController(vc, animated: true)
+        }
+        else if obj == "阿里云盘" {
+            PPAppConfig.shared.popMenu.showWithCallback(sourceView:self.tableView,
+                                                        stringArray: ["App内授权登录","手动输入配置"],
+                                                        sourceVC: self) { index, string in
+                if index == 1 {
+                    let vc = PPWebDAVConfigViewController()
+                    vc.cloudType = "AliyunDrive"
+                    vc.remark = "阿里云盘"
+                    vc.passwordDesc = "Token"
+                    vc.showServerURL = false
+                    vc.showUserName = false
+                    vc.showPassword = false
+                    vc.showToken = true
+                    vc.showRefreshToken = true
+                    self.navigationController?.pushViewController(vc, animated: true)
+                }
+                else if index == 0 {
+                    let vc = PPWebViewController()
+                    vc.urlString = aliyundrive_auth_url
+                    self.navigationController?.pushViewController(vc, animated: true)
+                }
+            }
         }
         else if obj == "Dropbox" {
 //            let vc = PPWebViewController()
@@ -249,6 +274,27 @@ class PPAddCloudServiceViewController : PPBaseViewController,UITableViewDataSour
                 UIViewController.pp_topViewController()?.navigationController?.pushViewController(vc, animated: true)
             }
             
+        }
+        else if url.host == aliyundrive_callback_domain {
+            let urlWithCode = url.absoluteString
+            if let code = urlWithCode.pp_valueOf("code") {
+                PPAliyunDriveService.getToken(code: code, callback: {access_token,refresh_token in
+                    debugPrint(access_token,refresh_token)
+                    let vc = PPWebDAVConfigViewController()
+                    vc.cloudType = "AliyunDrive"
+                    vc.serverURL = ""
+                    vc.userName = ""
+                    vc.remark = "阿里云盘"
+                    vc.showUserName = false
+                    vc.showServerURL = false
+                    vc.showPassword = false
+                    vc.accessToken = access_token
+                    vc.refreshToken = refresh_token
+                    UIViewController.pp_topViewController()?.navigationController?.pushViewController(vc, animated: true)
+                    
+                })
+                
+            }
         }
     }
 

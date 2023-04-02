@@ -15,7 +15,7 @@ import UIKit
 import FilesProvider
 import Alamofire
 
-class PPOneDriveService: PPFilesProvider, PPCloudServiceProtocol {
+class PPOneDriveService: NSObject, PPCloudServiceProtocol {
     
     var url = "https://graph.microsoft.com"
     var access_token = ""

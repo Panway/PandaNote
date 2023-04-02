@@ -18,6 +18,7 @@ class PPUserInfo: NSObject {
         case baiduyun = "baiduyun"
         case onedrive = "OneDrive"
         case alist = "alist"
+        case aliyundrive = "AliyunDrive"
     }
     static let shared = PPUserInfo()
 
@@ -25,6 +26,7 @@ class PPUserInfo: NSObject {
     var webDAVUserName:String?
     var webDAVPassword:String?
     var webDAVRemark = ""
+    var cloudServiceToken = "" //access token
     var cloudServiceExtra = ""//额外的字段
     /// 坚果云、Drpbox等
     var cloudServiceType:PPCloudServiceType = .webdav
@@ -162,11 +164,24 @@ class PPUserInfo: NSObject {
         }
         let webDAVInfo = webDAVInfoArray[index]
 
-        PPUserInfo.shared.webDAVServerURL = webDAVInfo["PPWebDAVServerURL"] ?? ""
-        PPUserInfo.shared.webDAVUserName = webDAVInfo["PPWebDAVUserName"] ?? ""
-        PPUserInfo.shared.webDAVPassword = webDAVInfo["PPWebDAVPassword"] ?? ""
+        PPUserInfo.shared.webDAVServerURL = webDAVInfo["PPWebDAVServerURL"] ?? "" //后期删除
+        PPUserInfo.shared.webDAVUserName = webDAVInfo["PPWebDAVUserName"] ?? "" //后期删除
+        PPUserInfo.shared.webDAVPassword = webDAVInfo["PPWebDAVPassword"] ?? "" //后期删除
         PPUserInfo.shared.webDAVRemark = webDAVInfo["PPWebDAVRemark"] ?? ""
+        if(PPUserInfo.shared.webDAVUserName?.length == 0) {
+            PPUserInfo.shared.webDAVUserName = webDAVInfo["PPUserName"] ?? ""
+        }
+        if(PPUserInfo.shared.webDAVPassword?.length == 0) {
+            PPUserInfo.shared.webDAVPassword = webDAVInfo["PPPassword"] ?? ""
+        }
+        if(PPUserInfo.shared.webDAVRemark.length == 0) {
+            PPUserInfo.shared.webDAVRemark = webDAVInfo["PPRemark"] ?? ""
+        }
+        if(PPUserInfo.shared.webDAVServerURL.length == 0) {
+            PPUserInfo.shared.webDAVServerURL = webDAVInfo["PPServerURL"] ?? ""
+        }
         PPUserInfo.shared.cloudServiceExtra = webDAVInfo["PPCloudServiceExtra"] ?? ""
+        PPUserInfo.shared.cloudServiceToken = webDAVInfo["PPAccessToken"] ?? ""
         PPUserInfo.shared.cloudServiceType = PPCloudServiceType(rawValue: webDAVInfo["PPCloudServiceType"] ?? "") ?? .webdav
     }
     class func pp_valueForSettingDict(key : String) -> Bool {

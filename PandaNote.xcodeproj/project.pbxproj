@@ -20,6 +20,9 @@
 		1E0D9E0C27736E9700E3AA73 /* PPMarkdownEditorToolBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E0D9E0B27736E9700E3AA73 /* PPMarkdownEditorToolBar.swift */; };
 		1E0D9EB42774C1C700E3AA73 /* PPAppConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E0D9EB32774C1C700E3AA73 /* PPAppConfig.swift */; };
 		1E0DE3E82612153A002BA5D9 /* web in Resources */ = {isa = PBXBuildFile; fileRef = 1E0DE3E72612153A002BA5D9 /* web */; };
+		1E12093F29D67F5E00D442A2 /* PPEditCloudServiceVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E12093E29D67F5E00D442A2 /* PPEditCloudServiceVC.swift */; };
+		1E12094229D8769500D442A2 /* PPAliyunDriveService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E12094129D8769500D442A2 /* PPAliyunDriveService.swift */; };
+		1E12094429D886A600D442A2 /* PPAliyunDriveFile.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E12094329D886A600D442A2 /* PPAliyunDriveFile.swift */; };
 		1E179BF925B549B0006C3A56 /* UIView+PPTool.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E179BF825B549B0006C3A56 /* UIView+PPTool.swift */; };
 		1E1B5894257B8118000860F6 /* NSAttributedString+PPTool.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E1B5893257B8118000860F6 /* NSAttributedString+PPTool.swift */; };
 		1E1B58A7257B9480000860F6 /* PPAddCloudServiceViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E1B58A6257B9480000860F6 /* PPAddCloudServiceViewController.swift */; };
@@ -145,6 +148,9 @@
 		1E0D9E0B27736E9700E3AA73 /* PPMarkdownEditorToolBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPMarkdownEditorToolBar.swift; sourceTree = "<group>"; };
 		1E0D9EB32774C1C700E3AA73 /* PPAppConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPAppConfig.swift; sourceTree = "<group>"; };
 		1E0DE3E72612153A002BA5D9 /* web */ = {isa = PBXFileReference; lastKnownFileType = folder; path = web; sourceTree = "<group>"; };
+		1E12093E29D67F5E00D442A2 /* PPEditCloudServiceVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPEditCloudServiceVC.swift; sourceTree = "<group>"; };
+		1E12094129D8769500D442A2 /* PPAliyunDriveService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPAliyunDriveService.swift; sourceTree = "<group>"; };
+		1E12094329D886A600D442A2 /* PPAliyunDriveFile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PPAliyunDriveFile.swift; path = PandaNote/Public/Tool/PPCloudService/AliyunDrive/PPAliyunDriveFile.swift; sourceTree = SOURCE_ROOT; };
 		1E179BF825B549B0006C3A56 /* UIView+PPTool.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIView+PPTool.swift"; sourceTree = "<group>"; };
 		1E1B5893257B8118000860F6 /* NSAttributedString+PPTool.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NSAttributedString+PPTool.swift"; sourceTree = "<group>"; };
 		1E1B58A6257B9480000860F6 /* PPAddCloudServiceViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPAddCloudServiceViewController.swift; sourceTree = "<group>"; };
@@ -321,6 +327,15 @@
 			path = View;
 			sourceTree = "<group>";
 		};
+		1E12094029D875DC00D442A2 /* AliyunDrive */ = {
+			isa = PBXGroup;
+			children = (
+				1E12094129D8769500D442A2 /* PPAliyunDriveService.swift */,
+				1E12094329D886A600D442A2 /* PPAliyunDriveFile.swift */,
+			);
+			path = AliyunDrive;
+			sourceTree = "<group>";
+		};
 		1E45F16229C708230009E16F /* alist */ = {
 			isa = PBXGroup;
 			children = (
@@ -342,8 +357,9 @@
 		1E526EC026B6781E0026DC67 /* PPCloudService */ = {
 			isa = PBXGroup;
 			children = (
-				1E45F16229C708230009E16F /* alist */,
 				1EEB0FEC27534498006A5E26 /* Base */,
+				1E12094029D875DC00D442A2 /* AliyunDrive */,
+				1E45F16229C708230009E16F /* alist */,
 				1EEB0FF127538758006A5E26 /* OneDrive */,
 				1E526EC126B6788A0026DC67 /* PPCloudService.swift */,
 			);
@@ -506,6 +522,7 @@
 				1E556A0D25639BEF00A4653F /* PPResultsTableController.swift */,
 				6056027923178017000809CD /* PPWebDAVConfigViewController.swift */,
 				6001B6332461A82400A40593 /* PPWebFileViewController.swift */,
+				1E12093E29D67F5E00D442A2 /* PPEditCloudServiceVC.swift */,
 			);
 			path = Controller;
 			sourceTree = "<group>";
@@ -808,7 +825,7 @@
 			attributes = {
 				LastSwiftUpdateCheck = 1020;
 				LastUpgradeCheck = 1220;
-				ORGANIZATIONNAME = WeirdPan;
+				ORGANIZATIONNAME = Panway;
 				TargetAttributes = {
 					60F5690C22F2ADC700874994 = {
 						CreatedOnToolsVersion = 10.2.1;
@@ -977,9 +994,12 @@
 				1EDE20962521E71A001331FE /* DouyinVideoModel.swift in Sources */,
 				6001B63C2465804100A40593 /* MyURLProtocol.swift in Sources */,
 				6080D3AB233315B900F582B1 /* CacheSerializer+Panda.swift in Sources */,
+				1E12093F29D67F5E00D442A2 /* PPEditCloudServiceVC.swift in Sources */,
 				6056024C231778D0000809CD /* String+Extention.swift in Sources */,
 				1E50942824DBB15B00238678 /* PPWebViewBottomToolbar.swift in Sources */,
 				60A1F8DA24388391009E390C /* PPWebViewController.swift in Sources */,
+				1E12094429D886A600D442A2 /* PPAliyunDriveFile.swift in Sources */,
+				1E12094229D8769500D442A2 /* PPAliyunDriveService.swift in Sources */,
 				1EC4F0342608D66600377D97 /* Data+PPTool.swift in Sources */,
 				60A1F92C24398B23009E390C /* PPFileObject.swift in Sources */,
 				1E03F83F274C7B940085ACFB /* Data+PPTool.swift.swift in Sources */,

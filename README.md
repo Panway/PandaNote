@@ -27,6 +27,7 @@ iOS 10.0+、macOS（初步支持，使用了Mac Catalyst）
 **已支持的网盘（协议）**：
 
 - [x] WebDAV（坚果云等）
+- [x] 阿里云盘
 - [x] Dropbox
 - [x] OneDrive
 - [x] 百度网盘
@@ -51,7 +52,7 @@ iOS 10.0+、macOS（初步支持，使用了Mac Catalyst）
 
 
 
-## 如何运行
+## 编译及运行
 
 项目基于最新Xcode13构建
 
@@ -74,6 +75,8 @@ open PandaNote.xcworkspace
 
 ## 解析markdown相关
 
+apple出品 https://github.com/apple/swift-markdown
+
 AFNetworking作者的： https://github.com/mattt/CommonMarkAttributedString
 
 Cmark的Swift封装：https://github.com/iwasrobbed/Down
@@ -88,6 +91,8 @@ markdown与AttributeString互转： https://github.com/chockenberry/MarkdownAttr
 
 77star https://github.com/calebkleveter/SwiftMark
 
+将 HTML 字符串转换为 NSAttributedString https://github.com/ZhgChgLi/ZMarkupParser
+
 MWeb作者使用的：
 
 https://github.com/hoedown/hoedown
@@ -97,3 +102,11 @@ https://github.com/ali-rantakari/peg-markdown-highlight
 [写一个 markdown 解析器，用什么方式比较好呢？](https://www.v2ex.com/t/682051)
 
 Java 解析 https://github.com/vsch/flexmark-java
+
+[CherryMarkdown](https://mp.weixin.qq.com/s/T8-zbxI2eeMM4vSgt8dk3w)- 腾讯开源的更友好的编辑器前端组件
+
+[bytemd](https://github.com/bytedance/bytemd) - 字节跳动开源的前端markdown编辑器
+
+[Runestone](https://github.com/simonbs/Runestone) - iOS 原生高性能纯文本编辑器，包括语法高亮、行号
+
+https://github.com/Milkdown/milkdown  https://milkdown.dev/zh-hans/playground

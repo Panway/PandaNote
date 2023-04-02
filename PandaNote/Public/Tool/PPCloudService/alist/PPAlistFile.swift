@@ -31,4 +31,11 @@ class PPAlistFile: PPFileModel {
 
 
     }
+    
+    public class func toModelArray(_ fileList:[[String:Any]]) -> [PPAlistFile] {
+        if let modelsArray = Mapper<PPAlistFile>().mapArray(JSONObject: fileList) {
+            return modelsArray
+        }
+        return []
+    }
 }

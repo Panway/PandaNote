@@ -12,7 +12,7 @@
 
 @interface XDFastTableView ()<UITableViewDelegate,UITableViewDataSource>
 @property (nonatomic) BOOL cellDidRegister;
-
+@property (nonatomic, strong) NSMutableArray *dataSource2;
 @end
 
 
@@ -76,7 +76,8 @@
         NSAssert(_cellDidRegister, @"Cell must be registered for identifier - %@", kXDFastTableViewCellReuseIdentifier);
         return;
     }
-    _dataSource = dataSource;
+//    _dataSource = dataSource;
+    _dataSource2 = [dataSource mutableCopy];
     [self.tableView reloadData];
 }
 
@@ -88,13 +89,13 @@
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
-    return self.dataSource.count;
+    return self.dataSource2.count;
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
     PandaFastTableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:kXDFastTableViewCellReuseIdentifier];
     cell.selectionStyle = UITableViewCellSelectionStyleNone;
-    id model = self.dataSource[indexPath.row];
+    id model = self.dataSource2[indexPath.row];
     [cell updateUIWithData:model];
     return cell;
 }
@@ -110,6 +111,17 @@
     }
 }
 
+- (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath {
+    if (editingStyle == UITableViewCellEditingStyleDelete) {
+        // 先处理数据源
+        [self.dataSource2 removeObjectAtIndex:indexPath.row];
+        // 再删除 TableView 中的行
+        [tableView deleteRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationFade];
+        if(_didDeleteRowAtIndex) {
+            _didDeleteRowAtIndex(indexPath.row);
+        }
+    }
+}
 
 
 /*
@@ -147,6 +159,8 @@
 }
 
 - (void)updateUIWithData:(id)data {
-    
+    if ([self isMemberOfClass:[PandaFastTableViewCell class]]) {
+        self.textLabel.text = data;
+    }
 }
 @end
