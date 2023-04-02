@@ -217,8 +217,8 @@ class PPWebViewController: UIViewController,WKUIDelegate,WKNavigationDelegate,WK
             URLProtocol.self.wk_unregisterScheme(scheme)
         }
     }
-    //MARK:Private
-    //MARK: 是否可以跳转
+    //MARK: Private
+    //MARK: 是否可以跳转 PPNavigationActionPolicy
     func shouldStartLoad(with request: URLRequest) -> Bool {
         //获取当前调转页面的URL
 //        let requestUrl = request?.url?.absoluteString
@@ -307,6 +307,7 @@ class PPWebViewController: UIViewController,WKUIDelegate,WKNavigationDelegate,WK
 //MARK: - Private 自己的业务逻辑
 extension PPWebViewController {
     func handleMyStartLoad(_ urlString:String) -> Bool {
+        debugPrint("handleMyStartLoad",urlString)
         //获取Dropbox的access_token
         if urlString.hasPrefix("filemgr://oauth-callback") {
             let urlWithToken = urlString.removingPercentEncoding?.replacingOccurrences(of: "#access_token", with: "?access_token")
@@ -339,6 +340,10 @@ extension PPWebViewController {
 //            var code = urlString.pp_valueOf("code")
             PPAddCloudServiceViewController.handleCloudServiceRedirect(URL(string: urlString)!)
         }
+        else if urlString.hasPrefix("https://" + aliyundrive_callback_domain) {
+            PPAddCloudServiceViewController.handleCloudServiceRedirect(URL(string: urlString)!)
+        }
+        
         #if DEBUG
 //        fakeData(urlString)
         #endif
