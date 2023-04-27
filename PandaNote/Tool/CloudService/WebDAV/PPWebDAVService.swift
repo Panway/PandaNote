@@ -37,39 +37,58 @@ class PPWebDAVService: PPFilesProvider, PPCloudServiceProtocol {
     }
     
     
-    func contentsOfDirectory(_ path: String, completionHandler: @escaping ([PPFileObject], Error?) -> Void) {
+    func contentsOfDirectory(_ path: String, _ pathID: String, completion: @escaping(_ data: [PPFileObject], _ error: Error?) -> Void) {
         webdav?.contentsOfDirectory(path: path, completionHandler: {
             contents, error in
+            if let error = error {
+                let errorCode = (error as NSError).code
+                
+                if let error2 = error as NSError? {
+                    NSLog("error %@ / %d", error2.domain, error2.code)
+                }
+                
+//                let error as? NSError
+                if error._code == 503 {
+                    debugPrint("503==",errorCode)
+                }
+                else {
+                    debugPrint("503==",error._code)
+                }
+            }
             let archieveArray = self.myPPFileArrayFrom(contents)
             
             DispatchQueue.main.async {
-                completionHandler(archieveArray,error)
+                completion(archieveArray,error)
             }
         })
     }
     
-    func contentsOfPathID(_ pathID: String, completionHandler: @escaping ([PPFileObject], Error?) -> Void) {
-        
+
+    
+    
+    func getFileData(_ path: String, _ extraParams:String, completion:@escaping(_ data:Data?, _ url:String, _ error:Error?) -> Void) {
+        webdav?.contents(path: path) { contents, error in
+            completion(contents,"",error)
+        }
     }
     
-    func contentsOfFile(_ path: String, completionHandler: @escaping (Data?, Error?) -> Void) {
-        webdav?.contents(path: path, completionHandler: completionHandler)
+    
+    func createDirectory(_ folderName: String, _ atPath: String, completion:@escaping(_ error: Error?) -> Void) {
+        webdav?.create(folder: folderName, at: atPath, completionHandler: completion)
     }
     
-    func createDirectory(_ folderName: String, at atPath: String, completionHandler: @escaping (Error?) -> Void) {
-        webdav?.create(folder: folderName, at: atPath, completionHandler: completionHandler)
+    func createFile(_ path: String, _ pathID: String, contents: Data, completion: @escaping(_ result: [String:String]?, _ error: Error?) -> Void) {
+        webdav?.writeContents(path: path, contents: contents, completionHandler: { error in
+            completion(nil, error)
+        })
     }
     
-    func createFile(atPath path: String, contents: Data, completionHandler: @escaping (Error?) -> Void) {
-        webdav?.writeContents(path: path, contents: contents, completionHandler: completionHandler)
+    func moveItem(srcPath: String, destPath: String, srcItemID: String, destItemID: String, isRename: Bool, completion: @escaping(_ error:Error?) -> Void) {
+        webdav?.moveItem(path:srcPath, to: destPath, completionHandler: completion)
     }
     
-    func moveItem(atPath srcPath: String, toPath dstPath: String, completionHandler: @escaping (Error?) -> Void) {
-        webdav?.moveItem(path:srcPath, to: dstPath, completionHandler: completionHandler)
-    }
-    
-    func removeItem(atPath path: String, completionHandler: @escaping (Error?) -> Void) {
-        webdav?.removeItem(path:path, completionHandler: completionHandler)
+    func removeItem(_ path: String, _ fileID: String, completion: @escaping(_ error: Error?) -> Void) {
+        webdav?.removeItem(path:path, completionHandler: completion)
     }
     
     

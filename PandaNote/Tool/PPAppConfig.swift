@@ -8,6 +8,7 @@
 
 import UIKit
 import GCDWebServer
+import Kingfisher
 
 
 class PPAppConfig: NSObject {
@@ -20,12 +21,22 @@ class PPAppConfig: NSObject {
     private var config = [String:String]()
     /// 沙盒Sandbox/Library/PandaCache
     private var pp_mainDirectory:String!
+    let cacheDirectory = NSSearchPathForDirectoriesInDomains(.cachesDirectory, .userDomainMask, true)[0]
+    
     private let webServer = GCDWebServer() // 必须保存实例防止对象被释放
-
+    let utcDateFormatter = DateFormatter() ///< yyyy-MM-dd'T'HH:mm:ss.SSSZ
+    let dateFormatter = DateFormatter() ///< yyyy-MM-dd HH:mm:ss
     let popMenu = PPPopMenu()
     
+    
     func initSetting() {
+        //将其格式选项中加入带小数秒的选项，并将时区设置为当前时区
+        //dateFormatter.formatOptions.insert(.withFractionalSeconds)
+        utcDateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSZ"
+        utcDateFormatter.timeZone = TimeZone.current
 
+        dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
+        dateFormatter.timeZone = TimeZone.current
 
         initWebServer()
         self.pp_mainDirectory = NSSearchPathForDirectoriesInDomains(.libraryDirectory, .userDomainMask, true)[0]
@@ -41,6 +52,11 @@ class PPAppConfig: NSObject {
         }
         self.fileListOrder = PPFileListOrder(rawValue: getIntItem("fileListOrder")) ?? .type
         showMarkdownOnly = getIntItem("showMarkdownOnly") == 1 ? true : false
+        let manager = KingfisherManager.shared
+        manager.cache.diskStorage.config.expiration = .days(30) //删除所有超过默认七天的缓存
+        manager.cache.cleanExpiredDiskCache()
+//        let cache = ImageCache.default
+//        cache.diskStorage.config.autoExtAfterHashedFileName = true
     }
     func initSettingAfterLoadMainUI() {
 #if DEBUG

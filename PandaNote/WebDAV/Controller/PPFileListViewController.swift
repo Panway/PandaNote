@@ -61,7 +61,8 @@ class PPFileListViewController: PPBaseViewController,
     var isMovingMode = false
     var leftButton : UIButton!
     var rightButton : UIButton!
-    var filePathToBeMove = ""
+    var srcPathForMove = "" ///< 移动文件时的原始目录
+    var srcFileIDForMove = "" ///< 移动文件时的原始ID
     //---------------移动文件（夹）到其他文件夹功能↑---------------
     var titleViewButton : UIButton!
     var documentPicker: PPFilePicker! //必须强引用
@@ -191,29 +192,42 @@ class PPFileListViewController: PPBaseViewController,
     ) -> CGFloat {
         return 0
     }
-    
+    var deleteTasks: [DispatchWorkItem] = []
+    @objc func cancelDelete() {
+        // 取消所有的打印任务
+        for task in deleteTasks {
+            task.cancel()
+        }
+        deleteTasks.removeAll()
+        PPHUD.shared.deleteBGView.removeFromSuperview()
+    }
     func didClickMoreBtn(cellIndex: Int, sender:UIButton) {
         debugPrint("==\(cellIndex)")
         if self.isMovingMode {
             return
         }
-        self.dropdown.dataSource = ["删除","重命名","移动","多选","QuickLook预览"]
+        self.dropdown.dataSource = ["删除","重命名","移动","多选","QuickLook预览","浏览器打开"]
         self.dropdown.selectionAction = { (index: Int, item: String) in
+            let fileObj = self.dataSource[cellIndex]
             if item == "删除" {
-                PPHUD.shared.showDelayTaskHUD {
+                let printTask = DispatchWorkItem {
                     self.deleteFile(cellIndex)
                 }
+                DispatchQueue.main.asyncAfter(deadline: .now() + 3, execute: printTask)
+                self.deleteTasks.append(printTask)
+                
+                PPHUD.shared.showDelayTaskHUD()
+                PPHUD.shared.revokeBtn.addTarget(self, action: #selector(self.cancelDelete), for: .touchUpInside)
             }
             else if item == "重命名" {
-                let fileObj = self.dataSource[cellIndex]
                 self.renameFile(fileObj)
             }
             else if item == "移动" {
                 debugPrint("移动")
-                let fileObj = self.dataSource[cellIndex]
                 let popVC = PPFileListViewController()
                 popVC.isMovingMode = true
-                popVC.filePathToBeMove = fileObj.path
+                popVC.srcPathForMove = fileObj.path
+                popVC.srcFileIDForMove = fileObj.pathID
                 let nav = UINavigationController(rootViewController: popVC)
                 self.present(nav, animated: true, completion: nil)
             }
@@ -222,7 +236,6 @@ class PPFileListViewController: PPBaseViewController,
 //                self.topToolBarHeight?.updateOffset(amount: 99)
             }
             else if item == "QuickLook预览" {
-                let fileObj = self.dataSource[cellIndex]
                 self.fileQuickLookPreview(fileObj)
             }
         }
@@ -259,14 +272,13 @@ class PPFileListViewController: PPBaseViewController,
             cell?.backgroundColor = .clear
         }
     }
+    //MARK: 点击文件
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         let cell = collectionView.cellForItem(at: indexPath)
         if multipleSelectionMode {
             cell?.backgroundColor = "4abf8a66".pp_HEXColor()
             return
         }
-//    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-//        tableView.deselectRow(at: indexPath, animated: true)
         collectionView.deselectItem(at: indexPath, animated: true)
         let fileObj = self.dataSource[indexPath.row]
         insertToRecentFiles(fileObj,isRecentFiles)
@@ -284,6 +296,9 @@ class PPFileListViewController: PPBaseViewController,
             vc.pathStr = getPathNotEmpty(fileObj) + "/"
             vc.pathID = fileObj.pathID
             vc.isMovingMode = self.isMovingMode
+            if(vc.isMovingMode) {
+                vc.srcFileIDForMove = self.srcFileIDForMove
+            }
             self.navigationController?.pushViewController(vc, animated: true)
         }
         else if (fileObj.name.isTextFile())  {
@@ -291,16 +306,7 @@ class PPFileListViewController: PPBaseViewController,
             vc.filePathStr = getPathNotEmpty(fileObj)
             vc.fileID = fileObj.pathID
             vc.downloadURL = fileObj.downloadURL
-            if UIDevice.current.userInterfaceIdiom != .phone {
-                //macOS和iPad使用左右分屏
-                if let navController = self.splitViewController?.viewControllers.last as? UINavigationController {
-                    navController.viewControllers = [vc]
-                    self.splitViewController?.showDetailViewController(navController, sender: self)
-                }
-            }
-            else {
-                self.navigationController?.pushViewController(vc, animated: true)
-            }
+            self.pushDetail(vc)
         }
         else if (fileObj.name.pp_isImageFile())  {
             loadAndCacheImage(fileObj) { (imageData,imageLocalPath) in
@@ -310,7 +316,7 @@ class PPFileListViewController: PPBaseViewController,
             }
         }
         else if (fileObj.name.hasSuffix("pdf"))  {
-            PPFileManager.shared.getFileURL(path: getPathNotEmpty(fileObj), fileID: fileObj.pathID) { filePath in
+            PPFileManager.shared.getLocalURL(path: getPathNotEmpty(fileObj), fileID: fileObj.pathID) { filePath in
                 if #available(iOS 11.0, *) {
                     let vc = PPPDFViewController()
                     vc.filePathStr = filePath
@@ -320,19 +326,12 @@ class PPFileListViewController: PPBaseViewController,
                 }
             }
         }
-        else if (fileObj.name.pp_isMediaFile())  {
-            PPFileManager.shared.getFileURL(path: getPathNotEmpty(fileObj), fileID: fileObj.pathID) { filePath in
+        else if (fileObj.name.pp_isVideoAudioFile())  {
+            PPFileManager.shared.getLocalURL(path: self.getPathNotEmpty(fileObj), fileID: fileObj.pathID, downloadURL: fileObj.downloadURL) { filePath in
                 let vc = PlayerViewController()
                 vc.localFileURL = URL(fileURLWithPath: filePath)
-                if UIDevice.current.userInterfaceIdiom != .phone {
-                    if let navController = self.splitViewController?.viewControllers.last as? UINavigationController {
-                        navController.viewControllers = [vc]
-                        self.splitViewController?.showDetailViewController(navController, sender: self)
-                    }
-                }
-                else {
-                self.navigationController?.pushViewController(vc, animated: true)
-                }
+                vc.name = fileObj.name
+                self.pushDetail(vc)
             }
         }
         else {
@@ -396,6 +395,7 @@ class PPFileListViewController: PPBaseViewController,
 
     func deleteFile(_ index:Int) {
         let fileObj = self.dataSource[index]
+        debugPrint("开始删除文件:",fileObj)
         if (self.isRecentFiles) {
             self.dataSource.remove(at: index)
             removeFromRecentFiles(fileObj)
@@ -526,7 +526,11 @@ class PPFileListViewController: PPBaseViewController,
                 return
             }
             guard let newName = firstTextField.text else { return }
-            PPFileManager.shared.moveRemoteFile(pathOld: pathPrefix+fileObj.name, pathNew: pathPrefix + newName) { (error) in
+            PPFileManager.shared.moveFile(srcPath: pathPrefix + fileObj.name,
+                                          destPath: pathPrefix + newName,
+                                          srcFileID: fileObj.pathID,
+                                          destFileID: fileObj.pathID,
+                                          isRename: true) { error in
                 PPHUD.showHUDFromTop("修改成功")
                 let fileNew = fileObj
                 fileNew.name = newName
@@ -621,7 +625,7 @@ class PPFileListViewController: PPBaseViewController,
                 }
             }
             else {
-            PPFileManager.shared.createFile(path: self.pathStr+newName, contents: "# 标题".data(using:.utf8)) { (error) in
+            PPFileManager.shared.createFile(path: self.pathStr+newName, contents: "# 标题".data(using:.utf8)) { (result, error) in
                 if error != nil {
                     PPHUD.showHUDFromTop("新建失败", isError: true)
                 }
@@ -644,7 +648,12 @@ class PPFileListViewController: PPBaseViewController,
         guard let documents = documents else { return }//为空返回
         for obj in documents {
             guard let objData = try? Data(contentsOf: obj.fileURL) else { return }//为空返回
-            PPFileManager.shared.createFile(path: self.pathStr + obj.fileURL.lastPathComponent, contents: objData) { (error) in
+            var fileName = obj.fileURL.lastPathComponent
+            if obj.fileURL.absoluteString.pp_isMediaFile() &&
+                PPUserInfo.pp_boolValue("uploadImageNameUseCreationDate") {
+                fileName = obj.fileURL.path.pp_getFileModificationDate().pp_stringWithoutColon() + "." + obj.fileURL.pathExtension
+            }
+            PPFileManager.shared.createFile(path: self.pathStr + fileName, contents: objData) { (result, error) in
                 if error != nil {
                     PPHUD.showHUDFromTop("新建失败", isError: true)
                 }
@@ -668,7 +677,9 @@ class PPFileListViewController: PPBaseViewController,
 //        let filePath = cache.cachePath(forComputedKey: imageURL)//KingFisher用
 //        let cachedData = try?Data(contentsOf: URL(fileURLWithPath: filePath))//KingFisher用
         
-        PPFileManager.shared.getFileData(path: getPathNotEmpty(file), fileID: fileID,downloadURL:file.downloadURL,cacheToDisk:true) { (contents: Data?,isFromCache, error) in
+        PPFileManager.shared.getFileData(path: getPathNotEmpty(file),
+                                         fileID: fileID,
+                                         downloadURL:file.downloadURL) { (contents: Data?,isFromCache, error) in
             guard let contents = contents else { return }
             if let handler = completionHandler {
                 DispatchQueue.main.async {
@@ -700,7 +711,7 @@ class PPFileListViewController: PPBaseViewController,
         return nil
     }
     func fileQuickLookPreview(_ fileObj:PPFileObject) {
-        PPFileManager.shared.getFileURL(path: self.getPathNotEmpty(fileObj),
+        PPFileManager.shared.getLocalURL(path: self.getPathNotEmpty(fileObj),
                                         fileID: fileObj.pathID,
                                         downloadURL: fileObj.downloadURL) { filePath in
             let vc = PPPreviewController() //QuickLook框架预览
@@ -730,17 +741,22 @@ class PPFileListViewController: PPBaseViewController,
             if error != nil {
                 PPHUD.showHUDFromTop("加载失败，请配置服务器", isError: true)
                 self.collectionView.endRefreshing()
+                if case let myError as PPCloudServiceError = error, myError == .forcedLoginRequired {
+                    debugPrint(PPUserInfo.shared.pp_serverInfoList[PPUserInfo.shared.pp_lastSeverInfoIndex])
+                    let serviceType = PPUserInfo.shared.getCurrentServerInfo("PPCloudServiceType")
+                    PPAddCloudServiceViewController.addCloudService(serviceType, self)
+                }
                 return
             }
-            PPHUD.showHUDFromTop(isFromCache ? "":"已加载最新")
+            PPHUD.showHUDFromTop(isFromCache ? "":"已加载最新\(self.dataSource.count)项")
             self.rawDataSource = contents
             self.dataSource = self.sort(array: contents, orderBy: PPAppConfig.shared.fileListOrder);
             self.imageArray = self.dataSource.filter {
-                if let name = $0.name { //防止name为空的情况：
-                    return name.pp_isImageFile()
-                } else {
-                    return false
-                }
+//                if let name = $0.name { //防止name为空的情况：
+                return $0.name.pp_isImageFile()
+//                } else {
+//                    return false
+//                }
             }
             self.collectionView.endRefreshing()
             self.collectionView.reloadData()

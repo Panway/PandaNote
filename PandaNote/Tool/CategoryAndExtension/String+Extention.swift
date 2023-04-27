@@ -37,14 +37,22 @@ extension String {
             self = utf8Text
             return
         }
+        //使用UTF8编码初始化失败的
         //打印data
         //debugPrint(gbkData.map { String(format: "%02x", $0) }.joined())
-
+        /*
+        GB_2312_80 和 GB_18030_2000 是中文编码方式中使用频率较高的两种。
+        GB_2312_80 是中国国家标准委员会于1980年发布的标准，该标准定义了包括简体中文在内的 7,656 个基本汉字和符号，并规定了它们在计算机中的编码方式，目前在一些老旧的软件和系统中仍在使用。
+        GB_18030_2000 是由中国国家标准委员会于 2000 年发布的中文编码标准，该标准覆盖了 GB 2312 和 GBK 编码中的所有字符以及大量的汉字、生僻字、外文字符等，支持多种语言的编码。在现代化的操作系统和软件中广泛使用。
+        macChineseSimp 是苹果公司在其 Core Foundation 框架中采用的中文编码格式，与 GB 18030 相比使用频率较低。
+        HZ_GB_2312 是用于邮件传输的编码方式，因其转换复杂、使用不便而逐渐被淘汰，现在使用频率较低。
+        */
         //获取GBK编码, 使用GB18030是因为它向下兼容GBK
-        let encodings = [CFStringEncodings.GB_18030_2000,
-                         CFStringEncodings.GB_2312_80,
-                         CFStringEncodings.macChineseSimp,
-                         CFStringEncodings.HZ_GB_2312]
+        let encodings = [
+            CFStringEncodings.GB_18030_2000,
+            CFStringEncodings.GB_2312_80,
+            CFStringEncodings.macChineseSimp,
+            CFStringEncodings.HZ_GB_2312]
         
         for encoding in encodings {
             let cfEncoding = encoding
@@ -561,44 +569,7 @@ extension String{
     }
 }
 
-//MARK:-- 获取文本的宽高 --
-extension String{
-    /// 获取文本高度
-    ///
-    /// - Parameters:
-    ///   - font: font
-    ///   - fixedWidth: fixedWidth
-    func obtainTextHeight(font : UIFont = UIFont.systemFont(ofSize: 18), fixedWidth : CGFloat) -> CGFloat {
-        
-        guard self.count > 0 && fixedWidth > 0 else {
-            return 0
-        }
-        
-        let size = CGSize(width:fixedWidth, height:CGFloat.greatestFiniteMagnitude)
-        let text = self as NSString
-        let rect = text.boundingRect(with: size, options:.usesLineFragmentOrigin, attributes: [NSAttributedString.Key.font : font], context:nil)
-        
-        return rect.size.height
-    }
-    
-    
-    /// 获取文本宽度
-    ///
-    /// - Parameter font: font
-    func obtainTextWidth(font : UIFont = UIFont.systemFont(ofSize: 17)) -> CGFloat {
-        
-        guard self.count > 0 else {
-            return 0
-        }
-        
-        let size = CGSize(width:CGFloat.greatestFiniteMagnitude, height:0)
-        let text = self as NSString
-        let rect = text.boundingRect(with: size, options:.usesLineFragmentOrigin, attributes: [NSAttributedString.Key.font : font], context:nil)
-        
-        return rect.size.width
-    }
-    
-}
+
 
 
 
@@ -609,53 +580,51 @@ extension String {
                            "html","c","h","m","swift",
                            "sh","java","py","rb","cpp",
                            "go","mm","plist","xml"]
-        let existedFile = textSuffixs.filter{self.hasSuffix($0)}
-        return existedFile.count > 0
+        let name = self.lowercased()
+        return textSuffixs.contains { name.hasSuffix($0) }
+//        let existedFile = textSuffixs.filter{self.hasSuffix($0)}
+//        return existedFile.count > 0
     }
     /// 是图片文件
     func pp_isImageFile() -> Bool {
-        let name = self.lowercased();
-        if(name.hasSuffix("jpg") ||
-           name.hasSuffix("jpeg") ||
-           name.hasSuffix("png") ||
-           name.hasSuffix("gif") ||
-           name.hasSuffix("webp") ||
-           name.hasSuffix("heic")) {
-            return true
-        }
-        return false
+        let imageExtensions = ["jpg", "jpeg", "png", "gif", "webp", "avif", "heic"]
+        let name = self.lowercased()
+        return imageExtensions.contains { name.hasSuffix($0) }
     }
+
     func pp_isVideoFile() -> Bool {
-        return self.lowercased().hasSuffix("mp4")
+        let videoExtensions = ["mp4", "mov", "avi", "mkv", "wmv", "flv"]
+        let name = self.lowercased()
+        return videoExtensions.contains { name.hasSuffix($0) }
     }
-    /// 是音视频媒体文件
+    func pp_isAudioFile() -> Bool {
+        let audioExtensions = ["mp3", "wav", "aac", "wma", "flac", "ogg"]
+        let name = self.lowercased()
+        return audioExtensions.contains { name.hasSuffix($0) }
+    }
+    /// 是音视频图片等媒体文件
+    func pp_isVideoAudioFile() -> Bool {
+        return pp_isVideoFile() || pp_isAudioFile()
+    }
+    /// 是音视频图片等媒体文件
     func pp_isMediaFile() -> Bool {
-        let l = self.lowercased();
-        if (l.hasSuffix("mp4") ||
-            l.hasSuffix("mov") ||
-            l.hasSuffix("mp3") ||
-            l.hasSuffix("wav") ||
-            l.hasSuffix("flac") ||
-            l.hasSuffix("m4a")) {
-            return true
-        }
-        return false
+        return pp_isImageFile() || pp_isVideoFile() || pp_isAudioFile()
     }
 }
-extension Int {
+extension Int64 {
     func pp_SizeString() -> String {
         if(self>0) {
             if self < 1024 {
-                return String(format: "%dByte",self )
+                return String(format: "%d Byte",self )
             }
             else if self < 1024*1024 {
-                return String(format: "%dKB",self/1024 )
+                return String(format: "%d KB",self/1024 )
             }
             else if self < 1024*1024*1024 {
-                return String(format: "%.2fMB",Float(self)/1024.0/1024.0 )
+                return String(format: "%.2f MB",Float(self)/1024.0/1024.0 )
             }
             else {
-                return String(format: "%.2fGB",Float(self)/1024.0/1024.0/1024.0 )
+                return String(format: "%.2f GB",Float(self)/1024.0/1024.0/1024.0 )
             }
         }
         return ""
@@ -668,6 +637,9 @@ extension Date {
 //            return ""
 //        }
         return PPFileManager.dateFormatter.string(from: self)
+    }
+    func pp_stringWithoutColon() -> String {
+        self.pp_stringFromDate().replacingOccurrences(of: ":", with: ".")
     }
 }
 

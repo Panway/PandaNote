@@ -130,16 +130,16 @@ extension PPFileListViewController {
     @objc func submitMove() {
         PPAlertAction.showAlert(withTitle: "移动到这里？", msg: "", buttonsStatement: ["确定","取消"]) { (index) in
             if index == 0 {
-                let first = self.navigationController?.viewControllers.first as! PPFileListViewController
-                guard let fileName = first.filePathToBeMove.split(separator: "/").last else {
+                guard let first = self.navigationController?.viewControllers.first as? PPFileListViewController,
+                    let fileName = first.srcPathForMove.split(separator: "/").last else {
                     PPHUD.showHUDFromTop("移动失败，文件名有问题")
                     return
                 }
                 //如果是本地文件就上传（上传App配置）
-                if (first.filePathToBeMove.contains(PPUserInfo.shared.pp_mainDirectory)) {
+                if (first.srcPathForMove.contains(PPUserInfo.shared.pp_mainDirectory)) {
                     let path = URL(fileURLWithPath: PPUserInfo.shared.pp_mainDirectory+"/PP_JSONConfig.json")
                     let jsonData = try? Data(contentsOf: path)
-                    PPFileManager.shared.createFile(path: self.pathStr + fileName, contents: jsonData) { (error) in
+                    PPFileManager.shared.createFile(path: self.pathStr + fileName, contents: jsonData) { (result, error) in
                         if error != nil {
                             PPHUD.showHUDFromTop("上传配置失败", isError: true)
                         }
@@ -150,8 +150,11 @@ extension PPFileListViewController {
                     }
                     return
                 }
-                PPFileManager.shared.moveRemoteFile(pathOld: first.filePathToBeMove,
-                                                       pathNew: self.pathStr + fileName) { (error) in
+                PPFileManager.shared.moveFile(srcPath: first.srcPathForMove,
+                                              destPath: self.pathStr + fileName,
+                                              srcFileID: self.srcFileIDForMove,
+                                              destFileID: self.pathID,
+                                              isRename: false) { error in
                     debugPrint(error?.localizedDescription)
                     if error == nil {
                         PPHUD.showHUDFromTop("移动成功，请刷新当前页面")

@@ -9,15 +9,8 @@
 import Foundation
 import Alamofire
 
-
-///PPSwiftTips: 错误的处理
-public enum PPCloudServiceError: Error {
-    /// 未知错误
-    case unknown
-    /// 文件不存在错误
-    case fileNotExist
-    case preCreateError
-}
+let baiduwangpan_auth_url = "http://openapi.baidu.com/oauth/2.0/authorize?response_type=token&client_id=4CXtrIz7T0yEYsLC8majw1ff42Uh64Yw&redirect_uri=pandanote://baiduwangpan&scope=basic,netdisk&display=mobile&state=pandanotestate&qrcode=1&qrcodeH=350&qrcodeW=350"
+//ES文件浏览器："https://openapi.baidu.com/oauth/2.0/authorize?response_type=token&client_id=NqOMXF6XGhGRIGemsQ9nG0Na&redirect_uri=http://www.estrongs.com&scope=basic,netdisk&display=mobile&state=STATE&force_login=1&qrcode=1&qrcodeW=350&qrcodeH=350"
 //struct HTTPBinResponse: Decodable { let url: String; let request_id:String }
 
 //兼容FilesProvider的类
@@ -54,12 +47,15 @@ open class BaiduyunAPITool: NSObject, PPCloudServiceProtocol {
         AF.request(baiduURL, parameters: parameters,headers: headers).responseJSON { response in
             let result = self.hanldeResponse(response.value as? [String : Any])
             let jsonDic = result.responseJSONDic
-            // jsonDic.printJSON()
+             jsonDic.printJSON()
             //有错误
             if result.errorNum != 0 {
-                PPHUD.showHUDFromTop("百度云错误", isError: true)
-                completionHandler([],false, CocoaError(.fileNoSuchFile,
-                                                       userInfo: [NSLocalizedDescriptionKey: "Base URL is not set."]))
+                if (result.errorNum == -6) {
+                    //身份验证失败，需要强制登录
+                    completionHandler([],false, PPCloudServiceError.forcedLoginRequired)
+                    return
+                }
+                completionHandler([],false, PPCloudServiceError.unknown)
                 return
             }
             //如果list没数据
@@ -102,17 +98,13 @@ open class BaiduyunAPITool: NSObject, PPCloudServiceProtocol {
     
     //MARK: 获取文件Data
     ///获取文件
-    func contents(path: String,
-                  fs_id:String,
-                  downloadIfCached:Bool?=false,
-                  completionHandler: @escaping ((_ contents: Data?, _ isFromCache:Bool, _ error: Error?) -> Void)) -> Void {
-        
-
+    func getFileData(_ path: String, _ extraParams:String, completion:@escaping(_ data:Data?, _ url:String, _ error:Error?) -> Void) {
+        let fileID = extraParams
         let reqURL = "https://pan.baidu.com/rest/2.0/xpan/multimedia"
         let parameters = ["access_token": access_token,
                           "dlink": "1",
                           "extra": "1",
-                          "fsids": "["+fs_id+"]",
+                          "fsids": "["+fileID+"]",
                           "method": "filemetas"]
 
         AF.request(reqURL, parameters: parameters,headers: headers).responseJSON { response in
@@ -123,19 +115,21 @@ open class BaiduyunAPITool: NSObject, PPCloudServiceProtocol {
             //如果有错误
             if result.errorNum != 0 {
                 PPHUD.showHUDFromTop("百度云错误", isError: true)
-                completionHandler(nil,false, nil)
+                completion(nil,"", PPCloudServiceError.fileNotExist)
                 return
             }
             //如果list没数据
             guard let list = jsonDic["list"] as? [[String:Any]] else {
-                completionHandler(nil,false, nil)
+                completion(nil,"", PPCloudServiceError.fileNotExist)
                 return
             }
             for baiduFile in list {
                 let model = BDFileObject(JSON: baiduFile )
-                AF.request(model?.downloadLink ?? "", parameters: parameters).response { response in
-                    completionHandler(response.data,true, nil)
+                if let dlink = model?.downloadLink {
+                    completion(nil, "\(dlink)&access_token=\(self.access_token)", nil)
                 }
+//                AF.request(model?.downloadLink ?? "", parameters: parameters).response { response in
+//                }
                 break//只处理第一个
             }
 
@@ -278,40 +272,36 @@ open class BaiduyunAPITool: NSObject, PPCloudServiceProtocol {
     }
     
     //MARK:PPCloudServiceProtocol
-    func contentsOfDirectory(_ path: String, completionHandler: @escaping ([PPFileModel], Error?) -> Void) {
+    func contentsOfDirectory(_ path: String, _ pathID: String, completion: @escaping(_ data: [PPFileObject], _ error: Error?) -> Void) {
         self.getFileList(path: path) { fileList, isCache, error in
-            completionHandler(fileList,error)
+            completion(fileList,error)
         }
     }
-    func contentsOfPathID(_ pathID: String, completionHandler: @escaping ([PPFileObject], Error?) -> Void) {
-        
-    }
-    func contentsOfFile(_ path: String, completionHandler: @escaping (Data?, Error?) -> Void) {
 
+    
+    
+    func createDirectory(_ folderName: String, _ atPath: String, completion:@escaping(_ error: Error?) -> Void) {
+        self.createFolder(path: folderName, completionHandler: completion)
     }
     
-    func createDirectory(_ folderName: String, at atPath: String, completionHandler: @escaping (Error?) -> Void) {
-        self.createFolder(path: folderName, completionHandler: completionHandler)
-    }
-    
-    func createFile(atPath path: String, contents: Data, completionHandler: @escaping (Error?) -> Void) {
+    func createFile(_ path: String, _ pathID: String, contents: Data, completion: @escaping(_ result: [String:String]?, _ error: Error?) -> Void) {
         upload(path: path, data: contents) { error in
-            completionHandler(error)
+            completion(nil, error)
         }
     }
     
-    func moveItem(atPath srcPath: String, toPath dstPath: String, completionHandler: @escaping (Error?) -> Void) {
-        let fileName = String(dstPath.split(separator: "/").last ?? "new_file")
-        let dirNew = dstPath.replacingOccurrences(of: fileName, with: "")
+    func moveItem(srcPath: String, destPath: String, srcItemID: String, destItemID: String, isRename: Bool, completion: @escaping(_ error:Error?) -> Void) {
+        let fileName = String(destPath.split(separator: "/").last ?? "new_file")
+        let dirNew = destPath.replacingOccurrences(of: fileName, with: "")
         self.moveFile(pathOld: srcPath, pathNew: dirNew, newName: fileName, completionHandler: { (error, _) in
-            completionHandler(error)
+            completion(error)
         })
     }
     
-    func removeItem(atPath path: String, completionHandler: @escaping (Error?) -> Void) {
+    func removeItem(_ path: String, _ fileID: String, completion: @escaping(_ error: Error?) -> Void) {
         delete(path: [path], completionHandler: { (error) in
             DispatchQueue.main.async {
-                completionHandler(error)
+                completion(error)
             }
         })
     }

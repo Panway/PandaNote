@@ -21,12 +21,18 @@ class PPDropDown: NSObject {
     
     public var dataSource = [String]() {
         didSet {
-            dropDown.dataSource = dataSource;
+            dropDown.dataSource = dataSource
+        }
+    }
+    
+    public var width : CGFloat? {
+        didSet {
+            dropDown.width = width
         }
     }
     
     public weak var anchorView: AnchorView? {
-        didSet {  dropDown.anchorView = anchorView; }
+        didSet {  dropDown.anchorView = anchorView }
     }
     
     

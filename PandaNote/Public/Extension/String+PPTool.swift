@@ -9,6 +9,22 @@
 import Foundation
 
 extension String {
+    /// 将字符串通过特定的字符串拆分为字符串数组
+    ///
+    /// - Parameter string: 拆分数组使用的字符串
+    /// - Returns: 字符串数组
+    func pp_split(_ separator:String) -> [String] {
+        return self.components(separatedBy: separator)
+//        method 2
+//        let str = "abc/def/ghi"
+//        let arr = str.split(separator: "/").map(String.init)
+        
+//        method 3
+//        let str = "abc/def/ghi"
+//        let arr = str.indices.filter { str[$0] == "/" }.map { str[str.startIndex..< $0] }
+//        arr.append(str[str.lastIndex(of: "/")!, str.endIndex])
+
+    }
     ///将十六进制颜色转换为UIColor
     func pp_HEXColor() -> UIColor {
         var hexStr = self
@@ -50,4 +66,44 @@ extension String {
         self.insert(contentsOf: text, at: start)
         return self
     }
+    func pp_substring(fromIndex: Int) -> String {
+        guard fromIndex < self.count else { return "" }
+        let startIndex = self.index(self.startIndex, offsetBy: fromIndex)
+        return String(self[startIndex...])
+    }
+    
+    /// 根据指定宽度计算文本高度
+    /// - Parameters:
+    ///   - font: UIFont
+    ///   - fixedWidth: 指定宽度
+    /// - Returns: height
+    func pp_calcTextHeight(font : UIFont = UIFont.systemFont(ofSize: 18), fixedWidth : CGFloat) -> CGFloat {
+        guard self.count > 0 && fixedWidth > 0 else {
+            return 0
+        }
+        //let options: NSStringDrawingOptions = [.usesLineFragmentOrigin, .usesFontLeading]
+        //let attributes: [NSAttributedString.Key: Any] = [.font: font]
+        let size = CGSize(width:fixedWidth, height:CGFloat.greatestFiniteMagnitude)
+        let text = self as NSString
+        let rect = text.boundingRect(with: size, options:.usesLineFragmentOrigin, attributes: [NSAttributedString.Key.font : font], context:nil)
+        return rect.size.height
+    }
+    
+    /// 获取文本宽度
+    /// - Parameter font: 字体
+    /// - Returns: 宽度
+    func pp_calcTextWidth(font : UIFont = UIFont.systemFont(ofSize: 17)) -> CGFloat {
+        guard self.count > 0 else {
+            return 0
+        }
+        let size = CGSize(width:CGFloat.greatestFiniteMagnitude, height:0)
+        let text = self as NSString
+        let rect = text.boundingRect(with: size, options:.usesLineFragmentOrigin, attributes: [NSAttributedString.Key.font : font], context:nil)
+        return rect.size.width
+    }
+    
+    func pp_encodedURL() -> String {
+        return self.addingPercentEncoding(withAllowedCharacters: .urlFragmentAllowed) ?? ""
+    }
+    
 }

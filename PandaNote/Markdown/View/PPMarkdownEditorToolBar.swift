@@ -9,19 +9,39 @@
 import UIKit
 
 public protocol PPEditorToolBarDelegate: AnyObject {
-    func didClickEditorToolBar(sender:UIButton,index:Int,totalCount:Int)
+    func didClickEditorToolBar(toolBar:PPMarkdownEditorToolBar, index:Int,totalCount:Int)
 }
 
-class PPMarkdownEditorToolBar: PPBaseView {
+public class PPMarkdownEditorToolBar: PPBaseView {
     var index = 0
     weak var delegate: PPEditorToolBarDelegate?
-
+    var images = [String]()
     override func pp_addSubviews() {
-        self.backgroundColor = .white
-        generateButton("editor_image")
-        generateButton("btn_down")
+        //self.backgroundColor = .white
+        
+//        generateButton("editor_image")
+//        generateButton("btn_down")
         
     }
+//    required init?(coder: NSCoder) {
+//            fatalError("init(coder:) has not been implemented")
+//        }
+//    init(frame:CGRect, images: [String]) {
+//        super.init(frame: frame)
+
+    convenience init(frame: CGRect, images:[String]) {
+        self.init(frame: frame)
+        
+        self.translatesAutoresizingMaskIntoConstraints = false
+        self.widthAnchor.constraint(equalToConstant: frame.size.width).isActive = true
+        self.heightAnchor.constraint(equalToConstant: 40).isActive = true
+        
+        self.images = images
+        for i in images {
+            generateButton(i)
+        }
+    }
+    
     func generateButton(_ imageName:String) -> Void {
         let width = 40
         let button = UIButton(type: .custom)
@@ -38,7 +58,7 @@ class PPMarkdownEditorToolBar: PPBaseView {
         index += 1
     }
     @objc func toolButtonAction(sender:UIButton)  {
-        self.delegate?.didClickEditorToolBar(sender: sender, index: sender.tag,totalCount:index)
+        self.delegate?.didClickEditorToolBar(toolBar: self, index: sender.tag,totalCount:index)
     }
     
     /*

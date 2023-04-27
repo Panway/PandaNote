@@ -10,16 +10,17 @@ import Foundation
 
 
 
+public enum PPCloudServiceType : String {
+    case webdav = "webdav"
+    case local = "local"
+    case dropbox = "Dropbox"
+    case baiduyun = "baiduyun"
+    case onedrive = "OneDrive"
+    case alist = "alist"
+    case aliyundrive = "AliyunDrive"
+}
+
 class PPUserInfo: NSObject {
-    public enum PPCloudServiceType : String {
-        case webdav = "webdav"
-        case local = "local"
-        case dropbox = "Dropbox"
-        case baiduyun = "baiduyun"
-        case onedrive = "OneDrive"
-        case alist = "alist"
-        case aliyundrive = "AliyunDrive"
-    }
     static let shared = PPUserInfo()
 
     var webDAVServerURL = ""
@@ -92,6 +93,22 @@ class PPUserInfo: NSObject {
             }
         }
     }
+    //获取当前服务器设置
+    func getCurrentServerInfo(_ key:String) -> String {
+        let current = pp_serverInfoList[pp_lastSeverInfoIndex]
+        if let value = current[key] {
+            return value
+        }
+        return ""
+    }
+    //更新当前服务器设置
+    func updateCurrentServerInfo(key:String, value:String) {
+        var serverList = pp_serverInfoList
+        var current = serverList[pp_lastSeverInfoIndex]
+        current[key] = value
+        serverList[pp_lastSeverInfoIndex] = current
+        pp_serverInfoList = serverList
+    }
     //服务器配置对应的序号映射
     var serverNameIndexMap : [String : String] = [:]
     
@@ -159,7 +176,7 @@ class PPUserInfo: NSObject {
     func updateCurrentServerInfo(index:Int) {
         PPUserInfo.shared.pp_lastSeverInfoIndex = index
         let webDAVInfoArray = PPUserInfo.shared.pp_serverInfoList
-        if webDAVInfoArray.count < 1 {
+        if webDAVInfoArray.count < 1 || index > webDAVInfoArray.count - 1 {
             return
         }
         let webDAVInfo = webDAVInfoArray[index]

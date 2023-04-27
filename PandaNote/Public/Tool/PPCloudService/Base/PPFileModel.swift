@@ -13,7 +13,7 @@ typealias PPFileObject = PPFileModel
 
 //public class PPFileModel:Mappable,Codable,Equatable {
 public class PPFileModel:NSObject,Mappable,Codable {
-    var name: String!
+    var name = ""
     //relative path. 文件相对路径，比如`/Documents/me.txt`
     var path = ""
     var downloadURL = ""

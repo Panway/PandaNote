@@ -14,6 +14,7 @@ extension UILabel {
         return systemLayoutSizeFitting(CGSize(width: constrainedWidth, height: UIView.layoutFittingCompressedSize.height), withHorizontalFittingPriority: .required, verticalFittingPriority: .fittingSizeLevel)
     }
 }
+//fileprivate var cancelHide = false
 class PPHUD: NSObject {
     
     static let shared = PPHUD()
@@ -22,14 +23,15 @@ class PPHUD: NSObject {
     let deleteBGView = UIView()
     let annularView = MBRoundProgressView()
     var canceled = false
-    
+    var hud = MBProgressHUD(view: UIApplication.shared.keyWindow!)
+
     lazy var revokeBtn : UIButton = {
         let button = UIButton(type: .custom)
         button.frame = CGRect(x: 0, y: 0, width: 40, height: 40)
         button.setTitle("撤销", for: .normal)
         button.setTitleColor("#3eaf7c".pp_HEXColor(), for: .normal) // #4abf8a 浅色
 //        button.setImage(UIImage(named: "revoke"), for: .normal)
-        button.addTarget(self, action: #selector(revoke), for: .touchUpInside)
+//        button.addTarget(self, action: #selector(revoke), for: .touchUpInside)
         return button
     }()
     
@@ -46,50 +48,70 @@ class PPHUD: NSObject {
         if(message.length < 1) {
             return
         }
-        let lastView = UIApplication.shared.keyWindow?.viewWithTag(9999)
-        var lastViewExist = false
-        if lastView != nil {
-            lastViewExist = true
-//            lastView?.removeFromSuperview()
+        guard let keyWindow = UIApplication.shared.keyWindow else { return }
+        var tag = 9998
+        let width = max(320, keyWindow.frame.width)
+        var hudH = CGFloat(20.0)
+        var hudLeft = 80.0
+        if let lastView = keyWindow.viewWithTag(tag) as? UILabel {
+            tag = 9999
+            lastView.frame.origin.x = 20.0
+            hudLeft = lastView.frame.origin.x + lastView.frame.size.width + 20
+            
+//            lastView.text = (lastView.text ?? "") + " " + message
+//            cancelHide = true
+//            DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+//                lastView.removeFromSuperview()
+//                cancelHide = false
+//            }
         }
-        let width = UIApplication.shared.keyWindow?.frame.width ?? 400
-        let aLB = UILabel(frame: CGRect(x: 80, y: -40.0, width: width-160, height: 140.0))
+        if #available(iOS 11.0, *) {
+            hudH = keyWindow.safeAreaInsets.top
+        }
+        let aLB = UILabel(frame: CGRect(x: hudLeft,
+                                        y: -40.0,
+                                        width: hudH * CGFloat(message.length),
+                                        height: hudH))
 //        aLB.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         if let isError = isError, isError {//isError存在且值为true
             aLB.backgroundColor = UIColor(hexRGBValue: 0xf75356)
         }
         else {
-            aLB.backgroundColor = UIColor(red:0.27, green:0.68, blue:0.49, alpha:1.00)//VUE绿            
+            aLB.backgroundColor = UIColor(red:0.27, green:0.68, blue:0.49, alpha:1.00)//VUE绿
         }
         aLB.textColor = UIColor.white
         aLB.textAlignment = NSTextAlignment.center
         aLB.numberOfLines = 3
-        aLB.font = UIFont.systemFont(ofSize: 16)
+        aLB.font = UIFont.systemFont(ofSize: 12)
         aLB.text = "\(message)"
-        aLB.tag = 9999
+        aLB.tag = tag
         aLB.layer.masksToBounds = true
         aLB.layer.cornerRadius = 8
         aLB.alpha = 0.7
         UIApplication.shared.keyWindow?.addSubview(aLB)
-        let size = aLB.getSize(constrainedWidth: width - 160)
-        
-        UIView.animate(withDuration: 0.8, delay: 0, usingSpringWithDamping: 0.76, initialSpringVelocity: 25, options: [.curveEaseInOut,.beginFromCurrentState], animations: {
-            aLB.frame = CGRect(x: 80, y: lastViewExist ? 84 : 44.0, width: width-140, height: size.height + 10)
+        let size = aLB.getSize(constrainedWidth: width)
+
+        UIView.animate(withDuration: 0.8, delay: 0, usingSpringWithDamping: 0.9, initialSpringVelocity: 25, options: [.curveEaseInOut,.beginFromCurrentState], animations: {
+            aLB.frame = CGRect(x: hudLeft, y: hudH*2, width: size.width+30, height: hudH)
 
         }) { (complete) in
-            
+
         }
-        
+
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-            aLB.removeFromSuperview()
+//            if cancelHide == false {
+                aLB.removeFromSuperview()
+//            }
         }
-//        hud.mode = MBProgressHUDMode.text
+//        hud.mode = .text
 //        hud.detailsLabel.text = message
 //        hud.detailsLabel.font = UIFont.systemFont(ofSize: 18)
-//        hud.bezelView.color = UIColor.black
-//        hud.detailsLabel.textColor = UIColor.white
+//        hud.bezelView.color = .black
+//        hud.contentColor = .darkGray
 //        hud.margin = 13
 //        hud.removeFromSuperViewOnHide = true
+//        UIApplication.shared.keyWindow?.addSubview(hud)
+//        hud.show(animated: true)
 //        hud.hide(animated: true, afterDelay: 1.5)
     }
     //MARK: 提示信息框
@@ -98,14 +120,27 @@ class PPHUD: NSObject {
         hud.mode = MBProgressHUDMode.text
         hud.detailsLabel.text = message
         hud.detailsLabel.font = UIFont.systemFont(ofSize: 18)
-        hud.bezelView.color = UIColor.black
-        hud.detailsLabel.textColor = UIColor.white
+        hud.bezelView.color = .black
+        hud.detailsLabel.textColor = .white
         hud.margin = 13
         hud.removeFromSuperViewOnHide = true
         hud.hide(animated: true, afterDelay: 1.5)
     }
+    class func showBarProgress() {
+        UIApplication.shared.keyWindow?.addSubview(shared.hud)
+        shared.hud.mode = MBProgressHUDMode.determinateHorizontalBar
+        shared.hud.show(animated: true)
+    }
+    class func updateBarProgress(_ progress: Float) {
+        shared.hud.progress = progress
+        if progress == 1 {
+            shared.hud.hide(animated: true)
+            shared.hud.progress = 0
+        }
+    }
     
     //MARK: 进度条
+    /*
     func showWaitView(view:UIView)  {
         if waitHUb != nil {
             return
@@ -156,12 +191,14 @@ class PPHUD: NSObject {
     
     func showDelayTaskHUD(completion: (() -> Void)? = nil) {
         let bottomPadding: CGFloat
+        guard let keyWindow = UIApplication.shared.keyWindow else { return }
+        let width = max(320, keyWindow.frame.width)
         if #available(iOS 11.0, *) {
             bottomPadding = UIApplication.shared.keyWindow?.safeAreaInsets.bottom ?? 0
         } else {
             bottomPadding = 0
         }
-        deleteBGView.frame = CGRect(x: 20, y: UIScreen.main.bounds.height - 45 - bottomPadding, width: UIScreen.main.bounds.width-40, height: 45)
+        deleteBGView.frame = CGRect(x: 20, y: keyWindow.frame.size.height - 45 - bottomPadding, width: keyWindow.frame.size.width-40, height: 45)
         deleteBGView.backgroundColor = UIColor(white: 0, alpha: 0.8)
         UIApplication.shared.keyWindow?.addSubview(deleteBGView)
         deleteBGView.addSubview(annularView)
@@ -173,14 +210,14 @@ class PPHUD: NSObject {
 
         
         DispatchQueue.global(qos: .default).async(execute: { [self] in
-            doSomeWorkWithProgress(view: deleteBGView)
-            DispatchQueue.main.async(execute: {
-                deleteBGView.removeFromSuperview()
-                if !canceled {
-                    if let completion = completion {
-                        completion()
-                    }
-                }
+            doSomeWorkWithProgress(view: deleteBGView) //每隔50ms更新下进度条
+            DispatchQueue.main.async(execute: { [self] in
+                self.deleteBGView.removeFromSuperview()
+//                if !canceled {
+//                    if let completion = completion {
+//                        completion()
+//                    }
+//                }
             })
         })
     }
@@ -199,4 +236,14 @@ class PPHUD: NSObject {
         viewController.present(alertController, animated: true, completion: nil)
     }
     
+}
+
+
+class PPAlertTool {
+    class func showAction(title: String, message: String?, items: [String], callback: @escaping((_ index:Int)->())) {
+        PPAlertAction.showSheet(withTitle: title, message: message, cancelButtonTitle: "取消", destructiveButtonTitle: nil, otherButtonTitle: items) { (index) in
+            debugPrint("index===========",index)
+            callback(index - 1)
+        }
+    }
 }

@@ -24,7 +24,7 @@ class PlayerViewController: PPBaseViewController {
         "playable",
         "hasProtectedContent"
     ]
-
+    var name = ""
     @objc let player = AVPlayer()
 
 	var currentTime: Double {
@@ -94,6 +94,7 @@ class PlayerViewController: PPBaseViewController {
 	}
     var localFilePath:String = ""
     var localFileURL:URL!
+    var httpURL = ""
     open var filePathStr: String = ""//文件相对路径
 
 
@@ -129,10 +130,18 @@ class PlayerViewController: PPBaseViewController {
         playerView.playerLayer.player = player
         
 //        let movieURL = Bundle.main.url(forResource: "ElephantSeals", withExtension: "mov")!
-        let movieURL = localFileURL//URL(string: "http://music.163.com/song/media/outer/url?id=545558246.mp3")
+        guard let movieURL = localFileURL else {return}
+        //URL(string: "http://music.163.com/song/media/outer/url?id=545558246.mp3")
 
-        asset = AVURLAsset(url: movieURL!, options: nil)
-        
+//        if ((movieURL.absoluteString.hasPrefix("http")) != nil) {
+//            let cachePath = NSTemporaryDirectory() + "myCache"
+//            let cacheURL = URL(fileURLWithPath: cachePath)
+//            asset = AVURLAsset(url: movieURL, options: [AVURLAssetOptionShouldCacheKey: true, AVURLAssetCacheKey: AVAssetCache(url: cacheURL)])
+//            
+//        }
+
+        asset = AVURLAsset(url: movieURL, options: nil)
+        debugPrint("AVURLAsset:",movieURL)
         // Make sure we don't have a strong reference cycle by only capturing self as weak.
         let interval = CMTimeMake(value: 1, timescale: 1)
 		timeObserverToken = player.addPeriodicTimeObserver(forInterval: interval, queue: DispatchQueue.main) { [unowned self] time in
@@ -141,8 +150,13 @@ class PlayerViewController: PPBaseViewController {
 			self.timeSlider.value = Float(timeElapsed)
 			self.startTimeLabel.text = self.createTimeString(time: timeElapsed)
 		}
+        self.tabBarController?.tabBar.isHidden = true
+
     }
-    
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        self.tabBarController?.tabBar.isHidden = false
+    }
     override func viewDidDisappear(_ animated: Bool) {
         super.viewDidDisappear(animated)
         removePlayerObserver()
@@ -377,41 +391,44 @@ class PlayerViewController: PPBaseViewController {
     
     // MARK: UI init
     func pp_initUI() {
+        self.title = self.name
         playerView = PlayerView()
         self.view.addSubview(playerView)
-        playerView.snp.makeConstraints { (make) in
-            make.top.leading.trailing.equalToSuperview()
-            make.bottom.equalToSuperview().offset(-80)
-        }
+        
         
         let bottomView = UIView()
         self.view.addSubview(bottomView)
-        bottomView.backgroundColor = UIColor.white
+        bottomView.backgroundColor = .white
         bottomView.snp.makeConstraints { (make) in
             make.leading.trailing.equalToSuperview()
             make.bottom.equalTo(self.pp_safeLayoutGuideBottom())
-            make.height.equalTo(100)
+            make.height.equalTo(80)
         }
         
-        rewindButton = UIButton.init(type: UIButton.ButtonType.custom)
+        playerView.snp.makeConstraints { (make) in
+            make.top.equalTo(self.pp_safeLayoutGuideTop())
+            make.left.right.equalTo(self.view)
+            make.bottom.equalTo(bottomView.snp.top)
+        }
+        
+        rewindButton = UIButton(type: .custom)
         bottomView.addSubview(rewindButton)
-        rewindButton.frame = CGRect.init(x: 40, y: 0, width: 40, height: 40)
-//        rewindButton.setImage(UIImage.init(named: "share"), for: UIControl.State.normal)
-        rewindButton.setTitle("⏪", for: UIControl.State.normal)
-        rewindButton.addTarget(self, action: #selector(rewindButtonWasPressed(_:)), for: UIControl.Event.touchUpInside)
+        rewindButton.frame = CGRect(x: 40, y: 0, width: 40, height: 40)
+        rewindButton.setTitle("⏪", for: .normal)
+        rewindButton.addTarget(self, action: #selector(rewindButtonWasPressed(_:)), for: .touchUpInside)
         rewindButton.snp.makeConstraints { (make) in
-            make.top.equalToSuperview().offset(50)
+            make.top.equalToSuperview().offset(40)
             make.right.equalTo(bottomView.snp.centerX).offset(-35)
             make.width.equalTo(70)
             make.height.equalTo(30)
         }
         
-        playPauseButton = UIButton.init(type: UIButton.ButtonType.custom)
+        playPauseButton = UIButton(type: .custom)
         bottomView.addSubview(playPauseButton)
-        playPauseButton.frame = CGRect.init(x: 40, y: 0, width: 40, height: 40)
-        //        rewindButton.setImage(UIImage.init(named: "share"), for: UIControl.State.normal)
-        playPauseButton.setTitle("▶️", for: UIControl.State.normal)
-        playPauseButton.addTarget(self, action: #selector(playPauseButtonWasPressed(_:)), for: UIControl.Event.touchUpInside)
+        playPauseButton.frame = CGRect(x: 40, y: 0, width: 40, height: 40)
+        //        rewindButton.setImage(UIImage.init(named: "share"), for: .normal)
+        playPauseButton.setTitle("▶️", for: .normal)
+        playPauseButton.addTarget(self, action: #selector(playPauseButtonWasPressed(_:)), for: .touchUpInside)
         playPauseButton.snp.makeConstraints { (make) in
             make.top.equalTo(rewindButton)
             make.left.equalTo(rewindButton.snp.right)
@@ -419,12 +436,12 @@ class PlayerViewController: PPBaseViewController {
             make.height.equalTo(30)
         }
         
-        fastForwardButton = UIButton.init(type: UIButton.ButtonType.custom)
+        fastForwardButton = UIButton(type: .custom)
         bottomView.addSubview(fastForwardButton)
-        fastForwardButton.frame = CGRect.init(x: 40, y: 0, width: 40, height: 40)
-        //        rewindButton.setImage(UIImage.init(named: "share"), for: UIControl.State.normal)
-        fastForwardButton.setTitle("⏩", for: UIControl.State.normal)
-        fastForwardButton.addTarget(self, action: #selector(fastForwardButtonWasPressed(_:)), for: UIControl.Event.touchUpInside)
+        fastForwardButton.frame = CGRect(x: 40, y: 0, width: 40, height: 40)
+        //        rewindButton.setImage(UIImage.init(named: "share"), for: .normal)
+        fastForwardButton.setTitle("⏩", for: .normal)
+        fastForwardButton.addTarget(self, action: #selector(fastForwardButtonWasPressed(_:)), for: .touchUpInside)
         fastForwardButton.snp.makeConstraints { (make) in
             make.top.equalTo(rewindButton)
             make.left.equalTo(playPauseButton.snp.right)
@@ -435,17 +452,17 @@ class PlayerViewController: PPBaseViewController {
         timeSlider = UISlider()
         bottomView.addSubview(timeSlider)
         timeSlider.snp.makeConstraints { (make) in
-            make.top.left.equalToSuperview().offset(8)
-            make.right.equalToSuperview().offset(8)
+            make.right.left.equalToSuperview().offset(8)
+            make.top.equalToSuperview().offset(0)
         }
         timeSlider.tintColor = UIColor(red:0.27, green:0.68, blue:0.49, alpha:1.00)//VUE绿
-        timeSlider.addTarget(self, action: #selector(timeSliderDidChange(_:)), for: UIControl.Event.valueChanged)
+        timeSlider.addTarget(self, action: #selector(timeSliderDidChange(_:)), for: .valueChanged)
         
         startTimeLabel = UILabel(frame: CGRect(x: 15, y: 16, width: 100, height: 40))
         //        aLB.autoresizingMask = [.flexibleWidth, .flexibleHeight]
-        //        aLB.backgroundColor = UIColor.white
-        startTimeLabel.textColor = UIColor.gray
-        //        aLB.textAlignment = NSTextAlignment.center
+        //        aLB.backgroundColor = .white
+        startTimeLabel.textColor = .gray
+        //        aLB.textAlignment = .center
         startTimeLabel.font = UIFont.systemFont(ofSize: 16)
         startTimeLabel.text = "0:00"
         bottomView.addSubview(startTimeLabel)
@@ -453,9 +470,9 @@ class PlayerViewController: PPBaseViewController {
         
         durationLabel = UILabel(frame: CGRect(x: 300, y: 16, width: 100, height: 40))
         //        aLB.autoresizingMask = [.flexibleWidth, .flexibleHeight]
-        //        aLB.backgroundColor = UIColor.white
-        durationLabel.textColor = UIColor.gray
-        //        aLB.textAlignment = NSTextAlignment.center
+        //        aLB.backgroundColor = .white
+        durationLabel.textColor = .gray
+        //        aLB.textAlignment = .center
         durationLabel.font = UIFont.systemFont(ofSize: 16)
         durationLabel.text = "-:--"
         bottomView.addSubview(durationLabel)

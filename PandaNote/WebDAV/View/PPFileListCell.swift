@@ -16,6 +16,7 @@ import Kingfisher
     case grid
     case gridLarge
     case gridSuperLarge
+    case photo
 }
 
 public protocol PPFileListCellDelegate:AnyObject {
@@ -31,9 +32,12 @@ class PPFileListCell: PPBaseCollectionViewCell {
     
     private var viewMode = PPFileListCellViewMode.list //默认是列表
     private var cellPadding = 8
+    private var moreBtn = UIButton(type: .custom)
 //    private let screenWidth: CGFloat = UIScreen.main.bounds.width
     private var iconImage : UIImageView = {
         let img = UIImageView()
+        img.contentMode = .scaleAspectFill
+        img.layer.masksToBounds = true
         return img
     }()
     
@@ -56,6 +60,8 @@ class PPFileListCell: PPBaseCollectionViewCell {
         let label = UILabel();
         label.textColor = "999999".HEXColor()
         label.font = UIFont.systemFont(ofSize: 11)
+//        label.layer.borderColor = "eeeeee".HEXColor().cgColor
+//        label.layer.borderWidth = 1
         return label
     }()
     
@@ -68,25 +74,45 @@ class PPFileListCell: PPBaseCollectionViewCell {
         
         self.contentView.clipsToBounds = true
         
-        let moreBtn = UIButton(type: .custom)
+        //let moreBtn = UIButton(type: .custom)
         self.contentView.addSubview(moreBtn)
-        moreBtn.snp.makeConstraints { make in
-            make.right.equalTo(self.contentView)//.offset(-5)
-            make.centerY.equalTo(self.contentView)
-            make.size.equalTo(CGSize(width: 25,height: 25))
-        }
+//        moreBtn.snp.makeConstraints { make in
+//            make.right.equalTo(self.contentView)//.offset(-5)
+//            make.centerY.equalTo(self.contentView)
+//            make.size.equalTo(CGSize(width: 44,height: 66))
+//        }
         moreBtn.addTarget(self, action: #selector(moreBtnClick(sender:)), for: .touchUpInside)
-        moreBtn.setTitle("·", for: .normal)
-        moreBtn.setTitleColor(.lightGray, for: .normal)
-        moreBtn.titleLabel?.font = UIFont.systemFont(ofSize: 30)
-        pp_listMode()
+        moreBtn.setImage(UIImage(named: "more_actions"), for: .normal)
+        //moreBtn.setTitle("·", for: .normal)
+        //moreBtn.setTitleColor(.lightGray, for: .normal)
+        //moreBtn.titleLabel?.font = UIFont.systemFont(ofSize: 30)
+//        pp_listMode()
     }
-    
     func pp_listMode() {
+        let cellW = self.contentView.frame.size.width
+        let cellH = self.contentView.frame.size.height
+        if(cellW == 0) {return}
+        var titleH : CGFloat = 21.0 + CGFloat(viewMode.rawValue)*2
+        if titleLabel.numberOfLines > 1 {
+            titleH = titleLabel.text?.pp_calcTextHeight(font: titleLabel.font, fixedWidth: cellW - cellH - 50) ?? 30
+            titleH = min(44, titleH)
+        }
+        let timeH = timeLabel.text?.pp_calcTextHeight(font: timeLabel.font, fixedWidth: cellW - cellH - 100) ?? 30
+        let remarkW = remarkLabel.text?.pp_calcTextWidth(font: remarkLabel.font) ?? 100
+        let top = 4.0 + CGFloat(viewMode.rawValue)*2
+        iconImage.frame = CGRect(x: 8, y: top, width: cellH - top*2, height: cellH - top*2)
+        titleLabel.frame = CGRect(x: 8 + cellH, y: titleH > 25 ? top : 8 + CGFloat(viewMode.rawValue)*2, width: cellW - cellH - 50, height: titleH)
+        timeLabel.frame = CGRect(x: 8 + cellH, y: cellH - timeH - 5, width: cellW - cellH - 100, height: timeH)
+        remarkLabel.frame = CGRect(x: cellW - remarkW, y: cellH - 22, width: remarkW, height: timeH)
+        moreBtn.frame = CGRect(x: cellW - 44, y: 0, width: 44, height: cellH)
+    }
+    //已废弃
+    func pp_listMode2() {
         //https://aplus.rs/2017/one-solution-for-90pct-auto-layout/
         //But for way too brief moment, UICollectionViewCell was 0-wide sometime along the way and that caused the error output. eg:
 //        "<NSAutoresizingMaskLayoutConstraint:0x280f88050 h=--& v=--& UIView:0x1033d6280.minX == 0   (active, names: '|':PandaNote.PPFileListCell:0x1033d6850 )>",
 //        "<NSAutoresizingMaskLayoutConstraint:0x280f880a0 h=--& v=--& UIView:0x1033d6280.width == 0   (active)>",
+        
         iconImage.snp.remakeConstraints { (make) in
 //set priority to 999 for half of your constraints in horizontal and/or vertical dimension
             make.top.equalTo(self.contentView).offset(8).priority(999)
@@ -95,18 +121,13 @@ class PPFileListCell: PPBaseCollectionViewCell {
             make.width.equalTo(iconImage.snp.height)//.multipliedBy(1)
         }
         
-        titleLabel.numberOfLines = 1
-        titleLabel.textAlignment = .left
-        titleLabel.font = UIFont.boldSystemFont(ofSize: CGFloat(15 + viewMode.rawValue*2))
         titleLabel.snp.remakeConstraints { (make) in
             make.top.equalTo(iconImage).offset(0)
             make.left.equalTo(iconImage.snp.right).offset(8)
             make.right.equalToSuperview().offset(-25)
         }
         
-//        timeLabel.isHidden = false
-        timeLabel.textAlignment = .left
-        timeLabel.snp.makeConstraints { (make) in
+        timeLabel.snp.remakeConstraints { (make) in
             make.left.equalTo(self.titleLabel)
             make.top.equalTo(self.titleLabel.snp.bottom).offset(8)
         }
@@ -117,8 +138,8 @@ class PPFileListCell: PPBaseCollectionViewCell {
         }
         
     }
-    
-    func pp_gridMode() {
+    //已废弃
+    func pp_gridMode2() {
         self.iconImage.snp.remakeConstraints { (make) in
             make.top.equalTo(self.contentView.snp.top).offset(8).priority(999)
             make.left.equalTo(self.contentView).offset(8).priority(999)
@@ -126,9 +147,6 @@ class PPFileListCell: PPBaseCollectionViewCell {
             make.height.equalTo(iconImage.snp.width)//.multipliedBy(1)
         }
         
-        titleLabel.textAlignment = .center
-        titleLabel.numberOfLines = 2
-        titleLabel.font = UIFont.boldSystemFont(ofSize: 15)
         titleLabel.snp.remakeConstraints { (make) in
             make.top.equalTo(iconImage.snp.bottom).offset(1)
             make.left.equalTo(self.contentView).offset(5).priority(999)
@@ -139,34 +157,58 @@ class PPFileListCell: PPBaseCollectionViewCell {
             make.bottom.equalToSuperview().offset(-2)
             make.centerX.equalToSuperview()
         }
-//        timeLabel.isHidden = true
-        timeLabel.textAlignment = .center
-        timeLabel.snp.makeConstraints { (make) in
+        
+        timeLabel.snp.remakeConstraints { (make) in
             make.bottom.equalTo(self.remarkLabel.snp.top).offset(-5)
             make.centerX.equalToSuperview()
         }
     }
     
-    func updateLayout(_ mode:PPFileListCellViewMode) {
-        if self.viewMode == mode {
-            return
-        }
-        self.viewMode = mode
-        if mode == .list {
-            pp_listMode()
-        }
-        else if mode == .listLarge {
-            pp_listMode() //emmm...
-        }
-        else if mode == .listSuperLarge {
+    func pp_gridMode() {
+        let cellW = self.contentView.frame.size.width
+        if(cellW == 0) {return}
+        let top : CGFloat = 8.0
+        iconImage.frame = CGRect(x: 8, y: top, width: cellW - top*2, height: cellW - top*2)
+        var titleH : CGFloat = titleLabel.text?.pp_calcTextHeight(font: titleLabel.font, fixedWidth: cellW - top*2) ?? 30
+        titleH = min(titleH, 40)
+        titleLabel.frame = CGRect(x: 8, y: cellW, width: cellW - top*2, height: titleH)
+        moreBtn.frame = CGRect(x: 0, y: cellW + 33, width: cellW, height: 44)
+        
+    }
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        if self.viewMode.rawValue <= PPFileListCellViewMode.listSuperLarge.rawValue {
             pp_listMode()
         }
         else {
             pp_gridMode()
         }
     }
+    func updateLayout(_ mode:PPFileListCellViewMode) {
+        if self.viewMode == mode {
+            return
+        }
+        self.viewMode = mode
+        //debugPrint("布局",self.viewMode.rawValue)
+        if mode.rawValue <= PPFileListCellViewMode.listSuperLarge.rawValue {
+//            pp_listMode()
+            titleLabel.numberOfLines = viewMode == .listSuperLarge ? 2 : 1
+            titleLabel.textAlignment = .left
+            titleLabel.font = UIFont.boldSystemFont(ofSize: CGFloat(15 + viewMode.rawValue*1))
+            timeLabel.textAlignment = .left
+        }
+        else {
+//            pp_gridMode()
+            titleLabel.textAlignment = .center
+            titleLabel.numberOfLines = 2
+            titleLabel.font = UIFont.boldSystemFont(ofSize: 15)
+            timeLabel.isHidden = true
+            timeLabel.textAlignment = .center
+            moreBtn.setImage(UIImage(named: "more_actions"), for: .normal)
+        }
+    }
     ///更新文件列表数据
-    override func updateUIWithData(_ model: AnyObject?) {
+    override func updateUIWithData(_ model: AnyObject) {
         let fileObj: PPFileObject = model as! PPFileObject
         self.titleLabel.text = fileObj.name
         if fileObj.isDirectory {
@@ -197,10 +239,19 @@ class PPFileListCell: PPBaseCollectionViewCell {
                 self.iconImage.image = UIImage(named: "ico_jpg")
             }
         }
-        if fileObj.thumbnail.length > 0 {
-            self.iconImage.kf.setImage(with: URL(string: fileObj.thumbnail))
+        if let thumbnail = URL(string: fileObj.thumbnail), fileObj.thumbnail.length > 0 {
+            // 阿里云盘略缩图问号后每次都是不同的参数，去掉问号后面的参数，这样不用每次都下载略缩图
+            let imageResource = ImageResource(downloadURL: thumbnail, cacheKey: fileObj.thumbnail.pp_split("?").first)
+            self.iconImage.kf.setImage(with: imageResource)
         }
-        let sizeStr = (fileObj.size>0) ? " - \(Int(fileObj.size).pp_SizeString())" :""
+        if(fileObj.modifiedDate.hasSuffix("Z")) {
+            if let date = PPAppConfig.shared.utcDateFormatter.date(from: fileObj.modifiedDate) {
+                //dateStyle为.medium时，日期样式为“yyyy-MM-dd”，timeStyle为.medium时，时间样式为“ah:mm:ss”
+                //fileObj.modifiedDate = DateFormatter.localizedString(from: date, dateStyle: .medium, timeStyle: .medium)
+                fileObj.modifiedDate = PPAppConfig.shared.dateFormatter.string(from: date)
+            }
+        }
+        let sizeStr = fileObj.size > 0 ? " - \(fileObj.size.pp_SizeString())" : ""
         self.timeLabel.text = fileObj.modifiedDate + sizeStr
         remarkLabel.text = fileObj.associatedServerName
     }
@@ -223,12 +274,18 @@ class PPFileListCell: PPBaseCollectionViewCell {
             return CGSize(width: screenWidth, height: 70)
         }
         else if viewMode == .grid {
-            itemsPerRow = CGFloat(Int(screenWidth / 70.0))
+            itemsPerRow = 3
+            if screenWidth > 414 {
+                itemsPerRow = CGFloat(Int(screenWidth / 80.0))
+            }
             let widthPerItem = screenWidth / itemsPerRow
             return CGSize(width: widthPerItem, height: widthPerItem + 70)
         }
         else if viewMode == .gridLarge {
-            itemsPerRow = CGFloat(Int(screenWidth / 110.0))
+            itemsPerRow = 2
+            if screenWidth > 414 {
+                itemsPerRow = CGFloat(Int(screenWidth / 110))
+            }
             let widthPerItem = screenWidth / itemsPerRow
             return CGSize(width: widthPerItem, height: widthPerItem + 70)
         }
@@ -236,6 +293,11 @@ class PPFileListCell: PPBaseCollectionViewCell {
             itemsPerRow = CGFloat(Int(screenWidth / 140.0))
             let widthPerItem = screenWidth / itemsPerRow
             return CGSize(width: widthPerItem, height: widthPerItem + 70)
+        }
+        else if viewMode == .photo {
+            itemsPerRow = 3
+            let widthPerItem = screenWidth / itemsPerRow
+            return CGSize(width: widthPerItem, height: widthPerItem)
         }
         return CGSize.zero
     }

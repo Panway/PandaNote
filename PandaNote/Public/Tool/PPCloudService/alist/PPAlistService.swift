@@ -10,11 +10,10 @@
 
 import Foundation
 import Alamofire
-//import ObjectMapper
 
 
 class PPAlistService: NSObject, PPCloudServiceProtocol {
-    
+
     var url = ""
     var username = ""
     var password = ""
@@ -26,9 +25,6 @@ class PPAlistService: NSObject, PPCloudServiceProtocol {
     }
     
     init(url: String, username: String, password: String) {
-//        let userCredential = URLCredential(user: "anonymous",
-//                                           password: access_token,
-//                                           persistence: .forSession)
         self.url = url
         self.username = username
         self.password = password
@@ -55,6 +51,9 @@ class PPAlistService: NSObject, PPCloudServiceProtocol {
         if access_token == nil || access_token?.length == 0 {
             login(url: url, username: username, password: password)
         }
+    }
+    func headers () -> HTTPHeaders{
+        return ["authorization": "\(self.access_token ?? "")"]
     }
     func login(url:String, username:String, password:String) {
         let parameters: [String: String] = [
@@ -91,15 +90,10 @@ class PPAlistService: NSObject, PPCloudServiceProtocol {
         }
     }
     //MARK: ls file list 文件列表
-    func contentsOfDirectory(_ path: String, completionHandler: @escaping ([PPFileObject], Error?) -> Void) {
-        contentsOfPathID(path, completionHandler: completionHandler)
-    }
 
-    func contentsOfPathID(_ pathID: String, completionHandler: @escaping ([PPFileObject], Error?) -> Void) {
+
+    func contentsOfDirectory(_ path: String, _ pathID: String, completion: @escaping(_ data: [PPFileObject], _ error: Error?) -> Void) {
         let requestURL = self.url + "/api/fs/list"
-        let headers: HTTPHeaders = [
-            "authorization": "\(self.access_token ?? "")"
-        ]
         let parameters: [String: Any] = [
             "path": pathID,
             "password":"",
@@ -107,13 +101,12 @@ class PPAlistService: NSObject, PPCloudServiceProtocol {
             "per_page": 0,
             "refresh": false
         ]
-        AF.request(requestURL, method: .post, parameters: parameters, encoding: JSONEncoding.default, headers: headers).responseJSON { response in
+        AF.request(requestURL, method: .post, parameters: parameters, encoding: JSONEncoding.default, headers: headers()).responseJSON { response in
             let jsonDic = response.value as? [String : Any]
             jsonDic?.printJSON()
             if let code = jsonDic?["code"] as? Int, code != 200 {
                 debugPrint("alist get list error")
-                completionHandler([], CocoaError(.fileNoSuchFile,
-                                                  userInfo: [NSLocalizedDescriptionKey: "unknown"]))
+                completion([], PPCloudServiceError.unknown)
                 //本来是要重新登录的，考虑到这个类只负责获取数据，就不搞其他的了
 //                self.login(url: self.url, username: self.username, password: self.password)
                 return
@@ -124,54 +117,74 @@ class PPAlistService: NSObject, PPCloudServiceProtocol {
                   let fileList = data["content"] as? [[String:Any]] else {
                 return
             }
-            completionHandler(PPAlistFile.toModelArray(fileList), nil)
+            completion(PPAlistFile.toModelArray(fileList), nil)
             
         }
         
     }
     
-    func contentsOfFile(_ path: String, completionHandler: @escaping (Data?, Error?) -> Void) {
-        let requestURL = self.url + "/api/fs/get"
-        let headers: HTTPHeaders = [
-            "authorization": "\(self.access_token ?? "")"
-        ]
-        let parameters: [String: Any] = [
+    func getFileData(_ path: String, _ extraParams:String, completion:@escaping(_ data:Data?, _ url:String, _ error:Error?) -> Void) {
+        //let fileID = extraParams.fileID
+        var requestURL = self.url + "/api/fs/get"
+        var parameters: [String: Any] = [
             "path": path,
             "password":""
         ]
-        AF.request(requestURL, method: .post, parameters: parameters, encoding: JSONEncoding.default, headers: headers).responseJSON { response in
+        if path.hasSuffix(".mp4") {
+            parameters["method"] = "video_preview"
+            requestURL = self.url + "/api/fs/other"
+        }
+        AF.request(requestURL, method: .post, parameters: parameters, encoding: JSONEncoding.default, headers: headers()).responseJSON { response in
             let jsonDic = response.value as? [String : Any]
             jsonDic?.printJSON()
-            if let code = jsonDic?["code"] as? Int, code == 400 {
+            if let code = jsonDic?["code"] as? Int, code != 200 {
                 debugPrint("alist get file error")
-                completionHandler(nil, CocoaError(.fileNoSuchFile,
-                                                  userInfo: [NSLocalizedDescriptionKey: "fileNotFound"]))
+                completion(nil, "", PPCloudServiceError.fileNotExist)
                 return
             }
-            guard let data = jsonDic?["data"] as? [String:Any],
-                  let raw_url = data["raw_url"] as? String else {
-                return
+            if let data = jsonDic?["data"] as? [String:Any],
+               let video_preview_play_info = data["video_preview_play_info"] as? [String:Any],
+               let live_transcoding_task_list = video_preview_play_info["live_transcoding_task_list"] as? [[String:Any]] {
+                var maxW = 0
+                var urlHD = ""
+                live_transcoding_task_list.forEach { e in
+                    if let width = e["template_width"] as? Int64,
+//                       let width = Int(template_width),
+                       let murl = e["url"] as? String
+                    {
+                        if width > maxW {
+                            maxW = Int(width)
+                            urlHD = murl
+                        }
+                    }
+                }
+                completion(nil, urlHD, nil)
+            }
+            if let data = jsonDic?["data"] as? [String:Any],
+               let raw_url = data["raw_url"] as? String {
+                completion(nil, raw_url, nil)
             }
             
-            AF.request(raw_url).response { response in
-                completionHandler(response.data, nil)
-            }
+//            AF.request(raw_url).response { response in
+//                completionHandler(response.data, nil)
+//            }
         }
     }
+
     
-    func createDirectory(_ folderName: String, at atPath: String, completionHandler: @escaping (Error?) -> Void) {
+    func createDirectory(_ folderName: String, _ atPath: String, completion:@escaping(_ error: Error?) -> Void) {
 
     }
     
-    func createFile(atPath path: String, contents: Data, completionHandler: @escaping (Error?) -> Void) {
+    func createFile(_ path: String, _ pathID: String, contents: Data, completion: @escaping(_ result: [String:String]?, _ error: Error?) -> Void) {
 
     }
     
-    func moveItem(atPath srcPath: String, toPath dstPath: String, completionHandler: @escaping (Error?) -> Void) {
+    func moveItem(srcPath: String, destPath: String, srcItemID: String, destItemID: String, isRename: Bool, completion: @escaping(_ error:Error?) -> Void) {
 
     }
     
-    func removeItem(atPath path: String, completionHandler: @escaping (Error?) -> Void) {
+    func removeItem(_ path: String, _ fileID: String, completion: @escaping(_ error: Error?) -> Void) {
 
     }
     

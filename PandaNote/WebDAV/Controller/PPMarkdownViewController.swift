@@ -1,16 +1,20 @@
 //
 //  PPMarkdownViewController.swift
-//  TeamDisk
 //
-//  Created by panwei on 2019/6/8.
-//  Copyright © 2019 Wei & Meng. All rights reserved.
+//
+//  Created by Panway on 2019/6/8.
+//  Copyright © 2019 Panway. All rights reserved.
 //
 import UIKit
 import Foundation
 import FilesProvider
 import Down
+import Highlightr
 
 typealias PPPTextView = UITextView
+
+fileprivate let TopToolBarTag = 1
+fileprivate let BottomToolBarTag = 2
 
 @objc enum PPSplitMode : UInt8 {
     case none
@@ -19,10 +23,11 @@ typealias PPPTextView = UITextView
 }
 //UITextViewDelegate
 class PPMarkdownViewController: PPBaseViewController,
-                                UITextViewDelegate,
-                                PPEditorToolBarDelegate {
-    
-    
+                                PPEditorToolBarDelegate,
+                                PPFindReplaceDelegate,
+                                UISearchBarDelegate,
+                                UITextViewDelegate
+{
 //    let markdownParser = MarkdownParser()
     var markdownStr = "I support a *lot* of custom Markdown **Elements**, even `code`!"
     var historyList = [String]()
@@ -32,18 +37,25 @@ class PPMarkdownViewController: PPBaseViewController,
     var filePathStr: String = ""
     ///文件ID（仅百度网盘）
     var fileID = ""
+    var fileExtension = ""
     var downloadURL = ""
 //    var webdav: WebDAVFileProvider?
     var closeAfterSave : Bool = false
     var textChanged : Bool = false//文本改变的话就不需要再比较字符串了
     var splitMode = PPSplitMode.none //上次的分栏模式 last mode
     var theme : PPThemeModel!
+    var highlightrThemes = [String]()
+    let highlightr = Highlightr()
     lazy var dropdown : PPDropDown = {
         let drop = PPDropDown()
         return drop
     }()
+    let topToolView = PPMarkdownEditorToolBar(frame: CGRect(x: 0,y: 0,width: 40*3,height: 40), images: ["preview","done", "toolbar_more"])
+
+    var findReplaceView: PPFindReplaceView!
+
     
-    //MARK: Life Cycle
+    //MARK: - Life Cycle
     override func viewDidLoad() {
         if self.filePathStr.length < 1 {
             return //使用UISplitViewController的时候，没路径显示空白
@@ -54,12 +66,12 @@ class PPMarkdownViewController: PPBaseViewController,
         PPFileManager.shared.getFileData(path: filePathStr,
                                          fileID: fileID,
                                          downloadURL:downloadURL,
-                                         cacheToDisk:true,
-                                         downloadIfCached:true) { (contents: Data?,isFromCache, error) in
+                                         alwaysDownload:true) { (contents: Data?,isFromCache, error) in
             guard let contents = contents else {
+                PPHUD.showHUDFromTop("获取内容失败，请进入文件夹刷新",isError: true)
                 return
             }
-            PPHUD.showHUDFromTop(isFromCache ? "已加载缓存文件":"已加载最新的")
+            PPHUD.showHUDFromTop(isFromCache ? "当前是缓存内容":"已加载最新")
 //            debugPrint(String(data: contents, encoding: .utf8)!) // "hello world!"
             if let text_encoded = String(textData: contents) {
                 self.markdownStr = text_encoded
@@ -71,7 +83,13 @@ class PPMarkdownViewController: PPBaseViewController,
                 }
                 return
             }
-            
+            //如果是代码文件
+            if let suffix = self.filePathStr.pp_split(".").last,
+               suffix.isTextFile() == true {
+                self.fileExtension = suffix
+                //目前不支持txt
+                self.fileExtension = suffix == "txt" ? "md" : suffix
+            }
             //markdown解析的方式
             if let selectedIndex = PPUserInfo.shared.pp_Setting["pp_markdownParseMethod"] {
                 let method = selectedIndex as! String
@@ -89,8 +107,38 @@ class PPMarkdownViewController: PPBaseViewController,
                     self.textView.attributedText = attributedString
                     
                 }
+                else if method == "Highlightr" {
+                    // 获取bundle中所有以min.css结尾的文件路径
+                    let bundle = Bundle(for: Highlightr.self)
+                    let cssURLs = bundle.urls(forResourcesWithExtension: "min.css", subdirectory: nil) ?? []
+                    self.highlightrThemes.removeAll()
+                    // 将URL转化为文件路径，并添加到数组中
+                    for url in cssURLs {
+                        self.highlightrThemes.append(url.lastPathComponent.pp_split(".").first ?? "")
+                    }
+                    self.highlightrThemes.sort()
+
+                    let userTheme = PPAppConfig.shared.getItem("PPHighlightTheme");
+                    self.highlightr?.setTheme(to: userTheme.length > 0 ? userTheme : "atom-one-light")
+                    
+                    let textStorage = CodeAttributedString(highlightr: self.highlightr!)
+                    textStorage.language = self.fileExtension
+                    let layoutManager = NSLayoutManager()
+                    textStorage.addLayoutManager(layoutManager)
+
+                    let textContainer = NSTextContainer(size: self.view.bounds.size)
+                    layoutManager.addTextContainer(textContainer)
+
+                    self.textView = UITextView(frame: self.view.bounds, textContainer: textContainer)
+                    self.view.addSubview(self.textView)
+                    self.pp_viewEdgeEqualToSafeArea(self.textView)
+                    
+                    let highlightedCode = self.highlightr?.highlight(self.markdownStr, as: self.fileExtension)
+                    self.textView.attributedText = highlightedCode
+                    self.textView.backgroundColor = self.highlightr?.theme.themeBackgroundColor
+                }
                 else {
-                    self.textView.text = self.markdownStr//none
+                    self.textView.text = self.markdownStr
                 }
             }
             else {//没设置
@@ -105,11 +153,21 @@ class PPMarkdownViewController: PPBaseViewController,
                 self.textView.setContentOffset(CGPoint(x: 0, y: offsetY), animated: false)
             }
             
+            self.findReplaceView = PPFindReplaceView(frame: CGRect(x: 0, y: 0, width: 320, height: 30))
+            self.view.addSubview(self.findReplaceView)
+            self.findReplaceView.snp.makeConstraints { make in
+                make.top.left.right.equalToSuperview()
+                make.height.equalTo(30)
+            }
+            self.findReplaceView.initSearchText(self.textView.text)
+            self.findReplaceView.delegate = self
+            self.findReplaceView.isHidden = true
+            
         }
 
         
         
-        self.view.backgroundColor = UIColor.white
+        self.view.backgroundColor = .white
 
     }
     override func viewWillDisappear(_ animated: Bool) {
@@ -120,13 +178,14 @@ class PPMarkdownViewController: PPBaseViewController,
         }
         if (UIDevice.current.userInterfaceIdiom != .phone) {
             self.closeAfterSave = false
-            self.saveTextAction(sender: nil)
+            self.saveTextAction()
         }
     }
     deinit {
-        self.switchSplitMode(.none)//好像不加也行
+//        self.switchSplitMode(.none)//好像不加也行
     }
     func pp_initView() {
+        self.edgesForExtendedLayout = []
         self.view.addSubview(backgroundImage)
         self.pp_viewEdgeEqualToSafeArea(backgroundImage)
 
@@ -139,17 +198,16 @@ class PPMarkdownViewController: PPBaseViewController,
         
         
         
-        let editorToolBar = PPMarkdownEditorToolBar(frame: CGRect(x: 0,y: 0,width: self.view.frame.size.width,height: 40))
+        let editorToolBar = PPMarkdownEditorToolBar(frame: CGRect(x: 0,y: 0,width: 40*2,height: 40), images: ["editor_image", "btn_down"])
         editorToolBar.delegate = self
         textView.inputAccessoryView = editorToolBar
         
-        let topToolView = UIView.init(frame: CGRect.init(x: 0, y: 0, width: 120, height: 40))
+        topToolView.delegate = self
+        topToolView.tag = TopToolBarTag
+
         
-        topToolView.addSubview(button0)
-        topToolView.addSubview(button1)
-        topToolView.addSubview(button2)
         
-        let rightBarItem = UIBarButtonItem.init(customView: topToolView)
+        let rightBarItem = UIBarButtonItem(customView: topToolView)
         
         self.navigationItem.rightBarButtonItem = rightBarItem
         
@@ -169,7 +227,7 @@ class PPMarkdownViewController: PPBaseViewController,
         let isMaciPad = UIDevice.current.userInterfaceIdiom != .phone
         if (isMaciPad || PPUserInfo.pp_valueForSettingDict(key: "saveMarkdownWhenClose")) {
             self.closeAfterSave = true
-            self.saveTextAction(sender: nil)
+            self.saveTextAction()
         } else {
             self.dropdown.dataSource = ["是否保存已修改的文字？","不保存","要保存"]
             self.dropdown.selectionAction = { (index: Int, item: String) in
@@ -179,7 +237,7 @@ class PPMarkdownViewController: PPBaseViewController,
                 }
                 else if (index == 2) {
                     self.closeAfterSave = true
-                    self.saveTextAction(sender: nil)
+                    self.saveTextAction()
                 }
             }
             // self.dropdown.anchorView = sender
@@ -187,7 +245,8 @@ class PPMarkdownViewController: PPBaseViewController,
             
         }
     }
-    // MARK: UITextViewDelegate 文本框代理
+
+    // MARK: - UITextViewDelegate 文本框代理
     func textViewDidChange(_ textView: PPPTextView) {
 //        debugPrint(textView.text)
         if splitMode != .none {
@@ -293,13 +352,13 @@ class PPMarkdownViewController: PPBaseViewController,
         
         var path = ""
         if self.filePathStr.hasSuffix("html") {//HTML文件直接显示
-            path = PPDiskCache.shared.path + self.filePathStr
-            webVC.fileURLStr = path
+            webVC.fileURLStr = self.filePathStr.pp_fileCachePath()
         }
         else {
             path = Bundle.main.url(forResource: "markdown", withExtension:"html")?.absoluteString ?? ""
             webVC.markdownStr = self.textView.text
             webVC.urlString = path // file:///....
+//            webVC.urlString = "http://192.168.123.162:8081/markdown.html"
             webVC.markdownName = self.filePathStr
         }
 
@@ -331,15 +390,15 @@ class PPMarkdownViewController: PPBaseViewController,
     }
 
     /// 预览markdown
-    @objc func previewAction(sender:UIButton)  {
+    @objc func previewAction()  {
 //        self.splitMode = .none
         self.switchSplitMode(.none)
         self.textView.resignFirstResponder()
         let webVC = PPUserInfo.shared.webViewController//PPWebViewController()
         var path = ""
         if self.filePathStr.hasSuffix("html") {//HTML文件直接显示
-            path = PPDiskCache.shared.path + self.filePathStr
-            webVC.fileURLStr = path
+            var urlStr = self.filePathStr.pp_fileCachePath()
+            webVC.fileURLStr = urlStr
         }
         else {
             path = Bundle.main.url(forResource: "markdown", withExtension:"html")?.absoluteString ?? ""
@@ -359,9 +418,12 @@ class PPMarkdownViewController: PPBaseViewController,
     @objc func shareTextAction(sender:UIButton?)  {
         let fileURL = URL(fileURLWithPath: PPDiskCache.shared.path + self.filePathStr)
         let shareSheet = UIActivityViewController(activityItems: [fileURL], applicationActivities: nil)
+        if let ppc = shareSheet.popoverPresentationController {
+            ppc.sourceView = self.view;
+        }
         present(shareSheet, animated: true)
     }
-    @objc func saveTextAction(sender:UIButton?)  {
+    @objc func saveTextAction()  {
         let stringToUpload = self.textView.text ?? ""
         if stringToUpload.length < 1 {
             PPHUD.showHUDFromTop("不支持保存空文件")
@@ -370,7 +432,7 @@ class PPMarkdownViewController: PPBaseViewController,
         debugPrint("保存的是===\(stringToUpload)")
         //MARK: 保存
         self.textView.resignFirstResponder()
-        PPFileManager.shared.createFile(path: self.filePathStr, contents: stringToUpload.data(using: .utf8), completionHandler: { (error) in
+        PPFileManager.shared.createFile(path: self.filePathStr, contents: stringToUpload.data(using: .utf8), completionHandler: { (result, error) in
             if error != nil {
                 PPHUD.showHUDFromTop("保存失败", isError: true)
                 return
@@ -385,25 +447,44 @@ class PPMarkdownViewController: PPBaseViewController,
         
 
     }
-    @objc func moreAction(sender:UIButton?)  {
-        let menuTitile = ["分享文本","左右分栏模式","上下分栏模式","关闭分栏"]
+    @objc func moreAction()  {
+        var menuTitile = ["分享文本","搜索","左右分栏模式","上下分栏模式","关闭分栏"]
+        menuTitile.append("更换主题")
         self.dropdown.dataSource = menuTitile
+        self.dropdown.width = "左右分栏模式".pp_calcTextWidth() + 30
         self.dropdown.selectionAction = { (index: Int, item: String) in
-            // debugPrint(index)
-            if index == 0 {
+             debugPrint(index, item)
+            if item == "分享文本" {
                 self.shareTextAction(sender: nil)
             }
-            else if index == 1 {
+            else if item == "搜索" {
+                self.findReplaceView.isHidden = false
+                self.findReplaceView.searchField.becomeFirstResponder()
+            }
+            else if item == "左右分栏模式" {
                 self.switchSplitMode(.leftAndRight)
             }
-            else if index == 2 {
+            else if item == "上下分栏模式" {
                 self.switchSplitMode(.upAndDown)
             }
-            else if index == 3 {
+            else if item == "关闭分栏" {
                 self.switchSplitMode(.none)
             }
+            else if item == "更换主题" {
+                PPAppConfig.shared.popMenu.showWithCallback(sourceView:self.view,
+                                                            stringArray: self.highlightrThemes,
+                                                            sourceVC: self) { index, string in
+                    debugPrint(string)
+                    self.highlightr?.setTheme(to: string)
+                    let highlightedCode = self.highlightr?.highlight(self.markdownStr, as: self.fileExtension)
+                    self.textView.attributedText = highlightedCode
+                    self.textView.backgroundColor = self.highlightr?.theme.themeBackgroundColor
+                    PPAppConfig.shared.setItem("PPHighlightTheme", string)
+                }
+                PPAppConfig.shared.popMenu.dismissOnSelection = false
+            }
         }
-        self.dropdown.anchorView = sender
+        self.dropdown.anchorView = topToolView
         self.dropdown.show()
     }
     //初始化样式
@@ -441,31 +522,23 @@ class PPMarkdownViewController: PPBaseViewController,
         
         
     }
-    lazy var button0 : UIButton = {
-        let button0 = UIButton.init(type: UIButton.ButtonType.custom)
-        button0.frame = CGRect.init(x: 0, y: 0, width: 40, height: 40)
-        button0.setImage(UIImage.init(named: "preview"), for: UIControl.State.normal)
-        button0.addTarget(self, action: #selector(previewAction(sender:)), for: UIControl.Event.touchUpInside)
-        return button0
-    }()
-    
-    lazy var button1 : UIButton = {
-        let button1 = UIButton(type: .custom)
-        button1.frame = CGRect(x: 40, y: 0, width: 40, height: 40)
-        button1.setImage(UIImage(named: "done"), for: .normal)
-        button1.addTarget(self, action: #selector(saveTextAction(sender:)), for: .touchUpInside)
-        return button1
-    }()
-    lazy var button2 : UIButton = {
-        let button2 = UIButton(type: .custom)
-        button2.frame = CGRect(x: 80, y: 0, width: 40, height: 40)
-        button2.setImage(UIImage(named: "toolbar_more"), for: .normal)
-        button2.addTarget(self, action: #selector(moreAction(sender:)), for: .touchUpInside)
-        return button2
-    }()
+
+
     // MARK: PPEditorToolBarDelegate
-    func didClickEditorToolBar(sender: UIButton, index: Int,totalCount: Int) {
+    func didClickEditorToolBar(toolBar: PPMarkdownEditorToolBar, index: Int,totalCount: Int) {
         debugPrint("didClickEditorToolBar:\(index)")
+        if toolBar.tag == TopToolBarTag {
+            if index == 0 {
+                previewAction()
+            }
+            else if index == 1 {
+                saveTextAction()
+            }
+            else if index == 2 {
+                moreAction()
+            }
+            return
+        }
         if index == 0 {
             self.showImagePicker { selectedAssets in
                 PPFileManager.shared.uploadPhotos(selectedAssets, completion: { photoAssets in
@@ -484,5 +557,41 @@ class PPMarkdownViewController: PPBaseViewController,
             self.textView.resignFirstResponder()
         }
     }
-    
+    //MARK: 查找与替换
+    func didFind(range: NSRange, msg: String) {
+        textView.becomeFirstResponder()
+        textView.selectedRange = range
+        textView.scrollRangeToVisible(range)
+    }
+// https://developer.apple.com/documentation/uikit/mac_catalyst/handling_key_presses_made_on_a_physical_keyboard/
+    override func pressesBegan(_ presses: Set<UIPress>, with event: UIPressesEvent?) {
+        
+        var didHandleEvent = false
+        var pressCommandKey = false
+        for press in presses {
+            guard let key = press.key else { continue }
+            let keyName = key.charactersIgnoringModifiers
+            debugPrint("用户按下：\(key.charactersIgnoringModifiers)")
+            if key.modifierFlags.contains(.command) {
+                pressCommandKey = true
+                print("用户按下command")
+            }
+            if pressCommandKey {
+                if keyName == "s" {
+                    saveTextAction() //保存
+                }
+                else if keyName == "f" {
+                    self.findReplaceView.isHidden = false
+                    self.findReplaceView.searchField.becomeFirstResponder()
+                }
+                
+            }
+        }
+        
+        if didHandleEvent == false {
+            // Didn't handle this key press, so pass the event to the next responder.
+            super.pressesBegan(presses, with: event)
+        }
+    }
 }
+

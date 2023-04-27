@@ -106,4 +106,18 @@ extension PPBaseViewController {
 #endif
     }
     
+    func pushDetail(_ viewController:UIViewController) {
+        if UIDevice.current.userInterfaceIdiom != .phone {
+            if let navController = self.splitViewController?.viewControllers.last as? UINavigationController {
+                // navController.viewControllers = [viewController]
+                //self.splitViewController?.showDetailViewController(navController, sender: self)
+                navController.popToRootViewController(animated: false)
+                navController.pushViewController(viewController, animated: true)
+            }
+        }
+        else {
+            self.navigationController?.pushViewController(viewController, animated: true)
+        }
+    }
+    
 }

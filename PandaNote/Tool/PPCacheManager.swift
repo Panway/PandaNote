@@ -43,7 +43,7 @@ class PPDiskCache {
             if let data = getData() {
                 self.setDataSync(data, key: key)
             } else {
-                debugPrint("Failed to get data for key \(key)")
+                debugPrint("Failed to setData for key \(key)")
             }
         })
     }
@@ -51,30 +51,30 @@ class PPDiskCache {
         if let data = getData() {
             self.setDataSync(data, key: key)
         } else {
-            debugPrint("Failed to get data for key \(key)")
+            debugPrint("Failed to setDataSynchronously for key \(key)")
         }
     }
     open func fetchData(key: String,
-                        onlyCheckIfFileExist : Bool? = false,
-                        failure fail: ((Error?) -> ())? = nil,
-                        success succeed: @escaping (Data?) -> ()) {
+                        returnURL : Bool? = false,
+                        success: @escaping (Data?) -> (),
+                        failure: ((Error?) -> ())? = nil) {
         cacheQueue.async {
             let path = self.fullPath(forKey: key)
             if FileManager.default.fileExists(atPath: path) {
-                if let onlyCheckIfFileExist = onlyCheckIfFileExist, onlyCheckIfFileExist == true {
+                if let onlyCheckIfFileExist = returnURL, onlyCheckIfFileExist == true {
                     DispatchQueue.main.async {
-                        succeed(nil)
+                        success(nil)
                     }
                     return
                 }
                 do {
                     let data = try Data(contentsOf: URL(fileURLWithPath: path), options: Data.ReadingOptions())
                     DispatchQueue.main.async {
-                        succeed(data)
+                        success(data)
                     }
                     self.updateDiskAccessDate(atPath: path)
                 } catch {
-                    if let failHandler = fail {
+                    if let failHandler = failure {
                         DispatchQueue.main.async {
                             failHandler(error)
                         }
@@ -83,10 +83,8 @@ class PPDiskCache {
             }
             else {
                 //文件不存在
-                if let failHandler = fail {
-                    DispatchQueue.main.async {
-                        failHandler(PPDiskCacheError.fileNotExist)
-                    }
+                DispatchQueue.main.async {
+                    failure?(PPDiskCacheError.fileNotExist)
                 }
             }
         }
@@ -132,7 +130,7 @@ class PPDiskCache {
                 if let data = getData() {
                     self.setDataSync(data, key: key)
                 } else {
-                    debugPrint( "Failed to get data for key \(key)")
+                    debugPrint( "Failed to updateAccessDate for key \(key)")
                 }
             }
         })

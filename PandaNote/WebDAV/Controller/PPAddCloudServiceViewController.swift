@@ -9,6 +9,7 @@
 import UIKit
 import Alamofire
 
+
 class PPAddCloudServiceViewController : PPBaseViewController,UITableViewDataSource,UITableViewDelegate {
     var dataSource:Array<String> = ["WebDAV（坚果云等）",
                                     "阿里云盘",
@@ -17,8 +18,6 @@ class PPAddCloudServiceViewController : PPBaseViewController,UITableViewDataSour
                                     "alist",
                                     "百度网盘"]
     var tableView = UITableView()
-    
-    let authMethods = ["App内授权登录","系统默认浏览器授权登录","手动输入配置"]
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -50,20 +49,27 @@ class PPAddCloudServiceViewController : PPBaseViewController,UITableViewDataSour
     }
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let obj = self.dataSource[indexPath.row]
+        PPAddCloudServiceViewController.addCloudService(obj,self)
+    }
+    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        return 50.0
+    }
+    
+    class func addCloudService(_ obj: String,_ sourceVC:UIViewController) {
+        let authMethods = ["App内授权登录","系统默认浏览器授权登录","手动输入配置"]
         if obj == "WebDAV（坚果云等）" {
+            //https://www.jianguoyun.com/#/safety
             let vc = PPWebDAVConfigViewController()
             vc.cloudType = obj
             vc.serverURL = "http://dav.jianguoyun.com/dav"
-            #if DEBUG
-
-            #endif
+#if DEBUG
+            
+#endif
             vc.remark = obj
-            self.navigationController?.pushViewController(vc, animated: true)
+            sourceVC.navigationController?.pushViewController(vc, animated: true)
         }
         else if obj == "阿里云盘" {
-            PPAppConfig.shared.popMenu.showWithCallback(sourceView:self.tableView,
-                                                        stringArray: ["App内授权登录","手动输入配置"],
-                                                        sourceVC: self) { index, string in
+            PPAlertTool.showAction(title: "请选择登录方式", message: nil, items: ["App内授权登录","手动输入配置"]) { index in
                 if index == 1 {
                     let vc = PPWebDAVConfigViewController()
                     vc.cloudType = "AliyunDrive"
@@ -74,23 +80,17 @@ class PPAddCloudServiceViewController : PPBaseViewController,UITableViewDataSour
                     vc.showPassword = false
                     vc.showToken = true
                     vc.showRefreshToken = true
-                    self.navigationController?.pushViewController(vc, animated: true)
+                    sourceVC.navigationController?.pushViewController(vc, animated: true)
                 }
                 else if index == 0 {
                     let vc = PPWebViewController()
                     vc.urlString = aliyundrive_auth_url
-                    self.navigationController?.pushViewController(vc, animated: true)
+                    sourceVC.navigationController?.pushViewController(vc, animated: true)
                 }
             }
         }
         else if obj == "Dropbox" {
-//            let vc = PPWebViewController()
-//            vc.urlString = "https://www.dropbox.com/oauth2/authorize?client_id=pjmhj9rfhownr7z&redirect_uri=filemgr://oauth-callback/dropbox&response_type=token&state=DROPBOX"
-//            self.navigationController?.pushViewController(vc, animated: true)
-            
-            
-            PPAppConfig.shared.popMenu.showWithCallback(sourceView:self.tableView, stringArray: authMethods, sourceVC: self) { index, string in
-                debugPrint("=====\(index)")
+            PPAlertTool.showAction(title: "请选择登录方式", message: nil, items: authMethods) { index in
                 if index == 2 {
                     let vc = PPWebDAVConfigViewController()
                     vc.cloudType = "Dropbox"
@@ -99,12 +99,12 @@ class PPAddCloudServiceViewController : PPBaseViewController,UITableViewDataSour
                     vc.showServerURL = false
                     vc.showUserName = false
                     vc.passwordRemark = "access token"
-                    self.navigationController?.pushViewController(vc, animated: true)
+                    sourceVC.navigationController?.pushViewController(vc, animated: true)
                 }
                 else if index == 0 {
                     let vc = PPWebViewController()
-                    vc.urlString = "https://www.dropbox.com/oauth2/authorize?client_id=pjmhj9rfhownr7z&redirect_uri=filemgr://oauth-callback/dropbox&response_type=token&state=DROPBOX"
-                    self.navigationController?.pushViewController(vc, animated: true)
+                    vc.urlString = dropbox_auth_url
+                    sourceVC.navigationController?.pushViewController(vc, animated: true)
                 }
                 else if index == 1 {
                     
@@ -113,20 +113,17 @@ class PPAddCloudServiceViewController : PPBaseViewController,UITableViewDataSour
             }
         }
         else if obj == "OneDrive" {
-            PPAppConfig.shared.popMenu.showWithCallback(sourceView:self.tableView, stringArray: authMethods, sourceVC: self) { index, string in
+            PPAlertTool.showAction(title: "请选择登录方式", message: nil, items: authMethods) { index in
 
-//            PPAlertAction.showSheet(withTitle: "您想如何获取访问令牌（access_token）", message: nil, cancelButtonTitle: "取消", destructiveButtonTitle: nil, otherButtonTitle: ["Safari浏览器内授权","App内授权","手动输入（抓包获取）"]) { (index) in
-                
-                let url = "https://login.live.com/oauth20_authorize.srf?client_id=064f5b62-97a8-4dae-b5c1-aaf44439939d&scope=onedrive.readwrite%20offline_access&response_type=code&redirect_uri=pandanote://msredirect"//pandanote的
                 if index == 1 {
-                    let authURL = URL(string: url)
+                    let authURL = URL(string: onedrive_auth_url)
                     UIApplication.shared.open(authURL!, options: [:], completionHandler: nil)
-//                    PPAddCloudServiceViewController.handleCloudServiceRedirect(URL(string: "pandanote://msredirect/?code=XXX")!)
+                    // PPAddCloudServiceViewController.handleCloudServiceRedirect(URL(string: "pandanote://msredirect/?code=XXX")!)
                 }
                 else if index == 0 {
                     let vc = PPWebViewController()
                     vc.urlString = onedrive_login_url_es//ES的
-                    self.navigationController?.pushViewController(vc, animated: true)
+                    sourceVC.navigationController?.pushViewController(vc, animated: true)
                 }
                 else if index == 2 {
                     let vc = PPWebDAVConfigViewController()
@@ -136,7 +133,7 @@ class PPAddCloudServiceViewController : PPBaseViewController,UITableViewDataSour
                     vc.showServerURL = false
                     vc.showUserName = false
                     vc.passwordRemark = "access token"
-                    self.navigationController?.pushViewController(vc, animated: true)
+                    sourceVC.navigationController?.pushViewController(vc, animated: true)
                 }
                 
             }
@@ -144,39 +141,38 @@ class PPAddCloudServiceViewController : PPBaseViewController,UITableViewDataSour
         }
         else if obj == "alist" {
             let vc = PPWebDAVConfigViewController()
+            vc.serverURL = "https://b.pandago.cf:5244"
             vc.cloudType = "alist"
             vc.remark = "alist"
             vc.password = ""
-            self.navigationController?.pushViewController(vc, animated: true)
+            sourceVC.navigationController?.pushViewController(vc, animated: true)
         }
-        else if obj == "百度网盘" {
-            PPAppConfig.shared.popMenu.showWithCallback(sourceView:self.tableView, stringArray: authMethods, sourceVC: self) { index, string in
+        else if obj == "百度网盘" || obj == PPCloudServiceType.baiduyun.rawValue {
+            PPAlertTool.showAction(title: "请选择登录方式", message: nil, items: authMethods) { index in
                 if index == 2 {
                     let vc = PPWebDAVConfigViewController()
-                    vc.cloudType = "baiduyun"
+                    vc.cloudType = PPCloudServiceType.baiduyun.rawValue
                     vc.serverURL = "https://pan.baidu.com/rest/2.0/xpan/file"
                     vc.remark = "百度网盘"
                     vc.showServerURL = false
                     vc.showUserName = false
                     vc.passwordRemark = "access token"
-                    self.navigationController?.pushViewController(vc, animated: true)                }
+                    sourceVC.navigationController?.pushViewController(vc, animated: true)                }
                 else if index == 0 {
                     let vc = PPWebViewController()
-                    vc.urlString = "https://openapi.baidu.com/oauth/2.0/authorize?response_type=token&client_id=NqOMXF6XGhGRIGemsQ9nG0Na&redirect_uri=http://www.estrongs.com&scope=basic,netdisk&display=mobile&state=STATE&force_login=1"
-                    self.navigationController?.pushViewController(vc, animated: true)
+                    vc.urlString = baiduwangpan_auth_url
+                    sourceVC.navigationController?.pushViewController(vc, animated: true)
                 }
                 else if index == 1 {
-                    let authURL = URL(string: "http://openapi.baidu.com/oauth/2.0/authorize?response_type=token&client_id=4CXtrIz7T0yEYsLC8majw1ff42Uh64Yw&redirect_uri=pandanote://baiduwangpan&scope=basic,netdisk&display=mobile&state=pandanotestate")
+                    let authURL = URL(string: baiduwangpan_auth_url)
                     UIApplication.shared.open(authURL!, options: [:], completionHandler: nil)
                 }
                 
             }
         }
+    }
         
-    }
-    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        return 50.0
-    }
+    
     
 
     class func handleCloudServiceRedirect(_ url:URL) {
@@ -266,7 +262,7 @@ class PPAddCloudServiceViewController : PPBaseViewController,UITableViewDataSour
             if let access_token = urlWithToken?.pp_valueOf("access_token") {
                 debugPrint("baidu access_token:",access_token)
                 let vc = PPWebDAVConfigViewController()
-                vc.cloudType = "baiduyun"
+                vc.cloudType = PPCloudServiceType.baiduyun.rawValue
                 vc.serverURL = "https://pan.baidu.com/rest/2.0/xpan/file"
                 vc.remark = "百度网盘"
                 vc.password = access_token

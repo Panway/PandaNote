@@ -22,38 +22,42 @@ class PPLocalFileService:PPFilesProvider, PPCloudServiceProtocol {
 //    }
     
     
-    func contentsOfDirectory(_ path: String, completionHandler: @escaping ([PPFileObject], Error?) -> Void) {
+    func contentsOfDirectory(_ path: String, _ pathID: String, completion: @escaping(_ data: [PPFileObject], _ error: Error?) -> Void) {
         fileProvider.contentsOfDirectory(path: path, completionHandler: {
             contents, error in
             let archieveArray = self.myPPFileArrayFrom(contents)
             DispatchQueue.main.async {
-                completionHandler(archieveArray,error)
+                completion(archieveArray,error)
             }
         })
     }
     
-    func contentsOfPathID(_ pathID: String, completionHandler: @escaping ([PPFileObject], Error?) -> Void) {
-        
+
+    
+    
+    func getFileData(_ path: String, _ extraParams:String, completion:@escaping(_ data:Data?, _ url:String, _ error:Error?) -> Void) {
+        //let fileID = extraParams.fileID
+        fileProvider.contents(path: path) { contents, error in
+            completion(contents,"",error)
+        }
     }
     
-    func contentsOfFile(_ path: String, completionHandler: @escaping (Data?, Error?) -> Void) {
-        fileProvider.contents(path: path, completionHandler: completionHandler)
+    func createDirectory(_ folderName: String, _ atPath: String, completion:@escaping(_ error: Error?) -> Void) {
+        fileProvider.create(folder: folderName, at: atPath, completionHandler: completion)
     }
     
-    func createDirectory(_ folderName: String, at atPath: String, completionHandler: @escaping (Error?) -> Void) {
-        fileProvider.create(folder: folderName, at: atPath, completionHandler: completionHandler)
+    func createFile(_ path: String, _ pathID: String, contents: Data, completion: @escaping(_ result: [String:String]?, _ error: Error?) -> Void) {
+        fileProvider.writeContents(path: path, contents: contents, overwrite: true) { error in
+            completion(nil, error)
+        }
     }
     
-    func createFile(atPath path: String, contents: Data, completionHandler: @escaping (Error?) -> Void) {
-        fileProvider.writeContents(path: path, contents: contents, overwrite: true, completionHandler: completionHandler)
+    func moveItem(srcPath: String, destPath: String, srcItemID: String, destItemID: String, isRename: Bool, completion: @escaping(_ error:Error?) -> Void) {
+        fileProvider.moveItem(path:srcPath, to: destPath, completionHandler: completion)
     }
     
-    func moveItem(atPath srcPath: String, toPath dstPath: String, completionHandler: @escaping (Error?) -> Void) {
-        fileProvider.moveItem(path:srcPath, to: dstPath, completionHandler: completionHandler)
-    }
-    
-    func removeItem(atPath path: String, completionHandler: @escaping (Error?) -> Void) {
-        fileProvider.removeItem(path:path, completionHandler: completionHandler)
+    func removeItem(_ path: String, _ fileID: String, completion: @escaping(_ error: Error?) -> Void) {
+        fileProvider.removeItem(path:path, completionHandler: completion)
     }
     
     

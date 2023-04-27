@@ -80,7 +80,7 @@ class PPFileListTableViewCell: PPBaseTableViewCell {
             }
         }
         
-        let sizeStr = (fileObj.size>0) ? " - \(Int(fileObj.size).pp_SizeString())" :""
+        let sizeStr = (fileObj.size>0) ? " - \(fileObj.size.pp_SizeString())" :""
         self.timeLabel.text = fileObj.modifiedDate + sizeStr
         
         

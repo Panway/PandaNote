@@ -10,6 +10,7 @@ let onedrive_redirect_uri_es = "https://login.microsoftonline.com/common/oauth2/
 let onedrive_client_id_pandanote = "064f5b62-97a8-4dae-b5c1-aaf44439939d"
 let onedrive_redirect_uri_pandanote = "pandanote://msredirect"
 let onedrive_login_url_es = "https://login.microsoftonline.com/common/oauth2/v2.0/authorize?client_id=dedcda2a-3acf-44bb-8baa-17f9ed544d64&scope=User.Read%20offline_access%20files.readwrite.all&redirect_uri=https://login.microsoftonline.com/common/oauth2/nativeclient&response_type=code"
+let onedrive_auth_url = "https://login.live.com/oauth20_authorize.srf?client_id=064f5b62-97a8-4dae-b5c1-aaf44439939d&scope=onedrive.readwrite%20offline_access&response_type=code&redirect_uri=pandanote://msredirect"//pandanote的
 
 import UIKit
 import FilesProvider
@@ -80,11 +81,9 @@ class PPOneDriveService: NSObject, PPCloudServiceProtocol {
         }
         return
     }
-    func contentsOfDirectory(_ path: String, completionHandler: @escaping ([PPFileObject], Error?) -> Void) {
-        contentsOfPathID(path, completionHandler: completionHandler)
-    }
 
-    func contentsOfPathID(_ pathID: String, completionHandler: @escaping ([PPFileObject], Error?) -> Void) {
+
+    func contentsOfDirectory(_ path: String, _ pathID: String, completion: @escaping(_ data: [PPFileObject], _ error: Error?) -> Void) {
         var requestURL = "https://graph.microsoft.com/v1.0/me/drive/items/\(pathID)/children?%24expand=thumbnails&%24top=200"
         if pathID == "/" {
             requestURL = "https://graph.microsoft.com/v1.0/me/drive/root/children?%24expand=thumbnails&%24top=200"
@@ -116,7 +115,7 @@ class PPOneDriveService: NSObject, PPCloudServiceProtocol {
                 }
                 
                 DispatchQueue.main.async {
-                    completionHandler(dataSource,nil)
+                    completion(dataSource,nil)
                 }
             }
             
@@ -136,26 +135,28 @@ class PPOneDriveService: NSObject, PPCloudServiceProtocol {
          */
     }
     
-    func contentsOfFile(_ path: String, completionHandler: @escaping (Data?, Error?) -> Void) {
-        AF.request(path).response { response in
-            completionHandler(response.data, nil)
+    
+    func getFileData(_ path: String, _ extraParams:String, completion:@escaping(_ data:Data?, _ url:String, _ error:Error?) -> Void) {
+        
+    }
+    
+    
+    func createDirectory(_ folderName: String, _ atPath: String, completion:@escaping(_ error: Error?) -> Void) {
+        onedrive.create(folder: folderName, at: atPath, completionHandler: completion)
+    }
+    
+    func createFile(_ path: String, _ pathID: String, contents: Data, completion: @escaping(_ result: [String:String]?, _ error: Error?) -> Void) {
+        onedrive.writeContents(path: path, contents: contents, overwrite: true) { error in
+            completion(nil, error)
         }
     }
     
-    func createDirectory(_ folderName: String, at atPath: String, completionHandler: @escaping (Error?) -> Void) {
-        onedrive.create(folder: folderName, at: atPath, completionHandler: completionHandler)
+    func moveItem(srcPath: String, destPath: String, srcItemID: String, destItemID: String, isRename: Bool, completion: @escaping(_ error:Error?) -> Void) {
+        onedrive.moveItem(path:srcPath, to: destPath, completionHandler: completion)
     }
     
-    func createFile(atPath path: String, contents: Data, completionHandler: @escaping (Error?) -> Void) {
-        onedrive.writeContents(path: path, contents: contents, overwrite: true, completionHandler: completionHandler)
-    }
-    
-    func moveItem(atPath srcPath: String, toPath dstPath: String, completionHandler: @escaping (Error?) -> Void) {
-        onedrive.moveItem(path:srcPath, to: dstPath, completionHandler: completionHandler)
-    }
-    
-    func removeItem(atPath path: String, completionHandler: @escaping (Error?) -> Void) {
-        onedrive.removeItem(path:path, completionHandler: completionHandler)
+    func removeItem(_ path: String, _ fileID: String, completion: @escaping(_ error: Error?) -> Void) {
+        onedrive.removeItem(path:path, completionHandler: completion)
     }
     
     

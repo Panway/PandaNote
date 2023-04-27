@@ -36,7 +36,7 @@ class PPWebDAVConfigViewController: PPBaseViewController {
     var tips = ""
     override func viewDidLoad() {
         super.viewDidLoad()
-        self.title = "新增云服务"
+        self.title = "云服务配置"
         self.view.backgroundColor = UIColor(red:0.93, green:0.93, blue:0.93, alpha:1.00)
         var leftNames = [String]() //["服务器","账号","密码","备注"]
         var placeHolders = [String]() //["服务器地址","账号（Dropbox不需要）","密码或token","备注（显示用）"]

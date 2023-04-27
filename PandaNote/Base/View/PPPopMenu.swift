@@ -43,7 +43,7 @@ class PPPopMenu: NSObject,PopMenuViewControllerDelegate {
         controller.shouldDismissOnSelection = true//选择后是否自动消失
         controller.delegate = self
         controller.appearance.popMenuColor.backgroundColor = .solid(fill: .white)
-
+        controller.appearance.popMenuActionCountForScrollable = 10
         controller.didDismiss = { selected in
             print("Menu dismissed: \(selected ? "selected item" : "no selection")")
         }
@@ -52,7 +52,11 @@ class PPPopMenu: NSObject,PopMenuViewControllerDelegate {
         sourceVC.present(controller, animated: true, completion: nil)
         self.selectionAction = selectHandler
     }
-    
+    public var dismissOnSelection : Bool? {
+        didSet {
+            controller.shouldDismissOnSelection = dismissOnSelection ?? true
+        }
+    }
     func popMenuDidSelectItem(_ popMenuViewController: PopMenuViewController, at index: Int) {
 //        debugPrint(index)
         self.selectionAction?(index, stringArray[index])

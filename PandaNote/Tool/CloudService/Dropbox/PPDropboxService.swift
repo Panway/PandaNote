@@ -9,6 +9,9 @@
 import UIKit
 import FilesProvider
 
+let dropbox_auth_url = "https://www.dropbox.com/oauth2/authorize?client_id=pjmhj9rfhownr7z&redirect_uri=filemgr://oauth-callback/dropbox&response_type=token&state=DROPBOX"
+
+
 class PPDropboxService: PPFilesProvider, PPCloudServiceProtocol {
     var url = "https://api.dropboxapi.com/2/"
     var baseURL: String {
@@ -24,38 +27,42 @@ class PPDropboxService: PPFilesProvider, PPCloudServiceProtocol {
     }
     
     
-    func contentsOfDirectory(_ path: String, completionHandler: @escaping ([PPFileObject], Error?) -> Void) {
+    func contentsOfDirectory(_ path: String, _ pathID: String, completion: @escaping(_ data: [PPFileObject], _ error: Error?) -> Void) {
         dropbox?.contentsOfDirectory(path: path, completionHandler: {
             contents, error in
             let archieveArray = self.myPPFileArrayFrom(contents)
             DispatchQueue.main.async {
-                completionHandler(archieveArray,error)
+                completion(archieveArray,error)
             }
         })
     }
     
-    func contentsOfPathID(_ pathID: String, completionHandler: @escaping ([PPFileObject], Error?) -> Void) {
-            
+    
+    
+    func getFileData(_ path: String, _ extraParams:String, completion:@escaping(_ data:Data?, _ url:String, _ error:Error?) -> Void) {
+        //let fileID = extraParams.fileID
+        dropbox?.contents(path: path, completionHandler: { contents, error in
+            completion(contents, "", error)
+        })
+    }
+
+    
+    func createDirectory(_ folderName: String, _ atPath: String, completion:@escaping(_ error: Error?) -> Void) {
+        dropbox?.create(folder: folderName, at: atPath, completionHandler: completion)
     }
     
-    func contentsOfFile(_ path: String, completionHandler: @escaping (Data?, Error?) -> Void) {
-        dropbox?.contents(path: path, completionHandler: completionHandler)
+    func createFile(_ path: String, _ pathID: String, contents: Data, completion: @escaping(_ result: [String:String]?, _ error: Error?) -> Void) {
+        dropbox?.writeContents(path: path, contents: contents, overwrite: true, completionHandler: { error in
+            completion(nil, error)
+        })
     }
     
-    func createDirectory(_ folderName: String, at atPath: String, completionHandler: @escaping (Error?) -> Void) {
-        dropbox?.create(folder: folderName, at: atPath, completionHandler: completionHandler)
+    func moveItem(srcPath: String, destPath: String, srcItemID: String, destItemID: String, isRename: Bool, completion: @escaping(_ error:Error?) -> Void) {
+        dropbox?.moveItem(path:srcPath, to: destPath, completionHandler: completion)
     }
     
-    func createFile(atPath path: String, contents: Data, completionHandler: @escaping (Error?) -> Void) {
-        dropbox?.writeContents(path: path, contents: contents, overwrite: true, completionHandler: completionHandler)
-    }
-    
-    func moveItem(atPath srcPath: String, toPath dstPath: String, completionHandler: @escaping (Error?) -> Void) {
-        dropbox?.moveItem(path:srcPath, to: dstPath, completionHandler: completionHandler)
-    }
-    
-    func removeItem(atPath path: String, completionHandler: @escaping (Error?) -> Void) {
-        dropbox?.removeItem(path:path, completionHandler: completionHandler)
+    func removeItem(_ path: String, _ fileID: String, completion: @escaping(_ error: Error?) -> Void) {
+        dropbox?.removeItem(path:path, completionHandler: completion)
     }
     
     

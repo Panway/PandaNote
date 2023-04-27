@@ -14,6 +14,7 @@ PODS:
   - GCDWebServer (3.5.4):
     - GCDWebServer/Core (= 3.5.4)
   - GCDWebServer/Core (3.5.4)
+  - Highlightr (2.1.0)
   - IQKeyboardManager (6.5.10)
   - Kanna (5.2.7)
   - Kingfisher (6.3.1)
@@ -57,6 +58,7 @@ DEPENDENCIES:
   - FLEX
   - FMDB
   - GCDWebServer
+  - Highlightr
   - IQKeyboardManager
   - Kanna (~> 5.2.2)
   - Kingfisher (~> 6.3.1)
@@ -88,6 +90,7 @@ SPEC REPOS:
     - FLEX
     - FMDB
     - GCDWebServer
+    - Highlightr
     - IQKeyboardManager
     - Kanna
     - Kingfisher
@@ -124,6 +127,7 @@ SPEC CHECKSUMS:
   FLEX: bdc9ac7d4a239e3d04c298c01221203257d63a80
   FMDB: 2ce00b547f966261cd18927a3ddb07cb6f3db82a
   GCDWebServer: 2c156a56c8226e2d5c0c3f208a3621ccffbe3ce4
+  Highlightr: 595f3e100737c8de41113385da8bd0b5b65212c6
   IQKeyboardManager: 45a1fa55c1a5b02c61ac0fd7fd5b62bb4ad20d97
   Kanna: 01cfbddc127f5ff0963692f285fcbc8a9d62d234
   Kingfisher: 016c8b653a35add51dd34a3aba36b580041acc74
@@ -140,6 +144,6 @@ SPEC CHECKSUMS:
   TZImagePickerController: e9909edbadf7381140efc5b5c9f5bdbfd630f7d4
   YYText: 5c461d709e24d55a182d1441c41dc639a18a4849
 
-PODFILE CHECKSUM: a57a80120e230d6253877a7b013744887fecfcd6
+PODFILE CHECKSUM: 8c862c542d961a39e29eadc74175afd3f28f500b
 
-COCOAPODS: 1.11.3
+COCOAPODS: 1.12.0

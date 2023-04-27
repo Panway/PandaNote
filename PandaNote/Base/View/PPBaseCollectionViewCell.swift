@@ -23,7 +23,7 @@ class PPBaseCollectionViewCell: UICollectionViewCell {
         
     }
     //让子类重写
-    func updateUIWithData(_ model:AnyObject?)  {
+    func updateUIWithData(_ model:AnyObject)  {
         
     }
 }

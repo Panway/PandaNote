@@ -8,7 +8,7 @@
 
 import UIKit
 
-class PPBaseView: UIView {
+public class PPBaseView: UIView {
     override init(frame: CGRect) {
         super.init(frame: frame)
         pp_addSubviews()

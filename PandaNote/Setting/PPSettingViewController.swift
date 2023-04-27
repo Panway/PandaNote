@@ -8,6 +8,7 @@
 
 import UIKit
 import DropDown
+import Kingfisher
 
 class PPSettingViewController: PPBaseViewController,UITableViewDataSource,UITableViewDelegate,PPSettingCellDelegate {
     
@@ -85,6 +86,12 @@ class PPSettingViewController: PPBaseViewController,UITableViewDataSource,UITabl
         cell.titleLB.text = item["name"]
         if let detail = item["detail"] {
             cell.detailLB.text = detail
+            if cell.titleLB.text == "清除缓存" {
+                let dir = PPAppConfig.shared.cacheDirectory + "/PandaCache"
+                let imageSize = (try? ImageCache.default.diskStorage.totalSize()) ?? 0
+                let totalSize = dir.pp_calculateDirectorySize() + Int64(imageSize)
+                cell.detailLB.text = totalSize > 0 ? totalSize.pp_SizeString() : "0KB"
+            }
         }
         if let showSwitch = item["showSwitch"],showSwitch.bool == true {
             cell.switchBtn.isOn = PPUserInfo.pp_boolValue(item["key"] ?? "")
@@ -103,7 +110,7 @@ class PPSettingViewController: PPBaseViewController,UITableViewDataSource,UITabl
         }
         else if obj == "保存设置到" {
             let vc = PPFileListViewController()
-            vc.filePathToBeMove = PPUserInfo.shared.pp_mainDirectory + "/PP_JSONConfig.json"
+            vc.srcPathForMove = PPUserInfo.shared.pp_mainDirectory + "/PP_JSONConfig.json"
             vc.isMovingMode = true
             let nav = UINavigationController(rootViewController: vc)
             self.present(nav, animated: true, completion: nil)
@@ -134,7 +141,7 @@ class PPSettingViewController: PPBaseViewController,UITableViewDataSource,UITabl
             dropDown.anchorView = tableView.cellForRow(at: indexPath) // UIView or UIBarButtonItem
             dropDown.direction = .bottom
             dropDown.bottomOffset = CGPoint(x: 100, y: 0)
-            dropDown.dataSource = ["none", "NSAttributedString+Markdown", "Down"]
+            dropDown.dataSource = ["none", "Highlightr","NSAttributedString+Markdown", "Down"]
             dropDown.selectionAction = { (index: Int, item: String) in
                 PPUserInfo.shared.pp_Setting.updateValue(dropDown.dataSource[index], forKey:"pp_markdownParseMethod")
             }
@@ -166,6 +173,13 @@ class PPSettingViewController: PPBaseViewController,UITableViewDataSource,UITabl
             dropDown.width = 55
             DropDown.appearance().setupCornerRadius(10)
             dropDown.show()
+        }
+        else if obj == "清除缓存" {
+            let dir = PPAppConfig.shared.cacheDirectory + "/PandaCache"
+            dir.pp_removeAllFiles()
+            ImageCache.default.clearDiskCache()
+            PPHUD.showHUDFromTop("清除完毕")
+            self.tableView.reloadRows(at: [indexPath], with: .none) //为什么reloadData UI全乱了？
         }
         
     }

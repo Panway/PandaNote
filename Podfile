@@ -31,6 +31,8 @@ target 'PandaNote' do
   pod 'SnapKit'
   # https://github.com/iwasrobbed/Down
   pod 'Down'
+  pod 'Highlightr'
+#  pod 'ZMarkupParser'
 #  pod 'DoraemonKit/Core'
   # https://github.com/Flipboard/FLEX
   pod 'FLEX', :configurations => ['Debug']

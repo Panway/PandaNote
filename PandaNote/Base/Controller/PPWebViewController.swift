@@ -27,12 +27,12 @@ class PPWebViewController: UIViewController,WKUIDelegate,WKNavigationDelegate,WK
     var preloadJSNameInBundle: String?
     /// 是否注册scheme来拦截http资源
     var registerHTTPSchemeForCustomProtocol = false
+    var shouldGetAssets = false /// 获取网页静态资源
     var lastOffsetY : CGFloat = 0.0
     var bottomView : PPWebViewBottomToolbar!
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        self.view.backgroundColor = UIColor.white
+        self.view.backgroundColor = .white
         if let titleStr = self.titleStr {
             self.title = titleStr
         }
@@ -61,7 +61,9 @@ class PPWebViewController: UIViewController,WKUIDelegate,WKNavigationDelegate,WK
         view.addSubview(wkWebView)
         wkWebView.frame = view.bounds
         self.pp_viewEdgeEqualToSafeArea(wkWebView)
-        
+        if #available(macCatalyst 16.4, iOS 16.4, *) {
+            wkWebView.isInspectable = true
+        }
         
         wkWebView.navigationDelegate = self
         wkWebView.uiDelegate = self
@@ -282,6 +284,10 @@ class PPWebViewController: UIViewController,WKUIDelegate,WKNavigationDelegate,WK
         PPAlertAction.showSheet(withTitle: "更多操作", message: nil, cancelButtonTitle: "取消", destructiveButtonTitle: nil, otherButtonTitle: items) { (index) in
             debugPrint(index)
             if index == 1 {
+                if (!self.registerHTTPSchemeForCustomProtocol || PPUserInfo.shared.pp_WebViewResource.count < 1) {
+                    self.getWebAssets()
+                    return
+                }
                 let vc = PPWebFileViewController()
                 self.navigationController?.pushViewController(vc, animated: true)
             }
@@ -294,8 +300,22 @@ class PPWebViewController: UIViewController,WKUIDelegate,WKNavigationDelegate,WK
             else if index == 4 {
                 self.wkWebView.exportToPdf { data in
                     let shareSheet = UIActivityViewController(activityItems: [data], applicationActivities: nil)
+                    if let ppc = shareSheet.popoverPresentationController {
+                        ppc.sourceView = self.view;
+                    }
                     self.present(shareSheet, animated: true)
                 }
+            }
+        }
+    }
+    
+    func getWebAssets() {
+        PPAlertAction.showAlert(withTitle: "当前页面需要重新加载才能提取资源", msg: "是否继续", buttonsStatement: ["确定","取消"]) { index in
+            if index == 0 {
+                self.shouldGetAssets = true
+                PPWebViewController.registerHTTPScheme()
+                WKWebViewTool.pp_clearWebViewCache()
+                self.wkWebView.reload()
             }
         }
     }
@@ -323,14 +343,16 @@ extension PPWebViewController {
             self.navigationController?.pushViewController(vc, animated: true)
         }
         //获取百度网盘的access_token
-        else if urlString.hasPrefix("http://www.estrongs.com") {
-            let urlWithToken = urlString.removingPercentEncoding?.replacingOccurrences(of: "www.estrongs.com/#", with: "www.estrongs.com?")
+        else if urlString.hasPrefix("http://www.estrongs.com") || urlString.hasPrefix("pandanote://baiduwangpan"){
+            var urlWithToken = urlString.removingPercentEncoding?.replacingOccurrences(of: "www.estrongs.com/#", with: "www.estrongs.com?")//早期用ES的配置，现在实际上没用了
+            urlWithToken = urlString.removingPercentEncoding?.replacingOccurrences(of: "pandanote://baiduwangpan#", with: "pandanote://baiduwangpan?")
             let access_token = urlWithToken?.pp_valueOf("access_token")
             debugPrint(access_token)
             
             let vc = PPWebDAVConfigViewController()
-            vc.cloudType = "baiduyun"
-            vc.serverURL = "https://pan.baidu.com/rest/2.0/xpan/file"
+            vc.cloudType = PPCloudServiceType.baiduyun.rawValue
+            vc.showServerURL = false
+            vc.showUserName = false
             vc.remark = "百度网盘"
             vc.password = access_token ?? ""
             self.navigationController?.pushViewController(vc, animated: true)

@@ -51,6 +51,11 @@
     "key": "recursiveDepthWhenSearch",
     "showSwitch": "",
     "detail": "强制递归搜索子文件夹"
+  },
+  {
+    "name": "清除缓存",
+    "key": "pp_clearCache",
+    "detail": "0 MB"
   }],
   [
   {
