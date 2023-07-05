@@ -15,7 +15,7 @@ class PPDetailViewController: UIViewController {
     
     
     let pageViewController = UIPageViewController(transitionStyle: .scroll, navigationOrientation: .horizontal, options: nil)
-    let viewControllers = [PPMarkdownViewController(), PPWebViewController()]
+//    let viewControllers = [PPMarkdownViewController(), PPWebViewController()]
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -23,11 +23,11 @@ class PPDetailViewController: UIViewController {
         view.addSubview(pageViewController.view)
         pageViewController.view.frame = view.bounds
         
-        guard let markdown = viewControllers[0] as? PPMarkdownViewController else {return};
-        markdown.filePathStr = filePathStr
-        markdown.fileID = fileID
-        markdown.downloadURL = downloadURL
-        pageViewController.setViewControllers([markdown], direction: .forward, animated: true, completion: nil)
-        pageViewController.didMove(toParent: self)
+//        guard let markdown = viewControllers[0] as? PPMarkdownViewController else {return};
+//        markdown.filePathStr = filePathStr
+//        markdown.fileID = fileID
+//        markdown.downloadURL = downloadURL
+//        pageViewController.setViewControllers([markdown], direction: .forward, animated: true, completion: nil)
+//        pageViewController.didMove(toParent: self)
     }
 }

@@ -71,7 +71,7 @@ class PPMarkdownViewController: PPBaseViewController,
                 PPHUD.showHUDFromTop("获取内容失败，请进入文件夹刷新",isError: true)
                 return
             }
-            PPHUD.showHUDFromTop(isFromCache ? "当前是缓存内容":"已加载最新")
+            PPHUD.showHUDFromTop(isFromCache ? "已加载缓存内容":"已加载最新")
 //            debugPrint(String(data: contents, encoding: .utf8)!) // "hello world!"
             if let text_encoded = String(textData: contents) {
                 self.markdownStr = text_encoded
@@ -118,15 +118,15 @@ class PPMarkdownViewController: PPBaseViewController,
                     }
                     self.highlightrThemes.sort()
 
-                    let userTheme = PPAppConfig.shared.getItem("PPHighlightTheme");
+                    let userTheme = PPAppConfig.shared.getItem("PPHighlightTheme")
                     self.highlightr?.setTheme(to: userTheme.length > 0 ? userTheme : "atom-one-light")
                     
                     let textStorage = CodeAttributedString(highlightr: self.highlightr!)
                     textStorage.language = self.fileExtension
                     let layoutManager = NSLayoutManager()
                     textStorage.addLayoutManager(layoutManager)
-
-                    let textContainer = NSTextContainer(size: self.view.bounds.size)
+                    // 高度为.greatestFiniteMagnitude才可滑动 enable scroll
+                    let textContainer = NSTextContainer(size: CGSize(width: self.view.bounds.width, height: .greatestFiniteMagnitude))
                     layoutManager.addTextContainer(textContainer)
 
                     self.textView = UITextView(frame: self.view.bounds, textContainer: textContainer)
@@ -146,7 +146,7 @@ class PPMarkdownViewController: PPBaseViewController,
             }
             
             //定位到上次滚动的位置
-            let offsetKey = PPFileManager.shared.currentServerUniqueID().pp_md5
+            let offsetKey = "\(PPFileManager.shared.currentServerUniqueID())\(self.filePathStr)".pp_md5
             let offsetY = PPCacheManeger.shared.get(offsetKey).toCGFloat()
             if offsetY > 0 {
                 //为0的时候设置好像有时候文字不显示？？？
@@ -172,8 +172,8 @@ class PPMarkdownViewController: PPBaseViewController,
     }
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
-        if !self.textChanged || changed() {
-            debugPrint("文本未修改")
+        if !changed() {
+            debugPrint("文本未修改",self.filePathStr)
             return
         }
         if (UIDevice.current.userInterfaceIdiom != .phone) {
@@ -214,12 +214,13 @@ class PPMarkdownViewController: PPBaseViewController,
         self.setLeftBarButton()
     }
     func changed() -> Bool {
-        return self.textView.text == self.markdownStr
+        debugPrint("文本改变:",self.textView.text != self.markdownStr)
+        return self.textView.text != self.markdownStr
     }
     override func pp_backAction() {
         self.textView.resignFirstResponder()
         //心疼CPU，文本有修改的话就不全部比较了>_<
-        if !self.textChanged || changed() {
+        if changed() == false {
             debugPrint("未修改,直接退出")
             self.navigationController?.popViewController(animated: true)
             return
@@ -397,7 +398,7 @@ class PPMarkdownViewController: PPBaseViewController,
         let webVC = PPUserInfo.shared.webViewController//PPWebViewController()
         var path = ""
         if self.filePathStr.hasSuffix("html") {//HTML文件直接显示
-            var urlStr = self.filePathStr.pp_fileCachePath()
+            let urlStr = self.filePathStr.pp_fileCachePath()
             webVC.fileURLStr = urlStr
         }
         else {
@@ -450,6 +451,7 @@ class PPMarkdownViewController: PPBaseViewController,
     @objc func moreAction()  {
         var menuTitile = ["分享文本","搜索","左右分栏模式","上下分栏模式","关闭分栏"]
         menuTitile.append("更换主题")
+        menuTitile.append("去掉换行符")
         self.dropdown.dataSource = menuTitile
         self.dropdown.width = "左右分栏模式".pp_calcTextWidth() + 30
         self.dropdown.selectionAction = { (index: Int, item: String) in
@@ -471,7 +473,7 @@ class PPMarkdownViewController: PPBaseViewController,
                 self.switchSplitMode(.none)
             }
             else if item == "更换主题" {
-                PPAppConfig.shared.popMenu.showWithCallback(sourceView:self.view,
+                PPAppConfig.shared.popMenu.showWithCallback(sourceView:self.dropdown,
                                                             stringArray: self.highlightrThemes,
                                                             sourceVC: self) { index, string in
                     debugPrint(string)
@@ -482,6 +484,9 @@ class PPMarkdownViewController: PPBaseViewController,
                     PPAppConfig.shared.setItem("PPHighlightTheme", string)
                 }
                 PPAppConfig.shared.popMenu.dismissOnSelection = false
+            }
+            else if item == "去掉换行符" {
+                self.textView.text = self.textView.text.replacingOccurrences(of: "\n", with: "")
             }
         }
         self.dropdown.anchorView = topToolView

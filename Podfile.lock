@@ -1,13 +1,13 @@
 PODS:
-  - Alamofire (5.4.4)
+  - Alamofire (5.7.1)
   - BTNavigationDropdownMenu (0.7)
   - ContextMenu (0.4.0)
-  - CryptoSwift (1.4.2)
+  - CryptoSwift (1.5.1)
   - Down (0.11.0)
   - DropDown (2.3.13)
   - FilesProvider (0.26.0)
-  - FLAnimatedImage (1.0.16)
-  - FLEX (4.7.0)
+  - FLAnimatedImage (1.0.17)
+  - FLEX (5.22.10)
   - FMDB (2.7.5):
     - FMDB/standard (= 2.7.5)
   - FMDB/standard (2.7.5)
@@ -15,7 +15,7 @@ PODS:
     - GCDWebServer/Core (= 3.5.4)
   - GCDWebServer/Core (3.5.4)
   - Highlightr (2.1.0)
-  - IQKeyboardManager (6.5.10)
+  - IQKeyboardManager (6.5.11)
   - Kanna (5.2.7)
   - Kingfisher (6.3.1)
   - MBProgressHUD (1.2.0)
@@ -30,7 +30,7 @@ PODS:
     - PINCache/Core
   - PINCache/Core (3.0.3):
     - PINOperation (~> 1.2.1)
-  - PINOperation (1.2.1)
+  - PINOperation (1.2.2)
   - PPiOSKit/CommomViews (0.0.1)
   - PPiOSKit/CrashCatcher (0.0.1):
     - PPiOSKit/RuntimeTool
@@ -68,6 +68,7 @@ DEPENDENCIES:
   - NewPopMenu
   - ObjectMapper
   - PINCache
+  - PINOperation (~> 1.2.1)
   - PPiOSKit/CommomViews (from `https://github.com/Panway/CodeSnipetCollection.git`)
   - PPiOSKit/CrashCatcher (from `https://github.com/Panway/CodeSnipetCollection.git`)
   - PPiOSKit/PPAlertAction (from `https://github.com/Panway/CodeSnipetCollection.git`)
@@ -112,23 +113,23 @@ EXTERNAL SOURCES:
 
 CHECKOUT OPTIONS:
   PPiOSKit:
-    :commit: 32aeb80ddd1602cce23d83a68cf9f29b9e32eb87
+    :commit: 9ec2070fd9b29219661e5e5f3934f4775a58a17e
     :git: https://github.com/Panway/CodeSnipetCollection.git
 
 SPEC CHECKSUMS:
-  Alamofire: f3b09a368f1582ab751b3fff5460276e0d2cf5c9
+  Alamofire: 0123a34370cb170936ae79a8df46cc62b2edeb88
   BTNavigationDropdownMenu: 57a72c74dc211db3564f5be168f4f7643491a7de
   ContextMenu: f835e09a93f1c28c631b76ee94396d9570397fd1
-  CryptoSwift: a532e74ed010f8c95f611d00b8bbae42e9fe7c17
+  CryptoSwift: c4f2debceb38bf44c80659afe009f71e23e4a082
   Down: b6ba1bc985c9d2f4e15e3b293d2207766fa12612
   DropDown: 8a2116376c1981888557f72ec2ffc9a5e0e456ec
   FilesProvider: 2a8ae17d8b9c23a6feadb1308ee638fa31d21065
-  FLAnimatedImage: 8f3e854ebf9680b71f0b6e700939687fc4d82b4b
-  FLEX: bdc9ac7d4a239e3d04c298c01221203257d63a80
+  FLAnimatedImage: bbf914596368867157cc71b38a8ec834b3eeb32b
+  FLEX: f21ee4f498eed3f8a1eded66b21939fd3b7a22ce
   FMDB: 2ce00b547f966261cd18927a3ddb07cb6f3db82a
   GCDWebServer: 2c156a56c8226e2d5c0c3f208a3621ccffbe3ce4
   Highlightr: 595f3e100737c8de41113385da8bd0b5b65212c6
-  IQKeyboardManager: 45a1fa55c1a5b02c61ac0fd7fd5b62bb4ad20d97
+  IQKeyboardManager: ef43ce1ba1e5aaf4adf222c0a46f39761f246879
   Kanna: 01cfbddc127f5ff0963692f285fcbc8a9d62d234
   Kingfisher: 016c8b653a35add51dd34a3aba36b580041acc74
   MBProgressHUD: 3ee5efcc380f6a79a7cc9b363dd669c5e1ae7406
@@ -137,13 +138,13 @@ SPEC CHECKSUMS:
   NewPopMenu: c6129e08e8192f6257ceb5f9a4357e1b59c6e2e7
   ObjectMapper: 1eb41f610210777375fa806bf161dc39fb832b81
   PINCache: 7a8fc1a691173d21dbddbf86cd515de6efa55086
-  PINOperation: 00c935935f1e8cf0d1e2d6b542e75b88fc3e5e20
+  PINOperation: daa34d4aa1d8449089be7d405b9d974abc4724c6
   PPiOSKit: 9f049cf7ff47cefda7f747a404254ee1a5ae7f85
   SKPhotoBrowser: cd95b95a6f352fc2a50992721299f75ead77f9ab
   SnapKit: e01d52ebb8ddbc333eefe2132acf85c8227d9c25
   TZImagePickerController: e9909edbadf7381140efc5b5c9f5bdbfd630f7d4
   YYText: 5c461d709e24d55a182d1441c41dc639a18a4849
 
-PODFILE CHECKSUM: 8c862c542d961a39e29eadc74175afd3f28f500b
+PODFILE CHECKSUM: d7ceb6f87e0dec47f28033ff85175af903fc8a60
 
-COCOAPODS: 1.12.0
+COCOAPODS: 1.12.1
