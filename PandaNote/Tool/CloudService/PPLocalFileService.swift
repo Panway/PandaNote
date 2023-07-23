@@ -10,7 +10,7 @@ import Foundation
 import FilesProvider
 
 
-class PPLocalFileService:PPFilesProvider, PPCloudServiceProtocol {
+class PPLocalFileService:NSObject, PPCloudServiceProtocol {
     var url = "local"
     var baseURL: String {
         return url
@@ -25,7 +25,7 @@ class PPLocalFileService:PPFilesProvider, PPCloudServiceProtocol {
     func contentsOfDirectory(_ path: String, _ pathID: String, completion: @escaping(_ data: [PPFileObject], _ error: Error?) -> Void) {
         fileProvider.contentsOfDirectory(path: path, completionHandler: {
             contents, error in
-            let archieveArray = self.myPPFileArrayFrom(contents)
+            let archieveArray = PPFileObject.toPPFileObjects(contents)
             DispatchQueue.main.async {
                 completion(archieveArray,error)
             }
@@ -42,7 +42,7 @@ class PPLocalFileService:PPFilesProvider, PPCloudServiceProtocol {
         }
     }
     
-    func createDirectory(_ folderName: String, _ atPath: String, completion:@escaping(_ error: Error?) -> Void) {
+    func createDirectory(_ folderName: String, _ atPath: String, _ parentID: String, completion: @escaping (Error?) -> Void) {
         fileProvider.create(folder: folderName, at: atPath, completionHandler: completion)
     }
     

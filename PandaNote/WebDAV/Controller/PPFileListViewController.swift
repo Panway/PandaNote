@@ -31,6 +31,7 @@ class PPFileListViewController: PPBaseViewController,
                                 PPDocumentDelegate
 {
     var pathStr = "/"
+    /// 当前路径唯一ID，百度网盘及阿里云盘等云存储需要
     var pathID = ""
     var rawDataSource:Array<PPFileObject> = [] ///< 原始数据源，筛选过滤时用到
     var dataSource:Array<PPFileObject> = []
@@ -614,7 +615,7 @@ class PPFileListViewController: PPBaseViewController,
                 return
             }
             if isDir {
-                PPFileManager.shared.createFolder(folder: newName, at: self.pathStr) { (error) in
+                PPFileManager.shared.createFolder(folder: newName, at: self.pathStr, parentID: self.pathID) { (error) in
                     if error == nil {
                         PPHUD.showHUDFromTop("新建成功")
                         self.getFileListData()
@@ -625,7 +626,7 @@ class PPFileListViewController: PPBaseViewController,
                 }
             }
             else {
-            PPFileManager.shared.createFile(path: self.pathStr+newName, contents: "# 标题".data(using:.utf8)) { (result, error) in
+                PPFileManager.shared.createFile(path: self.pathStr+newName,parentID: self.pathID, contents: "# 标题".data(using:.utf8)) { (result, error) in
                 if error != nil {
                     PPHUD.showHUDFromTop("新建失败", isError: true)
                 }
@@ -739,12 +740,15 @@ class PPFileListViewController: PPBaseViewController,
         PPFileManager.shared.pp_getFileList(path: self.pathStr, pathID:self.pathID) { (contents,isFromCache, error) in
             self.isCachedFile = isFromCache
             if error != nil {
-                PPHUD.showHUDFromTop("加载失败，请配置服务器", isError: true)
                 self.collectionView.endRefreshing()
                 if case let myError as PPCloudServiceError = error, myError == .forcedLoginRequired {
+                    PPHUD.showHUDFromTop("登录状态已失效，请重新登录", isError: true)
                     debugPrint(PPUserInfo.shared.pp_serverInfoList[PPUserInfo.shared.pp_lastSeverInfoIndex])
                     let serviceType = PPUserInfo.shared.getCurrentServerInfo("PPCloudServiceType")
                     PPAddCloudServiceViewController.addCloudService(serviceType, self)
+                }
+                else {
+                    PPHUD.showHUDFromTop("加载失败，请配置服务器", isError: true)
                 }
                 return
             }

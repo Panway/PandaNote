@@ -107,3 +107,13 @@ extension String {
     }
     
 }
+
+// MARK: - URL 相关处理
+extension String {
+    func pp_getDomain() -> String {
+        guard let urlComponents = URLComponents(string: self), let host = urlComponents.host else {
+            return ""
+        }
+        return host //host.hasPrefix("www.") ? String(host.dropFirst(4)) : host
+    }
+}

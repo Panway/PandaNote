@@ -27,8 +27,8 @@ class PPAliyunDriveService: NSObject, PPCloudServiceProtocol {
     var client_secret = "48b8170e32c1487394017fa712323830" //ES
     var access_token:String
     var refresh_token = ""
-    var drive_id = ""
-    var parent_file_id = ""
+    var drive_id = "" ///< 每个用户对应的唯一ID
+//    var parent_file_id = ""
     var retryCount = 0
     var deleteFileWithSameName = true ///< 阿里云盘同级目录允许存在多个同样名字的文件，在编辑文本时新增完删除旧的同名文件
     var currentDirFiles = [PPFileObject]()
@@ -142,10 +142,10 @@ class PPAliyunDriveService: NSObject, PPCloudServiceProtocol {
         currentDirID = pathID
         //我：将下面的curl命令换成Swift的请求库Alamofire实现。 ChatGPT：
         let requestURL = self.url + "/adrive/v1.0/openFile/list"
-        parent_file_id = path == "/" ? "root" : pathID
+        let parentID = path == "/" ? "root" : pathID
         let parameters: [String: Any] = [
             "drive_id": drive_id, //必填
-            "parent_file_id": parent_file_id, //必填
+            "parent_file_id": parentID, //必填
 //            "marker": "",
             "fields": "*", // 当填 * 时，返回文件所有字段；
             "order_direction": "DESC",
@@ -197,10 +197,10 @@ class PPAliyunDriveService: NSObject, PPCloudServiceProtocol {
         //let fileID = extraParams.fileID
     }
     //MARK: 新建文件夹
-    func createDirectory(_ folderName: String, _ atPath: String, completion:@escaping(_ error: Error?) -> Void) {
+    func createDirectory(_ folderName: String, _ atPath: String, _ parentID: String, completion: @escaping (Error?) -> Void) {
         let requestURL = self.url + "/adrive/v1.0/openFile/create"
         let parameters: [String: Any] = [
-            "parent_file_id": parent_file_id,
+            "parent_file_id": parentID,
             "check_name_mode": "ignore",//auto_rename参数会创建filename(1).md、filename(2).md
             "name": folderName,
             "type": "folder",
@@ -216,7 +216,7 @@ class PPAliyunDriveService: NSObject, PPCloudServiceProtocol {
 
         }
     }
-    
+    // 新建文件第3步：完成上传
     func completeUpload(_ file_id:String, _ upload_id:String, callback:((Error?) -> Void)? = nil) {
         let requestURL = self.url + "/adrive/v1.0/openFile/complete"
         let parameters: [String: Any] = [
@@ -228,11 +228,11 @@ class PPAliyunDriveService: NSObject, PPCloudServiceProtocol {
         AF.request(requestURL, method: .post, parameters: parameters, encoding: JSONEncoding.default, headers: getHeaders()).responseJSON { response in
             // 处理响应
             guard let jsonDic = response.value as? [String : Any] else { return }
-            debugPrint("complete")
+            debugPrint("/openFile/complete finished")
             jsonDic.printJSON()
             switch response.result {
             case .success(let value):
-                debugPrint("complete2",value)
+                debugPrint("/openFile/complete success",value)
                 callback?(nil)
             case .failure(let error):
                 callback?(error)
@@ -243,9 +243,10 @@ class PPAliyunDriveService: NSObject, PPCloudServiceProtocol {
     
     //MARK: 新建文件
     func createFile(_ path: String, _ pathID: String, contents: Data, completion: @escaping(_ result: [String:String]?, _ error: Error?) -> Void) {
-        let requestURL = self.url + "/adrive/v1.0/openFile/create";        let filename = path.pp_split("/").last ?? ""
+        let requestURL = self.url + "/adrive/v1.0/openFile/create";
+        let filename = path.pp_split("/").last ?? ""
         let parameters: [String: Any] = [
-            "parent_file_id": parent_file_id,
+            "parent_file_id": pathID,
             "check_name_mode": "ignore",//auto_rename参数会创建filename(1).md、filename(2).md
             "name": filename,
             "type": "file",

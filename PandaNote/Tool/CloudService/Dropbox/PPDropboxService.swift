@@ -12,7 +12,7 @@ import FilesProvider
 let dropbox_auth_url = "https://www.dropbox.com/oauth2/authorize?client_id=pjmhj9rfhownr7z&redirect_uri=filemgr://oauth-callback/dropbox&response_type=token&state=DROPBOX"
 
 
-class PPDropboxService: PPFilesProvider, PPCloudServiceProtocol {
+class PPDropboxService: NSObject, PPCloudServiceProtocol {
     var url = "https://api.dropboxapi.com/2/"
     var baseURL: String {
         return url
@@ -30,7 +30,7 @@ class PPDropboxService: PPFilesProvider, PPCloudServiceProtocol {
     func contentsOfDirectory(_ path: String, _ pathID: String, completion: @escaping(_ data: [PPFileObject], _ error: Error?) -> Void) {
         dropbox?.contentsOfDirectory(path: path, completionHandler: {
             contents, error in
-            let archieveArray = self.myPPFileArrayFrom(contents)
+            let archieveArray = PPFileObject.toPPFileObjects(contents)
             DispatchQueue.main.async {
                 completion(archieveArray,error)
             }
@@ -47,7 +47,7 @@ class PPDropboxService: PPFilesProvider, PPCloudServiceProtocol {
     }
 
     
-    func createDirectory(_ folderName: String, _ atPath: String, completion:@escaping(_ error: Error?) -> Void) {
+    func createDirectory(_ folderName: String, _ atPath: String, _ parentID: String, completion: @escaping (Error?) -> Void) {
         dropbox?.create(folder: folderName, at: atPath, completionHandler: completion)
     }
     

@@ -24,6 +24,7 @@ target 'PandaNote' do
   pod 'Alamofire','~> 5.0'
 #  https://github.com/onevcat/Kingfisher
   pod 'Kingfisher','~> 6.3.1'
+  pod 'PINOperation', '~> 1.2.1'
   pod 'PINCache'
   # https://github.com/amosavian/FileProvider
   pod 'FilesProvider'

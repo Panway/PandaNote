@@ -12,7 +12,6 @@ let onedrive_redirect_uri_pandanote = "pandanote://msredirect"
 let onedrive_login_url_es = "https://login.microsoftonline.com/common/oauth2/v2.0/authorize?client_id=dedcda2a-3acf-44bb-8baa-17f9ed544d64&scope=User.Read%20offline_access%20files.readwrite.all&redirect_uri=https://login.microsoftonline.com/common/oauth2/nativeclient&response_type=code"
 let onedrive_auth_url = "https://login.live.com/oauth20_authorize.srf?client_id=064f5b62-97a8-4dae-b5c1-aaf44439939d&scope=onedrive.readwrite%20offline_access&response_type=code&redirect_uri=pandanote://msredirect"//pandanote的
 
-import UIKit
 import FilesProvider
 import Alamofire
 
@@ -141,7 +140,7 @@ class PPOneDriveService: NSObject, PPCloudServiceProtocol {
     }
     
     
-    func createDirectory(_ folderName: String, _ atPath: String, completion:@escaping(_ error: Error?) -> Void) {
+    func createDirectory(_ folderName: String, _ atPath: String, _ parentID: String, completion: @escaping (Error?) -> Void) {
         onedrive.create(folder: folderName, at: atPath, completionHandler: completion)
     }
     

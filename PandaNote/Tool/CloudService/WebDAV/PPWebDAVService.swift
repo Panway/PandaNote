@@ -10,7 +10,7 @@ import Foundation
 import FilesProvider
 
 
-class PPWebDAVService: PPFilesProvider, PPCloudServiceProtocol {
+class PPWebDAVService: NSObject, PPCloudServiceProtocol {
     var url = ""
     var baseURL: String {
         return url
@@ -55,7 +55,7 @@ class PPWebDAVService: PPFilesProvider, PPCloudServiceProtocol {
                     debugPrint("503==",error._code)
                 }
             }
-            let archieveArray = self.myPPFileArrayFrom(contents)
+            let archieveArray = PPFileObject.toPPFileObjects(contents)
             
             DispatchQueue.main.async {
                 completion(archieveArray,error)
@@ -73,7 +73,7 @@ class PPWebDAVService: PPFilesProvider, PPCloudServiceProtocol {
     }
     
     
-    func createDirectory(_ folderName: String, _ atPath: String, completion:@escaping(_ error: Error?) -> Void) {
+    func createDirectory(_ folderName: String, _ atPath: String, _ parentID: String, completion: @escaping (Error?) -> Void) {
         webdav?.create(folder: folderName, at: atPath, completionHandler: completion)
     }
     
@@ -101,7 +101,7 @@ class PPWebDAVService: PPFilesProvider, PPCloudServiceProtocol {
         }
         
         webdav?.searchFiles(path: path, recursive: true, query: query, including: searchFile, foundItemHandler: nil, completionHandler: { (files, error) in
-            let archieveArray = self.myPPFileArrayFrom(files)
+            let archieveArray = PPFileObject.toPPFileObjects(files)
             if error == nil {
                 DispatchQueue.main.async {
                     completionHandler(archieveArray,false,error)

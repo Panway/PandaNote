@@ -12,6 +12,7 @@ import Foundation
 
 public enum PPCloudServiceType : String {
     case webdav = "webdav"
+    case icloud = "icloud"
     case local = "local"
     case dropbox = "Dropbox"
     case baiduyun = "baiduyun"

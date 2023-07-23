@@ -51,7 +51,7 @@ open class BaiduyunAPITool: NSObject, PPCloudServiceProtocol {
             //有错误
             if result.errorNum != 0 {
                 if (result.errorNum == -6) {
-                    //身份验证失败，需要强制登录
+                    debugPrint("百度网盘身份验证失败，需要强制登录")
                     completionHandler([],false, PPCloudServiceError.forcedLoginRequired)
                     return
                 }
@@ -280,7 +280,7 @@ open class BaiduyunAPITool: NSObject, PPCloudServiceProtocol {
 
     
     
-    func createDirectory(_ folderName: String, _ atPath: String, completion:@escaping(_ error: Error?) -> Void) {
+    func createDirectory(_ folderName: String, _ atPath: String, _ parentID: String, completion: @escaping (Error?) -> Void) {
         self.createFolder(path: folderName, completionHandler: completion)
     }
     

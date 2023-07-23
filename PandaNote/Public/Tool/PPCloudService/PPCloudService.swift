@@ -16,6 +16,7 @@ public enum PPCloudServiceError: Error {
     case fileNotExist
     case preCreateError
     case forcedLoginRequired
+    case accessTokenExpired
 }
 public enum PPCreateFileResult {
     case success([String:String])
@@ -38,7 +39,7 @@ protocol PPCloudServiceProtocol {
     func getFileData(_ path: String, _ extraParams:String, completion:@escaping(_ data:Data?, _ url:String, _ error:Error?) -> Void)
 
     /// 创建目录
-    func createDirectory(_ folderName: String, _ atPath: String, completion:@escaping(_ error: Error?) -> Void)
+    func createDirectory(_ folderName: String, _ atPath: String, _ parentID: String, completion:@escaping(_ error: Error?) -> Void)
     
     /// 创建文件
     func createFile(_ path: String, _ pathID: String, contents: Data, completion: @escaping(_ result: [String:String]?, _ error: Error?) -> Void)

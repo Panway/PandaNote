@@ -20,6 +20,7 @@ class PPFileManager: NSObject {
     var dropbox: PPDropboxService?//未配置服务器地址时刷新可能为空
     var localFileService: PPLocalFileService?
     var oneDriveService: PPOneDriveService?
+    var iCloudService: PPiCloudDriveService?
     var alistService: PPAlistService?
     var aliyunDriveService: PPAliyunDriveService?
     var baiduwangpan : BaiduyunAPITool?
@@ -48,6 +49,8 @@ class PPFileManager: NSObject {
                 return alistService
             case .aliyundrive:
                 return aliyunDriveService
+            case .icloud:
+                return iCloudService
             default:
                 return localFileService
             }
@@ -285,8 +288,8 @@ class PPFileManager: NSObject {
 
     }
     /// 新建文件夹
-    func createFolder(folder folderName: String, at atPath: String, completionHandler:@escaping(_ error:Error?) -> Void) {
-        currentService?.createDirectory(folderName, atPath, completion: { error in
+    func createFolder(folder folderName: String, at atPath: String, parentID: String, completionHandler:@escaping(_ error:Error?) -> Void) {
+        currentService?.createDirectory(folderName, atPath, parentID, completion: { error in
             DispatchQueue.main.async {
                 completionHandler(error)
             }
@@ -345,6 +348,10 @@ class PPFileManager: NSObject {
                 PPUserInfo.shared.updateCurrentServerInfo(key: key, value: value)
             }
         case .local:
+            DispatchQueue.global().async {
+                self.iCloudService = PPiCloudDriveService(containerId: PPAppConfig.shared.iCloudContainerId)
+            }
+        case .icloud:
             localFileService = PPLocalFileService()
         case .webdav:
             webdavService = PPWebDAVService(url: PPUserInfo.shared.webDAVServerURL,
