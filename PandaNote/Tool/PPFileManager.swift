@@ -52,7 +52,7 @@ class PPFileManager: NSObject {
             case .icloud:
                 return iCloudService
             default:
-                return localFileService
+                return iCloudService
             }
         }
         set {
@@ -348,9 +348,7 @@ class PPFileManager: NSObject {
                 PPUserInfo.shared.updateCurrentServerInfo(key: key, value: value)
             }
         case .local:
-            DispatchQueue.global().async {
-                self.iCloudService = PPiCloudDriveService(containerId: PPAppConfig.shared.iCloudContainerId)
-            }
+            self.iCloudService = PPiCloudDriveService(containerId: PPAppConfig.shared.iCloudContainerId)
         case .icloud:
             localFileService = PPLocalFileService()
         case .webdav:

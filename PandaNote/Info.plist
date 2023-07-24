@@ -64,12 +64,12 @@
 	<string>我们需要添加图片到笔记</string>
 	<key>NSUbiquitousContainers</key>
 	<dict>
-		<key>iCloud.com.yijian.yijianappaa</key>
+		<key>iCloud.com.agolddata.pandanotex</key>
 		<dict>
 			<key>NSUbiquitousContainerIsDocumentScopePublic</key>
 			<true/>
 			<key>NSUbiquitousContainerName</key>
-			<string>pandanotez</string>
+			<string>PandaNote</string>
 			<key>NSUbiquitousContainerSupportedFolderLevels</key>
 			<string>Any</string>
 		</dict>

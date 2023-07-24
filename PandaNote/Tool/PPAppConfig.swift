@@ -13,7 +13,7 @@ import Kingfisher
 
 class PPAppConfig: NSObject {
     static let shared = PPAppConfig()
-    let iCloudContainerId = "iCloud.com.agolddata.pandanotez"
+    let iCloudContainerId = "iCloud.com.agolddata.pandanotex"
     
     // https://github.com/swisspol/GCDWebServer/issues/143
     var fileViewMode = 0 //文件列表显示方式，列表或图标

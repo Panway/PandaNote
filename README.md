@@ -27,6 +27,7 @@ iOS 10.0+、macOS（初步支持，使用了Mac Catalyst）
 **已支持的网盘（协议）**：
 
 - [x] WebDAV（坚果云等）
+- [x] iCloud Documents
 - [x] 阿里云盘
 - [x] Dropbox
 - [x] OneDrive
