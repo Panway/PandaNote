@@ -30,16 +30,36 @@ fileprivate func getStringSeparatedBy(_ s:String, _ separator:String,_ removeLas
     }
 }
 
+fileprivate let removeParamList = ["smzdm.com", "okjike.com", "weibointl.api.weibo.com", "weibo.com"]
+fileprivate let sanitizerRules = ["mobile.yangkeduo.com": "goods_id"]
+fileprivate var userActions = ["🍀去微信分享","🌏打开网页"]
+fileprivate var douyinVideoID = "" //抖音视频ID
+fileprivate var currentURL = ""
 class PPPasteboardTool: NSObject {
+    // URL链接防跟踪、消毒、只保留必要参数
+    class func urlNoTracking(_ url:String) -> String {
+        var urlString = url
+        //去掉URL问号后面的参数
+        let results = removeParamList.filter { urlString.contains($0)}
+        if results.count > 0 {
+            urlString = urlString.split(string: "?")[0]
+        }
+        //只提取必要参数
+        let paramKey = sanitizerRules[urlString.pp_getDomain()] ?? ""
+        let paramValue = urlString.pp_valueOf(paramKey) ?? ""
+        if paramValue.length > 0 {
+            urlString = urlString.split(string: "?")[0] + "?\(paramKey)=\(paramValue)"
+        }
+        return urlString
+    }
+    
     class func getMoreInfomationOfURL() {
 //        UIPasteboard.general.string = "http://v.douyin.com/mLjjtL/ 抖音的测试链接"
 //        UIPasteboard.general.string = "https://www.smzdm.com/p/20405394/?send_by=3716913905&from=other"
         guard let input = UIPasteboard.general.string else { return }
         debugPrint("剪切板内容=\(input)")
-        if let lastPasteContent : String = PPUserInfo.shared.pp_Setting["PPLastPasteBoardContent"] as? String {
-            if input == lastPasteContent {
-                return
-            }
+        if input == PPAppConfig.shared.getItem("PPLastPasteBoardContent") {
+            return
         }
 //        let input = "https://m.weibo.cn/1098618600/4494272029733190"
 //        let input = "This is a test with the URL https://www.smzdm.com/p/20405394/?send_by=3716913905&from=other to be detected."
@@ -56,55 +76,35 @@ class PPPasteboardTool: NSObject {
         if matches.count > 1 {
             PPHUD.showHUDFromTop("URL太多，已为你解析第一个URL")
         }
-        //去掉URL问号后面的参数
-        if urlString.contains("smzdm.com") || urlString.contains("okjike.com") || urlString.contains("weibointl.api.weibo.com"){
-            urlString = urlString.split(string: "?")[0]
-        }
-        
-        debugPrint(urlString)
+        urlString = urlNoTracking(urlString)
+        debugPrint("消毒后的URL:\(urlString)")
+        currentURL = urlString
         AF.request(urlString).responseJSON { response in
             //不为空检查
             guard let data = response.data, let utf8Text = String(textData: data) else {
                 return
             }
-                //使用模拟器的时候，保存到自己电脑下载文件夹查看（pan是当前电脑用户名）
-                #if DEBUG
-                try? data.write(to: URL(fileURLWithPath: "/Users/pan/Downloads/PP_TEST.html", isDirectory: false))
-                #endif
+            //使用模拟器的时候，保存到自己电脑下载文件夹查看（pan是当前电脑用户名）
+#if DEBUG
+            try? data.write(to: URL(fileURLWithPath: "/Users/pan/Downloads/PP_TEST.html", isDirectory: false))
+#endif
                 
 //                debugPrint("Data: \(utf8Text)")
-                var title = PPPasteboardTool.getHTMLTitle(html: utf8Text,originURL: urlString)
-                title = title + "\n" + urlString
-                UIPasteboard.general.string = title
-                PPUserInfo.shared.pp_Setting.updateValue(title, forKey: "PPLastPasteBoardContent")
+            if PPPasteboardTool.getWebInfo(urlString) {
+                
+            }
+            
+            var title = PPPasteboardTool.getHTMLTitle(html: utf8Text,originURL: urlString)
+            title = title + "\n" + urlString
+            UIPasteboard.general.string = title
+            PPAppConfig.shared.setItem("PPLastPasteBoardContent", title)
             debugPrint("新的分享内容:" + title)
-            var userActions = ["🍀去微信分享","🌏打开网页"]
-            var douyinVideoID = "" //抖音视频ID
             if urlString.contains("v.douyin.com") {
                 userActions.append("⬇️下载抖音无水印视频")
                 douyinVideoID = response.response?.url?.pathComponents.last ?? ""
                 //重定向后的URL,https://www.iesdouyin.com/share/video/6736813535613013260/ ...
             }
-            
-            PPAlertAction.showSheet(withTitle: "是否去微信粘贴", message: "", cancelButtonTitle: "取消", destructiveButtonTitle: nil, otherButtonTitle: userActions) { (index) in
-                    debugPrint("==\(index)")
-                    if (index == 1) {
-                        if let weixin = URL(string: "wechat://") {
-                            UIApplication.shared.open(weixin, options: [:], completionHandler: nil)
-                        }
-                    }
-                    else if (index == 2) {
-                        let vc = PPWebViewController()
-                        vc.urlString = urlString
-                        UIViewController.pp_topViewController()?.navigationController?.pushViewController(vc, animated: true)
-                    }
-                    else if (index == 3) {
-                        //let results = utf8Text.pp_matches(for: "//s3.{1,80}reflow_video.*.js")
-                        //guard let res0 = results.first else { return }
-                        PPPasteboardTool.downLoadDouYinVideoWithoutWaterMark(id: douyinVideoID)
-                    }
-                }
-
+            PPPasteboardTool.showAlert()
         }
         
         
@@ -167,10 +167,46 @@ class PPPasteboardTool: NSObject {
                 result = doc.text ?? ""
             }
         }
-        debugPrint(result)
+        debugPrint("链接主要内容 URL content:",result)
         return result
     }
     
+    class func getWebInfo(_ originURL: String) -> Bool {
+        if (originURL.contains("https://weibo.com")) {
+            let weibo_id = originURL.pp_split("/").last ?? ""
+            AF.request("https://weibo.com/ajax/statuses/show?id=\(weibo_id)").responseJSON { response in
+                // debugPrint("weibo.com \(response.value ?? "")")
+                guard let jsonDic = response.value as? [String : Any] else { return }
+                if let text_raw = jsonDic["text_raw"] as? String {
+                    UIPasteboard.general.string = text_raw + "\n" + originURL
+                    PPAppConfig.shared.setItem("PPLastPasteBoardContent", text_raw + "\n" + originURL)
+                }
+            }
+            return true
+        }
+        return false
+    }
+    
+    class func showAlert() {
+        PPAlertAction.showSheet(withTitle: "是否去微信粘贴", message: "", cancelButtonTitle: "取消", destructiveButtonTitle: nil, otherButtonTitle: userActions) { (index) in
+            debugPrint("==\(index)")
+            if (index == 1) {
+                if let weixin = URL(string: "wechat://") {
+                    UIApplication.shared.open(weixin, options: [:], completionHandler: nil)
+                }
+            }
+            else if (index == 2) {
+                let vc = PPWebViewController()
+                vc.urlString = currentURL
+                UIViewController.pp_topViewController()?.navigationController?.pushViewController(vc, animated: true)
+            }
+            else if (index == 3) {
+                //let results = utf8Text.pp_matches(for: "//s3.{1,80}reflow_video.*.js")
+                //guard let res0 = results.first else { return }
+                PPPasteboardTool.downLoadDouYinVideoWithoutWaterMark(id: douyinVideoID)
+            }
+        }
+    }
     
      
     // 无水印解析来自：https://gist.github.com/d1y/cf8e21a1ad36b582e70da2941e624ea9

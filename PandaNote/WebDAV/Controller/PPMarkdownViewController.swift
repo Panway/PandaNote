@@ -91,8 +91,8 @@ class PPMarkdownViewController: PPBaseViewController,
                 self.fileExtension = suffix == "txt" ? "md" : suffix
             }
             //markdown解析的方式
-            if let selectedIndex = PPUserInfo.shared.pp_Setting["pp_markdownParseMethod"] {
-                let method = selectedIndex as! String
+            let method = PPAppConfig.shared.getItem("pp_markdownParseMethod")
+            if method != "" {
                 if method == "NSAttributedString+Markdown" {
                     //NSAttributedString+Markdown 解析
                     self.textView.attributedText = NSAttributedString(markdownRepresentation: self.markdownStr, attributes: [.font : UIFont.systemFont(ofSize: 17.0), .foregroundColor: self.theme.baseTextColor.pp_HEXColor()])
@@ -494,16 +494,12 @@ class PPMarkdownViewController: PPBaseViewController,
     }
     //初始化样式
     func initStyle() {
-        if let theme = PPUserInfo.shared.pp_Setting["pp_markdownEditorStyle"] as? String {
-            if theme == "锤子便签" {
-                useTheme("chuizi.json")
-            }
-            if theme == "Vue" {
-                useTheme("vue.json")
-            }
-            else {
-                useTheme("default.json")
-            }
+        let theme = PPAppConfig.shared.getItem("pp_markdownEditorStyle")
+        if theme == "锤子便签" {
+            useTheme("chuizi.json")
+        }
+        if theme == "Vue" {
+            useTheme("vue.json")
         }
         else {
             useTheme("default.json")

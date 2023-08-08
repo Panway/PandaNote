@@ -407,15 +407,13 @@ class PPFileManager: NSObject {
                 if isDegraded {
                    return//降级的，低质量的图片略缩图不要 https://stackoverflow.com/a/52355835/4493393
                 }
-                debugPrint("pick image size:",restulImage?.size)
+                debugPrint("pick image size:",restulImage?.size ?? "")
                 var originalFilename = "noname.jpg" //默认值，实际上不会出现
                 if let name = PHAssetResource.assetResources(for: asset).first?.originalFilename {
                     originalFilename = name
                 }
-                var compressionQuality = CGFloat(0.5)
-                if let compressionQ = PPUserInfo.shared.pp_Setting["pp_imageCompressionQuality"] as? String {
-                    compressionQuality = NumberFormatter().number(from: compressionQ) as? CGFloat ?? CGFloat(0.5)
-                }
+                let compressionQ = PPAppConfig.shared.getItem("pp_imageCompressionQuality")
+                let compressionQuality = NumberFormatter().number(from: compressionQ) as? CGFloat ?? CGFloat(0.5)
                 //"IMG_0111.HEIC" -> "IMG_0111.jpg"
                 originalFilename = String(originalFilename.split(separator: ".")[0]) + ".jpg"
                 if let imageData = restulImage?.jpegData(compressionQuality: compressionQuality) {

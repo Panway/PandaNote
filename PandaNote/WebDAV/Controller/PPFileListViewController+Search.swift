@@ -137,7 +137,7 @@ extension PPFileListViewController {
                 }
                 //如果是本地文件就上传（上传App配置）
                 if (first.srcPathForMove.contains(PPUserInfo.shared.pp_mainDirectory)) {
-                    let path = URL(fileURLWithPath: PPUserInfo.shared.pp_mainDirectory+"/PP_JSONConfig.json")
+                    let path = URL(fileURLWithPath: PPUserInfo.shared.pp_mainDirectory+"/PandaNote_AppSetting.json")
                     let jsonData = try? Data(contentsOf: path)
                     PPFileManager.shared.createFile(path: self.pathStr + fileName, contents: jsonData) { (result, error) in
                         if error != nil {
@@ -376,7 +376,7 @@ extension PPFileListViewController {
     func popMenuDidSelectItem(_ popMenuViewController: PopMenuViewController, at index: Int) {
         debugPrint(index)
         // 记住上次选中第几个
-        PPUserInfo.shared.pp_Setting["pp_lastSeverInfoIndex"] = index
+        PPAppConfig.shared.setItem("pp_lastSeverInfoIndex", "\(index)")
         PPUserInfo.shared.pp_lastSeverInfoIndex = index
         let info = PPUserInfo.shared.pp_serverInfoList[index]
         setNavTitle(info["PPWebDAVRemark"])

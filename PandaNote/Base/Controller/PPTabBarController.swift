@@ -46,12 +46,7 @@ class PPTabBarController: UITabBarController {
         let tab = PPTabBarController()
         tab.viewControllers = tabBarList
         //默认选择第几个tab
-        if let selectedIndex = PPUserInfo.shared.pp_Setting["pp_tab_selected_index"] {
-            tab.selectedIndex = selectedIndex as! Int
-        }
-        else {
-            tab.selectedIndex = 0
-        }
+        tab.selectedIndex = PPAppConfig.shared.getIntItem("pp_tab_selected_index")
         tab.tabBar.tintColor = PPCOLOR_GREEN
 //        UITabBar.appearance().tintColor
         return tab

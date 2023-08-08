@@ -42,7 +42,7 @@ class PPAppConfig: NSObject {
         initWebServer()
         self.pp_mainDirectory = NSSearchPathForDirectoriesInDomains(.libraryDirectory, .userDomainMask, true)[0]
         self.pp_mainDirectory += "/PandaNote"
-        if let data = try? Data(contentsOf: URL(fileURLWithPath: self.pp_mainDirectory+"/Panda_AppConfig.json")) {
+        if let data = try? Data(contentsOf: URL(fileURLWithPath: self.pp_mainDirectory+"/PandaNote_AppSetting.json")) {
             if let json = try? JSONSerialization.jsonObject(with: data, options: .allowFragments) {
                 self.config = json as! Dictionary<String, String>
             }
@@ -89,7 +89,7 @@ class PPAppConfig: NSObject {
     func saveToJSONFile() {
         if let jsonData = try? JSONSerialization.data(withJSONObject: config, options: JSONSerialization.WritingOptions.prettyPrinted) {
             do {
-                try jsonData.write(to: URL(fileURLWithPath: self.pp_mainDirectory + "/Panda_AppConfig.json"), options: .atomic)
+                try jsonData.write(to: URL(fileURLWithPath: self.pp_mainDirectory + "/PandaNote_AppSetting.json"), options: .atomic)
             } catch {
                 debugPrint(error)
             }

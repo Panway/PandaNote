@@ -56,7 +56,7 @@ class PPSettingViewController: PPBaseViewController,UITableViewDataSource,UITabl
         let item = self.dataSource[section][row]
         debugPrint("[设置项]\(item["name"] ?? ""):\(sender.isOn)")
         if item["name"] != nil {
-            PPUserInfo.shared.pp_Setting.updateValue(sender.isOn ? "1" : "0", forKey: item["key"] ?? "none")
+            PPAppConfig.shared.setItem(item["key"] ?? "none", sender.isOn ? "1" : "0")
         }
     }
     //MARK:- tab;le
@@ -110,7 +110,7 @@ class PPSettingViewController: PPBaseViewController,UITableViewDataSource,UITabl
         }
         else if obj == "保存设置到" {
             let vc = PPFileListViewController()
-            vc.srcPathForMove = PPUserInfo.shared.pp_mainDirectory + "/PP_JSONConfig.json"
+            vc.srcPathForMove = PPUserInfo.shared.pp_mainDirectory + "/PandaNote_AppSetting.json"
             vc.isMovingMode = true
             let nav = UINavigationController(rootViewController: vc)
             self.present(nav, animated: true, completion: nil)
@@ -128,7 +128,7 @@ class PPSettingViewController: PPBaseViewController,UITableViewDataSource,UITabl
             // 选择时触发动作 Action triggered on selection
             dropDown.selectionAction = { (index: Int, item: String) in
                 print("Selected item: \(item) at index: \(index)")
-                PPUserInfo.shared.pp_Setting.updateValue(index, forKey:"pp_tab_selected_index")
+                PPAppConfig.shared.setItem("pp_tab_selected_index", "\(index)")
             }
 
             // 将设置自定义宽度，而不是锚视图宽度 Will set a custom width instead of the anchor view width
@@ -143,7 +143,7 @@ class PPSettingViewController: PPBaseViewController,UITableViewDataSource,UITabl
             dropDown.bottomOffset = CGPoint(x: 100, y: 0)
             dropDown.dataSource = ["none", "Highlightr","NSAttributedString+Markdown", "Down"]
             dropDown.selectionAction = { (index: Int, item: String) in
-                PPUserInfo.shared.pp_Setting.updateValue(dropDown.dataSource[index], forKey:"pp_markdownParseMethod")
+                PPAppConfig.shared.setItem("pp_markdownParseMethod", dropDown.dataSource[index])
             }
             DropDown.appearance().setupCornerRadius(10)
             dropDown.show()
@@ -156,7 +156,7 @@ class PPSettingViewController: PPBaseViewController,UITableViewDataSource,UITabl
             dropDown.width = 100;
             dropDown.dataSource = ["默认", "锤子便签", "深黑", "浅黑","Vue"]
             dropDown.selectionAction = { (index: Int, item: String) in
-                PPUserInfo.shared.pp_Setting.updateValue(dropDown.dataSource[index], forKey:"pp_markdownEditorStyle")
+                PPAppConfig.shared.setItem("pp_markdownEditorStyle", dropDown.dataSource[index])
             }
             DropDown.appearance().setupCornerRadius(10)
             dropDown.show()
@@ -168,7 +168,7 @@ class PPSettingViewController: PPBaseViewController,UITableViewDataSource,UITabl
             dropDown.bottomOffset = CGPoint(x: 200, y: 0)
             dropDown.dataSource = ["0.1", "0.2", "0.3", "0.4","0.5"]
             dropDown.selectionAction = { (index: Int, item: String) in
-                PPUserInfo.shared.pp_Setting.updateValue(dropDown.dataSource[index], forKey:"pp_imageCompressionQuality")
+                PPAppConfig.shared.setItem("pp_imageCompressionQuality", dropDown.dataSource[index])
             }
             dropDown.width = 55
             DropDown.appearance().setupCornerRadius(10)

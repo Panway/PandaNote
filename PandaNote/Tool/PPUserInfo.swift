@@ -61,27 +61,6 @@ class PPUserInfo: NSObject {
         }
     }
     
-    
-    /// App等跟哟用户隐私无关的设置
-    public var pp_Setting : Dictionary<String, Any> = [:] {
-        didSet {
-            debugPrint("AppConfig 旧值：\(String(describing: oldValue)) \n新值： \(String(describing: pp_Setting))")
-//            let data:NSData = NSKeyedArchiver.archivedData(withRootObject: pp_Setting) as NSData
-//            data.write(toFile: self.pp_mainDirectory+"/PP_UserPreference", atomically: true)
-            if let jsonData = try? JSONSerialization.data(withJSONObject: pp_Setting, options: JSONSerialization.WritingOptions.prettyPrinted) {
-                do {
-                    try jsonData.write(to: URL(fileURLWithPath: self.pp_mainDirectory + "/PP_JSONConfig.json"), options: .atomic)
-                } catch {
-                    debugPrint(error)
-                }
-                                
-            }
-//            if oldValue != pp_Setting {
-                //save to disk
-                
-//            }
-        }
-    }
     /// 保存服务器配置（坚果云、Dropbox等）
     var pp_serverInfoList : [[String : String]] = [] {
         didSet {
@@ -139,16 +118,7 @@ class PPUserInfo: NSObject {
         catch {}
         self.pp_timezoneOffset = TimeZone.current.secondsFromGMT()
         
-        if let data = try? Data(contentsOf: URL(fileURLWithPath: self.pp_mainDirectory+"/PP_JSONConfig.json")) {
-//            let dict2 = NSKeyedUnarchiver.unarchiveObject(with: data)
-//            self.pp_Setting = dict2 as! Dictionary<String, Any>
-            if let json = try? JSONSerialization.jsonObject(with: data, options: .allowFragments) {
-                self.pp_Setting = json as! Dictionary<String, Any>
-            }
-            if let currentServerIndex = PPUserInfo.shared.pp_Setting["pp_lastSeverInfoIndex"] {
-                self.pp_lastSeverInfoIndex = currentServerIndex as! Int
-            }
-        }
+        self.pp_lastSeverInfoIndex = PPAppConfig.shared.getIntItem("pp_lastSeverInfoIndex")
         
         //服务器配置
         if let data = try? Data(contentsOf: URL(fileURLWithPath: self.pp_mainDirectory+"/PP_CloudServerSetting.json")) {
@@ -206,10 +176,8 @@ class PPUserInfo: NSObject {
         return self.pp_boolValue(key)
     }
     class func pp_boolValue(_ keyInSettingDict : String) -> Bool {
-        if let string : String = PPUserInfo.shared.pp_Setting[keyInSettingDict] as? String {
-            return string.bool
-        }
-        return false
+        let string = PPAppConfig.shared.getItem(keyInSettingDict)
+        return string.bool
     }
     class func saveObject(_ objcet:Any) {
         
@@ -222,7 +190,7 @@ class PPUserInfo: NSObject {
             }
         }
     }
-    ///共享的网页，提高网页显示速度
+    ///共享的网页单例，提高网页显示速度
     lazy var webViewController: PPWebViewController = {
         let webVC = PPWebViewController()
 //        webVC.urlString = "https://tophub.today"
