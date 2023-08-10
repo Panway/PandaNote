@@ -29,6 +29,7 @@ public class PPFileModel:NSObject,Mappable,Codable {
     var associatedServerID = "" ///< 所属服务器序号，仅本地用
     var associatedServerName = "" ///< 所属服务器备注，仅本地用
     var clickCount : Int64 = 0 ///< 用户点击次数，仅本地排序用
+    var downloadProgress : Double = 0.0 ///< 下载进度，仅本地用
 
     
     ///遵循Equatable协议，判断两个对象是否相等
@@ -65,6 +66,7 @@ public class PPFileModel:NSObject,Mappable,Codable {
         case associatedServerID
         case associatedServerName
         case clickCount
+        case downloadProgress
     }
     // JSONDecoder().decode() 时调用，将转换成Data类型的json文本转换成对象
     required public init(from decoder: Decoder) throws {
@@ -82,6 +84,7 @@ public class PPFileModel:NSObject,Mappable,Codable {
         associatedServerName = try container.decodeIfPresent(String.self, forKey: .associatedServerName) ?? ""
         // 在为PPFileModel新增加属性的时候，会导致之前的json文件不存在某个key，此时需要使用decodeIfPresent https://stackoverflow.com/a/66308592/4493393
         // 排查container.decode异常 https://stackoverflow.com/a/55391123/4493393
+        downloadProgress = try container.decodeIfPresent(Double.self, forKey: .downloadProgress) ?? 0
     }
         
     public func encode(to encoder: Encoder) throws {
@@ -97,10 +100,11 @@ public class PPFileModel:NSObject,Mappable,Codable {
         try container.encode(associatedServerID, forKey: .associatedServerID)
         try container.encode(associatedServerName, forKey: .associatedServerName)
         try container.encode(clickCount, forKey: .clickCount)
+        try container.encode(downloadProgress, forKey: .downloadProgress)
     }
     
     public override var description: String {
-        return "\(self.name ?? "") - \(self.path)"
+        return "[PPFileObject] name:\(self.name ) path:\(self.path)}"
     }
     
     

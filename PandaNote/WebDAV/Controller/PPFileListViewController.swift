@@ -65,6 +65,7 @@ class PPFileListViewController: PPBaseViewController,
     var srcPathForMove = "" ///< 移动文件时的原始目录
     var srcFileIDForMove = "" ///< 移动文件时的原始ID
     //---------------移动文件（夹）到其他文件夹功能↑---------------
+    var isSelectFileMode = false
     var titleViewButton : UIButton!
     var documentPicker: PPFilePicker! //必须强引用
 
@@ -102,7 +103,12 @@ class PPFileListViewController: PPBaseViewController,
         }
         setupSearchController()
         if isMovingMode {//移动文件模式
-            setupMoveUI()
+            setupMoveUI(title: "移动到", rightText: "完成")
+        }
+        if isSelectFileMode {
+            setupMoveUI(title: "请选择文件", rightText: "选取")
+            multipleSelectionMode = true
+            collectionView.allowsMultipleSelection = false
         }
         
     }
@@ -275,13 +281,27 @@ class PPFileListViewController: PPBaseViewController,
     }
     //MARK: 点击文件
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        let cell = collectionView.cellForItem(at: indexPath)
+//        let cell = collectionView.cellForItem(at: indexPath)
+        guard let cell = collectionView.cellForItem(at: indexPath) as? PPFileListCell else {
+            return
+        }
+
+        let fileObj = self.dataSource[indexPath.row]
         if multipleSelectionMode {
-            cell?.backgroundColor = "4abf8a66".pp_HEXColor()
+            cell.backgroundColor = "4abf8a66".pp_HEXColor()
+                        collectionView.selectItem(at: indexPath, animated: true, scrollPosition: .right)
+            if (!collectionView.allowsMultipleSelection) {
+                if fileObj.isDirectory {
+                    let vc = PPFileListViewController()
+                    vc.pathStr = getPathNotEmpty(fileObj) + "/"
+                    vc.pathID = fileObj.pathID
+                    vc.isSelectFileMode = self.isSelectFileMode
+                    self.navigationController?.pushViewController(vc, animated: true)
+                }
+            }
             return
         }
         collectionView.deselectItem(at: indexPath, animated: true)
-        let fileObj = self.dataSource[indexPath.row]
         insertToRecentFiles(fileObj,isRecentFiles)
         let objIndex = Int(fileObj.associatedServerID) ?? 0
         if(objIndex != PPUserInfo.shared.pp_lastSeverInfoIndex) {
@@ -713,8 +733,12 @@ class PPFileListViewController: PPBaseViewController,
     }
     func fileQuickLookPreview(_ fileObj:PPFileObject) {
         PPFileManager.shared.getLocalURL(path: self.getPathNotEmpty(fileObj),
-                                        fileID: fileObj.pathID,
-                                        downloadURL: fileObj.downloadURL) { filePath in
+                                         fileID: fileObj.pathID,
+                                         downloadURL: fileObj.downloadURL) { progress in
+            debugPrint("fileQuickLookPreview Download Progress: \(progress.fractionCompleted)")
+            fileObj.downloadProgress = progress.fractionCompleted
+//            self.reloadCellDownloadProgress()
+        } completion: { filePath in
             let vc = PPPreviewController() //QuickLook框架预览
             vc.filePathArray = [filePath]
             self.present(vc, animated: true)

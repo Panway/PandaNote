@@ -33,6 +33,7 @@ class PPFileListCell: PPBaseCollectionViewCell {
     private var viewMode = PPFileListCellViewMode.list //默认是列表
     private var cellPadding = 8
     private var moreBtn = UIButton(type: .custom)
+    private let progressBar = CALayer()
 //    private let screenWidth: CGFloat = UIScreen.main.bounds.width
     private var iconImage : UIImageView = {
         let img = UIImageView()
@@ -65,12 +66,20 @@ class PPFileListCell: PPBaseCollectionViewCell {
         return label
     }()
     
+    private var downloadFinishedImage : UIImageView = {
+        let img = UIImageView()
+        img.contentMode = .scaleAspectFill
+        img.image = UIImage(named: "download_finish")
+        img.isHidden = true
+        return img
+    }()
+    
     override func pp_addSubViews() {
         self.contentView.addSubview(self.iconImage)
         self.contentView.addSubview(self.titleLabel)
         self.contentView.addSubview(self.timeLabel)
         self.contentView.addSubview(self.remarkLabel)
-        
+        self.contentView.addSubview(self.downloadFinishedImage)
         
         self.contentView.clipsToBounds = true
         
@@ -87,6 +96,10 @@ class PPFileListCell: PPBaseCollectionViewCell {
         //moreBtn.setTitleColor(.lightGray, for: .normal)
         //moreBtn.titleLabel?.font = UIFont.systemFont(ofSize: 30)
 //        pp_listMode()
+        progressBar.backgroundColor = UIColor(red:0.27, green:0.68, blue:0.49, alpha:0.2).cgColor
+        progressBar.frame = CGRect(x: 0, y: 0, width: 0, height: self.bounds.height)
+        
+        self.layer.addSublayer(progressBar)
     }
     func pp_listMode() {
         let cellW = self.contentView.frame.size.width
@@ -103,8 +116,9 @@ class PPFileListCell: PPBaseCollectionViewCell {
         iconImage.frame = CGRect(x: 8, y: top, width: cellH - top*2, height: cellH - top*2)
         titleLabel.frame = CGRect(x: 8 + cellH, y: titleH > 25 ? top : 8 + CGFloat(viewMode.rawValue)*2, width: cellW - cellH - 50, height: titleH)
         timeLabel.frame = CGRect(x: 8 + cellH, y: cellH - timeH - 5, width: cellW - cellH - 100, height: timeH)
-        remarkLabel.frame = CGRect(x: cellW - remarkW, y: cellH - 22, width: remarkW, height: timeH)
+        remarkLabel.frame = CGRect(x: cellW - remarkW - 50, y: cellH - timeH - 5, width: remarkW, height: timeH)
         moreBtn.frame = CGRect(x: cellW - 44, y: 0, width: 44, height: cellH)
+        self.downloadFinishedImage.frame = CGRect(x: 8, y: cellH - top - 20, width: 20, height: 20)
     }
     //已废弃
     func pp_listMode2() {
@@ -207,10 +221,18 @@ class PPFileListCell: PPBaseCollectionViewCell {
             moreBtn.setImage(UIImage(named: "more_actions"), for: .normal)
         }
     }
+    // 更新进度条
+    func updateProgressBar(_ value: CGFloat) {
+        let maxWidth = self.bounds.width
+        let progressWidth = maxWidth * value
+        self.downloadFinishedImage.isHidden = value < 0.999
+        self.progressBar.frame.size.width = progressWidth
+    }
     ///更新文件列表数据
     override func updateUIWithData(_ model: AnyObject) {
         let fileObj: PPFileObject = model as! PPFileObject
         self.titleLabel.text = fileObj.name
+        updateProgressBar(fileObj.downloadProgress)
         if fileObj.isDirectory {
             self.iconImage.image = UIImage(named: "ico_folder")
         }
@@ -305,5 +327,16 @@ class PPFileListCell: PPBaseCollectionViewCell {
     @objc func moreBtnClick(sender:UIButton) {
         debugPrint("moreBtnClick:\(cellIndex)")
         self.delegate?.didClickMoreBtn(cellIndex: cellIndex,sender: sender)
+    }
+    
+    func downloadFile(_ fileObj:PPFileObject) {
+        PPFileManager.shared.getLocalURL(path: fileObj.path,
+                                         fileID: fileObj.pathID,
+                                         downloadURL: fileObj.downloadURL) { progress in
+            debugPrint("downloadFile Progress: \(progress.fractionCompleted)")
+            fileObj.downloadProgress = progress.fractionCompleted
+            self.updateProgressBar(progress.fractionCompleted)
+        } completion: { filePath in
+        }
     }
 }

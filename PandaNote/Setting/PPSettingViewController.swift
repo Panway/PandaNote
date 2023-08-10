@@ -108,7 +108,7 @@ class PPSettingViewController: PPBaseViewController,UITableViewDataSource,UITabl
             FLEXManager.shared.showExplorer()
             #endif
         }
-        else if obj == "保存设置到" {
+        else if obj == "备份App偏好设置" {
             let vc = PPFileListViewController()
             vc.srcPathForMove = PPUserInfo.shared.pp_mainDirectory + "/PandaNote_AppSetting.json"
             vc.isMovingMode = true

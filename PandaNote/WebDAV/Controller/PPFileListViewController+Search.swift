@@ -48,6 +48,9 @@ extension PPFileListViewController {
 
         definesPresentationContext = true
     }
+    func setupSearchUI() {
+        
+    }
 }
 // MARK: - 搜索功能
 // MARK: UISearchBarDelegate
@@ -104,8 +107,8 @@ extension PPFileListViewController: UISearchControllerDelegate {
 
 //MARK: - 移动文件（夹）到其他文件夹功能
 extension PPFileListViewController {
-    func setupMoveUI() {
-        self.title = "移动到"
+    func setupMoveUI(title:String,rightText:String) {
+        self.title = title
         leftButton = UIButton(type: .custom)
         leftButton.frame = CGRect(x: 0, y: 0, width: 66, height: 44)
         leftButton.setTitle("取消", for: .normal)
@@ -113,7 +116,7 @@ extension PPFileListViewController {
         
         rightButton = UIButton(type: .custom)
         rightButton.frame = CGRect(x: 0, y: 0, width: 66, height: 44)
-        rightButton.setTitle("完成", for: .normal)
+        rightButton.setTitle(rightText, for: .normal)
         rightButton.setTitleColor(PPCOLOR_GREEN, for: .normal)
 
         
@@ -128,15 +131,23 @@ extension PPFileListViewController {
     }
     
     @objc func submitMove() {
-        PPAlertAction.showAlert(withTitle: "移动到这里？", msg: "", buttonsStatement: ["确定","取消"]) { (index) in
+        if(isSelectFileMode) {
+            let indexPath = self.collectionView.indexPathsForSelectedItems?.first
+            
+            debugPrint("isSelectFileMode===",self.dataSource[indexPath?.item ?? 0])
+            return
+        }
+        guard let first = self.navigationController?.viewControllers.first as? PPFileListViewController,
+              let fileName = first.srcPathForMove.split(separator: "/").last else {
+            PPHUD.showHUDFromTop("移动失败，文件名有问题")
+            return
+        }
+        let isUploadAppSetting = first.srcPathForMove.contains(PPUserInfo.shared.pp_mainDirectory)
+        let title = isUploadAppSetting ? "备份设置到这里？" : "移动到这里？"
+        PPAlertAction.showAlert(withTitle: title, msg: "", buttonsStatement: ["确定","取消"]) { (index) in
             if index == 0 {
-                guard let first = self.navigationController?.viewControllers.first as? PPFileListViewController,
-                    let fileName = first.srcPathForMove.split(separator: "/").last else {
-                    PPHUD.showHUDFromTop("移动失败，文件名有问题")
-                    return
-                }
                 //如果是本地文件就上传（上传App配置）
-                if (first.srcPathForMove.contains(PPUserInfo.shared.pp_mainDirectory)) {
+                if (isUploadAppSetting) {
                     let path = URL(fileURLWithPath: PPUserInfo.shared.pp_mainDirectory+"/PandaNote_AppSetting.json")
                     let jsonData = try? Data(contentsOf: path)
                     PPFileManager.shared.createFile(path: self.pathStr + fileName, contents: jsonData) { (result, error) in

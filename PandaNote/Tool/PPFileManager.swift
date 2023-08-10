@@ -124,12 +124,16 @@ class PPFileManager: NSObject {
     //MARK:- 文件操作
     func downloadThenCache(url:String,
                            path:String,
+                           progress: ((Progress) -> Void)? = nil,
                            completion: @escaping ((_ contents: Data?, _ isFromCache:Bool, _ error: Error?) -> Void)){
         debugPrint("download:\(url)")
-        PPHUD.showBarProgress()
-        AF.request(url).downloadProgress { progress in
-            print("Download Progress: \(progress.fractionCompleted)")
-            PPHUD.updateBarProgress(Float(progress.fractionCompleted))
+//        PPHUD.showBarProgress()
+        AF.request(url).downloadProgress { p in
+            print("downloadThenCache Progress: \(p.fractionCompleted)")
+            if let progress = progress {
+                progress(p)
+            }
+//            PPHUD.updateBarProgress(Float(progress.fractionCompleted))
         }
         .response { response in
             var localPath = PPUserInfo.shared.webDAVRemark + "/" + path
@@ -147,9 +151,10 @@ class PPFileManager: NSObject {
                       fileID: String?,
                       downloadURL:String? = nil,
                       cacheToDisk: Bool? = false,
+                      progress: ((Progress) -> Void)? = nil,
                       completion: @escaping ((_ contents: Data?, _ isFromCache:Bool, _ error: Error?) -> Void)) {
         if let downloadURL = downloadURL, downloadURL.length > 1 {
-            downloadThenCache(url: downloadURL, path: path, completion: completion)
+            downloadThenCache(url: downloadURL, path: path, progress: progress, completion: completion)
             return
         }
         // 局部闭包
@@ -169,7 +174,7 @@ class PPFileManager: NSObject {
         let type = PPUserInfo.shared.cloudServiceType
         if type == .baiduyun || type == .alist || type == .aliyundrive {
             currentService?.getFileData(path, fileID ?? "", completion: { data, url, error in
-                self.downloadThenCache(url: url, path: path, completion: completion)
+                self.downloadThenCache(url: url, path: path, progress: progress, completion: completion)
             })
             return
         }
@@ -193,6 +198,7 @@ class PPFileManager: NSObject {
                             downloadURL:String? = nil,
                             alwaysDownload : Bool? = false,
                             returnURL : Bool? = false,
+                            progress: ((Progress) -> Void)? = nil,
                             completion: @escaping ((_ contents: Data?, _ isFromCache:Bool, _ error: Error?) -> Void)) {
         // 1 从本地磁盘获取文件缓存
         PPDiskCache.shared.fetchData(key: PPUserInfo.shared.webDAVRemark + path) { data in
@@ -200,25 +206,22 @@ class PPFileManager: NSObject {
             debugPrint("getFileData exist")
             completion(data,true,nil)
             if alwaysDownload == true {
-                self.downloadFile(path: path, fileID:fileID, downloadURL:downloadURL, cacheToDisk: true, completion: completion) // 即使本地有文件也下载
+                self.downloadFile(path: path, fileID:fileID, downloadURL:downloadURL, cacheToDisk: true, progress: progress, completion: completion) // 即使本地有文件也下载
             }
         } failure: { error in
             // 3 本地磁盘没有，就从服务器获取最新的
-            self.downloadFile(path: path, fileID:fileID,downloadURL:downloadURL, cacheToDisk: true, completion: completion)
+            self.downloadFile(path: path, fileID:fileID,downloadURL:downloadURL, cacheToDisk: true, progress: progress, completion: completion)
         }
     }
     
     
     /// 图片视频等不可修改的文件缓存到本地后返回本地URL
     func getLocalURL(path:String,
-                    fileID:String?,
-                    downloadURL:String? = nil,
-                    completion: @escaping (( _ url:String) -> Void)) {
-        getFileData(path: path,
-                    fileID: fileID,
-                    downloadURL: downloadURL,
-                    returnURL:true
-        ) { (contents: Data?,isFromCache, error) in
+                     fileID:String?,
+                     downloadURL:String? = nil,
+                     progress: ((Progress) -> Void)? = nil,
+                     completion: @escaping (( _ url:String) -> Void)) {
+        getFileData(path: path, fileID: fileID, downloadURL: downloadURL, alwaysDownload: false, returnURL: true, progress: progress) { contents, isFromCache, error in
             if error != nil {
                 return
             }

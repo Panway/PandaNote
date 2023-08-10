@@ -120,7 +120,7 @@ class PPMarkdownViewController: PPBaseViewController,
 
                     let userTheme = PPAppConfig.shared.getItem("PPHighlightTheme")
                     self.highlightr?.setTheme(to: userTheme.length > 0 ? userTheme : "atom-one-light")
-                    
+                    self.highlightr?.theme.setCodeFont(RPFont(name: "Courier", size: 18)!)
                     let textStorage = CodeAttributedString(highlightr: self.highlightr!)
                     textStorage.language = self.fileExtension
                     let layoutManager = NSLayoutManager()

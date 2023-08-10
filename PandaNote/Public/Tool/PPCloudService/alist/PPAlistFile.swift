@@ -8,6 +8,16 @@
 
 import Foundation
 import ObjectMapper
+struct AlistResponse: Decodable {
+    let message: String
+    let code: Int
+    let data: AlistToken
+}
+
+struct AlistToken: Decodable {
+    let token: String
+}
+
 
 class PPAlistFile: PPFileModel {
 

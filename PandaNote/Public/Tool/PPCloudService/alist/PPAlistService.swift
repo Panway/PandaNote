@@ -61,7 +61,21 @@ class PPAlistService: NSObject, PPCloudServiceProtocol {
             "password": password,
             "otp_code": ""
         ]
-        AF.request(url + "/api/auth/login", method: .post, parameters: parameters, encoding: JSONEncoding.default).responseJSON { response in
+        AF.request(url + "/api/auth/login", method: .post, parameters: parameters, encoding: JSONEncoding.default).responseDecodable(of: AlistResponse.self) { response in
+            let rr = response
+            switch response.result {
+            case .success(let res):
+                // 使用解码后的对象
+                debugPrint("alist response:",res)
+                self.access_token = res.data.token
+                self.updateToken()
+            case .failure(let error):
+                // 处理错误
+                debugPrint("alist error:",error)
+            }
+        }
+        /*
+        .responseJSON { response in
             switch response.result {
             case .success(let value):
                 print(value)
@@ -69,8 +83,6 @@ class PPAlistService: NSObject, PPCloudServiceProtocol {
                 let jsonDic = response.value as? [String : Any]
                 jsonDic?.printJSON()
                 let data = jsonDic?["data"] as? [String : Any]
-                //                    let access_token = jsonDic["access_token"] as? String
-                //            guard let data = jsonDic?["data"] else { return }
                 if let access_token = data?["token"] as? String {
                     debugPrint("alist token is:",access_token)
                     self.access_token = access_token
@@ -79,15 +91,8 @@ class PPAlistService: NSObject, PPCloudServiceProtocol {
             case .failure(let error):
                 print(error)
             }
-            
-
-                
-                
-                
-            
-            
-            
         }
+        */
     }
     //MARK: ls file list 文件列表
 
@@ -95,7 +100,7 @@ class PPAlistService: NSObject, PPCloudServiceProtocol {
     func contentsOfDirectory(_ path: String, _ pathID: String, completion: @escaping(_ data: [PPFileObject], _ error: Error?) -> Void) {
         let requestURL = self.url + "/api/fs/list"
         let parameters: [String: Any] = [
-            "path": pathID,
+            "path": path,
             "password":"",
             "page": 1,
             "per_page": 0,
