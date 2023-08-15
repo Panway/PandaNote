@@ -33,7 +33,7 @@ class PPAliyunDriveService: NSObject, PPCloudServiceProtocol {
     var deleteFileWithSameName = true ///< 阿里云盘同级目录允许存在多个同样名字的文件，在编辑文本时新增完删除旧的同名文件
     var currentDirFiles = [PPFileObject]()
     var currentDirID = ""
-    //更新完token等信息通知后使用的地方保存到本地
+    /// 更新完token等信息后执行的回调。你可以保存新token等信息到本地或数据库（解耦）
     var configChanged : ((_ key:String,_ value:String) -> ())?
     
     var baseURL: String {
@@ -52,9 +52,9 @@ class PPAliyunDriveService: NSObject, PPCloudServiceProtocol {
         let requestURL = self.url + "/adrive/v1.0/user/getDriveInfo"
         if(drive_id.length > 0) { return }
 
-        AF.request(requestURL, method: .post, encoding: JSONEncoding.default, headers: getHeaders()).responseJSON { response in
+        AF.request(requestURL, method: .post, encoding: JSONEncoding.default, headers: getHeaders()).responseData { response in
             // 处理响应
-            guard let jsonDic = response.value as? [String : Any] else { return }
+            guard let jsonDic = response.data?.pp_JSONObject() as? [String : Any] else { return }
             debugPrint("getUserInfo")
             jsonDic.printJSON()
             guard let default_drive_id = jsonDic["default_drive_id"] as? String  else {
@@ -77,8 +77,8 @@ class PPAliyunDriveService: NSObject, PPCloudServiceProtocol {
             "grant_type":"authorization_code"
         ]
 
-        AF.request(requestURL, method: .post, parameters: parameters, encoding: JSONEncoding.default).responseJSON { response in
-            guard let jsonDic = response.value as? [String : Any] else { return }
+        AF.request(requestURL, method: .post, parameters: parameters, encoding: JSONEncoding.default).responseData { response in
+            guard let jsonDic = response.data?.pp_JSONObject() as? [String : Any] else { return }
             debugPrint("aliyundrive getToken for the first time")
             jsonDic.printJSON()
             if let refresh_token = jsonDic["refresh_token"] as? String,
@@ -97,8 +97,8 @@ class PPAliyunDriveService: NSObject, PPCloudServiceProtocol {
             "grant_type":"refresh_token"
         ]
         debugPrint("aliyundrive refreshToken param:",parameters)
-        AF.request(requestURL, method: .post, parameters: parameters, encoding: JSONEncoding.default, headers: getHeaders()).responseJSON { response in
-            guard let jsonDic = response.value as? [String : Any] else { return }
+        AF.request(requestURL, method: .post, parameters: parameters, encoding: JSONEncoding.default, headers: getHeaders()).responseData { response in
+            guard let jsonDic = response.data?.pp_JSONObject() as? [String : Any] else { return }
             debugPrint("aliyundrive refreshToken finished")
             jsonDic.printJSON()
             if let refresh_token = jsonDic["refresh_token"] as? String,
@@ -154,9 +154,9 @@ class PPAliyunDriveService: NSObject, PPCloudServiceProtocol {
             "type": "all"
         ]
 
-        AF.request(requestURL, method: .post, parameters: parameters, encoding: JSONEncoding.default, headers: getHeaders()).responseJSON { response in
+        AF.request(requestURL, method: .post, parameters: parameters, encoding: JSONEncoding.default, headers: getHeaders()).responseData { response in
             // 处理响应
-            guard let jsonDic = response.value as? [String : Any] else { return }
+            guard let jsonDic = response.data?.pp_JSONObject() as? [String : Any] else { return }
             jsonDic.printJSON(true)
             
             if let code = jsonDic["code"] as? String
@@ -207,8 +207,8 @@ class PPAliyunDriveService: NSObject, PPCloudServiceProtocol {
             "drive_id": drive_id
         ]
 
-        AF.request(requestURL, method: .post, parameters: parameters, encoding: JSONEncoding.default, headers: getHeaders()).responseJSON { response in
-            guard let jsonDic = response.value as? [String : Any] else { return }
+        AF.request(requestURL, method: .post, parameters: parameters, encoding: JSONEncoding.default, headers: getHeaders()).responseData { response in
+            guard let jsonDic = response.data?.pp_JSONObject() as? [String : Any] else { return }
             debugPrint("createDirectory")
             jsonDic.printJSON()
             completion(response.error)
@@ -225,9 +225,9 @@ class PPAliyunDriveService: NSObject, PPCloudServiceProtocol {
             "upload_id":upload_id
         ]
 
-        AF.request(requestURL, method: .post, parameters: parameters, encoding: JSONEncoding.default, headers: getHeaders()).responseJSON { response in
+        AF.request(requestURL, method: .post, parameters: parameters, encoding: JSONEncoding.default, headers: getHeaders()).responseData { response in
             // 处理响应
-            guard let jsonDic = response.value as? [String : Any] else { return }
+            guard let jsonDic = response.data?.pp_JSONObject() as? [String : Any] else { return }
             debugPrint("/openFile/complete finished")
             jsonDic.printJSON()
             switch response.result {
@@ -253,9 +253,9 @@ class PPAliyunDriveService: NSObject, PPCloudServiceProtocol {
             "drive_id": drive_id
         ]
         // 1. create
-        AF.request(requestURL, method: .post, parameters: parameters, encoding: JSONEncoding.default, headers: getHeaders()).responseJSON { response in
+        AF.request(requestURL, method: .post, parameters: parameters, encoding: JSONEncoding.default, headers: getHeaders()).responseData { response in
             // 处理响应
-            guard let jsonDic = response.value as? [String : Any] else { return }
+            guard let jsonDic = response.data?.pp_JSONObject() as? [String : Any] else { return }
             debugPrint("openFile/create")
             jsonDic.printJSON()
             guard let file_id = jsonDic["file_id"] as? String,
@@ -334,9 +334,9 @@ class PPAliyunDriveService: NSObject, PPCloudServiceProtocol {
         }
         parameters.printJSON()
         
-        AF.request(requestURL, method: .post, parameters: parameters, encoding: JSONEncoding.default, headers: getHeaders()).responseJSON { response in
+        AF.request(requestURL, method: .post, parameters: parameters, encoding: JSONEncoding.default, headers: getHeaders()).responseData { response in
             // 处理响应
-            guard let jsonDic = response.value as? [String : Any] else { return }
+            guard let jsonDic = response.data?.pp_JSONObject() as? [String : Any] else { return }
             debugPrint("moveItem")
             jsonDic.printJSON()
             switch response.result {
@@ -360,9 +360,9 @@ class PPAliyunDriveService: NSObject, PPCloudServiceProtocol {
             "file_id": fileID
         ]
         
-        AF.request(requestURL, method: .post, parameters: parameters, encoding: JSONEncoding.default, headers: getHeaders()).responseJSON { response in
+        AF.request(requestURL, method: .post, parameters: parameters, encoding: JSONEncoding.default, headers: getHeaders()).responseData { response in
             // 处理响应
-            guard let jsonDic = response.value as? [String : Any] else { return }
+            guard let jsonDic = response.data?.pp_JSONObject() as? [String : Any] else { return }
             debugPrint("removeItem")
             jsonDic.printJSON()
             completion(response.error)

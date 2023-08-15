@@ -30,7 +30,7 @@ public class PPFileModel:NSObject,Mappable,Codable {
     var associatedServerName = "" ///< 所属服务器备注，仅本地用
     var clickCount : Int64 = 0 ///< 用户点击次数，仅本地排序用
     var downloadProgress : Double = 0.0 ///< 下载进度，仅本地用
-
+    var cellIndex = 0 ///< 列表显示时临时使用
     
     ///遵循Equatable协议，判断两个对象是否相等
     public static func == (lhs: PPFileModel, rhs: PPFileModel) -> Bool {

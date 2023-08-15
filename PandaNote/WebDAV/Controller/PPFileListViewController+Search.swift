@@ -177,7 +177,7 @@ extension PPFileListViewController {
         }
     }
     //排序
-    func sort(array:[PPFileObject], orderBy:PPFileListOrder) -> Array<PPFileObject> {
+    func sort(array:[PPFileObject], orderBy:PPFileListOrder, basePath: String) -> Array<PPFileObject> {
         var res = [PPFileObject]()
         switch orderBy {
         case .timeDesc:
@@ -210,6 +210,24 @@ extension PPFileListViewController {
             }
         case .type:
             res = array
+        }
+        let fileManager = FileManager.default
+        res.enumerated().forEach { index, file in
+            // 增加序号，图片浏览器需要用
+            res[index].cellIndex = index
+            if file.path == "" {
+                file.path = "\(basePath)\(file.name)".replacingOccurrences(of: "//", with: "/") //alist api 不返回path
+            }
+            let path = "\(PPDiskCache.shared.path)/\(PPUserInfo.shared.webDAVRemark)/\(file.path)"
+                .replacingOccurrences(of: "//", with: "/")
+            // debugPrint("=========",path, file)
+            // 增加缓存状态显示
+            if fileManager.fileExists(atPath: path) {
+                file.downloadProgress = 1.0
+            }
+            else {
+                file.downloadProgress = 0
+            }
         }
         return res;
     }
@@ -287,7 +305,7 @@ extension PPFileListViewController {
             }
             PPAppConfig.shared.setItem("fileListOrder","\(newOrder.rawValue)")
             PPAppConfig.shared.fileListOrder = newOrder
-            self.dataSource = self.sort(array: self.dataSource, orderBy: newOrder)
+            self.dataSource = self.sort(array: self.dataSource, orderBy: newOrder, basePath: self.pathStr)
             self.collectionView.reloadData()
         }
         self.dropdown.anchorView = anchorView

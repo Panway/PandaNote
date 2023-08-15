@@ -22,6 +22,7 @@ class PPFileManager: NSObject {
     var oneDriveService: PPOneDriveService?
     var iCloudService: PPiCloudDriveService?
     var alistService: PPAlistService?
+    var synologyService: PPSynologyService?
     var aliyunDriveService: PPAliyunDriveService?
     var baiduwangpan : BaiduyunAPITool?
     var currentPath = ""
@@ -47,6 +48,8 @@ class PPFileManager: NSObject {
                 return baiduwangpan
             case .alist:
                 return alistService
+            case .synology:
+                return synologyService
             case .aliyundrive:
                 return aliyunDriveService
             case .icloud:
@@ -129,7 +132,7 @@ class PPFileManager: NSObject {
         debugPrint("download:\(url)")
 //        PPHUD.showBarProgress()
         AF.request(url).downloadProgress { p in
-            print("downloadThenCache Progress: \(p.fractionCompleted)")
+            //debugPrint("downloadThenCache Progress: \(p.fractionCompleted)")
             if let progress = progress {
                 progress(p)
             }
@@ -192,7 +195,7 @@ class PPFileManager: NSObject {
     ///   - fileID: 文件ID，百度网盘是fs_id
     ///   - cacheToDisk: 缓存到本地磁盘
     ///   - alwaysDownload: 总是下载，有缓存也下载
-    ///   - completionHandler: 完成的回调
+    ///   - completion: 完成的回调
     public func getFileData(path: String,
                             fileID: String?,
                             downloadURL:String? = nil,
@@ -204,7 +207,7 @@ class PPFileManager: NSObject {
         PPDiskCache.shared.fetchData(key: PPUserInfo.shared.webDAVRemark + path) { data in
             // 2 本地磁盘有，按需从服务器获取最新的
             debugPrint("getFileData exist")
-            completion(data,true,nil)
+            completion(data,true,nil) //先给本地的
             if alwaysDownload == true {
                 self.downloadFile(path: path, fileID:fileID, downloadURL:downloadURL, cacheToDisk: true, progress: progress, completion: completion) // 即使本地有文件也下载
             }
@@ -341,6 +344,20 @@ class PPFileManager: NSObject {
             alistService = PPAlistService(url:PPUserInfo.shared.webDAVServerURL,
                                           username: user,
                                           password: password)
+            alistService?.configChanged = {key,value in
+                PPUserInfo.shared.updateCurrentServerInfo(key: key, value: value)
+            }
+        case .synology:
+            let sid = PPUserInfo.shared.getCurrentServerInfo("sid")
+            let did = PPUserInfo.shared.getCurrentServerInfo("did")
+            synologyService = PPSynologyService(url:PPUserInfo.shared.webDAVServerURL,
+                                                username: user,
+                                                password: password,
+                                                sid: sid,
+                                                did: did)
+            synologyService?.configChanged = {key,value in
+                PPUserInfo.shared.updateCurrentServerInfo(key: key, value: value)
+            }
         case .aliyundrive:
             let a = PPUserInfo.shared.getCurrentServerInfo("PPAccessToken")
             let b = PPUserInfo.shared.getCurrentServerInfo("PPRefreshToken")

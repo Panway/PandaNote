@@ -16,6 +16,7 @@ public enum PPCloudServiceType : String {
     case local = "local"
     case dropbox = "Dropbox"
     case baiduyun = "baiduyun"
+    case synology = "synology"
     case onedrive = "OneDrive"
     case alist = "alist"
     case aliyundrive = "AliyunDrive"
@@ -32,7 +33,7 @@ class PPUserInfo: NSObject {
     var cloudServiceExtra = ""//额外的字段
     /// 坚果云、Drpbox等
     var cloudServiceType:PPCloudServiceType = .webdav
-    /// 沙盒Sandbox/Library/PandaCache
+    /// 沙盒 Sandbox 里面的：`/Library/PandaCache`
     var pp_mainDirectory:String!
     var pp_mainDirectoryURL:URL!
     var pp_fileIcon = [String:String]()
@@ -65,7 +66,9 @@ class PPUserInfo: NSObject {
     var pp_serverInfoList : [[String : String]] = [] {
         didSet {
             do {
-                let encodedData = try JSONEncoder().encode(pp_serverInfoList)
+                let encoder = JSONEncoder()
+                encoder.outputFormatting = .prettyPrinted // 设置美化选项
+                let encodedData = try encoder.encode(pp_serverInfoList)
                 try? encodedData.write(to: URL(fileURLWithPath: self.pp_mainDirectory + "/PP_CloudServerSetting.json"))
                 updateRemarkIndexMap()
             } catch {
@@ -122,6 +125,7 @@ class PPUserInfo: NSObject {
         
         //服务器配置
         if let data = try? Data(contentsOf: URL(fileURLWithPath: self.pp_mainDirectory+"/PP_CloudServerSetting.json")) {
+            //allowFragments选项表示解析器允许JSON数据中的顶级元素是非JSON对象（比如字符串、数字、布尔值、null等），而不仅仅是JSON对象（包括字典和数组）
             if let json = try? JSONSerialization.jsonObject(with: data, options: .allowFragments) {
                 self.pp_serverInfoList = json as! [[String : String]]
                 updateRemarkIndexMap()

@@ -35,9 +35,9 @@ class PPFileListCell: PPBaseCollectionViewCell {
     private var moreBtn = UIButton(type: .custom)
     private let progressBar = CALayer()
 //    private let screenWidth: CGFloat = UIScreen.main.bounds.width
-    private var iconImage : UIImageView = {
+    var iconImage : UIImageView = {
         let img = UIImageView()
-        img.contentMode = .scaleAspectFill
+        img.contentMode = .scaleAspectFit
         img.layer.masksToBounds = true
         return img
     }()
@@ -118,7 +118,7 @@ class PPFileListCell: PPBaseCollectionViewCell {
         timeLabel.frame = CGRect(x: 8 + cellH, y: cellH - timeH - 5, width: cellW - cellH - 100, height: timeH)
         remarkLabel.frame = CGRect(x: cellW - remarkW - 50, y: cellH - timeH - 5, width: remarkW, height: timeH)
         moreBtn.frame = CGRect(x: cellW - 44, y: 0, width: 44, height: cellH)
-        self.downloadFinishedImage.frame = CGRect(x: 8, y: cellH - top - 20, width: 20, height: 20)
+        self.downloadFinishedImage.frame = CGRect(x: cellW - 30, y: cellH - 20, width: 20, height: 20)
     }
     //已废弃
     func pp_listMode2() {
@@ -180,6 +180,8 @@ class PPFileListCell: PPBaseCollectionViewCell {
     
     func pp_gridMode() {
         let cellW = self.contentView.frame.size.width
+        let cellH = self.contentView.frame.size.height
+
         if(cellW == 0) {return}
         let top : CGFloat = 8.0
         iconImage.frame = CGRect(x: 8, y: top, width: cellW - top*2, height: cellW - top*2)
@@ -187,6 +189,7 @@ class PPFileListCell: PPBaseCollectionViewCell {
         titleH = min(titleH, 40)
         titleLabel.frame = CGRect(x: 8, y: cellW, width: cellW - top*2, height: titleH)
         moreBtn.frame = CGRect(x: 0, y: cellW + 33, width: cellW, height: 44)
+        downloadFinishedImage.frame = CGRect(x: cellW - 30, y: cellH - 20, width: 20, height: 20)
         
     }
     override func layoutSubviews() {
@@ -225,13 +228,20 @@ class PPFileListCell: PPBaseCollectionViewCell {
     func updateProgressBar(_ value: CGFloat) {
         let maxWidth = self.bounds.width
         let progressWidth = maxWidth * value
-        self.downloadFinishedImage.isHidden = value < 0.999
-        self.progressBar.frame.size.width = progressWidth
+        if value > 0.9999 {
+            self.progressBar.frame.size.width = 0 //下载完了就不显示进度条了
+            self.downloadFinishedImage.isHidden = false
+        }
+        else {
+            self.progressBar.frame.size.width = progressWidth
+            self.downloadFinishedImage.isHidden = true
+        }
     }
-    ///更新文件列表数据
+    // MARK: - 更新文件列表界面 update UI
     override func updateUIWithData(_ model: AnyObject) {
         let fileObj: PPFileObject = model as! PPFileObject
         self.titleLabel.text = fileObj.name
+//        debugPrint("====downloadProgress=====",fileObj.downloadProgress)
         updateProgressBar(fileObj.downloadProgress)
         if fileObj.isDirectory {
             self.iconImage.image = UIImage(named: "ico_folder")
@@ -329,14 +339,15 @@ class PPFileListCell: PPBaseCollectionViewCell {
         self.delegate?.didClickMoreBtn(cellIndex: cellIndex,sender: sender)
     }
     
-    func downloadFile(_ fileObj:PPFileObject) {
-        PPFileManager.shared.getLocalURL(path: fileObj.path,
-                                         fileID: fileObj.pathID,
-                                         downloadURL: fileObj.downloadURL) { progress in
-            debugPrint("downloadFile Progress: \(progress.fractionCompleted)")
+    func downloadFile(_ fileObj:PPFileObject,
+                      completion: @escaping (( _ localFilePath: String) -> Void)) {
+        PPFileManager.shared.getLocalURL(path: fileObj.path, fileID: fileObj.pathID, downloadURL: fileObj.downloadURL) { progress in
+            //debugPrint("downloadFile Progress: \(progress.fractionCompleted)")
             fileObj.downloadProgress = progress.fractionCompleted
             self.updateProgressBar(progress.fractionCompleted)
         } completion: { filePath in
+            self.updateProgressBar(1.0)
+            completion(filePath)
         }
     }
 }

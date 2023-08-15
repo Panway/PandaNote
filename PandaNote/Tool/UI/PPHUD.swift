@@ -190,7 +190,7 @@ class PPHUD: NSObject {
             DispatchQueue.main.async(execute: {
                 self.annularView.progress = progress
             })
-            usleep(50000) //50ms
+            usleep(20000) //20ms*100次=2秒
         }
     }
     @objc func revoke() {

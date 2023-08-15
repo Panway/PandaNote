@@ -25,6 +25,7 @@ class PPWebDAVConfigViewController: PPBaseViewController {
     
     var cloudType = ""
     var serverURL = ""
+    var serverURLRemark = "服务器地址"
     var userName = ""
     var password = ""
     var passwordDesc = "密码"
@@ -44,7 +45,7 @@ class PPWebDAVConfigViewController: PPBaseViewController {
         
         if showServerURL {
             leftNames.append("URL")
-            placeHolders.append("服务器地址")
+            placeHolders.append(serverURLRemark)
             texts.append(serverURL)
         }
         if showUserName {

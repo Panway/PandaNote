@@ -41,7 +41,19 @@ class PPAlistFile: PPFileModel {
 
 
     }
-    
+    public class func toModelArray(_ fileList:[[String:Any]], _ baseURL:String) -> [PPAlistFile] {
+        var dataSource = [PPAlistFile]()
+        for f in fileList {
+            if let item = PPAlistFile(JSON: f) {
+                // 如果是第三方网盘直接就是http开头的略缩图URL
+                if(item.thumbnail.length > 0 && !item.thumbnail.hasPrefix("http")) {
+                    item.thumbnail = "\(baseURL)\(item.thumbnail)"
+                }
+                dataSource.append(item)
+            }
+        }
+        return dataSource
+    }
     public class func toModelArray(_ fileList:[[String:Any]]) -> [PPAlistFile] {
         if let modelsArray = Mapper<PPAlistFile>().mapArray(JSONObject: fileList) {
             return modelsArray

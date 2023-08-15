@@ -18,7 +18,9 @@ class PPAlistService: NSObject, PPCloudServiceProtocol {
     var username = ""
     var password = ""
     var access_token:String?
-    var refresh_token:String?
+
+    /// 更新完token等信息后执行的回调。你可以保存新token等信息到本地或数据库（解耦）
+    var configChanged : ((_ key:String,_ value:String) -> ())?
     
     var baseURL: String {
         return url
@@ -34,16 +36,6 @@ class PPAlistService: NSObject, PPCloudServiceProtocol {
 
     }
     
-    func updateToken() {
-        //更新
-        var serverList = PPUserInfo.shared.pp_serverInfoList
-        var current = serverList[PPUserInfo.shared.pp_lastSeverInfoIndex]
-        current["PPAccessToken"] = access_token
-        serverList.remove(at: PPUserInfo.shared.pp_lastSeverInfoIndex)
-        serverList.insert(current, at: PPUserInfo.shared.pp_lastSeverInfoIndex)
-        PPUserInfo.shared.pp_serverInfoList = serverList
-    }
-    
     func getToken() {
         let serverList = PPUserInfo.shared.pp_serverInfoList
         let current = serverList[PPUserInfo.shared.pp_lastSeverInfoIndex]
@@ -52,9 +44,11 @@ class PPAlistService: NSObject, PPCloudServiceProtocol {
             login(url: url, username: username, password: password)
         }
     }
-    func headers () -> HTTPHeaders{
+    
+    func headers() -> HTTPHeaders{
         return ["authorization": "\(self.access_token ?? "")"]
     }
+    
     func login(url:String, username:String, password:String) {
         let parameters: [String: String] = [
             "username": username,
@@ -62,13 +56,13 @@ class PPAlistService: NSObject, PPCloudServiceProtocol {
             "otp_code": ""
         ]
         AF.request(url + "/api/auth/login", method: .post, parameters: parameters, encoding: JSONEncoding.default).responseDecodable(of: AlistResponse.self) { response in
-            let rr = response
             switch response.result {
             case .success(let res):
                 // 使用解码后的对象
                 debugPrint("alist response:",res)
-                self.access_token = res.data.token
-                self.updateToken()
+                let t = res.data.token
+                self.access_token = t
+                self.configChanged?("PPAccessToken", t)
             case .failure(let error):
                 // 处理错误
                 debugPrint("alist error:",error)
@@ -95,8 +89,6 @@ class PPAlistService: NSObject, PPCloudServiceProtocol {
         */
     }
     //MARK: ls file list 文件列表
-
-
     func contentsOfDirectory(_ path: String, _ pathID: String, completion: @escaping(_ data: [PPFileObject], _ error: Error?) -> Void) {
         let requestURL = self.url + "/api/fs/list"
         let parameters: [String: Any] = [
@@ -106,24 +98,25 @@ class PPAlistService: NSObject, PPCloudServiceProtocol {
             "per_page": 0,
             "refresh": false
         ]
-        AF.request(requestURL, method: .post, parameters: parameters, encoding: JSONEncoding.default, headers: headers()).responseJSON { response in
-            let jsonDic = response.value as? [String : Any]
+        AF.request(requestURL, method: .post, parameters: parameters, encoding: JSONEncoding.default, headers: headers()).responseData { response in
+            let jsonDic = response.data?.pp_JSONObject() as? [String : Any]
             jsonDic?.printJSON()
             if let code = jsonDic?["code"] as? Int, code != 200 {
                 debugPrint("alist get list error")
                 completion([], PPCloudServiceError.unknown)
                 //本来是要重新登录的，考虑到这个类只负责获取数据，就不搞其他的了
 //                self.login(url: self.url, username: self.username, password: self.password)
+                if code == 401 {
+                    self.login(url: self.url, username: self.username, password: self.password)
+                }
                 return
             }
 
-            
             guard let data = jsonDic?["data"] as? [String:Any],
                   let fileList = data["content"] as? [[String:Any]] else {
                 return
             }
-            completion(PPAlistFile.toModelArray(fileList), nil)
-            
+            completion(PPAlistFile.toModelArray(fileList, self.baseURL), nil)
         }
         
     }
@@ -139,8 +132,8 @@ class PPAlistService: NSObject, PPCloudServiceProtocol {
             parameters["method"] = "video_preview"
             requestURL = self.url + "/api/fs/other"
         }
-        AF.request(requestURL, method: .post, parameters: parameters, encoding: JSONEncoding.default, headers: headers()).responseJSON { response in
-            let jsonDic = response.value as? [String : Any]
+        AF.request(requestURL, method: .post, parameters: parameters, encoding: JSONEncoding.default, headers: headers()).responseData { response in
+            let jsonDic = response.data?.pp_JSONObject() as? [String : Any]
             jsonDic?.printJSON()
             if let code = jsonDic?["code"] as? Int, code != 200 {
                 debugPrint("alist get file error")
@@ -178,20 +171,71 @@ class PPAlistService: NSObject, PPCloudServiceProtocol {
 
     
     func createDirectory(_ folderName: String, _ atPath: String, _ parentID: String, completion: @escaping (Error?) -> Void) {
-
+        let requestURL = self.url + "/api/fs/mkdir"
+        let parameters: [String: Any] = [
+            "path": atPath + folderName
+        ]
+        AF.request(requestURL, method: .post, parameters: parameters, encoding: JSONEncoding.default, headers: headers()).responseData { response in
+            completion(self.getResponseError(response))
+        }
     }
     
     func createFile(_ path: String, _ pathID: String, contents: Data, completion: @escaping(_ result: [String:String]?, _ error: Error?) -> Void) {
-
+        let requestURL = self.url + "/api/fs/put"
+        let headers: HTTPHeaders = [
+            "authorization": self.access_token ?? "",
+            "file-path": path.pp_encodedURL()
+        ]
+        // 使用Alamofire发送PUT请求
+        AF.upload(contents, to: requestURL, method: .put, headers:headers)
+            .responseData { response in
+                completion(nil, self.getResponseError(response))
+            }
     }
     
     func moveItem(srcPath: String, destPath: String, srcItemID: String, destItemID: String, isRename: Bool, completion: @escaping(_ error:Error?) -> Void) {
+        let filename = destPath.pp_split("/").last ?? ""
+        
+        let requestURL = self.url + "/api/fs/rename"
+        let parameters: [String: Any] = [
+            "path": srcPath,
+            "name":[filename], //支持一次删除多个文件，这里暂时没写
+        ]
+        AF.request(requestURL, method: .post, parameters: parameters, encoding: JSONEncoding.default, headers: headers()).responseData { response in
+            completion(self.getResponseError(response))
+        }
 
     }
     
     func removeItem(_ path: String, _ fileID: String, completion: @escaping(_ error: Error?) -> Void) {
+        let filename = path.pp_split("/").last ?? ""
+        let dir = path.pp_split(filename).first ?? ""
 
+        let requestURL = self.url + "/api/fs/remove"
+        let parameters: [String: Any] = [
+            "dir": dir,
+            "names":[filename], //支持一次删除多个文件，这里暂时没写
+        ]
+        AF.request(requestURL, method: .post, parameters: parameters, encoding: JSONEncoding.default, headers: headers()).responseData { response in
+            completion(self.getResponseError(response))
+        }
+        
     }
     
-    
+    func getResponseError(_ response:AFDataResponse<Data>) -> Error? {
+        switch response.result {
+        case .success(_):
+//            debugPrint("alist response: \(response)")
+            guard let json = response.data?.pp_JSONObject() else { return PPCloudServiceError.unknown }
+            if let message = json["message"] as? String {
+                if(message == "success") {
+                    return nil
+                }
+            }
+        case .failure(let error):
+//            debugPrint("alist error: \(error)")
+            return error
+        }
+        return PPCloudServiceError.unknown
+    }
 }

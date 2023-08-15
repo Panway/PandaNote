@@ -16,6 +16,7 @@ class PPAddCloudServiceViewController : PPBaseViewController,UITableViewDataSour
                                     "Dropbox",
                                     "OneDrive",
                                     "alist",
+                                    "群晖Synology",
                                     "百度网盘"]
     var tableView = UITableView()
     
@@ -144,6 +145,15 @@ class PPAddCloudServiceViewController : PPBaseViewController,UITableViewDataSour
             vc.serverURL = "https://b.pandago.cf:5244"
             vc.cloudType = "alist"
             vc.remark = "alist"
+            vc.password = ""
+            sourceVC.navigationController?.pushViewController(vc, animated: true)
+        }
+        else if obj == "群晖Synology" {
+            let vc = PPWebDAVConfigViewController()
+            vc.serverURL = ""
+            vc.serverURLRemark = "地址或 QuickConnect ID"
+            vc.cloudType = "synology"
+            vc.remark = "synology"
             vc.password = ""
             sourceVC.navigationController?.pushViewController(vc, animated: true)
         }

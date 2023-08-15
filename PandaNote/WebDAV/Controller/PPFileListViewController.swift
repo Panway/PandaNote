@@ -49,6 +49,7 @@ class PPFileListViewController: PPBaseViewController,
 
     var currentImageURL = ""
     var photoBrowser: SKPhotoBrowser!
+    var currentImageIndex = -1 // 防止多次调用didShowPhotoAtIndex
     ///如果是展示最近访问的列表
     var isRecentFiles = false
     var isCachedFile = false
@@ -213,7 +214,7 @@ class PPFileListViewController: PPBaseViewController,
         if self.isMovingMode {
             return
         }
-        self.dropdown.dataSource = ["删除","重命名","移动","多选","QuickLook预览","浏览器打开"]
+        self.dropdown.dataSource = ["删除","重命名","移动","打开为文本","多选","预览","浏览器打开"]
         self.dropdown.selectionAction = { (index: Int, item: String) in
             let fileObj = self.dataSource[cellIndex]
             if item == "删除" {
@@ -242,8 +243,11 @@ class PPFileListViewController: PPBaseViewController,
                 self.multipleSelectionMode = true
 //                self.topToolBarHeight?.updateOffset(amount: 99)
             }
-            else if item == "QuickLook预览" {
+            else if item == "预览" {
                 self.fileQuickLookPreview(fileObj)
+            }
+            else if item == "打开为文本" {
+                self.openAsTextFile(fileObj)
             }
         }
         self.dropdown.anchorView = sender
@@ -279,7 +283,7 @@ class PPFileListViewController: PPBaseViewController,
             cell?.backgroundColor = .clear
         }
     }
-    //MARK: 点击文件
+    //MARK: 点击文件 click file cell
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
 //        let cell = collectionView.cellForItem(at: indexPath)
         guard let cell = collectionView.cellForItem(at: indexPath) as? PPFileListCell else {
@@ -330,8 +334,10 @@ class PPFileListViewController: PPBaseViewController,
             self.pushDetail(vc)
         }
         else if (fileObj.name.pp_isImageFile())  {
-            loadAndCacheImage(fileObj) { (imageData,imageLocalPath) in
-                self.showImage(contents: imageData, image: nil, imageName: fileObj.path,imageURL:imageLocalPath) {
+            cell.iconImage.contentMode = .scaleAspectFit
+            cell.downloadFile(fileObj) { localFilePath in
+                self.showImage(fromView:cell, imageName: fileObj.path, imageURL:localFilePath) {
+                    fileObj.downloadProgress = 1.0
                     collectionView.reloadItems(at: [indexPath]) //下载成功后再刷新
                 }
             }
@@ -356,42 +362,15 @@ class PPFileListViewController: PPBaseViewController,
             }
         }
         else {
-            // 打开为「图片」、「文字」...
-            self.dropdown.dataSource = ["打开为文本","系统自带预览"]
-            self.dropdown.selectionAction = { (index: Int, item: String) in
-                if index == 0 {
-                    let vc = PPMarkdownViewController()
-                    vc.filePathStr = self.getPathNotEmpty(fileObj)
-                    self.navigationController?.pushViewController(vc, animated: true)
-                }
-                else if index == 1 {
-                    self.fileQuickLookPreview(fileObj)
-                }
+            cell.updateUIWithData(fileObj)
+            cell.downloadFile(fileObj) { url in
+                self.fileQuickLookPreview(fileObj)
             }
-            self.dropdown.anchorView = cell
-            self.dropdown.show()
         }
         
     }
 
-    func tableView(_ tableView: UITableView, editActionsForRowAt indexPath: IndexPath) -> [UITableViewRowAction]? {
-        if self.isMovingMode {
-            return []
-        }
-        let delete = UITableViewRowAction(style: .default, title: "删除") { (action, indexPath) in
-        }
-        delete.backgroundColor = UIColor.red
-        
-        let complete = UITableViewRowAction(style: .default, title: "重命名") { (action, indexPath) in
-
-        }
-        complete.backgroundColor = PPCOLOR_GREEN
-        let move = UITableViewRowAction(style: .default, title: "移动") { (action, indexPath) in
-            
-        }
-        move.backgroundColor = UIColor(hexRGBValue: 0x98acf8)
-        return [delete, move ,complete]
-    }
+    
     //https://stackoverflow.com/a/58006735/4493393
     //here is how I selecte file name `Panda` from `Panda.txt`
     func textFieldDidBeginEditing(_ textField: UITextField) {
@@ -483,32 +462,54 @@ class PPFileListViewController: PPBaseViewController,
 //            PPShareManager.shared().weixinShareEmoji(imageData ?? Data.init(), type: PPSharePlatform.weixinSession.rawValue)
         }
     }
-    
-    //在滑到第index页的时候，下载当前页的图片并且让SKPhotoBrowser刷新
-    func didScrollToIndex(_ browser: SKPhotoBrowser, index: Int) {
-        debugPrint(index)
+    // 仅在self.present(self.photoBrowser的时候执行
+    func viewForPhoto(_ browser: SKPhotoBrowser, index: Int) -> UIView? {
+        if (currentImageIndex != -1) {
+            return nil
+        }
         let obj = self.imageArray[index];
-        loadAndCacheImage(obj) { data, url in
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.2, execute: {
+        let indexPath = IndexPath(item: obj.cellIndex, section: 0)
+        guard let cell = collectionView.cellForItem(at: indexPath) as? PPFileListCell else { return nil }
+        return cell.iconImage
+    }
+    //照片浏览器消失
+    func didDismissAtPageIndex(_ index: Int) {
+        currentImageIndex = -1
+        
+
+    }
+    // 滑动和点击左右都会执行。在滑到第index页的时候，下载当前页的图片并且让SKPhotoBrowser刷新
+    func didShowPhotoAtIndex(_ browser: SKPhotoBrowser, index: Int) {
+        //debugPrint("didShowPhotoAtIndex",index,browser.currentPageIndex)
+        if(currentImageIndex != index) {
+            currentImageIndex = index
+            let obj = self.imageArray[index];
+            let indexPath = IndexPath(item: obj.cellIndex, section: 0)
+            guard let cell = collectionView.cellForItem(at: indexPath) as? PPFileListCell else {
+                return
+            }
+            cell.downloadFile(obj) { localFilePath in
+                obj.downloadProgress = 1.0
+                self.collectionView.reloadItems(at: [indexPath])
                 let obj2 = browser.photos[index]
-                obj2.loadUnderlyingImageAndNotify()
-                // browser.reloadData()
-            })
+                obj2.loadUnderlyingImageAndNotify()//刷新图像
+            }
         }
     }
+    
     //根据参数加载显示图片 Load photo according to the parameters
-    func showImage(contents:Data,image:UIImage?,imageName:String,imageURL:String,completion: (() -> Void)? = nil) -> Void {
-        var photos = [SKPhoto]()
-        let imageToSKPhoto = imageArray.map { imageObj -> SKPhoto in
-            let path2 = "\(PPDiskCache.shared.path)/\(PPUserInfo.shared.webDAVRemark)/\(getPathNotEmpty(imageObj))"
-            let url2 = URL(fileURLWithPath: path2)
-            let photo2 = SKPhoto.photoWithImageURL(url2.absoluteString)
+    func showImage(fromView: UIView?,imageName:String,imageURL:String,completion: (() -> Void)? = nil) -> Void {
+        var photos = [SKLocalPhoto]()
+        let imageToSKPhoto = imageArray.map { imageObj -> SKLocalPhoto in
+            let path2 = "\(PPDiskCache.shared.path)/\(PPUserInfo.shared.webDAVRemark)/\(getPathNotEmpty(imageObj))".replacingOccurrences(of: "//", with: "/")
+            let photo2 = SKLocalPhoto.photoWithImageURL(path2)//SKPhoto.photoWithImageURL(url2.absoluteString)
             photo2.caption = imageObj.path
             return photo2
         }
         photos.append(contentsOf: imageToSKPhoto)
+//        self.photoBrowser = SKPhotoBrowser(originImage: UIImage(), photos: photos, animatedFromView: fromView)
         self.photoBrowser = SKPhotoBrowser(photos: photos)
-
+        self.photoBrowser.shouldAutoHideControlls = false
         var clickIndex = 0//点击的图片是第几张 The sequence number of the clicked photo
         for i in 0..<imageArray.count {
             let fileObj = imageArray[i]
@@ -685,30 +686,6 @@ class PPFileListViewController: PPBaseViewController,
             }
         }
     }
-    /// 加载图片并保存，如果本地不存在就从服务器获取
-    func loadAndCacheImage(_ file:PPFileModel,completionHandler: ((Data,String) -> Void)? = nil) {
-//        let cache = ImageCache.default//KingFisher用
-        let imageURL = file.path
-        let fileID = file.pathID
-        
-        // /Library/Caches/PandaCache/OneDrive/path/to/example.png
-        let imagePath = "\(PPDiskCache.shared.path)/\(PPUserInfo.shared.webDAVRemark)/\(imageURL)"
-        self.currentImageURL = imagePath
-        
-//        let filePath = cache.cachePath(forComputedKey: imageURL)//KingFisher用
-//        let cachedData = try?Data(contentsOf: URL(fileURLWithPath: filePath))//KingFisher用
-        
-        PPFileManager.shared.getFileData(path: getPathNotEmpty(file),
-                                         fileID: fileID,
-                                         downloadURL:file.downloadURL) { (contents: Data?,isFromCache, error) in
-            guard let contents = contents else { return }
-            if let handler = completionHandler {
-                DispatchQueue.main.async {
-                    handler(contents,imagePath)
-                }
-            }
-        }        
-    }
     
     func getPathNotEmpty(_ fileObj:PPFileModel) -> String {
         if fileObj.path.length < 1 {
@@ -739,6 +716,7 @@ class PPFileListViewController: PPBaseViewController,
             fileObj.downloadProgress = progress.fractionCompleted
 //            self.reloadCellDownloadProgress()
         } completion: { filePath in
+            fileObj.downloadProgress = 1.0
             let vc = PPPreviewController() //QuickLook框架预览
             vc.filePathArray = [filePath]
             self.present(vc, animated: true)
@@ -748,7 +726,7 @@ class PPFileListViewController: PPBaseViewController,
     func getFileListData() -> Void {
         if isRecentFiles {
             self.rawDataSource = PPUserInfo.shared.recentFiles
-            self.dataSource = self.sort(array: self.rawDataSource, orderBy: PPAppConfig.shared.fileListOrder);
+            self.dataSource = self.sort(array: self.rawDataSource, orderBy: PPAppConfig.shared.fileListOrder, basePath: self.pathStr);
             self.imageArray = self.rawDataSource.filter{$0.name.pp_isImageFile()}
             self.collectionView.endRefreshing()
             self.sortRecentFileList()
@@ -778,21 +756,31 @@ class PPFileListViewController: PPBaseViewController,
             }
             PPHUD.showHUDFromTop(isFromCache ? "":"已加载最新\(self.dataSource.count)项")
             self.rawDataSource = contents
-            self.dataSource = self.sort(array: contents, orderBy: PPAppConfig.shared.fileListOrder);
-            self.imageArray = self.dataSource.filter {
-//                if let name = $0.name { //防止name为空的情况：
-                return $0.name.pp_isImageFile()
-//                } else {
-//                    return false
-//                }
-            }
+            self.dataSource = self.sort(array: contents, orderBy: PPAppConfig.shared.fileListOrder, basePath: self.pathStr);
+            self.imageArray = self.rawDataSource.filter{$0.name.pp_isImageFile()}
             self.collectionView.endRefreshing()
             self.collectionView.reloadData()
         }
         
     }
     
-    
+    func openAsTextFile(_ fileObj:PPFileObject) {
+        if(fileObj.size > 2048*1024) {
+            PPAlertAction.showAlert(withTitle: "当前文件过大", msg: "是否继续", buttonsStatement: ["确定","取消"]) { index in
+                if index == 0 {
+                    let vc = PPMarkdownViewController()
+                    vc.filePathStr = self.getPathNotEmpty(fileObj)
+                    self.navigationController?.pushViewController(vc, animated: true)
+                }
+            }
+        }
+        else {
+            let vc = PPMarkdownViewController()
+            vc.filePathStr = self.getPathNotEmpty(fileObj)
+            self.navigationController?.pushViewController(vc, animated: true)
+        }
+        
+    }
     
     
     
