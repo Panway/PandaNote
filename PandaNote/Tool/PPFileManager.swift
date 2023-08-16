@@ -175,7 +175,7 @@ class PPFileManager: NSObject {
             }
         }
         let type = PPUserInfo.shared.cloudServiceType
-        if type == .baiduyun || type == .alist || type == .aliyundrive {
+        if type == .baiduyun || type == .alist || type == .aliyundrive || type == .synology {
             currentService?.getFileData(path, fileID ?? "", completion: { data, url, error in
                 self.downloadThenCache(url: url, path: path, progress: progress, completion: completion)
             })
@@ -350,7 +350,10 @@ class PPFileManager: NSObject {
         case .synology:
             let sid = PPUserInfo.shared.getCurrentServerInfo("sid")
             let did = PPUserInfo.shared.getCurrentServerInfo("did")
-            synologyService = PPSynologyService(url:PPUserInfo.shared.webDAVServerURL,
+            let remoteURL = PPUserInfo.shared.getCurrentServerInfo("PPWebDAVServerURL")
+            let localURL = PPUserInfo.shared.getCurrentServerInfo("PPLocalBaseURL")
+            synologyService = PPSynologyService(url:remoteURL,
+                                                localURL: localURL,
                                                 username: user,
                                                 password: password,
                                                 sid: sid,

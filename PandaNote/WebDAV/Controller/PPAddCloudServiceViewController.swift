@@ -142,7 +142,7 @@ class PPAddCloudServiceViewController : PPBaseViewController,UITableViewDataSour
         }
         else if obj == "alist" {
             let vc = PPWebDAVConfigViewController()
-            vc.serverURL = "https://b.pandago.cf:5244"
+            vc.serverURL = ""
             vc.cloudType = "alist"
             vc.remark = "alist"
             vc.password = ""
