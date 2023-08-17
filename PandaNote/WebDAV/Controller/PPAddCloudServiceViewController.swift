@@ -70,8 +70,10 @@ class PPAddCloudServiceViewController : PPBaseViewController,UITableViewDataSour
             sourceVC.navigationController?.pushViewController(vc, animated: true)
         }
         else if obj == "阿里云盘" {
-            PPAlertTool.showAction(title: "请选择登录方式", message: nil, items: ["App内授权登录","手动输入配置"]) { index in
-                if index == 1 {
+            PPAlertTool.showAction(title: "请选择登录方式", message: nil,
+                                   items: ["App内授权登录","扫二维码登录"]) //,"手动输入配置"])
+            { index in
+                if index == 2 {
                     let vc = PPWebDAVConfigViewController()
                     vc.cloudType = "AliyunDrive"
                     vc.remark = "阿里云盘"
@@ -87,6 +89,19 @@ class PPAddCloudServiceViewController : PPBaseViewController,UITableViewDataSour
                     let vc = PPWebViewController()
                     vc.urlString = aliyundrive_auth_url
                     sourceVC.navigationController?.pushViewController(vc, animated: true)
+                }
+                else if index == 1 {
+                    PPAliyunDriveService.getQRCode { qrCodeUrl, sid in
+                        debugPrint(qrCodeUrl, sid)
+                        // 加载二维码让用户扫
+                        let vc = PPWebViewController()
+                        vc.urlString = qrCodeUrl
+                        sourceVC.navigationController?.pushViewController(vc, animated: true)
+                        PPAliyunDriveService.getQRCodeStatus(sid: sid) { code in
+                            //用户扫描二维码并点击授权后
+                            PPAddCloudServiceViewController.aliyundriveLoginWithCode(code)
+                        }
+                    }
                 }
             }
         }
@@ -182,7 +197,23 @@ class PPAddCloudServiceViewController : PPBaseViewController,UITableViewDataSour
         }
     }
         
-    
+    class func aliyundriveLoginWithCode(_ code: String) {
+        PPAliyunDriveService.getToken(code: code, callback: {access_token,refresh_token in
+            debugPrint(access_token,refresh_token)
+            let vc = PPWebDAVConfigViewController()
+            vc.cloudType = "AliyunDrive"
+            vc.serverURL = ""
+            vc.userName = ""
+            vc.remark = "阿里云盘"
+            vc.showUserName = false
+            vc.showServerURL = false
+            vc.showPassword = false
+            vc.accessToken = access_token
+            vc.refreshToken = refresh_token
+            UIViewController.pp_topViewController()?.navigationController?.pushViewController(vc, animated: true)
+            
+        })
+    }
     
 
     class func handleCloudServiceRedirect(_ url:URL) {
@@ -284,21 +315,7 @@ class PPAddCloudServiceViewController : PPBaseViewController,UITableViewDataSour
         else if url.host == aliyundrive_callback_domain {
             let urlWithCode = url.absoluteString
             if let code = urlWithCode.pp_valueOf("code") {
-                PPAliyunDriveService.getToken(code: code, callback: {access_token,refresh_token in
-                    debugPrint(access_token,refresh_token)
-                    let vc = PPWebDAVConfigViewController()
-                    vc.cloudType = "AliyunDrive"
-                    vc.serverURL = ""
-                    vc.userName = ""
-                    vc.remark = "阿里云盘"
-                    vc.showUserName = false
-                    vc.showServerURL = false
-                    vc.showPassword = false
-                    vc.accessToken = access_token
-                    vc.refreshToken = refresh_token
-                    UIViewController.pp_topViewController()?.navigationController?.pushViewController(vc, animated: true)
-                    
-                })
+                PPAddCloudServiceViewController.aliyundriveLoginWithCode(code)
                 
             }
         }

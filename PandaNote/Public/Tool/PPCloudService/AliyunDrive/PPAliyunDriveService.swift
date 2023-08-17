@@ -21,10 +21,12 @@ import Alamofire
 let aliyundrive_auth_url = "https://open.aliyundrive.com/o/oauth/authorize?client_id=4ef89a333545446db34c60c090b72b7f&redirect_uri=https://testcallback.aliyundrive.com&scope=user:base,user:phone,file:all:read,file:all:write"
 let aliyundrive_callback_domain = "testcallback.aliyundrive.com"
 
+fileprivate let client_id = "4ef89a333545446db34c60c090b72b7f" //ES
+fileprivate let client_secret = "48b8170e32c1487394017fa712323830" //ES
+fileprivate var getQRCodeStatusCount = 0
+
 class PPAliyunDriveService: NSObject, PPCloudServiceProtocol {
     var url = "https://openapi.aliyundrive.com"
-    var client_id = "4ef89a333545446db34c60c090b72b7f" //ES
-    var client_secret = "48b8170e32c1487394017fa712323830" //ES
     var access_token:String
     var refresh_token = ""
     var drive_id = "" ///< 每个用户对应的唯一ID
@@ -71,8 +73,8 @@ class PPAliyunDriveService: NSObject, PPCloudServiceProtocol {
     public class func getToken(code:String, callback:((String,String) -> Void)? = nil) {
         let requestURL = "https://openapi.aliyundrive.com/oauth/access_token"
         let parameters: [String: Any] = [
-            "client_id":"4ef89a333545446db34c60c090b72b7f",
-            "client_secret":"48b8170e32c1487394017fa712323830",
+            "client_id":client_id,
+            "client_secret":client_secret,
             "code":code,
             "grant_type":"authorization_code"
         ]
@@ -84,6 +86,53 @@ class PPAliyunDriveService: NSObject, PPCloudServiceProtocol {
             if let refresh_token = jsonDic["refresh_token"] as? String,
                let access_token = jsonDic["access_token"] as? String {
                 callback?(access_token,refresh_token)
+            }
+        }
+    }
+    // 阿里云盘扫码登录，文档：https://www.yuque.com/aliyundrive/zpfszx/ttfoy0xt2pza8lof
+    public class func getQRCode(callback:((String,String) -> Void)? = nil) {
+        let requestURL = "https://openapi.aliyundrive.com/oauth/authorize/qrcode"
+        let parameters: [String: Any] = [
+            "client_id":client_id,
+            "client_secret":"48b8170e32c1487394017fa712323830",
+            "scopes": [
+                "user:base"
+            ],
+            "width": 320, //照顾下iPhone5S
+            "height": 320
+        ]
+
+        AF.request(requestURL, method: .post, parameters: parameters, encoding: JSONEncoding.default).responseData { response in
+            guard let jsonDic = response.data?.pp_JSONObject() as? [String : Any] else { return }
+            debugPrint("aliyundrive getToken for the first time")
+            jsonDic.printJSON()
+            if let qrCodeUrl = jsonDic["qrCodeUrl"] as? String ,
+               let sid = jsonDic["sid"] as? String{
+                callback?(qrCodeUrl,sid)
+            }
+        }
+    }
+    
+    public class func getQRCodeStatus(sid: String,callback:((String) -> Void)? = nil) {
+        let requestURL = "https://openapi.aliyundrive.com/oauth/qrcode/\(sid)/status"
+        getQRCodeStatusCount += 1
+        AF.request(requestURL, method: .get, encoding: JSONEncoding.default).responseData { response in
+            guard let jsonDic = response.data?.pp_JSONObject() as? [String : Any] else { return }
+            debugPrint("aliyundrive getToken for the first time")
+            jsonDic.printJSON()
+            if let status = jsonDic["status"] as? String,
+               status == "LoginSuccess",
+               let authCode = jsonDic["authCode"] as? String{
+                callback?(authCode)
+                getQRCodeStatusCount = 100
+            }
+            else {
+                //轮询，直到用户扫码完成获取到code
+                if(getQRCodeStatusCount < 10) {
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+                        self.getQRCodeStatus(sid: sid, callback: callback)
+                    }
+                }
             }
         }
     }

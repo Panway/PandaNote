@@ -45,7 +45,7 @@ class PPEditCloudServiceVC: PPBaseViewController {
             vc.accessToken = dict["PPAccessToken"] ?? ""
             vc.showToken = vc.accessToken.length > 0
             
-            vc.accessToken = dict["PPRefreshToken"] ?? ""
+            vc.refreshToken = dict["PPRefreshToken"] ?? ""
             vc.showRefreshToken = vc.refreshToken.length > 0
             
             vc.userName = dict["PPWebDAVUserName"] ?? ""

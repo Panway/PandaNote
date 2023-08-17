@@ -9,27 +9,37 @@
 
 import Foundation
 import Alamofire
+//#if os(iOS) || os(watchOS) || os(tvOS)
+//import MobileCoreServices
+//#elseif os(macOS)
+//import CoreServices
+//#endif
 
 class PPSynologyService: NSObject, PPCloudServiceProtocol {
     var url = "" ///< 用户输入的地址或者QC ID
     var username = ""
     var password = ""
-    var access_token:String?
-    var baseURL = "" ///< 请求使用的
+
+    var remoteBaseURL = "" ///< 请求使用的局域网地址 ip:port
     var localBaseURL = "" ///< 请求使用的局域网地址 ip:port
     var sid = "" ///< Authorized session ID
     var did = "" ///< device id
+    
     private static let dateFormatter = DateFormatter()
-    private let headers: HTTPHeaders = [
+    private var headers: HTTPHeaders = [
         "User-Agent": "Synology-DS_file_5.17.0_iPhone_13_iOS_16.5 (iPhone; iOS 16.5)",
 //        "User-Agent": "DSfile/11 CFNetwork/1408.0.4 Darwin/22.5.0",
     ]
     /// 更新完token等信息后执行的回调。你可以保存新token等信息到本地或数据库（解耦）
     var configChanged : ((_ key:String,_ value:String) -> ())?
+    var baseURL: String {
+        //TODO: 自动切换局域网和远程IP
+        return remoteBaseURL
+    }
     
-    
-    init(url: String, localURL: String, username: String, password: String, sid: String, did: String) {
+    init(url: String, remoteURL: String, localURL: String, username: String, password: String, sid: String, did: String) {
         self.url = url
+        self.remoteBaseURL = remoteURL
         self.localBaseURL = localURL
         self.username = username
         self.password = password
@@ -46,7 +56,11 @@ class PPSynologyService: NSObject, PPCloudServiceProtocol {
         }
         else {
             // TODO: 局域网URL直接登录
-            
+            self.localBaseURL = url
+            self.configChanged?("PPLocalBaseURL", url)
+            if (self.sid.length == 0) {
+                self.login(username: self.username, password: self.password)
+            }
             return
         }
 
@@ -63,7 +77,6 @@ class PPSynologyService: NSObject, PPCloudServiceProtocol {
             switch response.result {
             case .success(_):
                 // 注意：国外IP不可访问
-
                 debugPrint("Synology getServerInfo:",response)
                 response.data?.pp_JSONObject()?.printJSON()
                 guard let jsonDict = response.data?.pp_JSONObject() as? [String:Any] else { return }
@@ -71,10 +84,10 @@ class PPSynologyService: NSObject, PPCloudServiceProtocol {
                 guard let relay_ip = service["relay_ip"] as? String,
                       let relay_port = service["relay_port"] as? Int,
                       let local_port = service["port"] as? Int else { return }
-                self.baseURL = "http://\(relay_ip):\(relay_port)"
+                self.remoteBaseURL = "http://\(relay_ip):\(relay_port)"
                 service.printJSON()
                 if (self.sid.length == 0) {
-                    self.login(username: self.username, password: self.password)
+                    self.login(username: self.username, password: self.password ,callback: callback)
                     return
                 }
                 else {
@@ -83,7 +96,7 @@ class PPSynologyService: NSObject, PPCloudServiceProtocol {
                 guard let server = service["server"] as? [String:Any], let interface = server["interface"] as? [[String:Any]] else { return }
                 guard let firstIP = interface.first, let localIP = firstIP["ip"] as? String else { return }
                 self.configChanged?("PPLocalBaseURL", "http://\(localIP):\(local_port)")
-                self.configChanged?("PPServerURL", self.baseURL)
+                self.configChanged?("PPServerURL", self.remoteBaseURL)
 
                
             case .failure(let error):
@@ -92,7 +105,7 @@ class PPSynologyService: NSObject, PPCloudServiceProtocol {
             }
         }
     }
-    func login(username:String, password:String) {
+    func login(username:String, password:String, callback:((String) -> Void)? = nil) {
             let parameters: Parameters = [
                 "account": username,
                 "api": "SYNO.API.Auth",
@@ -127,10 +140,11 @@ class PPSynologyService: NSObject, PPCloudServiceProtocol {
                     guard let responseHeader = response.response?.headers else {return}
                     guard let cookie = responseHeader["Set-Cookie"] else { return }
 
-                    self.access_token = cookie
-                    self.configChanged?("PPAccessToken", cookie)
+//                    self.access_token = cookie
+//                    self.configChanged?("PPAccessToken", cookie)
                     self.configChanged?("sid", sid)
                     self.configChanged?("did", did)
+                    
                 case .failure(let error):
                     // 处理错误
                     debugPrint("DSfile error:",error)
@@ -234,39 +248,50 @@ class PPSynologyService: NSObject, PPCloudServiceProtocol {
         parameters.printJSON()
         AF.request(baseURL + "/webapi/entry.cgi", method: .post, parameters: parameters, encoding: URLEncoding.default, headers: headers)
             .responseData { response in
-                debugPrint("DSfile response:" , response)
-
                 completion(self.getResponseError(response))
             }
     }
     
     func createFile(_ path: String, _ pathID: String, contents: Data, completion: @escaping ([String : String]?, Error?) -> Void) {
+        struct PPUploadParam {
+            var key: String
+            var value: String
+        }
+        
         let filename = path.pp_split("/").last ?? ""
         let dest_folder_path = path.replacingOccurrences(of: "/" + filename, with: "")
                 
-//        var urlString = self.baseURL.appending("/webapi/entry.cgi?api=SYNO.FileStation.Upload&method=upload&version=2")
-//        let uploadURL = urlString.appending("&_sid=\(sid)")
+        let urlString = self.baseURL.appending("/webapi/entry.cgi?api=SYNO.FileStation.Upload&method=upload&version=2")
+        let uploadURL = urlString.appending("&_sid=\(sid)")
         
+        var parameters: [PPUploadParam] = []
+        parameters.append(PPUploadParam(key: "path", value: dest_folder_path))
+        parameters.append(PPUploadParam(key: "create_parents", value: "true"))
         
-        let uploadURL = baseURL + "/webapi/entry.cgi"
-        AF.upload(multipartFormData: { formData in
-            formData.append(Data("upload".utf8), withName: "method")
-            formData.append(Data(self.sid.utf8), withName: "_sid")
-            formData.append(Data("SYNO.FileStation.Upload".utf8), withName: "api")
-            formData.append(Data("\(Int64(Date().timeIntervalSince1970) * 1000)".utf8), withName: "mtime")
-            formData.append(Data("true".utf8), withName: "overwrite")
-            formData.append(Data("true".utf8), withName: "create_parents")
-            formData.append(Data("\"\(dest_folder_path)\"".utf8), withName: "path")
-            formData.append(Data("2".utf8), withName: "version")
-//            formData.append(Data("51913".utf8), withName: "size")
-            formData.append(Data(), withName: "file", fileName: filename)
-        }, to: uploadURL, method: .post, headers: headers)
+        let multipart: (MultipartFormData) -> Void = { formData in
+            for param in parameters {
+                formData.append(Data(param.value.utf8), withName: param.key)
+            }
+            //let mimeType = self.mimeType(forFileName: filename)
+            formData.append(contents, withName: "file", fileName: filename) //,mimeType: mimeType)
+        }
+        // headers.add(name: "Cookie", value: self.access_token ?? "")
+        AF.upload(multipartFormData: multipart, to: uploadURL, method: .post, headers: headers)
             .responseData { response in
-                debugPrint("DSfile response:" , response)
                 completion(nil, self.getResponseError(response))
             }
-
-
+    }
+    /// 暂未使用
+    func mimeType(forFileName filename: String) -> String {
+//        if filename.contains(".") {
+//            let pathExtension = String(filename.split(separator: ".").last!)
+//            if let id = UTTypeCreatePreferredIdentifierForTag(kUTTagClassFilenameExtension, pathExtension as CFString, nil)?.takeRetainedValue(),
+//                let contentType = UTTypeCopyPreferredTagWithClass(id, kUTTagClassMIMEType)?.takeRetainedValue()
+//            {
+//                return contentType as String
+//            }
+//        }
+        return "application/octet-stream"
     }
     
     func moveItem(srcPath: String, destPath: String, srcItemID: String, destItemID: String, isRename: Bool, completion: @escaping (Error?) -> Void) {
@@ -315,6 +340,7 @@ class PPSynologyService: NSObject, PPCloudServiceProtocol {
     }
     
     func getResponseError(_ response:AFDataResponse<Data>) -> Error? {
+        //debugPrint("DSfile response:" , response)
         switch response.result {
         case .success(_):
             guard let json = response.data?.pp_JSONObject() else { return PPCloudServiceError.unknown }

@@ -26,6 +26,7 @@ class PPFileManager: NSObject {
     var aliyunDriveService: PPAliyunDriveService?
     var baiduwangpan : BaiduyunAPITool?
     var currentPath = ""
+    var currentPathID = "" ///< 阿里云盘等需要
     var baiduFSID = 0
     /// 下载保存的文件路径，只读
     public var downloadPath:String {
@@ -101,6 +102,7 @@ class PPFileManager: NSObject {
     /// 获取文件列表（先取本地再获取最新）
     func pp_getFileList(path:String,pathID:String,completionHandler:@escaping(_ data:[PPFileObject],_ isFromCache:Bool,_ error:Error?) -> Void) {
         self.currentPath = path
+        self.currentPathID = pathID
         //先获取本地缓存数据
         let archieveKey = self.apiCachePrefix + "\(self.currentService?.baseURL ?? "")\(path)".pp_md5
         PPDiskCache.shared.fetchData(key: archieveKey) { (data) in
@@ -350,9 +352,11 @@ class PPFileManager: NSObject {
         case .synology:
             let sid = PPUserInfo.shared.getCurrentServerInfo("sid")
             let did = PPUserInfo.shared.getCurrentServerInfo("did")
-            let remoteURL = PPUserInfo.shared.getCurrentServerInfo("PPWebDAVServerURL")
+            let url = PPUserInfo.shared.getCurrentServerInfo("PPWebDAVServerURL")
+            let remoteURL = PPUserInfo.shared.getCurrentServerInfo("PPServerURL")
             let localURL = PPUserInfo.shared.getCurrentServerInfo("PPLocalBaseURL")
-            synologyService = PPSynologyService(url:remoteURL,
+            synologyService = PPSynologyService(url:url,
+                                                remoteURL: remoteURL,
                                                 localURL: localURL,
                                                 username: user,
                                                 password: password,
@@ -516,7 +520,7 @@ class PPFileManager: NSObject {
                 let remotePath = path + uploadName
 //                debugPrint(imageLocalURL)
                 
-                PPFileManager.shared.createFile(path: remotePath, contents: imageData) { (result, error) in
+                PPFileManager.shared.createFile(path: remotePath, parentID: self.currentPathID, contents: imageData) { (result, error) in
                     if let error = error {
                         debugPrint("上传出错:\(error.localizedDescription)")
                         return
