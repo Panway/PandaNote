@@ -575,6 +575,11 @@ extension String{
 
 //MARK: Your Logic 自己的业务逻辑
 extension String {
+    func isMarkdownFile() -> Bool {
+        let textSuffixs = ["md","markdown","mmd","mkd"]
+        let name = self.lowercased()
+        return textSuffixs.contains { name.hasSuffix($0) }
+    }
     func isTextFile() -> Bool {
         let textSuffixs = ["md","txt","js","css","json",
                            "html","c","h","m","swift",

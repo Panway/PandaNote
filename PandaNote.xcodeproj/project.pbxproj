@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 51;
+	objectVersion = 54;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -66,7 +66,10 @@
 		1EEB0FF02753456E006A5E26 /* PPFileModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1EEB0FEF2753456E006A5E26 /* PPFileModel.swift */; };
 		1EEB0FF327538771006A5E26 /* PPOneDriveFile.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1EEB0FF227538771006A5E26 /* PPOneDriveFile.swift */; };
 		3B30DE452A8BDADD00D519AB /* PPSynologyFile.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B30DE442A8BDADD00D519AB /* PPSynologyFile.swift */; };
+		3B594A932A908CE600A5BC1E /* PPAttributedStringVisitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B594A922A908CE600A5BC1E /* PPAttributedStringVisitor.swift */; };
+		3B797E4D2A926BFC00D736E7 /* PPDownConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B797E4C2A926BFC00D736E7 /* PPDownConfig.swift */; };
 		3B8D11E92A6D2A8700EE801F /* PPiCloudDriveService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B8D11E82A6D2A8700EE801F /* PPiCloudDriveService.swift */; };
+		3B9E5CA82A924F9B0020E92F /* PPMDTextView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B9E5CA72A924F9B0020E92F /* PPMDTextView.swift */; };
 		60011E40243A29E000BC6458 /* PlayerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60011E3E243A29E000BC6458 /* PlayerViewController.swift */; };
 		60011E41243A29E000BC6458 /* PlayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60011E3F243A29E000BC6458 /* PlayerView.swift */; };
 		6001B6342461A82400A40593 /* PPWebFileViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6001B6332461A82400A40593 /* PPWebFileViewController.swift */; };
@@ -202,7 +205,10 @@
 		1EEB0FF227538771006A5E26 /* PPOneDriveFile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPOneDriveFile.swift; sourceTree = "<group>"; };
 		1EFF08AA24E50B8000E84AD1 /* PandaNote.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = PandaNote.entitlements; sourceTree = "<group>"; };
 		3B30DE442A8BDADD00D519AB /* PPSynologyFile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPSynologyFile.swift; sourceTree = "<group>"; };
+		3B594A922A908CE600A5BC1E /* PPAttributedStringVisitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPAttributedStringVisitor.swift; sourceTree = "<group>"; };
+		3B797E4C2A926BFC00D736E7 /* PPDownConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPDownConfig.swift; sourceTree = "<group>"; };
 		3B8D11E82A6D2A8700EE801F /* PPiCloudDriveService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPiCloudDriveService.swift; sourceTree = "<group>"; };
+		3B9E5CA72A924F9B0020E92F /* PPMDTextView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPMDTextView.swift; sourceTree = "<group>"; };
 		445FC61B8328A513BADB990E /* Pods-PandaNoteTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-PandaNoteTests.release.xcconfig"; path = "Target Support Files/Pods-PandaNoteTests/Pods-PandaNoteTests.release.xcconfig"; sourceTree = "<group>"; };
 		5FC90B3D04D0AB60B2DBFED0 /* Pods-PandaNoteUITests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-PandaNoteUITests.release.xcconfig"; path = "Target Support Files/Pods-PandaNoteUITests/Pods-PandaNoteUITests.release.xcconfig"; sourceTree = "<group>"; };
 		60011E3E243A29E000BC6458 /* PlayerViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PlayerViewController.swift; sourceTree = "<group>"; };
@@ -324,6 +330,7 @@
 		1E0D9E0927736E2A00E3AA73 /* Markdown */ = {
 			isa = PBXGroup;
 			children = (
+				3B594A912A908CDB00A5BC1E /* Tool */,
 				1E0D9E0A27736E4B00E3AA73 /* View */,
 			);
 			path = Markdown;
@@ -332,6 +339,7 @@
 		1E0D9E0A27736E4B00E3AA73 /* View */ = {
 			isa = PBXGroup;
 			children = (
+				3B9E5CA72A924F9B0020E92F /* PPMDTextView.swift */,
 				1E0D9E0B27736E9700E3AA73 /* PPMarkdownEditorToolBar.swift */,
 				1E8724EF29EAA51900F85BFA /* PPFindReplaceView.swift */,
 			);
@@ -498,6 +506,15 @@
 				1EEB0FF227538771006A5E26 /* PPOneDriveFile.swift */,
 			);
 			path = OneDrive;
+			sourceTree = "<group>";
+		};
+		3B594A912A908CDB00A5BC1E /* Tool */ = {
+			isa = PBXGroup;
+			children = (
+				3B594A922A908CE600A5BC1E /* PPAttributedStringVisitor.swift */,
+				3B797E4C2A926BFC00D736E7 /* PPDownConfig.swift */,
+			);
+			path = Tool;
 			sourceTree = "<group>";
 		};
 		3B8D11E72A6D27C300EE801F /* iCoudDrive */ = {
@@ -1114,10 +1131,13 @@
 				60F5D04523275549004E988B /* XDCollectionViewCell.m in Sources */,
 				3B8D11E92A6D2A8700EE801F /* PPiCloudDriveService.swift in Sources */,
 				1E6763CE28C4FE8E00D1BE39 /* WKWebViewTool.swift in Sources */,
+				3B797E4D2A926BFC00D736E7 /* PPDownConfig.swift in Sources */,
 				60A4CD332447325700367DA7 /* PPPasteboardTool.swift in Sources */,
 				6056027D23178B03000809CD /* XDFastTableView.m in Sources */,
+				3B9E5CA82A924F9B0020E92F /* PPMDTextView.swift in Sources */,
 				1EAB8F4025AC60A700D721A9 /* AppDelegate+PPTool.swift in Sources */,
 				1E8724F029EAA51A00F85BFA /* PPFindReplaceView.swift in Sources */,
+				3B594A932A908CE600A5BC1E /* PPAttributedStringVisitor.swift in Sources */,
 				60A1F8D824349581009E390C /* NSAttributedString+Markdown.m in Sources */,
 				1E1F2DEB25384C75002B0426 /* PPDebugViewController.swift in Sources */,
 				6080D3F323333C3500F582B1 /* PPFileManager.swift in Sources */,

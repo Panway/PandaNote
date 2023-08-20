@@ -20,12 +20,17 @@ class PPSynologyService: NSObject, PPCloudServiceProtocol {
     var username = ""
     var password = ""
 
-    var remoteBaseURL = "" ///< 请求使用的局域网地址 ip:port
-    var localBaseURL = "" ///< 请求使用的局域网地址 ip:port
+    var remoteBaseURL = "" ///< 请求使用的远程QuickConnect服务地址
+    var localBaseURL = "" ///< 请求使用的局域网地址
+    var useLANIP = false ///< 用来自动切换局域网和远程ip
+    var forceUseRemote = false
     var sid = "" ///< Authorized session ID
     var did = "" ///< device id
-    
+    var requestCount = -1
+    var retryCount = 0
+
     private static let dateFormatter = DateFormatter()
+    //    let reachabilityManager: NetworkReachabilityManager?
     private var headers: HTTPHeaders = [
         "User-Agent": "Synology-DS_file_5.17.0_iPhone_13_iOS_16.5 (iPhone; iOS 16.5)",
 //        "User-Agent": "DSfile/11 CFNetwork/1408.0.4 Darwin/22.5.0",
@@ -34,6 +39,9 @@ class PPSynologyService: NSObject, PPCloudServiceProtocol {
     var configChanged : ((_ key:String,_ value:String) -> ())?
     var baseURL: String {
         //TODO: 自动切换局域网和远程IP
+        if useLANIP {
+            return localBaseURL
+        }
         return remoteBaseURL
     }
     
@@ -45,10 +53,36 @@ class PPSynologyService: NSObject, PPCloudServiceProtocol {
         self.password = password
         self.sid = sid
         self.did = did
+        /*
+        if let localip = self.localBaseURL
+            .replacingOccurrences(of: "http://", with: "")
+            .replacingOccurrences(of: "https://", with: "").pp_split(":").first {
+            self.reachabilityManager = NetworkReachabilityManager(host: localip)!
+            self.reachabilityManager?.startListening { status in
+                switch status {
+                case .reachable(.cellular), .reachable(.ethernetOrWiFi):
+                    print("\(localip) is reachable")
+                    // 在这里处理服务可达
+                case .notReachable:
+                    print("\(localip) is not reachable")
+                    // 在这里处理服务不可
+                case .unknown:
+                    print("\(localip) status is unknown")
+                }
+            }
+        }
+        else {
+            self.reachabilityManager = nil
+        }
+        */
         super.init()
 
     }
     
+    /// 获取远程ip和端口、局域网ip和端口
+    /// - Parameters:
+    ///   - url: QuickConnect ID
+    ///   - optionalURL: global.quickconnect.cn 获取不到远程ip的话换个域名重新获取远程ip
     func getServerInfo(url: String, callback:((String) -> Void)? = nil) {
         var serverID = ""
         if !url.hasPrefix("http") {
@@ -73,30 +107,24 @@ class PPSynologyService: NSObject, PPCloudServiceProtocol {
         ]
         let requestURL = "https://global.quickconnect.cn/Serv.php"
         AF.request(requestURL, method: .post, parameters: parameters, encoding: JSONEncoding.default, headers: headers).responseData { response in
-
             switch response.result {
             case .success(_):
                 // 注意：国外IP不可访问
                 debugPrint("Synology getServerInfo:",response)
                 response.data?.pp_JSONObject()?.printJSON()
                 guard let jsonDict = response.data?.pp_JSONObject() as? [String:Any] else { return }
-                guard let service = jsonDict["service"] as? [String:Any] else { return }
-                guard let relay_ip = service["relay_ip"] as? String,
-                      let relay_port = service["relay_port"] as? Int,
-                      let local_port = service["port"] as? Int else { return }
-                self.remoteBaseURL = "http://\(relay_ip):\(relay_port)"
-                service.printJSON()
-                if (self.sid.length == 0) {
-                    self.login(username: self.username, password: self.password ,callback: callback)
-                    return
+                let getInfoSuccess = self.handleServerInfo(jsonDict)
+                if getInfoSuccess {
+                    if (self.sid.length == 0) {
+                        self.login(username: self.username, password: self.password ,callback: callback)
+                    }
                 }
                 else {
-                    
+                    if let env = jsonDict["env"] as? [String:Any],
+                       let control_host = env["control_host"] as? String {
+                        self.getServerInfoCN(url: "https://" + control_host + "/Serv.php", serverID: serverID, callback: callback)
+                    }
                 }
-                guard let server = service["server"] as? [String:Any], let interface = server["interface"] as? [[String:Any]] else { return }
-                guard let firstIP = interface.first, let localIP = firstIP["ip"] as? String else { return }
-                self.configChanged?("PPLocalBaseURL", "http://\(localIP):\(local_port)")
-                self.configChanged?("PPServerURL", self.remoteBaseURL)
 
                
             case .failure(let error):
@@ -105,22 +133,67 @@ class PPSynologyService: NSObject, PPCloudServiceProtocol {
             }
         }
     }
+    func getServerInfoCN(url: String, serverID: String, callback:((String) -> Void)? = nil) {
+        let parameters: Parameters = [
+            "location": "zh_CN",
+            "id": "dsm",
+            "platform": "iPhone14,5",
+            "serverID": serverID,
+            "command": "request_tunnel",
+            "version": "1"
+        ]
+        AF.request(url, method: .post, parameters: parameters, encoding: JSONEncoding.default, headers: headers).responseData { response in
+            switch response.result {
+            case .success(_):
+                // 注意：国外IP不可访问
+                debugPrint("Synology getServerInfoCN:",response)
+                response.data?.pp_JSONObject()?.printJSON()
+                guard let jsonDict = response.data?.pp_JSONObject() as? [String:Any] else { return }
+                let getInfoSuccess = self.handleServerInfo(jsonDict)
+                if (getInfoSuccess && self.sid.length == 0) {
+                    self.login(username: self.username, password: self.password ,callback: callback)
+                }
+                
+               
+            case .failure(let error):
+                // 处理错误
+                debugPrint("alist error:",error)
+            }
+        }
+    }
+    
+    func handleServerInfo(_ jsonDict: [String:Any]) -> Bool {
+        guard let service = jsonDict["service"] as? [String:Any] ,
+              let server = jsonDict["server"] as? [String:Any] else { return false}
+        guard let relay_ip = service["relay_ip"] as? String,
+              let relay_port = service["relay_port"] as? Int,
+              let local_port = service["port"] as? Int else { return false}
+        
+        self.remoteBaseURL = "http://\(relay_ip):\(relay_port)"
+        self.configChanged?("PPServerURL", self.remoteBaseURL)
+        //service.printJSON()
+        guard let interface = server["interface"] as? [[String:Any]],
+              let firstIP = interface.first,
+              let localIP = firstIP["ip"] as? String else { return false }
+        self.configChanged?("PPLocalBaseURL", "http://\(localIP):\(local_port)")
+        return true
+    }
+    
     func login(username:String, password:String, callback:((String) -> Void)? = nil) {
-            let parameters: Parameters = [
-                "account": username,
-                "api": "SYNO.API.Auth",
-                "method": "login",
-                "passwd": password,
-                "session": "FileStation",
-                "version": "3"
-            ]
-            
-            AF.request(baseURL + "/webapi/auth.cgi", method: .post, parameters: parameters, encoding: URLEncoding.default, headers: headers)
-            .responseData { response in
-                switch response.result {
-                case .success(_):
-                    // 使用解码后的对象
-                    let res = response.data?.pp_JSONObject()
+        let parameters: Parameters = [
+            "account": username,
+            "api": "SYNO.API.Auth",
+            "method": "login",
+            "passwd": password,
+            "session": "FileStation",
+            "version": "3"
+        ]
+        
+        AF.request(baseURL + "/webapi/auth.cgi", method: .post, parameters: parameters, encoding: URLEncoding.default, headers: headers).responseData { response in
+            switch response.result {
+            case .success(_):
+                // 使用解码后的对象
+                let res = response.data?.pp_JSONObject()
 /* 响应体：
 {
   "data" : {
@@ -130,28 +203,47 @@ class PPSynologyService: NSObject, PPCloudServiceProtocol {
   "success" : true
 }
 */
-                    res?.printJSON()
-                    guard let data_ = res?["data"] as? [String:Any] else { return }
-                    guard let sid = data_["sid"] as? String, let did = data_["did"] as? String else { return }
-
-                    self.sid = sid
-                    self.did = did
-                    debugPrint("DSfile response:" , response)
-                    guard let responseHeader = response.response?.headers else {return}
-                    guard let cookie = responseHeader["Set-Cookie"] else { return }
-
-//                    self.access_token = cookie
-//                    self.configChanged?("PPAccessToken", cookie)
-                    self.configChanged?("sid", sid)
-                    self.configChanged?("did", did)
-                    
-                case .failure(let error):
-                    // 处理错误
-                    debugPrint("DSfile error:",error)
-                }
+                res?.printJSON()
+                guard let data_ = res?["data"] as? [String:Any] else { return }
+                guard let sid = data_["sid"] as? String, let did = data_["did"] as? String else { return }
+                
+                self.sid = sid
+                self.did = did
+                debugPrint("DSfile response:" , response)
+                self.configChanged?("sid", sid)
+                self.configChanged?("did", did)
+                //                    guard let responseHeader = response.response?.headers else {return}
+                //                    guard let cookie = responseHeader["Set-Cookie"] else { return }
+                callback?("success")
+                
+            case .failure(let error):
+                // 处理错误
+                debugPrint("DSfile error:",error)
             }
         }
+    }
+    // 每隔3次请求检查本地网络可用性
+    func checkLANStatus() {
+        requestCount += 1
+        if requestCount % 3 != 0 {
+            return
+        }
+        let url = self.localBaseURL + "/webman/pingpong.cgi?quickconnect=true"
+
+        AF.request(url, method: .get, headers: headers){ $0.timeoutInterval = 3 }.response { response in
+//            debugPrint("checkLANStatus",response.response)
+            if let statusCode = response.response?.statusCode,
+               statusCode == 200 {
+                self.useLANIP = true
+            }
+            else {
+                self.useLANIP = false
+            }
+        }
+        
+    }
     func contentsOfDirectory(_ path: String, _ pathID: String, completion: @escaping ([PPFileObject], Error?) -> Void) {
+        self.checkLANStatus()
         var path_ = path
         if(path_.hasSuffix("/")) {
             path_ = String(path_.dropLast())
@@ -180,18 +272,18 @@ class PPSynologyService: NSObject, PPCloudServiceProtocol {
             parameters["folder_path"] = nil
             parameters["method"] = "list_share"
         }
-        parameters.printJSON()
+//        parameters.printJSON()
 //        let url = "http://192.168.1.46:5000/webapi/entry.cgi"
 
         AF.request(baseURL + "/webapi/entry.cgi", method: .post, parameters: parameters, encoding: URLEncoding.default, headers: headers)
             .responseData
         { response in
-//            debugPrint("DSfile response:" , response)
+            debugPrint("DSfile response:" , response.request)
             switch response.result {
             case .success(_):
                 // 使用解码后的对象
                 let res = response.data?.pp_JSONObject()
-                res?.printJSON()
+//                res?.printJSON()
                 var files = [[String:Any]]()
                 guard let data_ = res?["data"] as? [String:Any] else { return }
                 if(path == "/") {
@@ -209,7 +301,15 @@ class PPSynologyService: NSObject, PPCloudServiceProtocol {
                 completion(synologyFiles, nil)
             case .failure(let error):
                 // 处理错误
-                debugPrint("DSfile error:",error)
+                debugPrint("DSfile error:",error,response)
+                self.useLANIP = false
+                self.getServerInfo(url: self.url) { s in
+                    if self.retryCount < 3 {
+                        self.retryCount += 1 //自动刷新、防止死循环
+                        self.contentsOfDirectory(path, pathID, completion: completion)
+                    }
+                }
+                completion([], error)
             }
         }
         

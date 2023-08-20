@@ -11,7 +11,8 @@ import FilesProvider
 import Down
 import Highlightr
 
-typealias PPPTextView = UITextView
+
+//typealias PPPTextView = PPPPTextView
 
 fileprivate let TopToolBarTag = 1
 fileprivate let BottomToolBarTag = 2
@@ -21,6 +22,7 @@ fileprivate let BottomToolBarTag = 2
     case leftAndRight
     case upAndDown
 }
+
 //UITextViewDelegate
 class PPMarkdownViewController: PPBaseViewController,
                                 PPEditorToolBarDelegate,
@@ -31,7 +33,7 @@ class PPMarkdownViewController: PPBaseViewController,
 //    let markdownParser = MarkdownParser()
     var markdownStr = "I support a *lot* of custom Markdown **Elements**, even `code`!"
     var historyList = [String]()
-    var textView = PPPTextView()
+    var textView : PPMDTextView!
     let backgroundImage  = UIImageView()
     ///文件相对路径
     var filePathStr: String = ""
@@ -57,9 +59,11 @@ class PPMarkdownViewController: PPBaseViewController,
     
     //MARK: - Life Cycle
     override func viewDidLoad() {
+        navigationController?.view.backgroundColor = .white
         if self.filePathStr.length < 1 {
             return //使用UISplitViewController的时候，没路径显示空白
         }
+        textView = PPMDTextView(frame: self.view.bounds)
         initStyle()
         pp_initView()
         self.title = self.filePathStr.split(string: "/").last
@@ -101,10 +105,12 @@ class PPMarkdownViewController: PPBaseViewController,
                 }
                 else if method == "Down" {
                     //MARK: Down渲染
-                    let down = Down(markdownString: self.markdownStr)
+                    self.textView.text = self.markdownStr
+                    self.textView.backgroundColor = .clear
+//                    let down = Down(markdownString: self.markdownStr)
                     //DownAttributedStringRenderable 31行
-                    let attributedString = try? down.toAttributedString(DownOptions.default, stylesheet: "* {font-family: Helvetica } code, pre { font-family: Menlo } code {position: relative;background-color: #f6f8fa;border-radius: 6px;} img {max-width: 100%;display: block;margin-left: auto;margin-right: auto;}")
-                    self.textView.attributedText = attributedString
+//                    let attributedString = try? down.toAttributedString(DownOptions.default, stylesheet: "* {font-family: Helvetica } code, pre { font-family: Menlo } code {position: relative;background-color: #f6f8fa;border-radius: 6px;} img {max-width: 100%;display: block;margin-left: auto;margin-right: auto;}")
+//                    self.textView.attributedText = attributedString
                     
                 }
                 else if method == "Highlightr" {
@@ -129,7 +135,7 @@ class PPMarkdownViewController: PPBaseViewController,
                     let textContainer = NSTextContainer(size: CGSize(width: self.view.bounds.width, height: .greatestFiniteMagnitude))
                     layoutManager.addTextContainer(textContainer)
 
-                    self.textView = UITextView(frame: self.view.bounds, textContainer: textContainer)
+                    self.textView = PPMDTextView(frame: self.view.bounds)//, textContainer: textContainer)
                     self.view.addSubview(self.textView)
                     self.pp_viewEdgeEqualToSafeArea(self.textView)
                     
@@ -248,17 +254,17 @@ class PPMarkdownViewController: PPBaseViewController,
     }
 
     // MARK: - UITextViewDelegate 文本框代理
-    func textViewDidChange(_ textView: PPPTextView) {
+    func textViewDidChange(_ textView: PPMDTextView) {
 //        debugPrint(textView.text)
         if splitMode != .none {
             PPUserInfo.shared.webViewController.renderMardownWithJS(self.textView.text)
         }
     }
-    func textViewShouldBeginEditing(_ textView: PPPTextView) -> Bool {
+    func textViewShouldBeginEditing(_ textView: PPMDTextView) -> Bool {
         debugPrint("====Start")
         return true
     }
-    func textView(_ textView: PPPTextView, shouldChangeTextIn range: NSRange, replacementText text: String) -> Bool {
+    func textView(_ textView: PPMDTextView, shouldChangeTextIn range: NSRange, replacementText text: String) -> Bool {
         textChanged = true
         let newRange = Range(range, in: textView.text)!
         let mySubstring = textView.text![newRange]
@@ -266,7 +272,7 @@ class PPMarkdownViewController: PPBaseViewController,
         debugPrint("===shouldChangeTextIn \(myString)")
         return true
     }
-    func textViewDidEndEditing(_ textView: PPPTextView) {
+    func textViewDidEndEditing(_ textView: PPMDTextView) {
 //        debugPrint("===textViewDidEndEditing \(textView.attributedText.markdownRepresentation)")
         historyList.append(self.textView.text)
         debugPrint("historyList= \(historyList.count)")
@@ -276,7 +282,7 @@ class PPMarkdownViewController: PPBaseViewController,
         return true
     }
     func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
-        let offsetKey = PPFileManager.shared.currentServerUniqueID().pp_md5
+        let offsetKey = "\(PPFileManager.shared.currentServerUniqueID())\(self.filePathStr)".pp_md5
         debugPrint("滚动偏移量:\(scrollView.contentOffset.y)")
         PPCacheManeger.shared.set("\(scrollView.contentOffset.y)", key: offsetKey)
         if splitMode != .none {

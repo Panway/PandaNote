@@ -9,6 +9,9 @@
 import UIKit
 import Kingfisher
 
+// 解决Xcode15重名错误 Incorrect argument labels in call (have 'downloadURL:cacheKey:', expected 'name:bundle:')
+typealias KFImageResource = Kingfisher.ImageResource
+
 @objc enum PPFileListCellViewMode : Int {
     case list
     case listLarge
@@ -273,7 +276,7 @@ class PPFileListCell: PPBaseCollectionViewCell {
         }
         if let thumbnail = URL(string: fileObj.thumbnail), fileObj.thumbnail.length > 0 {
             // 阿里云盘略缩图问号后每次都是不同的参数，去掉问号后面的参数，这样不用每次都下载略缩图
-            let imageResource = ImageResource(downloadURL: thumbnail, cacheKey: fileObj.thumbnail.pp_split("?").first)
+            let imageResource = KFImageResource(downloadURL: thumbnail, cacheKey: fileObj.thumbnail.pp_split("?").first)
             self.iconImage.kf.setImage(with: imageResource)
         }
         if(fileObj.modifiedDate.hasSuffix("Z")) {

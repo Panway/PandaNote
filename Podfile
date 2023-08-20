@@ -30,7 +30,7 @@ target 'PandaNote' do
   pod 'FilesProvider'
   #布局 https://github.com/SnapKit/SnapKit
   pod 'SnapKit'
-  # https://github.com/iwasrobbed/Down
+  # https://github.com/johnxnguyen/Down
   pod 'Down'
   pod 'Highlightr'
 #  pod 'ZMarkupParser'
@@ -38,7 +38,9 @@ target 'PandaNote' do
   # https://github.com/Flipboard/FLEX
   pod 'FLEX', :configurations => ['Debug']
   pod 'MJRefresh'
-  pod 'YYText'
+  #  pod 'YYText'
+  #美图公司的富文本组件 https://github.com/meitu/MPITextKit
+  pod 'MPITextKit'
 #  https://github.com/suzuki-0000/SKPhotoBrowser
   pod 'SKPhotoBrowser'
   #https://github.com/Yummypets/YPImagePicker

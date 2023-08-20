@@ -3,7 +3,7 @@
 //
 #define USE_YPImagePicker 0
 
-#import "YYText.h"
+//#import "YYText.h"
 
 #import "UIScrollView+XDTool.h"
 //#import "XDWebViewController.h"

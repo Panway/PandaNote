@@ -21,6 +21,7 @@ PODS:
   - MBProgressHUD (1.2.0)
   - MJRefresh (3.7.5)
   - MonkeyKing (2.2.1)
+  - MPITextKit (0.2.1)
   - NewPopMenu (2.1.2)
   - ObjectMapper (4.2.0)
   - PINCache (3.0.3):
@@ -44,7 +45,6 @@ PODS:
     - TZImagePickerController/Location (= 3.8.3)
   - TZImagePickerController/Basic (3.8.3)
   - TZImagePickerController/Location (3.8.3)
-  - YYText (1.0.7)
 
 DEPENDENCIES:
   - Alamofire (~> 5.0)
@@ -65,6 +65,7 @@ DEPENDENCIES:
   - MBProgressHUD
   - MJRefresh
   - MonkeyKing
+  - MPITextKit
   - NewPopMenu
   - ObjectMapper
   - PINCache
@@ -76,7 +77,6 @@ DEPENDENCIES:
   - SKPhotoBrowser
   - SnapKit
   - TZImagePickerController
-  - YYText
 
 SPEC REPOS:
   trunk:
@@ -98,6 +98,7 @@ SPEC REPOS:
     - MBProgressHUD
     - MJRefresh
     - MonkeyKing
+    - MPITextKit
     - NewPopMenu
     - ObjectMapper
     - PINCache
@@ -105,7 +106,6 @@ SPEC REPOS:
     - SKPhotoBrowser
     - SnapKit
     - TZImagePickerController
-    - YYText
 
 EXTERNAL SOURCES:
   PPiOSKit:
@@ -135,6 +135,7 @@ SPEC CHECKSUMS:
   MBProgressHUD: 3ee5efcc380f6a79a7cc9b363dd669c5e1ae7406
   MJRefresh: fdf5e979eb406a0341468932d1dfc8b7f9fce961
   MonkeyKing: 196838a3b4c97e95915f3e7046fb2d6044f06101
+  MPITextKit: c35d4de736a88802122f957791504c16ed743e9d
   NewPopMenu: c6129e08e8192f6257ceb5f9a4357e1b59c6e2e7
   ObjectMapper: 1eb41f610210777375fa806bf161dc39fb832b81
   PINCache: 7a8fc1a691173d21dbddbf86cd515de6efa55086
@@ -143,8 +144,7 @@ SPEC CHECKSUMS:
   SKPhotoBrowser: cd95b95a6f352fc2a50992721299f75ead77f9ab
   SnapKit: e01d52ebb8ddbc333eefe2132acf85c8227d9c25
   TZImagePickerController: e9909edbadf7381140efc5b5c9f5bdbfd630f7d4
-  YYText: 5c461d709e24d55a182d1441c41dc639a18a4849
 
-PODFILE CHECKSUM: d7ceb6f87e0dec47f28033ff85175af903fc8a60
+PODFILE CHECKSUM: e5ea97f6a1124c22ed55b34acd92e70f321f24ce
 
 COCOAPODS: 1.12.1
