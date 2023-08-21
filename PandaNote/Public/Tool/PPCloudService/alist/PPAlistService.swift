@@ -17,7 +17,7 @@ class PPAlistService: NSObject, PPCloudServiceProtocol {
     var url = ""
     var username = ""
     var password = ""
-    var access_token:String?
+    var access_token = ""
 
     /// 更新完token等信息后执行的回调。你可以保存新token等信息到本地或数据库（解耦）
     var configChanged : ((_ key:String,_ value:String) -> ())?
@@ -26,27 +26,16 @@ class PPAlistService: NSObject, PPCloudServiceProtocol {
         return url
     }
     
-    init(url: String, username: String, password: String) {
+    init(url: String, username: String, password: String, access_token: String) {
         self.url = url
         self.username = username
         self.password = password
+        self.access_token = access_token
         super.init()
-//        login(url: url, username: username, password: password)
-        self.getToken()
-
-    }
-    
-    func getToken() {
-        let serverList = PPUserInfo.shared.pp_serverInfoList
-        let current = serverList[PPUserInfo.shared.pp_lastSeverInfoIndex]
-        self.access_token = current["PPAccessToken"]
-        if access_token == nil || access_token?.length == 0 {
-            login(url: url, username: username, password: password)
-        }
     }
     
     func headers() -> HTTPHeaders{
-        return ["authorization": "\(self.access_token ?? "")"]
+        return ["authorization": self.access_token]
     }
     
     func login(url:String, username:String, password:String) {
@@ -100,7 +89,7 @@ class PPAlistService: NSObject, PPCloudServiceProtocol {
         ]
         AF.request(requestURL, method: .post, parameters: parameters, encoding: JSONEncoding.default, headers: headers()).responseData { response in
             let jsonDic = response.data?.pp_JSONObject() as? [String : Any]
-            jsonDic?.printJSON()
+//            jsonDic?.printJSON()
             if let code = jsonDic?["code"] as? Int, code != 200 {
                 debugPrint("alist get list error")
                 completion([], PPCloudServiceError.unknown)
@@ -118,7 +107,9 @@ class PPAlistService: NSObject, PPCloudServiceProtocol {
             }
             completion(PPAlistFile.toModelArray(fileList, self.baseURL), nil)
         }
-        
+        if self.access_token.length == 0 {
+            login(url: self.url, username: self.username, password: self.password)
+        }
     }
     
     func getFileData(_ path: String, _ extraParams:String, completion:@escaping(_ data:Data?, _ url:String, _ error:Error?) -> Void) {
@@ -183,7 +174,7 @@ class PPAlistService: NSObject, PPCloudServiceProtocol {
     func createFile(_ path: String, _ pathID: String, contents: Data, completion: @escaping(_ result: [String:String]?, _ error: Error?) -> Void) {
         let requestURL = self.url + "/api/fs/put"
         let headers: HTTPHeaders = [
-            "authorization": self.access_token ?? "",
+            "authorization": self.access_token,
             "file-path": path.pp_encodedURL()
         ]
         // 使用Alamofire发送PUT请求
@@ -199,7 +190,7 @@ class PPAlistService: NSObject, PPCloudServiceProtocol {
         let requestURL = self.url + "/api/fs/rename"
         let parameters: [String: Any] = [
             "path": srcPath,
-            "name":[filename], //支持一次删除多个文件，这里暂时没写
+            "name": filename, //支持一次删除多个文件，这里暂时没写
         ]
         AF.request(requestURL, method: .post, parameters: parameters, encoding: JSONEncoding.default, headers: headers()).responseData { response in
             completion(self.getResponseError(response))
@@ -227,13 +218,17 @@ class PPAlistService: NSObject, PPCloudServiceProtocol {
         case .success(_):
 //            debugPrint("alist response: \(response)")
             guard let json = response.data?.pp_JSONObject() else { return PPCloudServiceError.unknown }
-            if let message = json["message"] as? String {
+            if let message = json["message"] as? String,
+               let code = json["code"] as? Int {
                 if(message == "success") {
                     return nil
                 }
+                else if code == 403 {
+                    return PPCloudServiceError.permissionDenied
+                }
             }
         case .failure(let error):
-//            debugPrint("alist error: \(error)")
+            debugPrint("alist error: \(error)")
             return error
         }
         return PPCloudServiceError.unknown

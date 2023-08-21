@@ -133,6 +133,9 @@ class PPFileManager: NSObject {
                            completion: @escaping ((_ contents: Data?, _ isFromCache:Bool, _ error: Error?) -> Void)){
         debugPrint("download:\(url)")
 //        PPHUD.showBarProgress()
+        // 我不知道为什么会有缓存，操
+        let urlRequest = URLRequest(url: URL(string: url)!)
+        URLCache.shared.removeCachedResponse(for: urlRequest)
         AF.request(url).downloadProgress { p in
             //debugPrint("downloadThenCache Progress: \(p.fractionCompleted)")
             if let progress = progress {
@@ -343,9 +346,11 @@ class PPFileManager: NSObject {
             oneDriveService = PPOneDriveService(access_token: password,
                                                 refresh_token: refresh_token)
         case .alist:
+            let a = PPUserInfo.shared.getCurrentServerInfo("PPAccessToken")
             alistService = PPAlistService(url:PPUserInfo.shared.webDAVServerURL,
                                           username: user,
-                                          password: password)
+                                          password: password,
+                                          access_token: a)
             alistService?.configChanged = {key,value in
                 PPUserInfo.shared.updateCurrentServerInfo(key: key, value: value)
             }

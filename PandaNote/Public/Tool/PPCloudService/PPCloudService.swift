@@ -14,6 +14,7 @@ public enum PPCloudServiceError: Error {
     case unknown
     /// 文件不存在错误
     case fileNotExist
+    case permissionDenied
     case preCreateError
     case forcedLoginRequired
     case accessTokenExpired

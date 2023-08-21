@@ -278,14 +278,23 @@ class PPSynologyService: NSObject, PPCloudServiceProtocol {
         AF.request(baseURL + "/webapi/entry.cgi", method: .post, parameters: parameters, encoding: URLEncoding.default, headers: headers)
             .responseData
         { response in
-            debugPrint("DSfile response:" , response.request)
+            debugPrint("DSfile response:" , response)
             switch response.result {
             case .success(_):
                 // 使用解码后的对象
                 let res = response.data?.pp_JSONObject()
 //                res?.printJSON()
                 var files = [[String:Any]]()
-                guard let data_ = res?["data"] as? [String:Any] else { return }
+                guard let data_ = res?["data"] as? [String:Any] else {
+                    if let code = response.response?.statusCode, code == 400, self.retryCount < 3 {
+                        self.getServerInfo(url: self.url) { sid in
+                            self.retryCount += 1 //自动刷新、防止死循环
+                            self.contentsOfDirectory(path, pathID, completion: completion)
+                        }
+                    }
+                    debugPrint("DSfile response:" , response)
+                    return
+                }
                 if(path == "/") {
                     guard let shares = data_["shares"] as? [[String:Any]] else { return }
                     files = shares

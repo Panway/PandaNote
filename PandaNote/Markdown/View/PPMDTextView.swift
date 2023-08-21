@@ -18,12 +18,16 @@ class PPMDTextView: UITextView {
     // MARK: - Properties
     
     open var styler: Styler
-    
+    open var renderMethod = ""
+    var cacheDir = ""
     
     open override var text: String! {
         didSet {
             guard oldValue != text else { return }
-            try? render()
+
+            if renderMethod == "Down" {
+                try? render()
+            }
         }
     }
 
@@ -65,14 +69,26 @@ class PPMDTextView: UITextView {
     // MARK: - Methods
     
     open func render() throws {
+        if renderMethod != "Down" {
+            return
+        }
+        // 获取原来的光标位置
+        let selectedRange = self.selectedRange
+        let offsetY = self.contentOffset.y
         let ttttt = self.text ?? "@@@"
         print("render==========\n\(ttttt)"  )
         let down = Down(markdownString: ttttt)
         
         let document = try down.toDocument(DownOptions.hardBreaks)
         let visitor = PPAttributedStringVisitor(styler: styler, options: DownOptions.hardBreaks)
+        visitor.cacheDir = cacheDir
         attributedText = document.accept(visitor)
         debugPrint("===========")
+        // 恢复光标位置
+        if selectedRange.location != NSNotFound {
+            self.selectedRange = selectedRange
+        }
+        self.setContentOffset(CGPoint(x: 0, y: offsetY), animated: false)
     }
     
 }

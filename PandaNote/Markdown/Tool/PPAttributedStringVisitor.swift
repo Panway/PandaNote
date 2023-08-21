@@ -20,6 +20,7 @@ public typealias PPListPrefixGeneratorBuilder = (List) -> ListItemPrefixGenerato
 public class PPAttributedStringVisitor {
 
     // MARK: - Properties
+    var cacheDir = ""
 
     private let styler: Styler
     private let options: DownOptions
@@ -58,8 +59,8 @@ extension PPAttributedStringVisitor: Visitor {
     public func visit(blockQuote node: BlockQuote) -> NSMutableAttributedString {
         var result = visitChildren(of: node).pp_joined
         result = renewString(result: result, newStr: "> \(result.string)")
-        if node.hasSuccessor { result.append(.pp_paragraphSeparator) }
         styler.style(blockQuote: result, nestDepth: node.nestDepth)
+        if node.hasSuccessor { result.append(.pp_paragraphSeparator) }
         return result
     }
 
@@ -107,8 +108,8 @@ extension PPAttributedStringVisitor: Visitor {
     public func visit(htmlBlock node: HtmlBlock) -> NSMutableAttributedString {
         guard let literal = node.literal else { return .pp_empty }
         let result = literal.pp_replacingNewlinesWithLineSeparators().pp_attributed
-        if node.hasSuccessor { result.append(.pp_paragraphSeparator) }
         styler.style(htmlBlock: result)
+        if node.hasSuccessor { result.append(.pp_paragraphSeparator) }
         return result
     }
 
@@ -120,16 +121,16 @@ extension PPAttributedStringVisitor: Visitor {
 
     public func visit(paragraph node: Paragraph) -> NSMutableAttributedString {
         let result = visitChildren(of: node).pp_joined
-        if node.hasSuccessor { result.append(.pp_paragraphSeparator) }
         styler.style(paragraph: result)
+        if node.hasSuccessor { result.append(.pp_paragraphSeparator) }
         return result
     }
 
     public func visit(heading node: Heading) -> NSMutableAttributedString {
         var result = visitChildren(of: node).pp_joined
         result = renewString(result: result, newStr: String(repeating: "#", count: node.headingLevel) + " \(result.string)")
-        if node.hasSuccessor { result.append(.pp_paragraphSeparator) }
         styler.style(heading: result, level: node.headingLevel)
+        if node.hasSuccessor { result.append(.pp_paragraphSeparator) }
         return result
     }
 
@@ -186,7 +187,14 @@ extension PPAttributedStringVisitor: Visitor {
     public func visit(emphasis node: Emphasis) -> NSMutableAttributedString {
         var result = visitChildren(of: node).pp_joined
         result = renewString(result: result, newStr: "*\(result.string)*")
-        styler.style(emphasis: result)
+        // 设置字体、下划线和删除线的属性
+        let attributes: [NSAttributedString.Key: Any] = [
+            .font: UIFont.italicSystemFont(ofSize: 17), // 设置斜体字体
+//            .underlineStyle: NSUnderlineStyle.single.rawValue, // 设置下划线样式
+//            .strikethroughStyle: NSUnderlineStyle.single.rawValue // 设置删除线样式
+        ]
+        result.addAttributes(attributes, range: result.wholeRange)
+//        styler.style(emphasis: result)
         return result
     }
 
@@ -208,6 +216,31 @@ extension PPAttributedStringVisitor: Visitor {
         var result = visitChildren(of: node).pp_joined
         result = renewString(result: result, newStr: "![\(result.string)](\(node.url ?? ""))")
         styler.style(image: result, title: node.title, url: node.url)
+        
+        //显示图片附件
+        let fileManager = FileManager.default
+        let path = "\(cacheDir)/\(node.url ?? "")".replacingOccurrences(of: "//", with: "/")
+        if fileManager.fileExists(atPath: path) {
+            result.append("\n".pp_attributed) //换行
+            // 创建一个NSTextAttachment实例并设置图片
+            let imageAttachment = NSTextAttachment()
+            if let localImage = UIImage(contentsOfFile: path) {
+                imageAttachment.image = localImage
+                // 设置图片尺寸：宽度最大为320，如果小于320按原始大小显示，且始终保持纵横比
+                let maxWidth: CGFloat = 320.0
+                var imageSize = localImage.size
+                // 调整图片尺寸，保持纵横比
+                if imageSize.width > maxWidth {
+                    let scaleFactor = maxWidth / imageSize.width
+                    imageSize.width *= scaleFactor
+                    imageSize.height *= scaleFactor
+                }
+                imageAttachment.bounds = CGRect(origin: .zero, size: imageSize)
+            }
+            // 创建包含图片附件的NSAttributedString
+            let attributedString = NSAttributedString(attachment: imageAttachment)
+            result.append(attributedString)
+        }
         return result
     }
     
@@ -265,7 +298,7 @@ private extension NSAttributedString {
 private extension String {
 
     var pp_attributed: NSMutableAttributedString {
-        return NSMutableAttributedString(string: self)
+        return NSMutableAttributedString(string: self, attributes: [.font:UIFont.systemFont(ofSize: 17)])
     }
 
     // This codepoint marks the end of a paragraph and the start of the next.

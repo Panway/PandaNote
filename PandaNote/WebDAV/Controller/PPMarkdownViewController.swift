@@ -41,6 +41,7 @@ class PPMarkdownViewController: PPBaseViewController,
     var fileID = ""
     var fileExtension = ""
     var downloadURL = ""
+    var cacheDir = ""
 //    var webdav: WebDAVFileProvider?
     var closeAfterSave : Bool = false
     var textChanged : Bool = false//文本改变的话就不需要再比较字符串了
@@ -63,7 +64,11 @@ class PPMarkdownViewController: PPBaseViewController,
         if self.filePathStr.length < 1 {
             return //使用UISplitViewController的时候，没路径显示空白
         }
+        
+        cacheDir = "\(PPDiskCache.shared.path)/\(PPUserInfo.shared.webDAVRemark)\(filePathStr.replacingOccurrences(of: filePathStr.pp_split("/").last ?? "", with: ""))"
+            .replacingOccurrences(of: "//", with: "/")
         textView = PPMDTextView(frame: self.view.bounds)
+        textView.cacheDir = cacheDir
         initStyle()
         pp_initView()
         self.title = self.filePathStr.split(string: "/").last
@@ -96,6 +101,7 @@ class PPMarkdownViewController: PPBaseViewController,
             }
             //markdown解析的方式
             let method = PPAppConfig.shared.getItem("pp_markdownParseMethod")
+            self.textView.renderMethod = method
             if method != "" {
                 if method == "NSAttributedString+Markdown" {
                     //NSAttributedString+Markdown 解析
@@ -431,6 +437,7 @@ class PPMarkdownViewController: PPBaseViewController,
         present(shareSheet, animated: true)
     }
     @objc func saveTextAction()  {
+        try? self.textView.render()
         let stringToUpload = self.textView.text ?? ""
         if stringToUpload.length < 1 {
             PPHUD.showHUDFromTop("不支持保存空文件")
