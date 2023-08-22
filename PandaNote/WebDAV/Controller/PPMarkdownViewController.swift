@@ -437,7 +437,7 @@ class PPMarkdownViewController: PPBaseViewController,
         present(shareSheet, animated: true)
     }
     @objc func saveTextAction()  {
-        try? self.textView.render()
+        textView.render()
         let stringToUpload = self.textView.text ?? ""
         if stringToUpload.length < 1 {
             PPHUD.showHUDFromTop("不支持保存空文件")
@@ -445,7 +445,7 @@ class PPMarkdownViewController: PPBaseViewController,
         }
         debugPrint("保存的是===\(stringToUpload)")
         //MARK: 保存
-        self.textView.resignFirstResponder()
+//        self.textView.resignFirstResponder()
         PPFileManager.shared.createFile(path: self.filePathStr, contents: stringToUpload.data(using: .utf8), completionHandler: { (result, error) in
             if error != nil {
                 PPHUD.showHUDFromTop("保存失败", isError: true)
@@ -585,10 +585,14 @@ class PPMarkdownViewController: PPBaseViewController,
         for press in presses {
             guard let key = press.key else { continue }
             let keyName = key.charactersIgnoringModifiers
-            debugPrint("用户按下：\(key.charactersIgnoringModifiers)")
+            debugPrint("用户按下：\(keyName)")
             if key.modifierFlags.contains(.command) {
                 pressCommandKey = true
                 print("用户按下command")
+                if let num = Int(keyName),
+                   num > 0 && num < 6 {
+                    self.textView.updateCurrentLineWithHeadingLevel(num)
+                }
             }
             if pressCommandKey {
                 if keyName == "s" {

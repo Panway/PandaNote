@@ -345,7 +345,7 @@ extension PPWebViewController {
         //获取百度网盘的access_token
         else if urlString.hasPrefix("http://www.estrongs.com") || urlString.hasPrefix("pandanote://baiduwangpan"){
             var urlWithToken = urlString.removingPercentEncoding?.replacingOccurrences(of: "www.estrongs.com/#", with: "www.estrongs.com?")//早期用ES的配置，现在实际上没用了
-            urlWithToken = urlString.removingPercentEncoding?.replacingOccurrences(of: "pandanote://baiduwangpan#", with: "pandanote://baiduwangpan?")
+            urlWithToken = urlWithToken?.removingPercentEncoding?.replacingOccurrences(of: "pandanote://baiduwangpan#", with: "pandanote://baiduwangpan?")
             let access_token = urlWithToken?.pp_valueOf("access_token")
             debugPrint(access_token)
             

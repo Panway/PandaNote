@@ -21,6 +21,7 @@ public class PPAttributedStringVisitor {
 
     // MARK: - Properties
     var cacheDir = ""
+    var images = [String]()
 
     private let styler: Styler
     private let options: DownOptions
@@ -220,6 +221,9 @@ extension PPAttributedStringVisitor: Visitor {
         //显示图片附件
         let fileManager = FileManager.default
         let path = "\(cacheDir)/\(node.url ?? "")".replacingOccurrences(of: "//", with: "/")
+        if let url_ = node.url {
+            images.append(url_)
+        }
         if fileManager.fileExists(atPath: path) {
             result.append("\n".pp_attributed) //换行
             // 创建一个NSTextAttachment实例并设置图片
@@ -281,22 +285,11 @@ private extension NSAttributedString {
     static var pp_paragraphSeparator: NSAttributedString {
         return "\n\n".pp_attributed
     }
-    func pp_attributes(at index: Int) -> [NSAttributedString.Key: Any]? {
-        if index > self.length || self.length == 0 {
-            return nil
-        }
-        if self.length > 0 && index == self.length {
-            return self.attributes(at: index - 1, effectiveRange: nil)
-        }
-        return self.attributes(at: index, effectiveRange: nil)
-    }
-    var wholeRange: NSRange {
-        return NSRange(location: 0, length: length)
-    }
+    
 }
 
 private extension String {
-
+    
     var pp_attributed: NSMutableAttributedString {
         return NSMutableAttributedString(string: self, attributes: [.font:UIFont.systemFont(ofSize: 17)])
     }

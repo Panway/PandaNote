@@ -20,6 +20,7 @@ class PPMDTextView: UITextView {
     open var styler: Styler
     open var renderMethod = ""
     var cacheDir = ""
+    var visitor : PPAttributedStringVisitor
     
     open override var text: String! {
         didSet {
@@ -55,6 +56,7 @@ class PPMDTextView: UITextView {
         textStorage.addLayoutManager(layoutManager)
         layoutManager.addTextContainer(textContainer)
         
+        self.visitor = PPAttributedStringVisitor(styler: styler, options: DownOptions.hardBreaks)
         super.init(frame: frame, textContainer: textContainer)
         
         // We don't want the text view to overwrite link attributes set
@@ -68,7 +70,7 @@ class PPMDTextView: UITextView {
     
     // MARK: - Methods
     
-    open func render() throws {
+    open func render() {
         if renderMethod != "Down" {
             return
         }
@@ -79,18 +81,62 @@ class PPMDTextView: UITextView {
         print("render==========\n\(ttttt)"  )
         let down = Down(markdownString: ttttt)
         
-        let document = try down.toDocument(DownOptions.hardBreaks)
-        let visitor = PPAttributedStringVisitor(styler: styler, options: DownOptions.hardBreaks)
+        guard let document = try? down.toDocument(DownOptions.hardBreaks) else { return }
         visitor.cacheDir = cacheDir
+        visitor.images.removeAll()
         attributedText = document.accept(visitor)
         debugPrint("===========")
         // 恢复光标位置
         if selectedRange.location != NSNotFound {
             self.selectedRange = selectedRange
         }
+        for item in visitor.images {
+            let path = "\(cacheDir)/\(item)".replacingOccurrences(of: "//", with: "/").pp_split(PPUserInfo.shared.webDAVRemark).last ?? ""
+
+            PPFileManager.shared.getFileData(path: path,
+                                             fileID: nil,
+                                             alwaysDownload:false) { (contents: Data?,isFromCache, error) in
+            }
+        }
         self.setContentOffset(CGPoint(x: 0, y: offsetY), animated: false)
     }
+    /// 更改标题级别
+    func updateCurrentLineWithHeadingLevel(_ headingLevel:Int) {
+        // 获取光标所在行的文本范围
+        if let selectedTextRange = self.selectedTextRange,
+           let currentLineRange = self.tokenizer.rangeEnclosingPosition(selectedTextRange.start, with: .line, inDirection: .init(rawValue: 1)) {
+            // 获取光标所在行的 NSRange
+            let cursorPosition = self.offset(from: self.beginningOfDocument, to: currentLineRange.start)
+            let lineNSRange = NSRange(location: cursorPosition, length: self.offset(from: currentLineRange.start, to: currentLineRange.end))
+            let currentLineText = self.attributedText.attributedSubstring(from: lineNSRange)
+            // 更新光标所在行的NSAttributedString
+            let stringWithoutHash = currentLineText.string.pp_removeLeadingCharacter("#").pp_removeLeadingCharacter(" ")
+            let newAttributedString = NSAttributedString(string: String(repeating: "#", count: headingLevel) + " \(stringWithoutHash)", attributes: currentLineText.pp_attributes(at: 0))
+            
+            // 更新当前行的文本
+            let mutableAttributedString = NSMutableAttributedString(attributedString: self.attributedText)
+            mutableAttributedString.replaceCharacters(in: lineNSRange, with: newAttributedString)
+            let selectedRange = self.selectedRange
+            self.attributedText = mutableAttributedString
+            self.render()
+            // 恢复光标位置
+            if selectedRange.location != NSNotFound {
+                self.becomeFirstResponder()
+                self.selectedRange = selectedRange
+            }
+        }
+    }
     
+    // https://stackoverflow.com/a/34922332
+    func moveCursor(offset:Int) {
+        if let selectedRange = self.selectedTextRange {
+            // and only if the new position is valid
+            if let newPosition = self.position(from: selectedRange.start, offset: offset) {
+                // set the new position
+                self.selectedTextRange = self.textRange(from: newPosition, to: newPosition)
+            }
+        }
+    }
 }
 //https://levelup.gitconnected.com/background-with-rounded-corners-in-uitextview-1c095c708d14
 /// Shadow style for background attribute

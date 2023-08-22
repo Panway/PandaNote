@@ -134,7 +134,11 @@ class PPFileManager: NSObject {
         debugPrint("download:\(url)")
 //        PPHUD.showBarProgress()
         // 我不知道为什么会有缓存，操
-        let urlRequest = URLRequest(url: URL(string: url)!)
+        guard let url_ = URL(string: url) else {
+            debugPrint("URL is WRONG:\(url)")
+            return
+        }
+        let urlRequest = URLRequest(url: url_)
         URLCache.shared.removeCachedResponse(for: urlRequest)
         AF.request(url).downloadProgress { p in
             //debugPrint("downloadThenCache Progress: \(p.fractionCompleted)")

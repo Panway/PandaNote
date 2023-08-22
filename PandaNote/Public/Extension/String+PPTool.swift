@@ -103,9 +103,16 @@ extension String {
     }
     
     func pp_encodedURL() -> String {
-        return self.addingPercentEncoding(withAllowedCharacters: .urlFragmentAllowed) ?? ""
+        return self.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
     }
-    
+    /// 去除字符串开头的连续的某个字符
+    func pp_removeLeadingCharacter(_ character: Character) -> String {
+        var result = self
+        while let firstCharacter = result.first, firstCharacter == character {
+            result.removeFirst()
+        }
+        return result
+    }
 }
 
 // MARK: - URL 相关处理
