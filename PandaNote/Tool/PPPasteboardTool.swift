@@ -110,6 +110,52 @@ class PPPasteboardTool: NSObject {
         
     }
     
+    class func getAttributedContentFromPasteboard() -> NSAttributedString? {
+        if let pasteboardData = UIPasteboard.general.data(forPasteboardType: .init("public.html")),
+           let attributedString = try? NSAttributedString(data: pasteboardData, options: [.documentType: NSAttributedString.DocumentType.html], documentAttributes: nil) {
+            return attributedString
+        }
+        return nil
+    }
+    
+    class func getHTMLFromPasteboard() -> NSAttributedString? {
+        guard let pasteboardData = UIPasteboard.general.data(forPasteboardType: .init("public.html")) else {
+            return nil
+        }
+        
+        guard let doc = try? HTML(html: pasteboardData, encoding: .utf8),
+              var body = doc.body else {
+            debugPrint("copy content is not html data")
+            return nil
+        }
+        let h1s = body.css("h1", namespaces: nil)
+        for var element in h1s {
+            element.content = "# " + (element.content ?? "")
+            element["style"] = ""
+        }
+        
+        let h2 = body.css("h2", namespaces: nil)
+        for var element in h2 {
+            element.content = "## " + (element.content ?? "")
+            element["style"] = ""
+        }
+        
+        let htmlStr = body.innerHTML
+        let options: [NSAttributedString.DocumentReadingOptionKey: Any] = [
+            .documentType: NSAttributedString.DocumentType.html,
+            .characterEncoding: String.Encoding.utf8.rawValue
+        ]
+        if let new_data = htmlStr?.data(using: .utf8),
+           let attributedString = try? NSAttributedString(data: new_data, options: options, documentAttributes: nil) {
+#if DEBUG
+            try? new_data.write(to: URL(fileURLWithPath: NSHomeDirectory() + "/Library/PandaNote/UIPasteboard_after.html", isDirectory: false))
+            try? pasteboardData.write(to: URL(fileURLWithPath: NSHomeDirectory() + "/Library/PandaNote/UIPasteboard.html", isDirectory: false))
+#endif
+            return attributedString
+        }
+        return nil
+    }
+    
     class func getHTMLTitle(html:String,originURL:String) -> String {
         var result = ""
         if let doc = try? HTML(html: html, encoding: .utf8) {

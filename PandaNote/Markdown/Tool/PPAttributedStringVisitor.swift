@@ -38,7 +38,7 @@ public class PPAttributedStringVisitor {
     public init(
         styler: Styler,
         options: DownOptions = .default,
-        listPrefixGeneratorBuilder: @escaping PPListPrefixGeneratorBuilder = { StaticListItemPrefixGenerator(list: $0) }
+        listPrefixGeneratorBuilder: @escaping PPListPrefixGeneratorBuilder = { PPListItemPrefixGenerator(list: $0) }
     ) {
         self.styler = styler
         self.options = options
@@ -82,9 +82,18 @@ extension PPAttributedStringVisitor: Visitor {
         let result = visitChildren(of: node).pp_joined
 
         let prefix = listPrefixGenerators.last?.next() ?? "-"
-        let attributedPrefix = "\(prefix)\t".pp_attributed
+        let attributedPrefix = "\(prefix) ".pp_attributed //\t".pp_attributed
         styler.style(listItemPrefix: attributedPrefix)
         result.insert(attributedPrefix, at: 0)
+        
+        if prefix == "-" {
+            let switchAttachment = PPCheckmarkTextAttachment()
+            let switchView = PPCheckmarkView(frame: CGRect(x: 0, y: 0, width: 15, height: 15))
+            switchView.isChecked = true
+            switchAttachment.switchView = switchView
+            switchAttachment.customHeight = UIFont.systemFont(ofSize: 17).lineHeight  // Use the appropriate font size
+            result.insert(NSAttributedString(attachment: switchAttachment), at: 2)
+        }
 
         if node.hasSuccessor { result.append(.pp_paragraphSeparator) }
         styler.style(item: result, prefixLength: (prefix as NSString).length)

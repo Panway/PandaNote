@@ -82,14 +82,17 @@ class PPMarkdownViewController: PPBaseViewController,
             }
             PPHUD.showHUDFromTop(isFromCache ? "已加载缓存内容":"已加载最新")
 //            debugPrint(String(data: contents, encoding: .utf8)!) // "hello world!"
-            if let text_encoded = String(textData: contents) {
-                self.markdownStr = text_encoded
-            }
-            else {
+            guard let text_encoded = String(textData: contents) else {
                 PPHUD.showHUDFromTop("此文本无法用 UTF8 编码", isError:true)
                 DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
                     self.navigationController?.popViewController(animated: true)
                 }
+                return
+            }
+            self.markdownStr = text_encoded
+            
+            if isFromCache {
+                self.textView.text = text_encoded
                 return
             }
             //如果是代码文件
@@ -112,6 +115,9 @@ class PPMarkdownViewController: PPBaseViewController,
                 else if method == "Down" {
                     //MARK: Down渲染
                     self.textView.text = self.markdownStr
+                    if(!self.textView.didRender) {
+                        self.textView.render()
+                    }
                     self.textView.backgroundColor = .clear
 //                    let down = Down(markdownString: self.markdownStr)
                     //DownAttributedStringRenderable 31行

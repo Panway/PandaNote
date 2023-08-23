@@ -29,12 +29,13 @@ extension NSRegularExpression {
 extension String {
     //这段代码让我们可以在左边使用任何字符串，在右边使用正则表达式，所有这些操作都集成在一起:
     //比如 "hat" ~= "[a-z]at" 表示在hat里正则匹配以at结尾的单词
-    static func ~= (lhs: String, rhs: String) -> Bool {
-        //注意: 创建一个 nsregularexexpression 实例是有成本的，因此如果您打算重复使用正则表达式，那么最好缓存 nsregularexexpression 实例
-        guard let regex = try? NSRegularExpression(pattern: rhs) else { return false }
-        let range = NSRange(location: 0, length: lhs.utf16.count)
-        return regex.firstMatch(in: lhs, options: [], range: range) != nil
-    }
+    // 会覆盖Swift中String类型的 ~= 操作符。这是因为你在String类型的扩展中定义了一个与Swift标准库中已有的模式匹配操作符~=相同的操作符
+//    static func ~= (lhs: String, rhs: String) -> Bool {
+//        //注意: 创建一个 nsregularexexpression 实例是有成本的，因此如果您打算重复使用正则表达式，那么最好缓存 nsregularexexpression 实例
+//        guard let regex = try? NSRegularExpression(pattern: rhs) else { return false }
+//        let range = NSRange(location: 0, length: lhs.utf16.count)
+//        return regex.firstMatch(in: lhs, options: [], range: range) != nil
+//    }
     
     func pp_matches(for regex: String) -> [String] {
 

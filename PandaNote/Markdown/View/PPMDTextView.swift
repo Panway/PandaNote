@@ -19,6 +19,7 @@ class PPMDTextView: UITextView {
     
     open var styler: Styler
     open var renderMethod = ""
+    var didRender = false ///< 第一次如果只设置text而没设置attributedText，就调用render()
     var cacheDir = ""
     var visitor : PPAttributedStringVisitor
     
@@ -27,7 +28,7 @@ class PPMDTextView: UITextView {
             guard oldValue != text else { return }
 
             if renderMethod == "Down" {
-                try? render()
+                render()
             }
         }
     }
@@ -62,13 +63,66 @@ class PPMDTextView: UITextView {
         // We don't want the text view to overwrite link attributes set
         // by the styler.
         linkTextAttributes = [:]
+        // 注册粘贴板变化通知
+//        NotificationCenter.default.addObserver(self, selector: #selector(handlePasteboardChange), name: UIPasteboard.changedNotification, object: nil)
+        // 长按事件
+        let longPress = UILongPressGestureRecognizer(target: self, action: #selector(handleDoubleTap(_:)))
+        longPress.minimumPressDuration = 1.0
+        self.addGestureRecognizer(longPress)
+
     }
     
     required public init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
     
+    deinit {
+        // 移除通知观察者
+//        NotificationCenter.default.removeObserver(self)
+    }
     // MARK: - Methods
+    
+    @objc func handleDoubleTap(_ gestureRecognizer: UITapGestureRecognizer) {
+        if gestureRecognizer.state == .ended {
+            if gestureRecognizer.view is UITextView {
+                debugPrint("Double tap detected in UITextView")
+                // 在这里执行双击事件的处理
+                let menuController = UIMenuController.shared
+                // 添加"粘贴为富文本"菜单项
+                let pasteRichTextMenuItem = UIMenuItem(title: "粘贴为富文本", action: #selector(pasteRichText))
+                // 添加"粘贴为纯文本"菜单项
+                let pastePlainTextMenuItem = UIMenuItem(title: "粘贴为纯文本", action: #selector(pastePlainText))
+                // 设置菜单项
+                menuController.menuItems = [pasteRichTextMenuItem, pastePlainTextMenuItem]
+                // 设置菜单显示位置
+                menuController.setTargetRect(self.frame, in: self)
+                menuController.setMenuVisible(true, animated: true)
+                //                menuController.showMenu(from: self, rect: self.frame)
+            }
+        }
+    }
+    @objc func pasteRichText() {
+        if let attributedString = PPPasteboardTool.getHTMLFromPasteboard() {
+            // 在这里处理富文本的插入
+            self.insertAttributedString(attributedString)
+            self.render()
+        }
+    }
+    
+    @objc func pastePlainText() {
+        if let plainText = UIPasteboard.general.string {
+            // 在这里处理纯文本的插入
+        }
+    }
+    // 处理粘贴板变化通知
+    @objc func handlePasteboardChange(_ notification: Notification) {
+        if let pasteboard = notification.object as? UIPasteboard {
+            if let copiedString = pasteboard.string {
+                debugPrint("Pasted String:")
+                debugPrint(copiedString)
+            }
+        }
+    }
     
     open func render() {
         if renderMethod != "Down" {
@@ -85,6 +139,7 @@ class PPMDTextView: UITextView {
         visitor.cacheDir = cacheDir
         visitor.images.removeAll()
         attributedText = document.accept(visitor)
+        didRender = true
         debugPrint("===========")
         // 恢复光标位置
         if selectedRange.location != NSNotFound {
@@ -99,6 +154,16 @@ class PPMDTextView: UITextView {
             }
         }
         self.setContentOffset(CGPoint(x: 0, y: offsetY), animated: false)
+    }
+    // 如何在UITextView已经显示的attributedText当前光标处插入一个NSAttributedString对象
+    func insertAttributedString(_ attributedString: NSAttributedString) {
+        let selectedRange = self.selectedRange
+        guard let at = self.attributedText else { return }
+        let mutableAttributedString = NSMutableAttributedString(attributedString: at)
+        mutableAttributedString.replaceCharacters(in: selectedRange, with: attributedString)
+        self.attributedText = mutableAttributedString
+        // 更新光标位置
+        self.selectedRange = NSRange(location: selectedRange.location + attributedString.length, length: 0)
     }
     /// 更改标题级别
     func updateCurrentLineWithHeadingLevel(_ headingLevel:Int) {
@@ -135,6 +200,13 @@ class PPMDTextView: UITextView {
                 // set the new position
                 self.selectedTextRange = self.textRange(from: newPosition, to: newPosition)
             }
+        }
+    }
+    
+    func moveCursorToLastRect() {
+        if let selectedTextRange = self.selectedTextRange {
+            let caretRect = self.caretRect(for: selectedTextRange.start)
+            self.scrollRectToVisible(caretRect, animated: false)
         }
     }
 }

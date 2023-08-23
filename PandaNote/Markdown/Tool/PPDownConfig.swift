@@ -63,3 +63,86 @@ public struct PPDownColorCollection: ColorCollection {
     }
 
 }
+
+
+
+
+/// Default implementation of `ListItemPrefixGenerator`.
+/// Generating the following symbol based on `List.ListType`:
+/// - List.ListType is bullet (黑圆点、项目符号)=> "•"
+/// - List.ListType is ordered(有序列表) => "X." (where is the item number)
+public class PPListItemPrefixGenerator: ListItemPrefixGenerator {
+
+    // MARK: - Properties
+
+    private var prefixes: IndexingIterator<[String]>
+
+    // MARK: - Life cycle
+
+    required public init(listType: List.ListType, numberOfItems: Int, nestDepth: Int) {
+            switch listType {
+            case .bullet:
+                prefixes = [String](repeating: "-", count: numberOfItems)
+                    .makeIterator()
+
+            case .ordered(let start):
+                prefixes = (start..<(start + numberOfItems))
+                    .map { "\($0)." }
+                    .makeIterator()
+            }
+        }
+
+    // MARK: - Methods
+
+    public func next() -> String? {
+        prefixes.next()
+    }
+
+}
+
+class PPCheckmarkView: UIView {
+    var isChecked: Bool = false {
+        didSet {
+            setNeedsDisplay()
+        }
+    }
+    
+    override func draw(_ rect: CGRect) {
+        debugPrint("=========draw")
+        let center = CGPoint(x: rect.size.width / 2, y: rect.size.height / 2)
+        let radius = min(rect.size.width, rect.size.height) / 2
+        
+        let context = UIGraphicsGetCurrentContext()
+        context?.setLineWidth(2)
+        context?.setStrokeColor(UIColor.black.cgColor)
+        context?.addArc(center: center, radius: radius - 1, startAngle: 0, endAngle: CGFloat(2 * Double.pi), clockwise: false)
+        
+        if isChecked {
+            context?.setFillColor(UIColor(red:0.27, green:0.68, blue:0.49, alpha:1.00).cgColor)
+            context?.fillPath()
+        } else {
+            context?.strokePath()
+        }
+    }
+}
+
+
+class PPCheckmarkTextAttachment: NSTextAttachment {
+    var switchView: PPCheckmarkView?
+    var customHeight: CGFloat = 15
+
+    
+    override func attachmentBounds(for textContainer: NSTextContainer?, proposedLineFragment lineFrag: CGRect, glyphPosition position: CGPoint, characterIndex charIndex: Int) -> CGRect {
+            return CGRect(x: 0, y: 0, width: min(lineFrag.size.width, 20), height: customHeight)
+        }
+    override func image(forBounds imageBounds: CGRect, textContainer: NSTextContainer?, characterIndex charIndex: Int) -> UIImage? {
+        if let switchView = switchView {
+            UIGraphicsBeginImageContextWithOptions(imageBounds.size, false, 0.0)
+            switchView.draw(switchView.bounds)
+            let image = UIGraphicsGetImageFromCurrentImageContext()
+            UIGraphicsEndImageContext()
+            return image
+        }
+        return nil
+    }
+}
