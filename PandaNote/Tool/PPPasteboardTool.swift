@@ -79,7 +79,7 @@ class PPPasteboardTool: NSObject {
         urlString = urlNoTracking(urlString)
         debugPrint("消毒后的URL:\(urlString)")
         currentURL = urlString
-        AF.request(urlString).responseJSON { response in
+        AF.request(urlString).responseData { response in
             //不为空检查
             guard let data = response.data, let utf8Text = String(textData: data) else {
                 return
@@ -124,23 +124,116 @@ class PPPasteboardTool: NSObject {
         }
         
         guard let doc = try? HTML(html: pasteboardData, encoding: .utf8),
-              var body = doc.body else {
+              let body = doc.body else {
             debugPrint("copy content is not html data")
             return nil
         }
-        let h1s = body.css("h1", namespaces: nil)
-        for var element in h1s {
-            element.content = "# " + (element.content ?? "")
+        
+        // h1 - h6 的内容加#转换成markdown文本
+        for i in 1...6 {
+            let h_tags = body.css("h\(i)")
+            for var element in h_tags {
+                element.content = "\(String(repeating: "#", count: i)) " + (element.content ?? "")
+                element["style"] = ""
+            }
+        }
+        //行内代码
+        let code = body.css("code")
+        for var element in code {
+            element["style"] = ""
+            if element.parent?.tagName != "pre" {
+                element.content = "`\(element.content ?? "")`"
+            }
+        }
+        // 链接
+        let a = body.css("a")
+        for var element in a {
+            element.content = "[\(element.content ?? "")](\(element["href"] ?? ""))"
             element["style"] = ""
         }
-        
-        let h2 = body.css("h2", namespaces: nil)
-        for var element in h2 {
-            element.content = "## " + (element.content ?? "")
+        // 加粗
+        let strong = body.css("strong")
+        for var element in strong {
+            element.content = "**\(element.content ?? "")**"
             element["style"] = ""
         }
+        // 引用
+        let blockquote = body.css("blockquote")
+        for var element in blockquote {
+            element.content = "> \(element.content ?? "")==pandanote_break====pandanote_break=="
+            element["style"] = ""
+        }
+        // 无序列表
+        let uls = body.css("ul")
+        for ul in uls {
+            let lis = ul.css("li")
+            for var li in lis {
+                li.content = "- " + (li.content ?? "")
+                li["style"] = ""
+            }
+        }
+        // 有序列表
+        let ols = body.css("ol")
+        for ol in ols {
+            let lis = ol.css("li")
+            for i in 0..<lis.count {
+                var li = lis[i]
+                li.content = "\(i). " + (li.content ?? "")
+            }
+        }
+        // 表格
+        let tables = body.css("table")
+        for var table in tables {
+            table["style"] = ""
+            let trs = table.css("tr")
+            
+            for i in 0..<trs.count {
+                var tr = trs[i]
+                tr["style"] = ""
+                let ths = tr.css("th")
+                let tds = tr.css("td")
+                
+                
+                var markdown = ""
+                for i in 0..<ths.count {
+                    var th = ths[i]
+                    th["style"] = ""
+                    if i == ths.count - 1 {
+                        markdown += "| " + (th.content ?? "") + " | ==pandanote_break== " + "\(String(repeating: "| --- ", count: ths.count)) |"
+                        th.content = "\(markdown)"
+                        // 我只是想创建一个元素
+//                        if let doc = try? XML(xml: "<div id=\"pandanote\"><span>\(markdown)</span></div>", encoding: String.Encoding.utf8),
+//                        let newth = doc.at_css("#pandanote") {
+//                            th = newth
+//                        }
+                    }
+                    else {
+                        markdown += "| " + (th.content ?? "")
+                        th.content = ""
+                    }
+                }
+                
+                var td_str = ""
+                for i in 0..<tds.count {
+                    var td = tds[i]
+                    td["style"] = ""
+                    if i == tds.count - 1 {
+                        td_str += "| " + (td.content ?? "") + " |"
+                        td.content = "\(td_str)"
+                    }
+                    else {
+                        td_str += "| " + (td.content ?? "")
+                        td.content = ""
+                    }
+                }
+            }
+        }
         
-        let htmlStr = body.innerHTML
+        var htmlStr = body.innerHTML
+        htmlStr = htmlStr?.replacingOccurrences(of: "<pre", with: "<div>```</div><br><pre")
+        htmlStr = htmlStr?.replacingOccurrences(of: "/pre>", with: "/pre><br><div>```</div>")
+        htmlStr = htmlStr?.replacingOccurrences(of: "<td style=\"\"></td>", with: "")
+        htmlStr = htmlStr?.replacingOccurrences(of: "==pandanote_break==", with: "<br>")
         let options: [NSAttributedString.DocumentReadingOptionKey: Any] = [
             .documentType: NSAttributedString.DocumentType.html,
             .characterEncoding: String.Encoding.utf8.rawValue
@@ -220,9 +313,9 @@ class PPPasteboardTool: NSObject {
     class func getWebInfo(_ originURL: String) -> Bool {
         if (originURL.contains("https://weibo.com")) {
             let weibo_id = originURL.pp_split("/").last ?? ""
-            AF.request("https://weibo.com/ajax/statuses/show?id=\(weibo_id)").responseJSON { response in
+            AF.request("https://weibo.com/ajax/statuses/show?id=\(weibo_id)").responseData { response in
                 // debugPrint("weibo.com \(response.value ?? "")")
-                guard let jsonDic = response.value as? [String : Any] else { return }
+                guard let jsonDic = response.data?.pp_JSONObject() else { return }
                 if let text_raw = jsonDic["text_raw"] as? String {
                     UIPasteboard.general.string = text_raw + "\n" + originURL
                     PPAppConfig.shared.setItem("PPLastPasteBoardContent", text_raw + "\n" + originURL)
@@ -260,11 +353,9 @@ class PPPasteboardTool: NSObject {
     class func downLoadDouYinVideoWithoutWaterMark(id:String) {
         let parameters = ["item_ids": id]
 //        let headers: HTTPHeaders = ["User-Agent":"Mozilla/5.0 (Linux; Android 5.0; SM-G900P Build/LRX21T) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.25 Mobile Safari/537.36"]
-        AF.request("https://www.iesdouyin.com/web/api/v2/aweme/iteminfo/", parameters: parameters).responseJSON { response in
-            guard let value = response.value else {
-                return
-            }
-            let jsonDic:Dictionary = value as! Dictionary<String, Any>
+        AF.request("https://www.iesdouyin.com/web/api/v2/aweme/iteminfo/", parameters: parameters).responseData { response in
+            // debugPrint("weibo.com \(response.value ?? "")")
+            guard let jsonDic = response.data?.pp_JSONObject() else { return }
             //目的：取jsonDic["item_list"][0]["video"]["play_addr"]["url_list"][0]
             guard let item_list = jsonDic["item_list"] else {
                 return
