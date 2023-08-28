@@ -22,6 +22,7 @@ public class PPAttributedStringVisitor {
     // MARK: - Properties
     var cacheDir = ""
     var images = [String]()
+    var headings = [NSMutableAttributedString]()
 
     private let styler: Styler
     private let options: DownOptions
@@ -140,6 +141,9 @@ extension PPAttributedStringVisitor: Visitor {
         var result = visitChildren(of: node).pp_joined
         result = renewString(result: result, newStr: String(repeating: "#", count: node.headingLevel) + " \(result.string)")
         styler.style(heading: result, level: node.headingLevel)
+        // #号颜色不要太深，否则影响我看标题内容
+        result.pp_replaceAttribute(for: .foregroundColor, value: PPAppConfig.shared.downColorTheme.bodyLight, inRange: NSRange(location: 0, length: node.headingLevel))
+        headings.append(result)
         if node.hasSuccessor { result.append(.pp_paragraphSeparator) }
         return result
     }
@@ -175,7 +179,7 @@ extension PPAttributedStringVisitor: Visitor {
 //        styler.style(code: result)
         let attributes: [NSAttributedString.Key: Any] = [
             .font: UIFont.systemFont(ofSize: 17),
-            .foregroundColor: "#000000".pp_HEXColor(),
+            .foregroundColor: "#476582".pp_HEXColor(),
             .backgroundColor: UIColor.lightGray.withAlphaComponent(0.3), //这里透明度设置成0.1左右，非常重要，不然选中文字看不到选中高亮色，very important!!!
         ]
         result.addAttributes(attributes, range: result.wholeRange)
@@ -198,12 +202,12 @@ extension PPAttributedStringVisitor: Visitor {
         var result = visitChildren(of: node).pp_joined
         result = renewString(result: result, newStr: "*\(result.string)*")
         // 设置字体、下划线和删除线的属性
-        let attributes: [NSAttributedString.Key: Any] = [
-            .font: UIFont.italicSystemFont(ofSize: 17), // 设置斜体字体
+        let font = UIFont(name: "LXGWWenKai-Light", size: 20)?.pp_italic ?? UIFont.systemFont(ofSize: 14).pp_setItalic()
+//        let attributes: [NSAttributedString.Key: Any] = [.font:font]
+//            [.font: UIFont(name: "LXGWWenKai-Light.ttf", size: 16).pp_setItalic()] // 系统默认字体变斜体
 //            .underlineStyle: NSUnderlineStyle.single.rawValue, // 设置下划线样式
 //            .strikethroughStyle: NSUnderlineStyle.single.rawValue // 设置删除线样式
-        ]
-        result.addAttributes(attributes, range: result.wholeRange)
+        result.pp_replaceAttribute(for: .font, value: font)
 //        styler.style(emphasis: result)
         return result
     }
@@ -211,6 +215,9 @@ extension PPAttributedStringVisitor: Visitor {
     public func visit(strong node: Strong) -> NSMutableAttributedString {
         var result = visitChildren(of: node).pp_joined
         result = renewString(result: result, newStr: "**\(result.string)**")
+        // * 设置成浅色
+        result.pp_replaceAttribute(for: .foregroundColor, value: PPAppConfig.shared.downColorTheme.bodyLight, inRange: NSRange(location: 0, length: 2))
+        result.pp_replaceAttribute(for: .foregroundColor, value: PPAppConfig.shared.downColorTheme.bodyLight, inRange: NSRange(location: result.string.length - 2, length: 2))
         styler.style(strong: result)
         return result
     }
@@ -297,7 +304,7 @@ private extension NSAttributedString {
     
 }
 
-private extension String {
+extension String {
     
     var pp_attributed: NSMutableAttributedString {
         return NSMutableAttributedString(string: self, attributes: [.font:UIFont.systemFont(ofSize: 17)])

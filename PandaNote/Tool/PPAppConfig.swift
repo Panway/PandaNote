@@ -9,6 +9,7 @@
 import UIKit
 import GCDWebServer
 import Kingfisher
+import Alamofire
 
 
 class PPAppConfig: NSObject {
@@ -28,7 +29,7 @@ class PPAppConfig: NSObject {
     let utcDateFormatter = DateFormatter() ///< yyyy-MM-dd'T'HH:mm:ss.SSSZ
     let dateFormatter = DateFormatter() ///< yyyy-MM-dd HH:mm:ss
     let popMenu = PPPopMenu()
-    
+    let downColorTheme = PPDownColorCollection()
     
     func initSetting() {
         //将其格式选项中加入带小数秒的选项，并将时区设置为当前时区
@@ -48,7 +49,8 @@ class PPAppConfig: NSObject {
             }
         }
 
-        if let path = Bundle.main.path(forResource: "MarkdownSample", ofType:"md") {
+        if let path = Bundle.main.path(forResource: "MarkdownSample", ofType:"md"),
+           !FileManager.default.fileExists(atPath: NSHomeDirectory() + "/Documents/MarkdownSample.md") {
             try? FileManager.default.copyItem(atPath: path, toPath: NSHomeDirectory() + "/Documents/MarkdownSample.md")
         }
         self.fileListOrder = PPFileListOrder(rawValue: getIntItem("fileListOrder")) ?? .type
@@ -100,5 +102,31 @@ class PPAppConfig: NSObject {
         webServer.addGETHandler(forBasePath: "/", directoryPath: PPDiskCache.shared.path, indexFilename: nil, cacheAge: 3600, allowRangeRequests: true)
         webServer.start(withPort: 23333 , bonjourName: "GCD Web Server")
         print("Visit \(webServer.serverURL?.absoluteString ?? "") in your web browser")
+    }
+    //下载字体到沙盒Documents
+    func downloadFontAndSaveToDocuments(url: String, name: String) {
+        let destination: DownloadRequest.Destination = { _, _ in
+            let documentsURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+            let fileURL = documentsURL.appendingPathComponent(name)
+            return (fileURL, [.removePreviousFile, .createIntermediateDirectories])
+        }
+        
+        AF.download(url, to: destination).response { response in
+            self.loadAndUseDownloadedFont(name: name)
+        }
+    }
+    func loadAndUseDownloadedFont(name: String) {
+        let documentsURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
+        let downloadedFontURL = documentsURL.appendingPathComponent(name)
+        
+        do {
+            let fontData = try Data(contentsOf: downloadedFontURL)
+            if let fontDataProvider = CGDataProvider(data: fontData as CFData),
+               let font = CGFont(fontDataProvider) {
+                CTFontManagerRegisterGraphicsFont(font, nil)
+            }
+        } catch {
+            print("Error loading downloaded font:", error)
+        }
     }
 }

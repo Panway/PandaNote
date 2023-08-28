@@ -29,6 +29,8 @@ iOS 10.0+、macOS（初步支持，使用了Mac Catalyst）
 - [x] WebDAV（坚果云等）
 - [x] iCloud Documents
 - [x] 阿里云盘
+- [x] 群晖 Synology NAS
+- [x] Alist
 - [x] Dropbox
 - [x] OneDrive
 - [x] 百度网盘
@@ -76,7 +78,9 @@ open PandaNote.xcworkspace
 
 ## 解析markdown相关
 
-apple出品 https://github.com/apple/swift-markdown
+apple出品的 Markdown 解析器 https://github.com/apple/swift-markdown
+
+利用 Apple 的 Markdown 解析器输出 NSAttributedString https://github.com/christianselig/Markdownosaur
 
 AFNetworking作者的： https://github.com/mattt/CommonMarkAttributedString
 

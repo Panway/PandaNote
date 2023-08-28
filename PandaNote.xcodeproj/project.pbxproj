@@ -65,6 +65,7 @@
 		1EE5A41A25B2DBB500429CB8 /* app_setting_option.json in Resources */ = {isa = PBXBuildFile; fileRef = 1EE5A41925B2DBB500429CB8 /* app_setting_option.json */; };
 		1EEB0FF02753456E006A5E26 /* PPFileModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1EEB0FEF2753456E006A5E26 /* PPFileModel.swift */; };
 		1EEB0FF327538771006A5E26 /* PPOneDriveFile.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1EEB0FF227538771006A5E26 /* PPOneDriveFile.swift */; };
+		3B1F3FF92A99F798003A2756 /* PPMarkdownMiniMapCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B1F3FF82A99F798003A2756 /* PPMarkdownMiniMapCell.swift */; };
 		3B30DE452A8BDADD00D519AB /* PPSynologyFile.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B30DE442A8BDADD00D519AB /* PPSynologyFile.swift */; };
 		3B594A932A908CE600A5BC1E /* PPAttributedStringVisitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B594A922A908CE600A5BC1E /* PPAttributedStringVisitor.swift */; };
 		3B797E4D2A926BFC00D736E7 /* PPDownConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B797E4C2A926BFC00D736E7 /* PPDownConfig.swift */; };
@@ -89,7 +90,6 @@
 		6056024C231778D0000809CD /* String+Extention.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6056024B231778D0000809CD /* String+Extention.swift */; };
 		60560252231778FF000809CD /* XDRefreshHeader.m in Sources */ = {isa = PBXBuildFile; fileRef = 6056024E231778FF000809CD /* XDRefreshHeader.m */; };
 		60560253231778FF000809CD /* XDRefreshAutoStateFooter.m in Sources */ = {isa = PBXBuildFile; fileRef = 6056024F231778FF000809CD /* XDRefreshAutoStateFooter.m */; };
-		605602562317796F000809CD /* XDWebViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 605602552317796F000809CD /* XDWebViewController.m */; };
 		6056025823177A30000809CD /* PPFileListViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6056025723177A2F000809CD /* PPFileListViewController.swift */; };
 		6056027823177C73000809CD /* markdown.html in Resources */ = {isa = PBXBuildFile; fileRef = 6056027723177C73000809CD /* markdown.html */; };
 		6056027A23178017000809CD /* PPWebDAVConfigViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6056027923178017000809CD /* PPWebDAVConfigViewController.swift */; };
@@ -205,6 +205,7 @@
 		1EEB0FEF2753456E006A5E26 /* PPFileModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPFileModel.swift; sourceTree = "<group>"; };
 		1EEB0FF227538771006A5E26 /* PPOneDriveFile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPOneDriveFile.swift; sourceTree = "<group>"; };
 		1EFF08AA24E50B8000E84AD1 /* PandaNote.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = PandaNote.entitlements; sourceTree = "<group>"; };
+		3B1F3FF82A99F798003A2756 /* PPMarkdownMiniMapCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPMarkdownMiniMapCell.swift; sourceTree = "<group>"; };
 		3B30DE442A8BDADD00D519AB /* PPSynologyFile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPSynologyFile.swift; sourceTree = "<group>"; };
 		3B594A922A908CE600A5BC1E /* PPAttributedStringVisitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPAttributedStringVisitor.swift; sourceTree = "<group>"; };
 		3B797E4C2A926BFC00D736E7 /* PPDownConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPDownConfig.swift; sourceTree = "<group>"; };
@@ -236,8 +237,6 @@
 		6056024F231778FF000809CD /* XDRefreshAutoStateFooter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XDRefreshAutoStateFooter.m; sourceTree = "<group>"; };
 		60560250231778FF000809CD /* XDRefreshHeader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XDRefreshHeader.h; sourceTree = "<group>"; };
 		60560251231778FF000809CD /* XDRefreshAutoStateFooter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XDRefreshAutoStateFooter.h; sourceTree = "<group>"; };
-		605602542317796F000809CD /* XDWebViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XDWebViewController.h; sourceTree = "<group>"; };
-		605602552317796F000809CD /* XDWebViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XDWebViewController.m; sourceTree = "<group>"; };
 		6056025723177A2F000809CD /* PPFileListViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PPFileListViewController.swift; sourceTree = "<group>"; };
 		6056027723177C73000809CD /* markdown.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = markdown.html; sourceTree = "<group>"; };
 		6056027923178017000809CD /* PPWebDAVConfigViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPWebDAVConfigViewController.swift; sourceTree = "<group>"; };
@@ -343,6 +342,7 @@
 			children = (
 				3B9E5CA72A924F9B0020E92F /* PPMDTextView.swift */,
 				1E0D9E0B27736E9700E3AA73 /* PPMarkdownEditorToolBar.swift */,
+				3B1F3FF82A99F798003A2756 /* PPMarkdownMiniMapCell.swift */,
 				1E8724EF29EAA51900F85BFA /* PPFindReplaceView.swift */,
 			);
 			path = View;
@@ -635,8 +635,6 @@
 				60011E3E243A29E000BC6458 /* PlayerViewController.swift */,
 				1E1F2DEA25384C75002B0426 /* PPDebugViewController.swift */,
 				1E07779B29AB3167005619E4 /* PPDetailViewController.swift */,
-				605602542317796F000809CD /* XDWebViewController.h */,
-				605602552317796F000809CD /* XDWebViewController.m */,
 			);
 			path = Controller;
 			sourceTree = "<group>";
@@ -1096,7 +1094,6 @@
 				60560224231771E2000809CD /* UIScrollView+XDTool.m in Sources */,
 				1E8F64F22898292100819C60 /* PPPreviewController.swift in Sources */,
 				1E03F8052748FF730085ACFB /* UITextView+PPTool.swift in Sources */,
-				605602562317796F000809CD /* XDWebViewController.m in Sources */,
 				6001B6362462BF3400A40593 /* UIImage+PPTool.swift in Sources */,
 				1E92F0B1258A1847009374C9 /* BaiduFileObject.swift in Sources */,
 				60E61420243DA3B500630B4B /* PPBottomToolBarView.swift in Sources */,
@@ -1121,6 +1118,7 @@
 				1E1B58A7257B9480000860F6 /* PPAddCloudServiceViewController.swift in Sources */,
 				1E92F0AC258A0B54009374C9 /* BaiduyunAPITool.swift in Sources */,
 				1E526EC726B6BD360026DC67 /* PPLocalFileService.swift in Sources */,
+				3B1F3FF92A99F798003A2756 /* PPMarkdownMiniMapCell.swift in Sources */,
 				1E670AAB24F62D23002DB57C /* PPPublicTool.swift in Sources */,
 				6056025823177A30000809CD /* PPFileListViewController.swift in Sources */,
 				1E556A0E25639BEF00A4653F /* PPResultsTableController.swift in Sources */,

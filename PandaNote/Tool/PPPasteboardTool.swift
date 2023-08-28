@@ -120,7 +120,7 @@ class PPPasteboardTool: NSObject {
     
     class func getHTMLFromPasteboard() -> NSAttributedString? {
         guard let pasteboardData = UIPasteboard.general.data(forPasteboardType: .init("public.html")) else {
-            return nil
+            return UIPasteboard.general.string?.pp_attributed
         }
         
         guard let doc = try? HTML(html: pasteboardData, encoding: .utf8),
@@ -151,10 +151,22 @@ class PPPasteboardTool: NSObject {
             element.content = "[\(element.content ?? "")](\(element["href"] ?? ""))"
             element["style"] = ""
         }
+        // 图片
+        let img = body.css("img")
+        for var element in img {
+            element.content = "![\(element.content ?? "")](\(element["src"] ?? ""))"
+            element["style"] = ""
+        }
         // 加粗
         let strong = body.css("strong")
         for var element in strong {
             element.content = "**\(element.content ?? "")**"
+            element["style"] = ""
+        }
+        // 斜体
+        let em = body.css("em")
+        for var element in em {
+            element.content = "*\(element.content ?? "")*"
             element["style"] = ""
         }
         // 引用
@@ -165,7 +177,10 @@ class PPPasteboardTool: NSObject {
         }
         // 无序列表
         let uls = body.css("ul")
-        for ul in uls {
+        
+        for var ul in uls {
+            ul["style"] = ""
+
             let lis = ul.css("li")
             for var li in lis {
                 li.content = "- " + (li.content ?? "")
@@ -178,7 +193,7 @@ class PPPasteboardTool: NSObject {
             let lis = ol.css("li")
             for i in 0..<lis.count {
                 var li = lis[i]
-                li.content = "\(i). " + (li.content ?? "")
+                li.content = "\(i+1). " + (li.content ?? "")
             }
         }
         // 表格
@@ -234,6 +249,10 @@ class PPPasteboardTool: NSObject {
         htmlStr = htmlStr?.replacingOccurrences(of: "/pre>", with: "/pre><br><div>```</div>")
         htmlStr = htmlStr?.replacingOccurrences(of: "<td style=\"\"></td>", with: "")
         htmlStr = htmlStr?.replacingOccurrences(of: "==pandanote_break==", with: "<br>")
+        htmlStr = htmlStr?.replacingOccurrences(of: "<ul", with: "<div")
+        htmlStr = htmlStr?.replacingOccurrences(of: "</ul>", with: "</div>")
+        htmlStr = htmlStr?.replacingOccurrences(of: "<ol", with: "<div")
+        htmlStr = htmlStr?.replacingOccurrences(of: "</ol>", with: "</div>")
         let options: [NSAttributedString.DocumentReadingOptionKey: Any] = [
             .documentType: NSAttributedString.DocumentType.html,
             .characterEncoding: String.Encoding.utf8.rawValue
@@ -309,7 +328,20 @@ class PPPasteboardTool: NSObject {
         debugPrint("链接主要内容 URL content:",result)
         return result
     }
-    
+    //复制的内容是富文本或网页内容
+    class func copyContentsIsAttributeString() -> Bool {
+        let items = UIPasteboard.general.items
+        for item in items {
+            for (key, _) in item {
+                if key == "public.html" || key == "public.rtf" {
+                    debugPrint("pasteboard is rtf")
+                    return true
+                }
+            }
+        }
+        debugPrint("pasteboard is plain text")
+        return false
+    }
     class func getWebInfo(_ originURL: String) -> Bool {
         if (originURL.contains("https://weibo.com")) {
             let weibo_id = originURL.pp_split("/").last ?? ""

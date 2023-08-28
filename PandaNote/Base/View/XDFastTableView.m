@@ -81,6 +81,10 @@
     [self.tableView reloadData];
 }
 
+- (NSArray *)dataSource {
+    return _dataSource2;
+}
+
 /// MARK: Delegate
 #pragma mark - UITableViewDataSource, UITableViewDelegate
 
@@ -96,7 +100,13 @@
     PandaFastTableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:kXDFastTableViewCellReuseIdentifier];
     cell.selectionStyle = UITableViewCellSelectionStyleNone;
     id model = self.dataSource2[indexPath.row];
-    [cell updateUIWithData:model];
+    @try {
+        [cell updateUIWithData:model];
+    } @catch (NSException *exception) {
+        
+    } @finally {
+        
+    }
     return cell;
 }
 

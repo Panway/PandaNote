@@ -45,5 +45,55 @@ extension UITextView {
         }
         
     }
-
+    /// I DONT KNOW WHY 暂时不知道原因???
+    /// A UITextView extension to scroll a substring to the "top line" of the view
+    ///  https://stackoverflow.com/a/44553609 https://gist.github.com/DonMag/19daac863553c51725a56f0bc3296076
+    /// - Parameters:
+    ///   - searchString: the string in the textview you want brought to the top
+    ///   - animated: animate the scrolling (or not)
+    /// - Returns: False if the searchString was not found, else True
+    @discardableResult func pp_scrollSubstringToTop(_ searchString: String, animated: Bool) -> Bool {
+        
+        let nsText = self.text as NSString
+        
+        // get the range of the string to scroll to the top
+        self.selectedRange = nsText.range(of: searchString)
+        
+        // if text not found, return false
+        guard let sr = self.selectedTextRange else {
+            return false
+        }
+        
+        // get the bounding box of the string
+        var rect = self.firstRect(for: sr)
+        
+        // if the bounding box is *below* the top of the text view, add the
+        //  height of the text view to the y offset
+        // this will result in the "target rect" being at the bottom of the text view,
+        //    pushing the "desired rect" up to the top
+//        debugPrint("rect = (\(rect.origin.x),\(rect.origin.y)  [\(rect.size.width),\(rect.size.height)]")
+        if rect.origin.y > self.contentOffset.y {
+            rect.origin.y += self.bounds.height - rect.size.height
+        }
+        
+        // make sure the bounding box y is not beyond the scrollable height
+        //    so, if we have 20 rows of text and 10 rows are visible, we cannot
+        //    scroll row 16 to the top (for example)
+        rect.origin.y = min(rect.origin.y, self.contentSize.height - 1)
+//        debugPrint("rect2= (\(rect.origin.x),\(rect.origin.y)  [\(rect.size.width),\(rect.size.height)]")
+        // scroll the bounding box rect into view
+        self.scrollRectToVisible(rect, animated: animated)
+        
+        return true
+        
+    }
+    // 我自己写的，滚动到某个字符串所在的位置
+    func pp_scrollToSubstring(string: String) {
+        let searchRange = NSRange(location: 0, length: self.text.length)
+        let nsstr = self.text as NSString
+        let lastSearchRange = nsstr.range(of: string, options: .caseInsensitive,range: searchRange)
+        if lastSearchRange.location != NSNotFound {
+            self.scrollRangeToVisible(lastSearchRange)
+        }
+    }
 }

@@ -11,7 +11,9 @@ import UIKit
 import Down
 import Highlightr
 //import libcmark
-
+public protocol PPMDTextViewDelegate: AnyObject {
+    func didUpdateHeading(_ headings:[NSMutableAttributedString])
+}
 
 class PPMDTextView: UITextView {
     
@@ -22,7 +24,8 @@ class PPMDTextView: UITextView {
     var didRender = false ///< 第一次如果只设置text而没设置attributedText，就调用render()
     var cacheDir = ""
     var visitor : PPAttributedStringVisitor
-    
+    weak var markdownDelegate: PPMDTextViewDelegate?
+
     open override var text: String! {
         didSet {
             guard oldValue != text else { return }
@@ -38,7 +41,7 @@ class PPMDTextView: UITextView {
     
     public convenience init(frame: CGRect) { //, styler: Styler = DownStyler()) {
         let dsc = DownStylerConfiguration(fonts: StaticFontCollection(),
-                                          colors: PPDownColorCollection(),
+                                          colors: PPAppConfig.shared.downColorTheme,
                                           paragraphStyles: StaticParagraphStyleCollection(),
                                           listItemOptions: ListItemOptions(),
                                           quoteStripeOptions: QuoteStripeOptions(thickness: 5, spacingAfter: 8),
@@ -59,11 +62,12 @@ class PPMDTextView: UITextView {
         
         self.visitor = PPAttributedStringVisitor(styler: styler, options: DownOptions.hardBreaks)
         super.init(frame: frame, textContainer: textContainer)
-        
+        self.autocorrectionType = .no  // 取消拼写自动纠错 Disable the default autocorrection
+        self.spellCheckingType = .no // 禁用拼写检查
         // We don't want the text view to overwrite link attributes set
         // by the styler.
         linkTextAttributes = [:]
-        // 注册粘贴板变化通知
+        // 注册剪贴板在App内部变化的通知
 //        NotificationCenter.default.addObserver(self, selector: #selector(handlePasteboardChange), name: UIPasteboard.changedNotification, object: nil)
         // 长按事件
         let longPress = UILongPressGestureRecognizer(target: self, action: #selector(handleDoubleTap(_:)))
@@ -80,8 +84,29 @@ class PPMDTextView: UITextView {
         // 移除通知观察者
 //        NotificationCenter.default.removeObserver(self)
     }
+    // 我操你大爷的，重写Command+V原来这么简单？？？
+    @objc override func paste(_ sender: Any?) {
+        let isRtf = PPPasteboardTool.copyContentsIsAttributeString()
+        if isRtf {
+            PPAlertAction.showAlert(withTitle: "是否将富文本解析为Markdown", msg: nil, buttonsStatement: ["确定","取消"]) { index in
+                if index == 0 {
+                    self.pasteRichText()
+                }
+            }
+        }
+        else {
+            super.paste(sender)
+            // self.insertAttributedString(UIPasteboard.general.string?.pp_attributed)
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                self.render()
+            }
+        }
+    }
     // MARK: - Methods
-    
+    // 按 Cmd+Z 撤销时调用 （还原）
+    @objc func undoAttributedTextChange(_ backupText: NSAttributedString) {
+        self.attributedText = backupText
+    }
     @objc func handleDoubleTap(_ gestureRecognizer: UITapGestureRecognizer) {
         if gestureRecognizer.state == .ended {
             if gestureRecognizer.view is UITextView {
@@ -90,14 +115,12 @@ class PPMDTextView: UITextView {
                 let menuController = UIMenuController.shared
                 // 添加"粘贴为富文本"菜单项
                 let pasteRichTextMenuItem = UIMenuItem(title: "粘贴为富文本", action: #selector(pasteRichText))
-                // 添加"粘贴为纯文本"菜单项
-                let pastePlainTextMenuItem = UIMenuItem(title: "粘贴为纯文本", action: #selector(pastePlainText))
                 // 设置菜单项
-                menuController.menuItems = [pasteRichTextMenuItem, pastePlainTextMenuItem]
-                // 设置菜单显示位置
-                menuController.setTargetRect(self.frame, in: self)
-                menuController.setMenuVisible(true, animated: true)
-                //                menuController.showMenu(from: self, rect: self.frame)
+                menuController.menuItems = [pasteRichTextMenuItem]
+                // 设置弹出（右键）菜单显示位置
+//                menuController.setTargetRect(self.frame, in: self)
+//                menuController.setMenuVisible(true, animated: true)
+                menuController.showMenu(from: self, rect: self.frame)
             }
         }
     }
@@ -109,19 +132,15 @@ class PPMDTextView: UITextView {
         }
     }
     
-    @objc func pastePlainText() {
-        if let plainText = UIPasteboard.general.string {
-            // 在这里处理纯文本的插入
-        }
-    }
+    
     // 处理粘贴板变化通知
     @objc func handlePasteboardChange(_ notification: Notification) {
-        if let pasteboard = notification.object as? UIPasteboard {
-            if let copiedString = pasteboard.string {
-                debugPrint("Pasted String:")
-                debugPrint(copiedString)
-            }
-        }
+//        if let pasteboard = notification.object as? UIPasteboard {
+//            if let copiedString = pasteboard.string {
+//                debugPrint("Pasted String:")
+//                debugPrint(copiedString)
+//            }
+//        }
     }
     
     open func render() {
@@ -138,7 +157,11 @@ class PPMDTextView: UITextView {
         guard let document = try? down.toDocument(DownOptions.hardBreaks) else { return }
         visitor.cacheDir = cacheDir
         visitor.images.removeAll()
-        attributedText = document.accept(visitor)
+        visitor.headings.removeAll()
+        let attText = document.accept(visitor)
+        self.undoManager?.registerUndo(withTarget: self, selector: #selector(undoAttributedTextChange), object: attText)
+        attributedText = attText
+        self.markdownDelegate?.didUpdateHeading(visitor.headings)
         didRender = true
         debugPrint("===========")
         // 恢复光标位置
@@ -161,6 +184,7 @@ class PPMDTextView: UITextView {
         guard let at = self.attributedText else { return }
         let mutableAttributedString = NSMutableAttributedString(attributedString: at)
         mutableAttributedString.replaceCharacters(in: selectedRange, with: attributedString)
+        self.undoManager?.registerUndo(withTarget: self, selector: #selector(undoAttributedTextChange), object: mutableAttributedString)
         self.attributedText = mutableAttributedString
         // 更新光标位置
         self.selectedRange = NSRange(location: selectedRange.location + attributedString.length, length: 0)
@@ -182,6 +206,8 @@ class PPMDTextView: UITextView {
             let mutableAttributedString = NSMutableAttributedString(attributedString: self.attributedText)
             mutableAttributedString.replaceCharacters(in: lineNSRange, with: newAttributedString)
             let selectedRange = self.selectedRange
+            // 备份，以供Command + Z撤销
+            self.undoManager?.registerUndo(withTarget: self, selector: #selector(undoAttributedTextChange), object: mutableAttributedString)
             self.attributedText = mutableAttributedString
             self.render()
             // 恢复光标位置

@@ -16,6 +16,7 @@ import Highlightr
 
 fileprivate let TopToolBarTag = 1
 fileprivate let BottomToolBarTag = 2
+fileprivate let tocTag = 3
 
 @objc enum PPSplitMode : UInt8 {
     case none
@@ -24,15 +25,16 @@ fileprivate let BottomToolBarTag = 2
 }
 
 //UITextViewDelegate
-class PPMarkdownViewController: PPBaseViewController,
+final class PPMarkdownViewController: PPBaseViewController,
                                 PPEditorToolBarDelegate,
                                 PPFindReplaceDelegate,
+                                PPMDTextViewDelegate,
                                 UISearchBarDelegate,
                                 UITextViewDelegate
 {
 //    let markdownParser = MarkdownParser()
     var markdownStr = "I support a *lot* of custom Markdown **Elements**, even `code`!"
-    var historyList = [String]()
+//    var historyList = [String]()
     var textView : PPMDTextView!
     let backgroundImage  = UIImageView()
     ///文件相对路径
@@ -48,12 +50,15 @@ class PPMarkdownViewController: PPBaseViewController,
     var splitMode = PPSplitMode.none //上次的分栏模式 last mode
     var theme : PPThemeModel!
     var highlightrThemes = [String]()
-    let highlightr = Highlightr()
+    var highlightr: Highlightr? = nil
+    let tocTable = XDFastTableView()
+    var showTOC = false
     lazy var dropdown : PPDropDown = {
         let drop = PPDropDown()
         return drop
     }()
     let topToolView = PPMarkdownEditorToolBar(frame: CGRect(x: 0,y: 0,width: 40*3,height: 40), images: ["preview","done", "toolbar_more"])
+    let menuBtn = PPMarkdownEditorToolBar(frame: CGRect(x: 0,y: 0,width: 40*3,height: 40), images: ["menu"])
 
     var findReplaceView: PPFindReplaceView!
 
@@ -71,6 +76,10 @@ class PPMarkdownViewController: PPBaseViewController,
         textView.cacheDir = cacheDir
         initStyle()
         pp_initView()
+        if filePathStr.isMarkdownFile() {
+            initTOC()
+            textView.markdownDelegate = self
+        }
         self.title = self.filePathStr.split(string: "/").last
         PPFileManager.shared.getFileData(path: filePathStr,
                                          fileID: fileID,
@@ -127,6 +136,7 @@ class PPMarkdownViewController: PPBaseViewController,
                 }
                 else if method == "Highlightr" {
                     // 获取bundle中所有以min.css结尾的文件路径
+                    self.highlightr = Highlightr()
                     let bundle = Bundle(for: Highlightr.self)
                     let cssURLs = bundle.urls(forResourcesWithExtension: "min.css", subdirectory: nil) ?? []
                     self.highlightrThemes.removeAll()
@@ -266,28 +276,26 @@ class PPMarkdownViewController: PPBaseViewController,
     }
 
     // MARK: - UITextViewDelegate 文本框代理
-    func textViewDidChange(_ textView: PPMDTextView) {
+    func textViewDidChange(_ textView: UITextView) {
 //        debugPrint(textView.text)
         if splitMode != .none {
             PPUserInfo.shared.webViewController.renderMardownWithJS(self.textView.text)
         }
     }
-    func textViewShouldBeginEditing(_ textView: PPMDTextView) -> Bool {
+    func textViewShouldBeginEditing(_ textView: UITextView) -> Bool {
         debugPrint("====Start")
         return true
     }
-    func textView(_ textView: PPMDTextView, shouldChangeTextIn range: NSRange, replacementText text: String) -> Bool {
+    func textView(_ textView: UITextView, shouldChangeTextIn range: NSRange, replacementText text: String) -> Bool {
         textChanged = true
-        let newRange = Range(range, in: textView.text)!
+        guard let newRange = Range(range, in: textView.text) else { return true }
         let mySubstring = textView.text![newRange]
         let myString = String(mySubstring)
         debugPrint("===shouldChangeTextIn \(myString)")
         return true
     }
-    func textViewDidEndEditing(_ textView: PPMDTextView) {
+    func textViewDidEndEditing(_ textView: UITextView) {
 //        debugPrint("===textViewDidEndEditing \(textView.attributedText.markdownRepresentation)")
-        historyList.append(self.textView.text)
-        debugPrint("historyList= \(historyList.count)")
     }
     func textView(_ textView: UITextView, shouldInteractWith URL: URL, in characterRange: NSRange, interaction: UITextItemInteraction) -> Bool {
         debugPrint("\(URL)")
@@ -308,8 +316,44 @@ class PPMarkdownViewController: PPBaseViewController,
             self.scrollToSameTextAsTextView()
         }
     }
+    func didUpdateHeading(_ headings: [NSMutableAttributedString]) {
+        tocTable.dataSource = headings
+        tocTable.tableView.reloadData()
+    }
     //MARK: - Private 私有方法
-    
+    func initTOC() {
+        menuBtn.delegate = self
+        menuBtn.tag = tocTag
+        self.view.addSubview(menuBtn)
+        menuBtn.snp.makeConstraints { make in
+            make.right.top.equalTo(self.view)
+            make.size.equalTo(CGSize(width: 40.0, height: 40.0))
+        }
+
+        self.view.addSubview(tocTable)
+        // 限制 tocTable 的宽度不大于 400，同时仍然保持其宽度为父视图宽度的一半
+        tocTable.snp.makeConstraints { (make) in
+            make.top.equalTo(self.view).offset(40)
+            make.right.equalTo(self.view)
+            make.width.height.equalTo(self.view).multipliedBy(0.5).priority(.high)
+            make.width.lessThanOrEqualTo(400) // 添加这行限制宽度不大于 400
+        }
+        tocTable.isHidden = true
+        tocTable.registerCellClass(PPMarkdownMiniMapCell.self)
+        tocTable.dataSource = []
+        tocTable.backgroundColor = UIColor(white: 1.0, alpha: 0.6)
+        tocTable.tableView.backgroundColor = .clear
+        tocTable.didSelectRowAtIndexHandler = {(index: Int) ->Void in
+            if let obj = self.tocTable.dataSource[index] as? NSMutableAttributedString {
+                self.textView.pp_scrollSubstringToTop(obj.string, animated: true)
+            }
+        }
+        tocTable.layer.cornerRadius = 10.0
+        tocTable.layer.shadowOpacity = 0.5
+        tocTable.layer.shadowOffset = CGSize(width: 0, height: 2)
+        tocTable.layer.shadowRadius = 4
+    }
+
     ///定位到与 TextView 相同的文本
     func scrollToSameTextAsTextView() {
         let range = Range(self.textView.pp_visibleRange())!
@@ -469,7 +513,11 @@ class PPMarkdownViewController: PPBaseViewController,
     }
     @objc func moreAction()  {
         var menuTitile = ["分享文本","搜索","左右分栏模式","上下分栏模式","关闭分栏"]
-        menuTitile.append("更换主题")
+        let method = PPAppConfig.shared.getItem("pp_markdownParseMethod")
+
+        if method == "Highlightr" {
+            menuTitile.append("更换主题")            
+        }
         menuTitile.append("去掉换行符")
         self.dropdown.dataSource = menuTitile
         self.dropdown.width = "左右分栏模式".pp_calcTextWidth() + 30
@@ -557,6 +605,12 @@ class PPMarkdownViewController: PPBaseViewController,
             else if index == 2 {
                 moreAction()
             }
+            return
+        }
+        else if toolBar.tag == tocTag {
+            //是否显示目录
+            showTOC = !showTOC
+            tocTable.isHidden = !showTOC
             return
         }
         if index == 0 {

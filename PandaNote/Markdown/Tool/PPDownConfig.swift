@@ -20,6 +20,7 @@ public struct PPDownColorCollection: ColorCollection {
     public var heading5: DownColor
     public var heading6: DownColor
     public var body: DownColor
+    public var bodyLight = UIColor.lightGray
     public var code: DownColor
     public var link: DownColor
     public var quote: DownColor
@@ -38,10 +39,10 @@ public struct PPDownColorCollection: ColorCollection {
         heading5: DownColor = .black,
         heading6: DownColor = .black,
         body: DownColor = .black,
-        code: DownColor = .black,
-        link: DownColor = .blue,
+        code: DownColor = "#476582".pp_HEXColor(),
+        link: DownColor = PPCOLOR_GREEN,
         quote: DownColor = .darkGray,
-        quoteStripe: DownColor = UIColor(red:0.27, green:0.68, blue:0.49, alpha:1.00),
+        quoteStripe: DownColor = PPCOLOR_GREEN,
         thematicBreak: DownColor = .init(white: 0.9, alpha: 1),
         listItemPrefix: DownColor = .lightGray,
         codeBlockBackground: DownColor = UIColor.lightGray.withAlphaComponent(0.3)

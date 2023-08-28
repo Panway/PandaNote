@@ -26,7 +26,7 @@ extension String {
 
     }
     ///将十六进制颜色转换为UIColor
-    func pp_HEXColor() -> UIColor {
+    public func pp_HEXColor() -> UIColor {
         var hexStr = self
         if self.starts(with: "#") {
             hexStr = hexStr.split(separator: "#").last.map(String.init) ?? hexStr
