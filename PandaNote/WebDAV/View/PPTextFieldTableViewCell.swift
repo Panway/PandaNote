@@ -11,7 +11,7 @@ import UIKit
 class PPTextFieldTableViewCell: PandaFastTableViewCell {
     var serverNameTF = UITextField()
     let leftLB = UILabel()
-    var textFieldNonnull = true
+//    var textFieldNonnull = true
     override func awakeFromNib() {
         super.awakeFromNib()
         // Initialization code
@@ -28,7 +28,7 @@ class PPTextFieldTableViewCell: PandaFastTableViewCell {
             make.width.equalTo(80)
             make.centerY.equalTo(self.contentView)
         }
-        leftLB.text = "服务器"
+//        leftLB.text = "服务器"
         leftLB.adjustsFontSizeToFitWidth = true
         
         serverNameTF = UITextField()
@@ -40,7 +40,7 @@ class PPTextFieldTableViewCell: PandaFastTableViewCell {
             make.height.equalTo(30)
             make.centerY.equalTo(self.contentView)
         }
-        serverNameTF.placeholder = "服务器地址"
+//        serverNameTF.placeholder = "服务器地址"
         serverNameTF.clearButtonMode = .whileEditing
 //        serverNameTF.borderStyle = .bezel
     }
@@ -51,7 +51,7 @@ class PPTextFieldTableViewCell: PandaFastTableViewCell {
         serverNameTF.placeholder = model.placeHolder
         leftLB.text = model.leftName
         serverNameTF.text = model.textValue
-        textFieldNonnull  = model.textFieldNonnull
+//        textFieldNonnull  = !model.isOptional
     }
 }
 
@@ -60,6 +60,6 @@ class PPAddCloudServiceModel: NSObject {
     var leftName = ""
     var placeHolder = ""
     var textValue = ""
-    var textFieldNonnull = true
+    var isOptional = false ///< 可选（可为空）
 
 }

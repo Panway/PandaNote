@@ -28,6 +28,7 @@ class PPSynologyService: NSObject, PPCloudServiceProtocol {
     var did = "" ///< device id
     var requestCount = -1
     var retryCount = 0
+    var overwriteFile = true
 
     private static let dateFormatter = DateFormatter()
     //    let reachabilityManager: NetworkReachabilityManager?
@@ -278,12 +279,12 @@ class PPSynologyService: NSObject, PPCloudServiceProtocol {
         AF.request(baseURL + "/webapi/entry.cgi", method: .post, parameters: parameters, encoding: URLEncoding.default, headers: headers)
             .responseData
         { response in
-            debugPrint("DSfile response:" , response)
+//            debugPrint("DSfile response:" , response)
             switch response.result {
             case .success(_):
                 // 使用解码后的对象
                 let res = response.data?.pp_JSONObject()
-//                res?.printJSON()
+                res?.printJSON()
                 var files = [[String:Any]]()
                 guard let data_ = res?["data"] as? [String:Any] else {
                     if let code = response.response?.statusCode, code == 400, self.retryCount < 3 {
@@ -376,7 +377,8 @@ class PPSynologyService: NSObject, PPCloudServiceProtocol {
         var parameters: [PPUploadParam] = []
         parameters.append(PPUploadParam(key: "path", value: dest_folder_path))
         parameters.append(PPUploadParam(key: "create_parents", value: "true"))
-        
+        parameters.append(PPUploadParam(key: "overwrite", value: "\(overwriteFile)")) //上传时覆盖
+
         let multipart: (MultipartFormData) -> Void = { formData in
             for param in parameters {
                 formData.append(Data(param.value.utf8), withName: param.key)
@@ -453,13 +455,16 @@ class PPSynologyService: NSObject, PPCloudServiceProtocol {
         switch response.result {
         case .success(_):
             guard let json = response.data?.pp_JSONObject() else { return PPCloudServiceError.unknown }
-            if let message = json["success"] as? Bool {
-                return message ? nil : PPCloudServiceError.unknown
+            if let success = json["success"] as? Bool, success == true {
+                return nil
+            }
+            else {
+                json.printJSON()
+                return PPCloudServiceError.unknown
             }
         case .failure(let error):
             return error
         }
-        return PPCloudServiceError.unknown
     }
     
 }

@@ -257,4 +257,29 @@ class PPAlertTool {
             callback(index - 1)
         }
     }
+    /// 弹出输入框
+    static func presentInputAlert(inViewController viewController: UIViewController,
+                                  title: String,
+                                  placeholder: String,
+                                  handler: @escaping (String?) -> Void) {
+        let alertController = UIAlertController(title: title, message: "", preferredStyle: .alert)
+        alertController.addTextField { textField in
+            textField.placeholder = placeholder
+        }
+        
+        let saveAction = UIAlertAction(title: "确定", style: .default) { _ in
+            let textField = alertController.textFields?.first
+            let newName = textField?.text
+            handler(newName)
+        }
+        
+        let cancelAction = UIAlertAction(title: "取消", style: .default, handler: nil)
+        
+        alertController.addAction(saveAction)
+        alertController.addAction(cancelAction)
+        
+        viewController.present(alertController, animated: true, completion: nil)
+    }
+    
+
 }

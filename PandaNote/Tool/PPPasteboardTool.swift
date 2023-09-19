@@ -10,6 +10,13 @@ import UIKit
 import Kanna
 import Alamofire
 
+fileprivate struct PPParseHTMLOptions: OptionSet {
+    let rawValue: Int
+    static let useDataSrcInImg = PPParseHTMLOptions(rawValue: 1 << 0)
+    static let relativeToAbsoluteInImg = PPParseHTMLOptions(rawValue: 1 << 1)
+    static let executable = PPParseHTMLOptions(rawValue: 1 << 2)
+    static let compressed = PPParseHTMLOptions(rawValue: 1 << 3)
+}
 /// 字符串分割取前面的，eg："小爱同学调戏天猫精灵集锦_哔哩哔哩" -> "小爱同学调戏天猫精灵集锦"
 /// - Parameters:
 ///   - s: 原始字符串
@@ -35,6 +42,7 @@ fileprivate let sanitizerRules = ["mobile.yangkeduo.com": "goods_id"]
 fileprivate var userActions = ["🍀去微信分享","🌏打开网页"]
 fileprivate var douyinVideoID = "" //抖音视频ID
 fileprivate var currentURL = ""
+fileprivate var title_intro = "" ///< 标题和链接
 class PPPasteboardTool: NSObject {
     // URL链接防跟踪、消毒、只保留必要参数
     class func urlNoTracking(_ url:String) -> String {
@@ -52,19 +60,19 @@ class PPPasteboardTool: NSObject {
         }
         return urlString
     }
-    
-    class func getMoreInfomationOfURL() {
+    @discardableResult
+    class func getURLFromPasteboard() -> String {
 //        UIPasteboard.general.string = "http://v.douyin.com/mLjjtL/ 抖音的测试链接"
 //        UIPasteboard.general.string = "https://www.smzdm.com/p/20405394/?send_by=3716913905&from=other"
-        guard let input = UIPasteboard.general.string else { return }
+        guard let input = UIPasteboard.general.string else { return "" }
         debugPrint("剪切板内容=\(input)")
         if input == PPAppConfig.shared.getItem("PPLastPasteBoardContent") {
-            return
+            return ""
         }
-//        let input = "https://m.weibo.cn/1098618600/4494272029733190"
-//        let input = "This is a test with the URL https://www.smzdm.com/p/20405394/?send_by=3716913905&from=other to be detected."
+        //        let input = "https://m.weibo.cn/1098618600/4494272029733190"
+        //        let input = "This is a test with the URL https://www.smzdm.com/p/20405394/?send_by=3716913905&from=other to be detected."
         let detector = try? NSDataDetector(types: NSTextCheckingResult.CheckingType.link.rawValue)
-        guard let detector = detector else { return }
+        guard let detector = detector else { return ""}
         let matches = detector.matches(in: input, options: [], range: NSRange(location: 0, length: input.utf16.count))
         var urlString = ""
         for match in matches {
@@ -77,8 +85,26 @@ class PPPasteboardTool: NSObject {
             PPHUD.showHUDFromTop("URL太多，已为你解析第一个URL")
         }
         urlString = urlNoTracking(urlString)
-        debugPrint("消毒后的URL:\(urlString)")
+        debugPrint("去除追踪参数的URL:\(urlString)")
         currentURL = urlString
+        return urlString
+    }
+    
+    class func getMoreInfomationOfURL() {
+
+        if currentURL.contains("v.douyin.com") {
+            userActions.append("⬇️下载抖音无水印视频")
+        }
+        else if currentURL.hasPrefix("https://mp.weixin.qq.com/s") {
+            userActions.append("保存公众号文章为Markdown")
+        }
+        PPPasteboardTool.showAlert()
+    }
+    class func getHTMLSourceCode(urlStr:String, completion: ((String) -> Void)? = nil) {
+        var urlString = urlStr
+        if urlString == "" {
+            urlString = currentURL
+        }
         AF.request(urlString).responseData { response in
             //不为空检查
             guard let data = response.data, let utf8Text = String(textData: data) else {
@@ -86,7 +112,7 @@ class PPPasteboardTool: NSObject {
             }
             //使用模拟器的时候，保存到自己电脑下载文件夹查看（pan是当前电脑用户名）
 #if DEBUG
-            try? data.write(to: URL(fileURLWithPath: "/Users/pan/Downloads/PP_TEST.html", isDirectory: false))
+            try? data.write(to: URL(fileURLWithPath: "/Users/pan/Downloads/tmp_TEST.html", isDirectory: false))
 #endif
                 
 //                debugPrint("Data: \(utf8Text)")
@@ -95,19 +121,14 @@ class PPPasteboardTool: NSObject {
             }
             
             var title = PPPasteboardTool.getHTMLTitle(html: utf8Text,originURL: urlString)
-            title = title + "\n" + urlString
-            UIPasteboard.general.string = title
-            PPAppConfig.shared.setItem("PPLastPasteBoardContent", title)
-            debugPrint("新的分享内容:" + title)
+            title_intro = title + "\n" + urlString
+            
             if urlString.contains("v.douyin.com") {
-                userActions.append("⬇️下载抖音无水印视频")
                 douyinVideoID = response.response?.url?.pathComponents.last ?? ""
-                //重定向后的URL,https://www.iesdouyin.com/share/video/6736813535613013260/ ...
             }
-            PPPasteboardTool.showAlert()
+            //重定向后的URL,https://www.iesdouyin.com/share/video/6736813535613013260/ ...
+            completion?(utf8Text)
         }
-        
-        
     }
     
     class func getAttributedContentFromPasteboard() -> NSAttributedString? {
@@ -117,12 +138,31 @@ class PPPasteboardTool: NSObject {
         }
         return nil
     }
+    class func parseArticleContent(url: String, completion: @escaping((NSAttributedString) -> Void)) {
+        getHTMLSourceCode(urlStr: url) { sourceCode in
+            var result = ""
+            if let doc = try? HTML(html: sourceCode, encoding: .utf8) {
+                if url.hasPrefix("https://mp.weixin.qq.com/s") {
+                    for var link in doc.css("#js_content") {
+                        link["visibility"] = ""
+                        result = link.toHTML ?? ""
+                        let att = parseHTMLCode(result, parseOption: [PPParseHTMLOptions.useDataSrcInImg])
+                        completion(att ?? "".pp_attributed)
+                    }
+                }
+            }
+            
+        }
+    }
     
-    class func getHTMLFromPasteboard() -> NSAttributedString? {
+    class func getHTMLFromPasteboard(str: String? = nil) -> NSAttributedString? {
         guard let pasteboardData = UIPasteboard.general.data(forPasteboardType: .init("public.html")) else {
             return UIPasteboard.general.string?.pp_attributed
         }
-        
+        return parseHTMLCode(String(data: pasteboardData, encoding: .utf8) ?? "", parseOption: [])
+    }
+    
+    fileprivate class func parseHTMLCode(_ pasteboardData: String, parseOption:[PPParseHTMLOptions]) -> NSAttributedString? {
         guard let doc = try? HTML(html: pasteboardData, encoding: .utf8),
               let body = doc.body else {
             debugPrint("copy content is not html data")
@@ -154,7 +194,16 @@ class PPPasteboardTool: NSObject {
         // 图片
         let img = body.css("img")
         for var element in img {
-            element.content = "![\(element.content ?? "")](\(element["src"] ?? ""))"
+            var img_src = ""
+            if parseOption.contains(.useDataSrcInImg) {
+                img_src = element["data-src"] ?? ""
+                element["src"] = element["data-src"]
+                element["data-src"] = ""
+            }
+            else {
+                img_src = element["src"] ?? ""
+            }
+            element.content = "![\(element.content ?? "")](\(img_src))"
             element["style"] = ""
         }
         // 加粗
@@ -253,6 +302,7 @@ class PPPasteboardTool: NSObject {
         htmlStr = htmlStr?.replacingOccurrences(of: "</ul>", with: "</div>")
         htmlStr = htmlStr?.replacingOccurrences(of: "<ol", with: "<div")
         htmlStr = htmlStr?.replacingOccurrences(of: "</ol>", with: "</div>")
+        htmlStr = htmlStr?.convertImgTagsToMarkdown()
         let options: [NSAttributedString.DocumentReadingOptionKey: Any] = [
             .documentType: NSAttributedString.DocumentType.html,
             .characterEncoding: String.Encoding.utf8.rawValue
@@ -261,7 +311,7 @@ class PPPasteboardTool: NSObject {
            let attributedString = try? NSAttributedString(data: new_data, options: options, documentAttributes: nil) {
 #if DEBUG
             try? new_data.write(to: URL(fileURLWithPath: NSHomeDirectory() + "/Library/PandaNote/UIPasteboard_after.html", isDirectory: false))
-            try? pasteboardData.write(to: URL(fileURLWithPath: NSHomeDirectory() + "/Library/PandaNote/UIPasteboard.html", isDirectory: false))
+            try? pasteboardData.data(using: .utf8)?.write(to: URL(fileURLWithPath: NSHomeDirectory() + "/Library/PandaNote/UIPasteboard.html", isDirectory: false))
 #endif
             return attributedString
         }
@@ -359,22 +409,30 @@ class PPPasteboardTool: NSObject {
     }
     
     class func showAlert() {
-        PPAlertAction.showSheet(withTitle: "是否去微信粘贴", message: "", cancelButtonTitle: "取消", destructiveButtonTitle: nil, otherButtonTitle: userActions) { (index) in
+        PPAlertAction.showSheet(withTitle: "选择想要的操作", message: "", cancelButtonTitle: "取消", destructiveButtonTitle: nil, otherButtonTitle: userActions) { (index) in
             debugPrint("==\(index)")
             if (index == 1) {
-                if let weixin = URL(string: "wechat://") {
-                    UIApplication.shared.open(weixin, options: [:], completionHandler: nil)
+                getURLFromPasteboard()
+                getHTMLSourceCode(urlStr: currentURL) { _ in
+                    UIPasteboard.general.string = title_intro
+                    PPAppConfig.shared.setItem("PPLastPasteBoardContent", title_intro)
+                    debugPrint("新的分享内容:" + title_intro)
+                    if let weixin = URL(string: "wechat://") {
+                        UIApplication.shared.open(weixin, options: [:], completionHandler: nil)
+                    }
                 }
             }
             else if (index == 2) {
                 let vc = PPWebViewController()
-                vc.urlString = currentURL
+                vc.urlString = getURLFromPasteboard()
                 UIViewController.pp_topViewController()?.navigationController?.pushViewController(vc, animated: true)
             }
             else if (index == 3) {
                 //let results = utf8Text.pp_matches(for: "//s3.{1,80}reflow_video.*.js")
                 //guard let res0 = results.first else { return }
+                getHTMLSourceCode(urlStr: currentURL) {_ in
                 PPPasteboardTool.downLoadDouYinVideoWithoutWaterMark(id: douyinVideoID)
+                }
             }
         }
     }
@@ -413,4 +471,76 @@ class PPPasteboardTool: NSObject {
     
     
     
+}
+
+extension String {
+    /*
+     感谢ChatGPT：
+     1. swift如何将<img src="https://e.com/1.jpg"/>123<img src="https://e.com/2.jpg"/>
+     转换成![](https://e.com/1.jpg)123![](https://e.com/2.jpg)
+     2. 下面的代码在匹配并替换结果后，由于原始文本长度变化，导致后面的替换失败，如何修改？
+     */
+    // "<img\\s+src=\"(.*?)\".*?>" `\\s`表示空白字符
+    func convertImgTagsToMarkdown() -> String {
+        let regexPattern = "<img[^>]+src=\"(.*?)\"[^>]*>"
+        let regex = try! NSRegularExpression(pattern: regexPattern, options: .caseInsensitive)
+        var result = self
+        
+        var offset = 0 // 用于跟踪偏移量
+        
+        regex.enumerateMatches(in: self, options: [], range: NSRange(location: 0, length: self.utf16.count)) { (match, _, stop) in
+            guard let match = match else { return }
+            
+            let imgTagRange = match.range
+            let imgTag = (self as NSString).substring(with: imgTagRange)
+//            debugPrint("===========tag:", imgTag)
+            
+            if let firstSrc = imgTag.extractImgUrl() {
+//                debugPrint("===========匹配出", firstSrc)
+                let markdownImage = "<p>![](\(firstSrc))</p>"
+                
+                let startIndex = self.index(self.startIndex, offsetBy: imgTagRange.location + offset)
+//                let endIndex = self.index(startIndex, offsetBy: imgTagRange.length)
+                
+                // 使用 NSString 的 `replacingCharacters(in:with:)` 替换
+                let nsString = NSMutableString(string: result)
+                nsString.replaceCharacters(in: NSRange(location: imgTagRange.location + offset, length: imgTagRange.length), with: markdownImage)
+                
+                result = nsString as String
+                
+                // 更新偏移量
+                let lengthDifference = markdownImage.utf16.count - imgTagRange.length
+                offset += lengthDifference
+            }
+        }
+        
+        return result
+    }
+    
+    func extractImgUrls() -> [String] {
+        var imgUrls = [String]()
+        let pattern = #"src="(https?://[^\s]+)""#
+        if let regex = try? NSRegularExpression(pattern: pattern, options: .caseInsensitive) {
+            let nsRange = NSRange(self.startIndex..<self.endIndex, in: self)
+            let matches = regex.matches(in: self, options: [], range: nsRange)
+            for match in matches {
+                if let range = Range(match.range(at: 1), in: self) {
+                    imgUrls.append(String(self[range]))
+                }
+            }
+        }
+        return imgUrls
+    }
+    
+    func extractImgUrl() -> String? {
+        // " src=\"(.*)\""
+        let regex = try! NSRegularExpression(pattern: " src=\"([^\\s]+)\"", options: .caseInsensitive)
+        if let match = regex.firstMatch(in: self, options: [], range: NSRange(location: 0, length: self.utf16.count)) {
+            if let range = Range(match.range(at: 1), in: self) {
+                return String(self[range])
+            }
+            return nil
+        }
+        return nil
+    }
 }

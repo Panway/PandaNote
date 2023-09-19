@@ -40,9 +40,10 @@ class PPMDTextView: UITextView {
     // MARK: - Life cycle
     
     public convenience init(frame: CGRect) { //, styler: Styler = DownStyler()) {
-        let dsc = DownStylerConfiguration(fonts: StaticFontCollection(),
-                                          colors: PPAppConfig.shared.downColorTheme,
-                                          paragraphStyles: StaticParagraphStyleCollection(),
+        
+        let dsc = DownStylerConfiguration(fonts: PPAppConfig.shared.downFont,
+                                          colors: PPAppConfig.shared.downColor,
+                                          paragraphStyles: PPDownParagraphStyleCollection(),
                                           listItemOptions: ListItemOptions(),
                                           quoteStripeOptions: QuoteStripeOptions(thickness: 5, spacingAfter: 8),
                                           thematicBreakOptions: ThematicBreakOptions(),
@@ -142,7 +143,10 @@ class PPMDTextView: UITextView {
 //            }
 //        }
     }
-    
+    // utf8编码的纯文本，用16进制查看发现有好多EFBFBCEFBFBC，请问这是什么字符？(退出保存的时候)
+    // UTF-8 编码的文本中，EFBFBCEFBFBC 表示的是 UTF-8 编码的 REPLACEMENT CHARACTER（替代字符），在 Unicode 中表示为 U+FFFD。
+    // UTF-8 编码的 REPLACEMENT CHARACTER 是一个特殊字符，通常用来替代文本中包含了无法正确解码的或损坏的字节序列的部分。它是一个Unicode的保留字符，通常用于指示编码或解码问题。当文本中包含无法识别或无法解码的字符时，文本处理程序通常会将其替换为 U+FFFD。
+    // 这个字符在文本处理中用来表明出现了编码问题，通常意味着原始文本中包含了某种无法识别或正确解码的字符或字节序列。在处理文本时，你可能需要查找并解决编码问题，以确保文本能够正确显示和处理。
     open func render() {
         if renderMethod != "Down" {
             return
@@ -150,8 +154,9 @@ class PPMDTextView: UITextView {
         // 获取原来的光标位置
         let selectedRange = self.selectedRange
         let offsetY = self.contentOffset.y
-        let ttttt = self.text ?? "@@@"
-        print("render==========\n\(ttttt)"  )
+//        self.text = self.text.replacingOccurrences(of: "￼", with: "") //去掉替代字符
+        let ttttt = self.text.replacingOccurrences(of: "￼", with: "")
+        print("render==========\n\(ttttt)\n=========="  )
         let down = Down(markdownString: ttttt)
         
         guard let document = try? down.toDocument(DownOptions.hardBreaks) else { return }
@@ -170,7 +175,17 @@ class PPMDTextView: UITextView {
         }
         for item in visitor.images {
             let path = "\(cacheDir)/\(item)".replacingOccurrences(of: "//", with: "/").pp_split(PPUserInfo.shared.webDAVRemark).last ?? ""
-
+            // 是完整的http路径，缓存到 `/Library/Caches/PandaCache/XXX/7217078bf5868444aa1dd421eafbd956`
+            if item.hasPrefix("http://") || item.hasPrefix("https://") {
+                let absPath = "\(cacheDir)/\(item.pp_md5)".replacingOccurrences(of: "//", with: "/")
+                if FileManager.default.fileExists(atPath: absPath) {
+                    continue
+                }
+                PPFileManager.shared.downloadThenCache(url: item, path: absPath.pp_split(PPUserInfo.shared.webDAVRemark).last ?? "") { contents, isFromCache, error in
+                }
+                continue
+            }
+            //不是完整的http路径
             PPFileManager.shared.getFileData(path: path,
                                              fileID: nil,
                                              alwaysDownload:false) { (contents: Data?,isFromCache, error) in

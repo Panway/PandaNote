@@ -1,4 +1,4 @@
-# 一个iOS markdown笔记应用
+原生解析渲染的 markdown 笔记应用，支持iOS/macOS
 
 ## 预览
 
@@ -22,7 +22,7 @@
 
 **设备兼容性：**
 
-iOS 10.0+、macOS（初步支持，使用了Mac Catalyst）
+iOS 10.0+、macOS（使用Mac Catalyst支持）
 
 **已支持的网盘（协议）**：
 
@@ -37,17 +37,17 @@ iOS 10.0+、macOS（初步支持，使用了Mac Catalyst）
 
 **支持的markdown相关功能**：
 
-- [x] markdown 原生渲染（待优化）
-- [x] markdown 使用 [marked.js](https://github.com/markedjs/marked) 渲染、目录生成、代码高亮、导出成PDF
+- [x] 原生渲染markdown、H1-H6生成为目录
+- [x] 可使用 [marked.js](https://github.com/markedjs/marked) 预览、目录生成、代码高亮、导出成PDF
 - [x] markdown 等纯文本的新建、编辑、保存
 - [ ] 公众号等网页文章一键保存为markdown
 
 **其他功能**：
 
-- [x] 支持预览mp3、mp4、pdf
-- [x] WebDAV HTTP响应和下载的文件缓存到磁盘，无网状态也可以查看文件
+- [x] 预览mp3、mp4、pdf
+- [x] HTTP响应和下载的文件缓存到磁盘，无网状态也可以查看文件
 - [x] 文件移动、删除、重命名、新建文件夹
-- [x] 上传相册原始图片或视频到指定目录
+- [x] 上传相册原始图片或视频、照片可压缩后上传、照片上传完可自动删除
 - [x] 图片预览、原图和Gif（微信表情）分享到微信
 - [ ] 读取剪切板查看淘宝京东价格曲线
 - [x] 抖音视频无水印下载，微博等视频解析下载

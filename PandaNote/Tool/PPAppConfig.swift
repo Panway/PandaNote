@@ -29,8 +29,9 @@ class PPAppConfig: NSObject {
     let utcDateFormatter = DateFormatter() ///< yyyy-MM-dd'T'HH:mm:ss.SSSZ
     let dateFormatter = DateFormatter() ///< yyyy-MM-dd HH:mm:ss
     let popMenu = PPPopMenu()
-    let downColorTheme = PPDownColorCollection()
-    
+    var downColor = PPDownColorCollection()
+    var downFont = PPDownFontCollection()
+
     func initSetting() {
         //将其格式选项中加入带小数秒的选项，并将时区设置为当前时区
         //dateFormatter.formatOptions.insert(.withFractionalSeconds)

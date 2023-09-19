@@ -102,7 +102,7 @@ extension String {
         return rect.size.width
     }
     
-    func pp_encodedURL() -> String {
+    public var pp_encodedURL: String {
         return self.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
     }
     /// 去除字符串开头的连续的某个字符

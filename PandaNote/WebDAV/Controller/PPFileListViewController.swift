@@ -134,7 +134,7 @@ class PPFileListViewController: PPBaseViewController,
             make.top.equalTo(self.pp_safeLayoutGuideTop())
             make.left.right.equalTo(self.view)
             //https://snapkit.github.io/SnapKit/docs/#:~:text=1.-,References,-You%20can%20hold
-            self.topToolBarHeight = make.height.equalTo(44).constraint
+            self.topToolBarHeight = make.height.equalTo(44+14).constraint
         }
         
         let layout = UICollectionViewFlowLayout();
@@ -255,7 +255,7 @@ class PPFileListViewController: PPBaseViewController,
     }
     //MARK: 顶部工具条
     func didClickFileListToolBar(index: Int, title: String, button:UIButton) {
-        debugPrint("===\(index)==\(title)")
+        debugPrint("点击顶部工具条:\(index)\(title)")
         if index == 1 {
             let dataS = ["列表（小）","列表（中）","列表（大）","图标（小）","图标（中）","图标（大）"]
             let selectStr = dataS[PPAppConfig.shared.getIntItem("fileViewMode")];
@@ -274,6 +274,9 @@ class PPFileListViewController: PPBaseViewController,
         else if index == 2 {
             self.multipleSelectionMode = true
             self.navigationItem.rightBarButtonItem = UIBarButtonItem(title: "取消选择", style: .plain, target: self, action: #selector(self.cancelMultiSelect))
+        }
+        else if index == 3 {
+            self.getFileListData()
         }
     }
     

@@ -8,6 +8,27 @@
 
 import Foundation
 extension UIImage {
+    // 创建一个带有指定大小和颜色的圆形 UIImage
+    static func pp_circleImage(withSize size: CGSize, color: UIColor) -> UIImage? {
+        UIGraphicsBeginImageContextWithOptions(size, false, 0.0)
+        guard let context = UIGraphicsGetCurrentContext() else {
+            return nil
+        }
+        
+        // 设置填充颜色
+        color.setFill()
+        
+        // 创建圆形路径并填充
+        let radius = min(size.width, size.height) / 2.0
+        context.addArc(center: CGPoint(x: size.width / 2.0, y: size.height / 2.0), radius: radius, startAngle: 0, endAngle: CGFloat.pi * 2, clockwise: true)
+        context.fillPath()
+        
+        // 从当前上下文获取 UIImage
+        let circleImage = UIGraphicsGetImageFromCurrentImageContext()
+        UIGraphicsEndImageContext()
+        
+        return circleImage
+    }
     
     func pp_rotate(_ degrees: CGFloat) -> UIImage {
         let image = self
@@ -36,7 +57,7 @@ extension UIImage {
 
         return rotatedImage
     }
-    func maskWithColor(color: UIColor) -> UIImage? {
+    func maskWithColor(_ color: UIColor) -> UIImage? {
         let maskImage = cgImage!
         
         let width = size.width

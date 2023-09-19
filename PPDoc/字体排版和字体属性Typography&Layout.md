@@ -35,6 +35,10 @@
 
 这只是字体排版领域中的一些常见术语。随着技术和设计的不断发展，可能会出现新的术语或变化。如果你在具体的排版工作中遇到了特定的术语，最好参考相关的排版资源和文档，以确保你理解正确。
 
+## Font metrics
+
+![glyph metrics](https://blog.krzyzanowskim.com/content/images/2020/07/glyph_metrics.png)
+
 ## Down
 
 ```swift

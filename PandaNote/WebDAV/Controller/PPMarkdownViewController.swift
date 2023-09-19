@@ -53,6 +53,7 @@ final class PPMarkdownViewController: PPBaseViewController,
     var highlightr: Highlightr? = nil
     let tocTable = XDFastTableView()
     var showTOC = false
+    let imagePreviewer = PPImagePreviewer()
     lazy var dropdown : PPDropDown = {
         let drop = PPDropDown()
         return drop
@@ -115,13 +116,13 @@ final class PPMarkdownViewController: PPBaseViewController,
             let method = PPAppConfig.shared.getItem("pp_markdownParseMethod")
             self.textView.renderMethod = method
             if method != "" {
-                if method == "NSAttributedString+Markdown" {
+                if method == "NSAttributedString+Markdown" && self.filePathStr.isMarkdownFile() {
                     //NSAttributedString+Markdown 解析
                     self.textView.attributedText = NSAttributedString(markdownRepresentation: self.markdownStr, attributes: [.font : UIFont.systemFont(ofSize: 17.0), .foregroundColor: self.theme.baseTextColor.pp_HEXColor()])
                     self.textView.linkTextAttributes = [.foregroundColor:self.theme.linkTextColor.pp_HEXColor()]
 
                 }
-                else if method == "Down" {
+                else if method == "Down" && self.filePathStr.isMarkdownFile(){
                     //MARK: Down渲染
                     self.textView.text = self.markdownStr
                     if(!self.textView.didRender) {
@@ -134,7 +135,7 @@ final class PPMarkdownViewController: PPBaseViewController,
 //                    self.textView.attributedText = attributedString
                     
                 }
-                else if method == "Highlightr" {
+                else if method == "Highlightr" || !self.filePathStr.isMarkdownFile() {
                     // 获取bundle中所有以min.css结尾的文件路径
                     self.highlightr = Highlightr()
                     let bundle = Bundle(for: Highlightr.self)
@@ -242,8 +243,10 @@ final class PPMarkdownViewController: PPBaseViewController,
         self.setLeftBarButton()
     }
     func changed() -> Bool {
-        debugPrint("文本改变:",self.textView.text != self.markdownStr)
-        return self.textView.text != self.markdownStr
+        let textWithoutReplacementCharacter = self.textView.text.replacingOccurrences(of: "￼", with: "")
+        let textDidChanged = textWithoutReplacementCharacter != self.markdownStr
+        debugPrint("文本改变:",textDidChanged)
+        return textDidChanged
     }
     override func pp_backAction() {
         self.textView.resignFirstResponder()
@@ -299,6 +302,12 @@ final class PPMarkdownViewController: PPBaseViewController,
     }
     func textView(_ textView: UITextView, shouldInteractWith URL: URL, in characterRange: NSRange, interaction: UITextItemInteraction) -> Bool {
         debugPrint("\(URL)")
+        // 处理链接点击事件
+        if URL.scheme == "pandanote" && URL.host == "openimage" {
+            // 预览图片
+            imagePreviewer.showImage(fromView: nil, imageName: "name", localPath: URL.absoluteString.pp_split("openimage?path=").last ?? "")
+            return false
+        }
         return true
     }
     func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
@@ -488,12 +497,15 @@ final class PPMarkdownViewController: PPBaseViewController,
     }
     @objc func saveTextAction()  {
         textView.render()
-        let stringToUpload = self.textView.text ?? ""
+        // 去除16进制为`EFBFBC`的REPLACEMENT CHARACTER（替代字符）
+        let textWithoutReplacementCharacter = self.textView.text.replacingOccurrences(of: "￼", with: "")
+//            .replacingOccurrences(of: "\u{FFFD}", with: "")//, options: NSString.CompareOptions.literal, range: nil)
+        let stringToUpload = textWithoutReplacementCharacter
         if stringToUpload.length < 1 {
             PPHUD.showHUDFromTop("不支持保存空文件")
             return
         }
-        debugPrint("保存的是===\(stringToUpload)")
+//        print("保存的是==========\n\(stringToUpload)\n=========="  )
         //MARK: 保存
 //        self.textView.resignFirstResponder()
         PPFileManager.shared.createFile(path: self.filePathStr, contents: stringToUpload.data(using: .utf8), completionHandler: { (result, error) in
@@ -512,7 +524,7 @@ final class PPMarkdownViewController: PPBaseViewController,
 
     }
     @objc func moreAction()  {
-        var menuTitile = ["分享文本","搜索","左右分栏模式","上下分栏模式","关闭分栏"]
+        var menuTitile = ["分享文本","搜索","左右分栏模式","上下分栏模式","关闭分栏","保存链接为Markdown"]
         let method = PPAppConfig.shared.getItem("pp_markdownParseMethod")
 
         if method == "Highlightr" {
@@ -538,6 +550,16 @@ final class PPMarkdownViewController: PPBaseViewController,
             }
             else if item == "关闭分栏" {
                 self.switchSplitMode(.none)
+            }
+            else if item == "保存链接为Markdown" {
+                PPAlertTool.presentInputAlert(inViewController: self, title: "输入文章链接", placeholder: "公众号或博客文章") { res in
+                    if let urlStr = res {
+                        PPPasteboardTool.parseArticleContent(url: urlStr) { attributedString in
+                            self.textView.insertAttributedString(attributedString)
+                            self.textView.render()
+                        }
+                    }
+                }
             }
             else if item == "更换主题" {
                 PPAppConfig.shared.popMenu.showWithCallback(sourceView:self.dropdown,

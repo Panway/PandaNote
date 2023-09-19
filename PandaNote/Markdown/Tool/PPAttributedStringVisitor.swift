@@ -28,7 +28,12 @@ public class PPAttributedStringVisitor {
     private let options: DownOptions
     private let listPrefixGeneratorBuilder: PPListPrefixGeneratorBuilder
     private var listPrefixGenerators = [ListItemPrefixGenerator]()
-
+    private var colors: PPDownColorCollection {
+        return PPAppConfig.shared.downColor
+    }
+    private var fonts: PPDownFontCollection {
+        return PPAppConfig.shared.downFont
+    }
     /// Creates a new instance with the given styler and options.
     ///
     /// - parameters:
@@ -62,6 +67,7 @@ extension PPAttributedStringVisitor: Visitor {
         var result = visitChildren(of: node).pp_joined
         result = renewString(result: result, newStr: "> \(result.string)")
         styler.style(blockQuote: result, nestDepth: node.nestDepth)
+//        result.pp_addAttributes([.backgroundColor:"#eeeeee".pp_HEXColor().withAlphaComponent(0.5)])
         if node.hasSuccessor { result.append(.pp_paragraphSeparator) }
         return result
     }
@@ -88,12 +94,21 @@ extension PPAttributedStringVisitor: Visitor {
         result.insert(attributedPrefix, at: 0)
         
         if prefix == "-" {
-            let switchAttachment = PPCheckmarkTextAttachment()
-            let switchView = PPCheckmarkView(frame: CGRect(x: 0, y: 0, width: 15, height: 15))
-            switchView.isChecked = true
-            switchAttachment.switchView = switchView
-            switchAttachment.customHeight = UIFont.systemFont(ofSize: 17).lineHeight  // Use the appropriate font size
-            result.insert(NSAttributedString(attachment: switchAttachment), at: 2)
+            let switchAttachment = NSTextAttachment()
+            let font = fonts.body
+            let rectHeight = 16.0 / UIScreen.main.scale // pp_circleImage内部会乘以缩放率
+            //垂直居中 https://stackoverflow.com/a/47888862/4493393
+            switchAttachment.image = UIImage.pp_circleImage(withSize: CGSize(width: rectHeight, height: rectHeight), color: PPCOLOR_GREEN)
+            let imageSize = switchAttachment.image!.size
+            switchAttachment.bounds = CGRect(x: 0, 
+                                             y: (font.capHeight - imageSize.height) / 2,
+                                             width: imageSize.width, height: imageSize.height)
+            result.insert(NSAttributedString(attachment: switchAttachment), at: 0)
+            
+            // 设置字间距（调整 attachment 与旁边文字的距离）
+            let letterSpacing: CGFloat = 20.0 // 调整这个值来设置字间距
+            result.addAttribute(NSAttributedString.Key.kern, value: letterSpacing, range: NSRange(location: 0, length: 1))
+
         }
 
         if node.hasSuccessor { result.append(.pp_paragraphSeparator) }
@@ -103,12 +118,12 @@ extension PPAttributedStringVisitor: Visitor {
 
     public func visit(codeBlock node: CodeBlock) -> NSMutableAttributedString {
         guard let literal = node.literal else { return .pp_empty }
-        var result = literal.pp_replacingNewlinesWithLineSeparators().pp_attributed
-        result = renewString(result: result, newStr: "```\(node.fenceInfo ?? "")\n\(result.string)\n```\n")
+        var result = literal.pp_replacingNewlinesWithLineSeparators().pp_attributed(colors.code)
+        result = renewString(result: result, newStr: "\n\(result.string)\n")
+        result.insert(lightGrayText("``` \(node.fenceInfo ?? "")"), at: 0)
+        result.append(lightGrayText("```\n"))
         let attributes: [NSAttributedString.Key: Any] = [
-            .font: UIFont.systemFont(ofSize: 17),
-            .foregroundColor: UIColor.black,
-            .backgroundColor: UIColor.lightGray.withAlphaComponent(0.3), //这里透明度设置成0.1左右，非常重要，不然选中文字看不到选中高亮色，very important!!!
+            .backgroundColor: colors.codeBlockBackground, //这里透明度设置成0.1左右，非常重要，不然选中文字看不到选中高亮色，very important!!!
         ]
         result.addAttributes(attributes, range: result.wholeRange)
         if node.hasSuccessor { result.append(.pp_paragraphSeparator) }
@@ -133,6 +148,7 @@ extension PPAttributedStringVisitor: Visitor {
     public func visit(paragraph node: Paragraph) -> NSMutableAttributedString {
         let result = visitChildren(of: node).pp_joined
         styler.style(paragraph: result)
+        print("=====paragraph=====",result.string)
         if node.hasSuccessor { result.append(.pp_paragraphSeparator) }
         return result
     }
@@ -142,7 +158,7 @@ extension PPAttributedStringVisitor: Visitor {
         result = renewString(result: result, newStr: String(repeating: "#", count: node.headingLevel) + " \(result.string)")
         styler.style(heading: result, level: node.headingLevel)
         // #号颜色不要太深，否则影响我看标题内容
-        result.pp_replaceAttribute(for: .foregroundColor, value: PPAppConfig.shared.downColorTheme.bodyLight, inRange: NSRange(location: 0, length: node.headingLevel))
+        result.pp_replaceAttribute(for: .foregroundColor, value: colors.bodyLight, inRange: NSRange(location: 0, length: node.headingLevel))
         headings.append(result)
         if node.hasSuccessor { result.append(.pp_paragraphSeparator) }
         return result
@@ -173,14 +189,14 @@ extension PPAttributedStringVisitor: Visitor {
     }
 
     public func visit(code node: Code) -> NSMutableAttributedString {
-        guard let result1 = node.literal?.pp_attributed else { return .pp_empty }
-        var result = result1
-        result = renewString(result: result, newStr: "`\(result.string)`")
+        guard let result1 = node.literal?.pp_attributed(colors.code) else { return .pp_empty }
+        let result = result1
+//        result = renewString(result: result, newStr: "`\(result.string)`")
+        result.insert(lightGrayText("`"), at: 0)
+        result.append(lightGrayText("`"))
 //        styler.style(code: result)
         let attributes: [NSAttributedString.Key: Any] = [
-            .font: UIFont.systemFont(ofSize: 17),
-            .foregroundColor: "#476582".pp_HEXColor(),
-            .backgroundColor: UIColor.lightGray.withAlphaComponent(0.3), //这里透明度设置成0.1左右，非常重要，不然选中文字看不到选中高亮色，very important!!!
+            .backgroundColor: colors.codeBlockBackground, //这里透明度设置成0.1左右，非常重要，不然选中文字看不到选中高亮色，very important!!!
         ]
         result.addAttributes(attributes, range: result.wholeRange)
         return result
@@ -202,7 +218,7 @@ extension PPAttributedStringVisitor: Visitor {
         var result = visitChildren(of: node).pp_joined
         result = renewString(result: result, newStr: "*\(result.string)*")
         // 设置字体、下划线和删除线的属性
-        let font = UIFont(name: "LXGWWenKai-Light", size: 20)?.pp_italic ?? UIFont.systemFont(ofSize: 14).pp_setItalic()
+        let font = UIFont(name: "LXGWWenKai-Light", size: 20)?.pp_italic ?? fonts.body.pp_setItalic()
 //        let attributes: [NSAttributedString.Key: Any] = [.font:font]
 //            [.font: UIFont(name: "LXGWWenKai-Light.ttf", size: 16).pp_setItalic()] // 系统默认字体变斜体
 //            .underlineStyle: NSUnderlineStyle.single.rawValue, // 设置下划线样式
@@ -216,8 +232,8 @@ extension PPAttributedStringVisitor: Visitor {
         var result = visitChildren(of: node).pp_joined
         result = renewString(result: result, newStr: "**\(result.string)**")
         // * 设置成浅色
-        result.pp_replaceAttribute(for: .foregroundColor, value: PPAppConfig.shared.downColorTheme.bodyLight, inRange: NSRange(location: 0, length: 2))
-        result.pp_replaceAttribute(for: .foregroundColor, value: PPAppConfig.shared.downColorTheme.bodyLight, inRange: NSRange(location: result.string.length - 2, length: 2))
+        result.pp_replaceAttribute(for: .foregroundColor, value: colors.bodyLight, inRange: NSRange(location: 0, length: 2))
+        result.pp_replaceAttribute(for: .foregroundColor, value: colors.bodyLight, inRange: NSRange(location: result.string.length - 2, length: 2))
         styler.style(strong: result)
         return result
     }
@@ -234,14 +250,19 @@ extension PPAttributedStringVisitor: Visitor {
         result = renewString(result: result, newStr: "![\(result.string)](\(node.url ?? ""))")
         styler.style(image: result, title: node.title, url: node.url)
         
+        
+        guard let img_url = node.url else { return result }
         //显示图片附件
         let fileManager = FileManager.default
-        let path = "\(cacheDir)/\(node.url ?? "")".replacingOccurrences(of: "//", with: "/")
-        if let url_ = node.url {
-            images.append(url_)
+        var path = "\(cacheDir)/\(img_url)".replacingOccurrences(of: "//", with: "/")
+        if img_url.hasPrefix("http://") || img_url.hasPrefix("https://") {
+            path = "\(cacheDir)/\(img_url.pp_md5)".replacingOccurrences(of: "//", with: "/")
         }
+        images.append(img_url)
         if fileManager.fileExists(atPath: path) {
-            result.append("\n".pp_attributed) //换行
+            // result.insert("\u{FEFF}".pp_attributed, at: 0)
+            result.insert("\n".pp_attributed, at: 0)
+//            result.append("\n".pp_attributed) //图片换行显示（会造成每次保存多一个换行）
             // 创建一个NSTextAttachment实例并设置图片
             let imageAttachment = NSTextAttachment()
             if let localImage = UIImage(contentsOfFile: path) {
@@ -256,10 +277,26 @@ extension PPAttributedStringVisitor: Visitor {
                     imageSize.height *= scaleFactor
                 }
                 imageAttachment.bounds = CGRect(origin: .zero, size: imageSize)
+                
             }
             // 创建包含图片附件的NSAttributedString
             let attributedString = NSAttributedString(attachment: imageAttachment)
-            result.append(attributedString)
+            result.insert(attributedString, at: 0)
+            
+            
+            // 创建一个段落样式属性并设置换行模式为 .byWordWrapping
+//            let paragraphStyle = NSMutableParagraphStyle()
+//            paragraphStyle.lineBreakMode = .byWordWrapping
+//            paragraphStyle.alignment = .center
+//            // 将段落样式属性应用于整个 NSMutableAttributedString 或需要换行的部分
+//            result.addAttribute(.paragraphStyle, value: paragraphStyle, range: NSRange(location: 0, length: 3))
+
+            
+            
+            
+            // 为图片附件富文本添加链接属性
+            let attachmentRange = NSRange(location: 0, length: 1)//NSRange(location: result.length - 1, length: 1)
+            result.addAttribute(.link, value: "pandanote://openimage?path=\(path)", range: attachmentRange)
         }
         return result
     }
@@ -275,6 +312,15 @@ extension PPAttributedStringVisitor: Visitor {
         else {
             return newStr.pp_attributed
         }
+    }
+    
+    
+    
+    public func lightGrayText(_ text: String) -> NSMutableAttributedString {
+        let attText = NSMutableAttributedString(string: text,
+                                                attributes:[.font: fonts.body,
+                                                            .foregroundColor: "#cccccc".pp_HEXColor()])
+        return attText
     }
 }
 
@@ -307,9 +353,11 @@ private extension NSAttributedString {
 extension String {
     
     var pp_attributed: NSMutableAttributedString {
-        return NSMutableAttributedString(string: self, attributes: [.font:UIFont.systemFont(ofSize: 17)])
+        return NSMutableAttributedString(string: self, attributes: [.font:PPAppConfig.shared.downFont.body])
     }
-
+    func pp_attributed(_ color: UIColor) -> NSMutableAttributedString {
+        return NSMutableAttributedString(string: self, attributes: [.font:PPAppConfig.shared.downFont.body,.foregroundColor:color])
+    }
     // This codepoint marks the end of a paragraph and the start of the next.
 //    这几个符号是 Unicode 转义字符，用于表示不同的特殊空白字符或换行符：
 //    1. `\u{2029}`：这是 Unicode 转义字符，代表 "Paragraph Separator"（段落分隔符）。在文本中，它通常用于分隔段落。

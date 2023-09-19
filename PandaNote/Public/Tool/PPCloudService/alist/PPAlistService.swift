@@ -21,7 +21,8 @@ class PPAlistService: NSObject, PPCloudServiceProtocol {
 
     /// 更新完token等信息后执行的回调。你可以保存新token等信息到本地或数据库（解耦）
     var configChanged : ((_ key:String,_ value:String) -> ())?
-    
+    var retryCount = 0
+
     var baseURL: String {
         return url
     }
@@ -38,7 +39,7 @@ class PPAlistService: NSObject, PPCloudServiceProtocol {
         return ["authorization": self.access_token]
     }
     
-    func login(url:String, username:String, password:String) {
+    func login(url:String, username:String, password:String, completion:(() -> Void)? = nil) {
         let parameters: [String: String] = [
             "username": username,
             "password": password,
@@ -96,7 +97,12 @@ class PPAlistService: NSObject, PPCloudServiceProtocol {
                 //本来是要重新登录的，考虑到这个类只负责获取数据，就不搞其他的了
 //                self.login(url: self.url, username: self.username, password: self.password)
                 if code == 401 {
-                    self.login(url: self.url, username: self.username, password: self.password)
+                    self.login(url: self.url, username: self.username, password: self.password) {
+                        if self.retryCount < 4 {
+                            self.retryCount += 1 //自动刷新、防止死循环
+                            self.contentsOfDirectory(path, pathID, completion: completion)
+                        }
+                    }
                 }
                 return
             }
@@ -108,7 +114,12 @@ class PPAlistService: NSObject, PPCloudServiceProtocol {
             completion(PPAlistFile.toModelArray(fileList, self.baseURL), nil)
         }
         if self.access_token.length == 0 {
-            login(url: self.url, username: self.username, password: self.password)
+            login(url: self.url, username: self.username, password: self.password){
+                if self.retryCount < 4 {
+                    self.retryCount += 1 //自动刷新、防止死循环
+                    self.contentsOfDirectory(path, pathID, completion: completion)
+                }
+            }
         }
     }
     
@@ -175,7 +186,7 @@ class PPAlistService: NSObject, PPCloudServiceProtocol {
         let requestURL = self.url + "/api/fs/put"
         let headers: HTTPHeaders = [
             "authorization": self.access_token,
-            "file-path": path.pp_encodedURL()
+            "file-path": path.pp_encodedURL
         ]
         // 使用Alamofire发送PUT请求
         AF.upload(contents, to: requestURL, method: .put, headers:headers)

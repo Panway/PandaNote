@@ -140,22 +140,23 @@ class PPFileManager: NSObject {
         }
         let urlRequest = URLRequest(url: url_)
         URLCache.shared.removeCachedResponse(for: urlRequest)
-        AF.request(url).downloadProgress { p in
+        AF.download(url).downloadProgress { p in
             //debugPrint("downloadThenCache Progress: \(p.fractionCompleted)")
             if let progress = progress {
                 progress(p)
             }
 //            PPHUD.updateBarProgress(Float(progress.fractionCompleted))
         }
-        .response { response in
+        .responseData { response in
+            guard let data = response.value else { return }
             var localPath = PPUserInfo.shared.webDAVRemark + "/" + path
             localPath = localPath.replacingOccurrences(of: "//", with: "/")
             if(response.response?.statusCode != 200) {
                 completion(nil, false, PPCloudServiceError.unknown)
                 return
             }
-            PPDiskCache.shared.setData(response.data, key: localPath)
-            completion(response.data, false, nil)
+            PPDiskCache.shared.setData(data, key: localPath)
+            completion(data, false, nil)
         }
     }
     /// 从服务器下载文件

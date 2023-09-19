@@ -11,6 +11,15 @@
 
 //https://stackoverflow.com/a/24263296
 extension UIColor {
+    static func pp_random() -> UIColor {
+        let red = CGFloat.random(in: 0.0 ... 1.0)
+        let green = CGFloat.random(in: 0.0 ... 1.0)
+        let blue = CGFloat.random(in: 0.0 ... 1.0)
+        let alpha = CGFloat.random(in: 0.5 ... 1.0) // 透明度范围可以根据需要调整
+        
+        return UIColor(red: red, green: green, blue: blue, alpha: alpha)
+    }
+    
     convenience init(red: Int, green: Int, blue: Int) {
         assert(red >= 0 && red <= 255, "Invalid red component")
         assert(green >= 0 && green <= 255, "Invalid green component")
