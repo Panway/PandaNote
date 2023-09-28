@@ -170,6 +170,8 @@ class PPAddCloudServiceViewController : PPBaseViewController,UITableViewDataSour
             vc.cloudType = "synology"
             vc.remark = "synology"
             vc.password = ""
+            vc.showOtpCode = true
+            vc.optCodeRemark = "双重认证码（Secure Signin应用内）"
             sourceVC.navigationController?.pushViewController(vc, animated: true)
         }
         else if obj == "百度网盘" || obj == PPCloudServiceType.baiduyun.rawValue {

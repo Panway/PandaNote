@@ -19,6 +19,7 @@ class PPSynologyService: NSObject, PPCloudServiceProtocol {
     var url = "" ///< 用户输入的地址或者QC ID
     var username = ""
     var password = ""
+    var otp_code = "" //两步验证码、Secure Signin双重验证
 
     var remoteBaseURL = "" ///< 请求使用的远程QuickConnect服务地址
     var localBaseURL = "" ///< 请求使用的局域网地址
@@ -46,12 +47,13 @@ class PPSynologyService: NSObject, PPCloudServiceProtocol {
         return remoteBaseURL
     }
     
-    init(url: String, remoteURL: String, localURL: String, username: String, password: String, sid: String, did: String) {
+    init(url: String, remoteURL: String, localURL: String, username: String, password: String, otp_code: String, sid: String, did: String) {
         self.url = url
         self.remoteBaseURL = remoteURL
         self.localBaseURL = localURL
         self.username = username
         self.password = password
+        self.otp_code = otp_code
         self.sid = sid
         self.did = did
         /*
@@ -94,7 +96,7 @@ class PPSynologyService: NSObject, PPCloudServiceProtocol {
             self.localBaseURL = url
             self.configChanged?("PPLocalBaseURL", url)
             if (self.sid.length == 0) {
-                self.login(username: self.username, password: self.password)
+                self.login(username: self.username, password: self.password, otp_code: self.otp_code)
             }
             return
         }
@@ -117,7 +119,7 @@ class PPSynologyService: NSObject, PPCloudServiceProtocol {
                 let getInfoSuccess = self.handleServerInfo(jsonDict)
                 if getInfoSuccess {
                     if (self.sid.length == 0) {
-                        self.login(username: self.username, password: self.password ,callback: callback)
+                        self.login(username: self.username, password: self.password ,otp_code: self.otp_code, callback: callback)
                     }
                 }
                 else {
@@ -180,8 +182,8 @@ class PPSynologyService: NSObject, PPCloudServiceProtocol {
         return true
     }
     
-    func login(username:String, password:String, callback:((String) -> Void)? = nil) {
-        let parameters: Parameters = [
+    func login(username:String, password:String, otp_code:String? = nil, callback:((String) -> Void)? = nil) {
+        var parameters: Parameters = [
             "account": username,
             "api": "SYNO.API.Auth",
             "method": "login",
@@ -189,7 +191,9 @@ class PPSynologyService: NSObject, PPCloudServiceProtocol {
             "session": "FileStation",
             "version": "3"
         ]
-        
+        if let otp_code = otp_code, otp_code.length > 0 {
+            parameters["otp_code"] = otp_code
+        }
         AF.request(baseURL + "/webapi/auth.cgi", method: .post, parameters: parameters, encoding: URLEncoding.default, headers: headers).responseData { response in
             switch response.result {
             case .success(_):
@@ -225,10 +229,10 @@ class PPSynologyService: NSObject, PPCloudServiceProtocol {
     }
     // 每隔3次请求检查本地网络可用性
     func checkLANStatus() {
-        requestCount += 1
-        if requestCount % 3 != 0 {
-            return
-        }
+//        requestCount += 1
+//        if requestCount % 3 != 0 {
+//            return
+//        }
         let url = self.localBaseURL + "/webman/pingpong.cgi?quickconnect=true"
 
         AF.request(url, method: .get, headers: headers){ $0.timeoutInterval = 3 }.response { response in

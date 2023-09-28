@@ -35,12 +35,15 @@ class PPEditCloudServiceVC: PPBaseViewController {
             vc.cloudType = dict["PPCloudServiceType"] ?? ""
             vc.extraString = dict["PPCloudServiceExtra"] ?? ""
             vc.accessToken = dict["PPAccessToken"] ?? ""
-            
+
             vc.serverURL = dict["PPWebDAVServerURL"] ?? ""
             vc.showServerURL = vc.serverURL.length > 0
 
             vc.password = dict["PPWebDAVPassword"] ?? ""
             vc.showPassword = vc.password.length > 0
+            
+            vc.optCode = dict["PPOptCode"] ?? ""
+            vc.showOtpCode = vc.optCode.length > 0
             
             vc.accessToken = dict["PPAccessToken"] ?? ""
             vc.showToken = vc.accessToken.length > 0

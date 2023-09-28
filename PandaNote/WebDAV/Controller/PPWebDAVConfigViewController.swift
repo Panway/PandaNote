@@ -19,25 +19,32 @@ class PPWebDAVConfigViewController: PPBaseViewController {
     var showUserName = true
     var showPassword = true //密码
     var showOtpCode = false ///< 显示（两步验证）验证码 two-factor code
-    var showToken = false //access token
-    var showRefreshToken = false //refresh token
-    var showExtra = false
-    var showRemark = true
     
     var cloudType = ""
     var serverURL = ""
     var serverURLRemark = "服务器地址"
     var userName = ""
     
-    var password = ""
+    var password = "" //编辑时用到
     var passwordDesc = "密码"
     var passwordRemark = "密码"
     
-    var optCodeRemark = "验证码"
-    var accessToken = ""
-    var refreshToken = ""
+    var showRemark = true
     var remark = ""
+    
+    var optCodeRemark = "验证码" //占位符
+    var optCode = ""
+    
+    var showToken = false //access token
+    var accessToken = ""
+    
+    var showRefreshToken = false //refresh token
+    var refreshToken = ""
+    
+    var showExtra = false
+    var extraDesc = "其他"
     var extraString = "" //额外的字段
+    
     var tips = ""
     var isOptional = [Int]()
 
@@ -66,11 +73,11 @@ class PPWebDAVConfigViewController: PPBaseViewController {
             texts.append(password)
             isOptional.append(0)
         }
-        if showPassword {
+        if showOtpCode {
             leftNames.append("验证码")
             placeHolders.append(optCodeRemark)
-            texts.append(password)
-            isOptional.append(0)
+            texts.append("")
+            isOptional.append(1)
         }
         if showToken {
             leftNames.append("access token")
@@ -85,7 +92,7 @@ class PPWebDAVConfigViewController: PPBaseViewController {
             isOptional.append(0)
         }
         if showExtra {
-            leftNames.append("其他")
+            leftNames.append(extraDesc)
             placeHolders.append(extraString)
             texts.append(extraString)
             isOptional.append(0)
@@ -167,10 +174,10 @@ class PPWebDAVConfigViewController: PPBaseViewController {
         if let visibleRows = table.tableView.indexPathsForVisibleRows {
             for indexPath in visibleRows {
                 if let cell = table.tableView.cellForRow(at: indexPath) as? PPTextFieldTableViewCell {
-                    keyValue[cell.leftLB.text ?? "key"] = cell.serverNameTF.text
+                    keyValue[cell.leftLB.text ?? "key"] = cell.rightTF.text
                     // print(cell.leftLB.text, cell.serverNameTF.text)
                     let isOptional = isOptional[indexPath.row]
-                    if let value = cell.serverNameTF.text, isOptional == 0 && value.length < 1 {
+                    if let value = cell.rightTF.text, isOptional == 0 && value.length < 1 {
                         PPHUD.showHUDFromTop(cell.leftLB.text!+"不能为空", isError: true)
                         return
                     }
@@ -182,15 +189,22 @@ class PPWebDAVConfigViewController: PPBaseViewController {
         if(keyValue["Token"] != nil) {
             self.accessToken = keyValue["Token"] ?? ""
         }
-        let newServer = ["PPWebDAVServerURL":keyValue["URL"] ?? "",
-                         "PPWebDAVUserName":keyValue["账号"] ?? "",
-                         "PPWebDAVPassword":keyValue["密码"] ?? "",
-                         "PPCloudServiceType":self.cloudType,
-                         "PPCloudServiceExtra":self.extraString,
-                         "PPAccessToken": self.accessToken,
-                         "PPRefreshToken": self.refreshToken,
-                         "PPWebDAVRemark":keyValue["备注"] ?? ""]
-        
+        var newServer = ["PPCloudServiceType":self.cloudType]
+        let desc_keys = [("URL","PPWebDAVServerURL"),("账号","PPWebDAVUserName"),(passwordDesc,"PPWebDAVPassword"),
+                         ("备注","PPWebDAVRemark"),("验证码","PPOptCode"),(extraDesc,"PPCloudServiceExtra")]
+        for desc_key in desc_keys {
+            let (desc, key) = desc_key
+            if let value = keyValue[desc], value.length > 0 {
+                newServer[key] = value
+            }
+        }
+        if accessToken.length > 0 {
+            newServer["PPAccessToken"] = accessToken
+        }
+        if refreshToken.length > 0 {
+            newServer["PPRefreshToken"] = refreshToken
+        }
+        debugPrint(newServer)
         if isEditMode {
             PPUserInfo.shared.pp_serverInfoList[editIndex] = newServer
         }

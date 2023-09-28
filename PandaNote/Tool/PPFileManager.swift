@@ -365,11 +365,13 @@ class PPFileManager: NSObject {
             let url = PPUserInfo.shared.getCurrentServerInfo("PPWebDAVServerURL")
             let remoteURL = PPUserInfo.shared.getCurrentServerInfo("PPServerURL")
             let localURL = PPUserInfo.shared.getCurrentServerInfo("PPLocalBaseURL")
+            let otp_code = PPUserInfo.shared.getCurrentServerInfo("PPOptCode")
             synologyService = PPSynologyService(url:url,
                                                 remoteURL: remoteURL,
                                                 localURL: localURL,
                                                 username: user,
                                                 password: password,
+                                                otp_code: otp_code,
                                                 sid: sid,
                                                 did: did)
             synologyService?.configChanged = {key,value in
