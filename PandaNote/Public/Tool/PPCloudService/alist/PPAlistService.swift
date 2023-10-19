@@ -89,6 +89,17 @@ class PPAlistService: NSObject, PPCloudServiceProtocol {
             "refresh": false
         ]
         AF.request(requestURL, method: .post, parameters: parameters, encoding: JSONEncoding.default, headers: headers()).responseData { response in
+            if let error = response.error?.asAFError {
+                if response.description.contains("kCFStreamErrorCodeKey=-9814") {
+                    print("HTTPS证书已过期")
+                    completion([], PPCloudServiceError.certificateInvalid)
+                }
+               else {
+                    print("服务器错误: \(error)")
+                    completion([], PPCloudServiceError.unknown)
+                }
+                return
+            }
             let jsonDic = response.data?.pp_JSONObject() as? [String : Any]
 //            jsonDic?.printJSON()
             if let code = jsonDic?["code"] as? Int, code != 200 {

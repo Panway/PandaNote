@@ -746,14 +746,19 @@ class PPFileListViewController: PPBaseViewController,
             self.isCachedFile = isFromCache
             if error != nil {
                 self.collectionView.endRefreshing()
-                if case let myError as PPCloudServiceError = error, myError == .forcedLoginRequired {
-                    PPHUD.showHUDFromTop("登录状态已失效，请重新登录", isError: true)
-                    debugPrint(PPUserInfo.shared.pp_serverInfoList[PPUserInfo.shared.pp_lastSeverInfoIndex])
-                    let serviceType = PPUserInfo.shared.getCurrentServerInfo("PPCloudServiceType")
-                    PPAddCloudServiceViewController.addCloudService(serviceType, self)
+                if case let myError as PPCloudServiceError = error {
+                    if myError == .forcedLoginRequired {
+                        PPHUD.showHUDFromTop("登录状态已失效，请重新登录", isError: true)
+                        debugPrint(PPUserInfo.shared.pp_serverInfoList[PPUserInfo.shared.pp_lastSeverInfoIndex])
+                        let serviceType = PPUserInfo.shared.getCurrentServerInfo("PPCloudServiceType")
+                        PPAddCloudServiceViewController.addCloudService(serviceType, self)
+                    }
+                    else if myError == .certificateInvalid {
+                        PPHUD.showHUDFromTop("服务器证书过期或无效", isError: true)
+                    }
                 }
                 else {
-                    PPHUD.showHUDFromTop("加载失败，请配置服务器", isError: true)
+                    PPHUD.showHUDFromTop("加载失败，请检查服务器配置", isError: true)
                 }
                 return
             }

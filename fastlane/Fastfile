@@ -1,0 +1,83 @@
+# This file contains the fastlane.tools configuration
+# You can find the documentation at https://docs.fastlane.tools
+#
+# For a list of all available actions, check out
+#
+#     https://docs.fastlane.tools/actions
+#
+# For a list of all available plugins, check out
+#
+#     https://docs.fastlane.tools/plugins/available-plugins
+#
+
+# Uncomment the line if you want fastlane to automatically update itself
+# update_fastlane
+
+default_platform(:ios)
+
+platform :ios do
+  # add actions here: https://docs.fastlane.tools/actions
+
+  desc "更新、下载、安装发布所需 provisioning file"
+  lane :release_setting do
+    sigh(
+      username: 'xxx@126.com',
+      app_identifier: 'com.agolddata.pandanotex',
+      # 续订配置文件，为您提供具有最长使用寿命的配置文件
+      force: true,
+      platform: 'catalyst',
+      provisioning_name: 'com.agolddata.pandanotex',
+      ignore_profiles_with_different_name: true,
+      development:false
+    )
+  end
+
+  lane :debug_setting do
+    sigh(
+      username: 'xxx@126.com',
+      app_identifier: 'com.agolddata.pandanotex',
+      force: true,
+      platform: 'catalyst',
+      provisioning_name: 'com.agolddata.pandanotex_Catalyst_DEBUG',
+      ignore_profiles_with_different_name: true,
+      development:true
+    )
+  end
+
+  desc "build and generate ipa"
+  lane :build_ipa do |options|
+    # xcversion(version: "13.4.1")
+    xcode_select "/Applications/Xcode.app"
+    # 打包
+    gym(
+      scheme: "PandaNote",
+      #enterprise app-store ad-hoc
+      export_method: "ad-hoc",
+      output_name:"PandaNote.ipa"
+    )
+  end
+
+
+  lane :build_ipa_enterprise do |options|
+    # xcversion(version: "13.4.1")
+    xcode_select "/Applications/Xcode.app"
+    # 打包
+    gym(
+      scheme: "PandaNote",
+      #enterprise app-store ad-hoc
+      export_method: "enterprise",
+      output_name:"PandaNote.ipa"
+    )
+  end  
+
+
+  lane :generate_app_icon do 
+    appicon(
+      appicon_image_file: './appicon.png',
+      appicon_devices: [:ipad, :iphone, :ios_marketing],
+      appicon_name:'AppIcon.appiconset',
+      appicon_path: 'PandaNote/Assets.xcassets'
+    )
+  end  
+
+end

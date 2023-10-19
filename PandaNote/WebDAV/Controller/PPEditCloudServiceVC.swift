@@ -43,7 +43,7 @@ class PPEditCloudServiceVC: PPBaseViewController {
             vc.showPassword = vc.password.length > 0
             
             vc.optCode = dict["PPOptCode"] ?? ""
-            vc.showOtpCode = vc.optCode.length > 0
+            vc.showOtpCode = vc.cloudType == "synology"
             
             vc.accessToken = dict["PPAccessToken"] ?? ""
             vc.showToken = vc.accessToken.length > 0

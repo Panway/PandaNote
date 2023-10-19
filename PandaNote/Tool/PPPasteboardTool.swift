@@ -91,12 +91,19 @@ class PPPasteboardTool: NSObject {
     }
     
     class func getMoreInfomationOfURL() {
-
+        guard let input = UIPasteboard.general.string else { return }
+        debugPrint("剪切板内容=\(input)")
+        if input == PPAppConfig.shared.getItem("PPLastPasteBoardContent") {
+            return
+        }
+        if getURLFromPasteboard().length < 1 {
+            return
+        }
         if currentURL.contains("v.douyin.com") {
             userActions.append("⬇️下载抖音无水印视频")
         }
         else if currentURL.hasPrefix("https://mp.weixin.qq.com/s") {
-            userActions.append("保存公众号文章为Markdown")
+//            userActions.append("保存公众号文章为Markdown")
         }
         PPPasteboardTool.showAlert()
     }
