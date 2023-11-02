@@ -119,9 +119,13 @@ class PPMDTextView: UITextView {
                 // 设置菜单项
                 menuController.menuItems = [pasteRichTextMenuItem]
                 // 设置弹出（右键）菜单显示位置
-//                menuController.setTargetRect(self.frame, in: self)
-//                menuController.setMenuVisible(true, animated: true)
-                menuController.showMenu(from: self, rect: self.frame)
+                if #available(iOS 13.0, *) {
+                    menuController.showMenu(from: self, rect: self.frame)
+                }
+                else {
+                    menuController.setTargetRect(self.frame, in: self)
+                    menuController.setMenuVisible(true, animated: true)
+                }
             }
         }
     }

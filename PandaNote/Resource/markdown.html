@@ -317,10 +317,12 @@
       let element = obj[i]
       //如果是App包里的markdown.html文件
       if (element.src.includes("PandaNote.app") || element.src.includes("127.0.0.1:8083")) {
-        let filePath = element.src.split("PandaNote.app")[1];
+        //let filePath = element.src.split("PandaNote.app")[1];
+        const pathSegments = element.src.split('/');
+        const fileName = pathSegments[pathSegments.length - 1];
         // let filePath = element.src.split("127.0.0.1:8083")[1];// debug path
-        console.log("filePathOld",filePath);
-        filePath = "http://127.0.0.1:23333" + rootPath.split("PandaCache")[1] + filePath
+        console.log("fileName:",fileName);
+        const filePath = "http://127.0.0.1:23333" + rootPath.split("PandaCache")[1] + fileName
         console.log("rootPath",rootPath,"filePath",filePath);
         element.src = filePath
       }

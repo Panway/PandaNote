@@ -48,11 +48,68 @@ extension PPFileListViewController {
 
         definesPresentationContext = true
     }
+    //使用UIButton和UITextField制作搜索框和搜索按钮，要求跟iOS自带UIsearchBar样式高度一致
     func setupSearchUI() {
-        
+        // 创建搜索框
+        searchField.placeholder = "搜索文件名"
+        searchField.borderStyle = .roundedRect
+        searchField.clearButtonMode = .whileEditing
+        searchField.translatesAutoresizingMaskIntoConstraints = false
+        searchField.delegate = self
+        searchField.tag = tag_search
+        view.addSubview(searchField)
+        // 监听编辑变化事件
+        searchField.addTarget(self, action: #selector(textFieldDidChange(_:)), for: .editingChanged)
+        let showSearchButton = false //写死
+        if showSearchButton {
+            // 创建搜索按钮
+            let searchButton = UIButton(type: .custom)
+            searchButton.setTitle("搜索", for: .normal)
+            searchButton.setTitleColor(PPCOLOR_GREEN, for: .normal)
+            searchButton.addTarget(self, action: #selector(searchButtonTapped), for: .touchUpInside)
+            searchButton.translatesAutoresizingMaskIntoConstraints = false
+            view.addSubview(searchButton)
+            NSLayoutConstraint.activate([
+                searchField.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
+                searchField.trailingAnchor.constraint(equalTo: searchButton.leadingAnchor, constant: -8),
+                
+                searchButton.widthAnchor.constraint(equalToConstant: 60),
+                searchButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
+                searchButton.topAnchor.constraint(equalTo: searchField.topAnchor, constant: 0)
+            ])
+        }
+        else {
+            // 布局（不使用SnapKit竟然也很简洁！！！）
+            NSLayoutConstraint.activate([
+                searchField.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
+                searchField.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -8),
+            ])
+        }
+        if #available(iOS 11.0, *) {
+            // 对于 iOS 11 及更高版本，使用 safeAreaLayoutGuide
+            searchField.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 8).isActive = true
+        } else {
+            // 对于 iOS 10 及更早版本，使用 topLayoutGuide
+            searchField.topAnchor.constraint(equalTo: topLayoutGuide.bottomAnchor, constant: 8).isActive = true
+        }
     }
+    // 处理文本变化事件，执行搜索操作
+    @objc func textFieldDidChange(_ textField: UITextField) {
+        searchButtonTapped()
+    }
+    // MARK: - 搜索功能
+    @objc func searchButtonTapped() {
+        // 处理搜索按钮点击事件
+        guard let searchText = searchField.text ,searchText != "" else {
+            self.dataSource = self.rawDataSource
+            self.collectionView.reloadData()
+            return
+        }
+        self.dataSource = self.rawDataSource.filter{$0.name.contains(searchField.text ?? "")}
+        self.collectionView.reloadData()
+    }
+    
 }
-// MARK: - 搜索功能
 // MARK: UISearchBarDelegate
 
 extension PPFileListViewController: UISearchBarDelegate {

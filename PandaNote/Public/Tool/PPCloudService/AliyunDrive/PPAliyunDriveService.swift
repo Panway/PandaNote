@@ -22,7 +22,7 @@ let aliyundrive_auth_url = "https://open.aliyundrive.com/o/oauth/authorize?clien
 let aliyundrive_callback_domain = "testcallback.aliyundrive.com"
 
 fileprivate let client_id = "4ef89a333545446db34c60c090b72b7f" //ES
-fileprivate let client_secret = "48b8170e32c1487394017fa712323830" //ES
+fileprivate let client_secret = "48b8170e32c14873" + "94017fa712323830" //ES 阿里云盘文档说不能泄露
 fileprivate var getQRCodeStatusCount = 0
 
 class PPAliyunDriveService: NSObject, PPCloudServiceProtocol {
@@ -94,7 +94,7 @@ class PPAliyunDriveService: NSObject, PPCloudServiceProtocol {
         let requestURL = "https://openapi.aliyundrive.com/oauth/authorize/qrcode"
         let parameters: [String: Any] = [
             "client_id":client_id,
-            "client_secret":"48b8170e32c1487394017fa712323830",
+            "client_secret": client_secret,
             "scopes": [
                 "user:base"
             ],

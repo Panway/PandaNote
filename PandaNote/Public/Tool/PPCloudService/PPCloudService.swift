@@ -18,6 +18,7 @@ public enum PPCloudServiceError: Error {
     case preCreateError
     case forcedLoginRequired
     case accessTokenExpired
+    case certificateInvalid // 新的HTTPS证书过期（无效）情况
 }
 public enum PPCreateFileResult {
     case success([String:String])

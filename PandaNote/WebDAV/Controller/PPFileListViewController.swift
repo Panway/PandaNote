@@ -18,6 +18,11 @@ import Photos
 import MonkeyKing
 import SnapKit
 
+fileprivate let tag_newfile = 2333
+fileprivate let tag_rename = 2334
+let tag_search = 2335
+
+
 class PPFileListViewController: PPBaseViewController,
                                 UITextFieldDelegate,
                                 UITableViewDelegate,
@@ -58,6 +63,7 @@ class PPFileListViewController: PPBaseViewController,
     var searchController: UISearchController!
     /// 展示在本控制器的上面的控制器的列表 Search results table view.
     var resultsTableController: PPResultsTableController!
+    let searchField = UITextField()
     //---------------搜索功能↑---------------
     //---------------移动文件（夹）到其他文件夹功能↓---------------
     var isMovingMode = false
@@ -68,6 +74,7 @@ class PPFileListViewController: PPBaseViewController,
     //---------------移动文件（夹）到其他文件夹功能↑---------------
     var isSelectFileMode = false
     var titleViewButton : UIButton!
+    var showSideBarBtn : UIButton!
     var documentPicker: PPFilePicker! //必须强引用
 
     //MARK:Life Cycle
@@ -128,10 +135,12 @@ class PPFileListViewController: PPBaseViewController,
     
     //MARK: - UI
     func initSubViews() {
+        setupSearchUI()
+
         self.view.addSubview(topToolBar)
         topToolBar.delegate = self
         topToolBar.snp.makeConstraints { make in
-            make.top.equalTo(self.pp_safeLayoutGuideTop())
+            make.top.equalTo(searchField.snp.bottom)//(self.pp_safeLayoutGuideTop())
             make.left.right.equalTo(self.view)
             //https://snapkit.github.io/SnapKit/docs/#:~:text=1.-,References,-You%20can%20hold
             self.topToolBarHeight = make.height.equalTo(44+14).constraint
@@ -372,30 +381,20 @@ class PPFileListViewController: PPBaseViewController,
         }
         
     }
-
-    
+// MARK: - UITextFieldDelegate
     //https://stackoverflow.com/a/58006735/4493393
     //here is how I selecte file name `Panda` from `Panda.txt`
     func textFieldDidBeginEditing(_ textField: UITextField) {
-        let nameParts = textField.text!.split(separator: ".")
-        var offset = 0
-        if nameParts.count > 1 {
-            // if textField.text is `Panda.txt`, so offset will be 3+1=4
-            offset = String(textField.text!.split(separator: ".").last!).length + 1
+        guard let string = textField.text else { return }
+        if textField.tag == tag_rename {
+            textField.selectNamePartOfFileName()
         }
-        let from = textField.position(from: textField.beginningOfDocument, offset: 0)
-        let to = textField.position(from: textField.beginningOfDocument,
-                                    offset:textField.text!.length - offset)
-        //now `Panda` will be selected
-        textField.selectedTextRange = textField.textRange(from: from!, to: to!)//danger! unwrap with `!` is not recommended  危险，不推荐用！解包
     }
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
-        if textField.tag == 2333 {//区分新建文本TextField
-            return true
-        }
+        debugPrint("textFieldShouldReturn")
         return true
     }
-
+    
     func deleteFile(_ index:Int) {
         let fileObj = self.dataSource[index]
         debugPrint("开始删除文件:",fileObj)
@@ -541,7 +540,7 @@ class PPFileListViewController: PPBaseViewController,
             textField.placeholder = "输入文件名"
             textField.text = fileObj.name
             textField.delegate = self
-            textField.tag = 2333
+            textField.tag = tag_rename
         }
         let saveAction = UIAlertAction(title: "保存", style: UIAlertAction.Style.default, handler: { alert -> Void in
             let firstTextField = alertController.textFields![0] as UITextField
@@ -624,7 +623,7 @@ class PPFileListViewController: PPBaseViewController,
             textField.placeholder = "输入文件名"
             textField.text = isDir ? "新建文件夹" :"新建文档.md"
             textField.delegate = self
-            textField.tag = 2333
+            textField.tag = tag_newfile
         }
 //        alertController.addTextField { (textField : UITextField!) -> Void in
 //            textField.placeholder = "文件格式"

@@ -4,7 +4,7 @@
 
 右侧网页预览可关闭
 
-![preview](https://s2.loli.net/2022/03/15/zMlfrHWapvC1n84.gif)
+![20231102.gif](https://s2.loli.net/2023/11/02/HfMnqsk2echEtrv.gif)
 
 
 
@@ -40,7 +40,7 @@ iOS 10.0+、macOS（使用Mac Catalyst支持）
 - [x] 原生渲染markdown、H1-H6生成为目录
 - [x] 可使用 [marked.js](https://github.com/markedjs/marked) 预览、目录生成、代码高亮、导出成PDF
 - [x] markdown 等纯文本的新建、编辑、保存
-- [ ] 公众号等网页文章一键保存为markdown
+- [x] 公众号文章一键保存为markdown
 
 **其他功能**：
 

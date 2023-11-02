@@ -428,7 +428,7 @@ final class PPMarkdownViewController: PPBaseViewController,
         }
         else {
             path = Bundle.main.url(forResource: "markdown", withExtension:"html")?.absoluteString ?? ""
-            webVC.markdownStr = self.textView.text
+            webVC.markdownStr = textWithoutUselessChar()
             webVC.urlString = path // file:///....
 //            webVC.urlString = "http://192.168.123.162:8081/markdown.html"
             webVC.markdownName = self.filePathStr
@@ -456,7 +456,7 @@ final class PPMarkdownViewController: PPBaseViewController,
 //            }
         }
         
-        PPUserInfo.shared.webViewController.markdownStr = self.textView.text
+        PPUserInfo.shared.webViewController.markdownStr = textWithoutUselessChar()
         PPUserInfo.shared.webViewController.loadURL()
         
     }
@@ -474,7 +474,7 @@ final class PPMarkdownViewController: PPBaseViewController,
         }
         else {
             path = Bundle.main.url(forResource: "markdown", withExtension:"html")?.absoluteString ?? ""
-            webVC.markdownStr = self.textView.text
+            webVC.markdownStr = textWithoutUselessChar()
             webVC.urlString = path // file:///....
 //            webVC.urlString = "http://127.0.0.1:8083/markdown.html"//调试用 for Debug use
             webVC.markdownName = self.filePathStr
@@ -495,12 +495,16 @@ final class PPMarkdownViewController: PPBaseViewController,
         }
         present(shareSheet, animated: true)
     }
-    @objc func saveTextAction()  {
-        textView.render()
+    func textWithoutUselessChar() -> String {
         // 去除16进制为`EFBFBC`的REPLACEMENT CHARACTER（替代字符）
         let textWithoutReplacementCharacter = self.textView.text.replacingOccurrences(of: "￼", with: "")
-//            .replacingOccurrences(of: "\u{FFFD}", with: "")//, options: NSString.CompareOptions.literal, range: nil)
-        let stringToUpload = textWithoutReplacementCharacter
+        //            .replacingOccurrences(of: "\u{FFFD}", with: "")//, options: NSString.CompareOptions.literal, range: nil)
+        return textWithoutReplacementCharacter
+    }
+    
+    @objc func saveTextAction()  {
+        textView.render()
+        let stringToUpload = textWithoutUselessChar()
         if stringToUpload.length < 1 {
             PPHUD.showHUDFromTop("不支持保存空文件")
             return
@@ -519,9 +523,6 @@ final class PPMarkdownViewController: PPBaseViewController,
                 self.navigationController?.popViewController(animated: true)
             }
         })
-
-        
-
     }
     @objc func moreAction()  {
         var menuTitile = ["分享文本","搜索","左右分栏模式","上下分栏模式","关闭分栏","保存链接为Markdown"]
