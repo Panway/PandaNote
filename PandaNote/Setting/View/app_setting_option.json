@@ -89,6 +89,15 @@
   ],
   [
     {
+      "name": "应用锁",
+      "category": "安全设置",
+      "key": "appLock",
+      "comment": "每次启动需使用指纹或面容ID",
+      "showSwitch": "1"
+    }
+  ],
+  [
+    {
       "name": "FLEX Debug Enable",
       "category": "调试设置"
     }

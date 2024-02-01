@@ -38,7 +38,7 @@ target 'PandaNote' do
   # https://github.com/Flipboard/FLEX
   pod 'FLEX', :configurations => ['Debug']
   pod 'MJRefresh'
-  #  pod 'YYText'
+#  pod 'YYText'
   #美图公司的富文本组件 https://github.com/meitu/MPITextKit
   pod 'MPITextKit'
 #  https://github.com/suzuki-0000/SKPhotoBrowser
@@ -108,15 +108,10 @@ end
 
 
 post_install do |installer|
-  puts '因Personal Team账户不支持，默认关闭UniversalLink选项，如果你知道如何配置请撤销PandaNote.entitlements的改动'
+  puts '因Personal Team账户不支持UniversalLink选项，故默认关闭，如果你知道如何配置请自行撤销文件PandaNote.entitlements的改动'
   output = %x( #{"sed -i '' -e '/associated-domains/,+3d' PandaNote/PandaNote.entitlements"} )
   puts '在pod install之后执行脚本，修复警告或错误，如果出错请再执行一遍 pod install'
   output = %x( #{"ruby XcodeTool.rb fix_deployment_target 10"} ) #执行 XcodeTool.rb 脚本文件消除警告
-  output = %x( #{"cp -vf ./PPDoc/Pods_modified/libxmlHTMLNode.swift ./Pods/Kanna/Sources/Kanna/libxmlHTMLNode.swift"} ) #执行 XcodeTool.rb 脚本文件消除警告
+  output = %x( #{"sh config_tool.sh overwrite_pods"} ) #修改Pods源码
   puts output
-  #支持Mac Catalyst
-#  output = %x( #{"curl https://p.agolddata.com/l/h/src/iOS/DoraemonAppInfoViewController.m -o DoraemonAppInfoViewController.m && cp -v -f DoraemonAppInfoViewController.m Pods/DoraemonKit/iOS/DoraemonKit/Src/Core/Plugin/Common/AppInfo/DoraemonAppInfoViewController.m"})
-#  output = %x( #{"sh ios_tool.sh correct_import"} )# 执行shell脚本文件
-  #    output = %x( #{"cp -f -R -v PodsNew/ZFPlayer Pods"} )# 执行shell脚本
-  
 end

@@ -56,6 +56,14 @@ class PPAppConfig: NSObject {
         }
         self.fileListOrder = PPFileListOrder(rawValue: getIntItem("fileListOrder")) ?? .type
         showMarkdownOnly = getIntItem("showMarkdownOnly") == 1 ? true : false
+        if PPUserInfo.pp_boolValue("appLock") {
+            // 开启应用锁就跳转
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                let appAuth = PPAppAuthenticationVC()
+                appAuth.modalPresentationStyle = .fullScreen
+                UIViewController.pp_topViewController()?.present(appAuth, animated: true)
+            }
+        }
         let manager = KingfisherManager.shared
         manager.cache.diskStorage.config.expiration = .days(30) //删除所有超过默认七天的缓存
         manager.cache.cleanExpiredDiskCache()
