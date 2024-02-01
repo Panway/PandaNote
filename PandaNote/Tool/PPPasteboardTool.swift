@@ -37,10 +37,17 @@ fileprivate func getStringSeparatedBy(_ s:String, _ separator:String,_ removeLas
     }
 }
 
-fileprivate let removeParamList = ["smzdm.com", "okjike.com", "weibointl.api.weibo.com", "weibo.com"]
+fileprivate let removeParamList = ["smzdm.com",
+                                   "okjike.com",
+                                   "weibointl.api.weibo.com",
+                                   "weibo.com",
+                                   "item.m.jd.com",
+                                   "item.jd.com",
+                                   "xiaohongshu.com"]
 fileprivate let sanitizerRules = ["mobile.yangkeduo.com": "goods_id"]
-fileprivate var userActions = ["🍀去微信分享","🌏打开网页"]
+fileprivate var userActions = ["🍀消毒后微信分享","🌏打开网页"]
 fileprivate var douyinVideoID = "" //抖音视频ID
+fileprivate var douyinRedirectURL = ""
 fileprivate var currentURL = ""
 fileprivate var title_intro = "" ///< 标题和链接
 class PPPasteboardTool: NSObject {
@@ -99,13 +106,19 @@ class PPPasteboardTool: NSObject {
         if getURLFromPasteboard().length < 1 {
             return
         }
-        if currentURL.contains("v.douyin.com") {
+        let url = getURLFromPasteboard()
+        var title = ""
+        if url.length > 0 {
+            title = "检测到链接，请选择以继续"
+        }
+        if currentURL.contains("v.douyin.com") && userActions.count < 3 {
             userActions.append("⬇️下载抖音无水印视频")
         }
         else if currentURL.hasPrefix("https://mp.weixin.qq.com/s") {
 //            userActions.append("保存公众号文章为Markdown")
         }
-        PPPasteboardTool.showAlert()
+        if(title.length == 0) { return }
+        PPPasteboardTool.showAlert(title,url)
     }
     class func getHTMLSourceCode(urlStr:String, completion: ((String) -> Void)? = nil) {
         var urlString = urlStr
@@ -132,6 +145,7 @@ class PPPasteboardTool: NSObject {
             
             if urlString.contains("v.douyin.com") {
                 douyinVideoID = response.response?.url?.pathComponents.last ?? ""
+                douyinRedirectURL = response.response?.url?.absoluteString ?? ""
             }
             //重定向后的URL,https://www.iesdouyin.com/share/video/6736813535613013260/ ...
             completion?(utf8Text)
@@ -241,6 +255,13 @@ class PPPasteboardTool: NSObject {
             for var li in lis {
                 li.content = "- " + (li.content ?? "")
                 li["style"] = ""
+//                if let newxml = try? XML(xml: "<div id=\"pandanote\"><div>li.content</div></div>", encoding: String.Encoding.utf8),
+//                let newth = newxml.at_css("#pandanote") {
+//                    debugPrint("=========",newth.innerHTML)
+//                    debugPrint("=========",li.parent?.innerHTML)
+//                    li = newth
+//                    debugPrint("=========",li.innerHTML)
+//                }
             }
         }
         // 有序列表
@@ -415,11 +436,10 @@ class PPPasteboardTool: NSObject {
         return false
     }
     
-    class func showAlert() {
+    class func showAlert(_ title:String, _ url: String?) {
         PPAlertAction.showSheet(withTitle: "选择想要的操作", message: "", cancelButtonTitle: "取消", destructiveButtonTitle: nil, otherButtonTitle: userActions) { (index) in
             debugPrint("==\(index)")
             if (index == 1) {
-                getURLFromPasteboard()
                 getHTMLSourceCode(urlStr: currentURL) { _ in
                     UIPasteboard.general.string = title_intro
                     PPAppConfig.shared.setItem("PPLastPasteBoardContent", title_intro)
@@ -438,44 +458,15 @@ class PPPasteboardTool: NSObject {
                 //let results = utf8Text.pp_matches(for: "//s3.{1,80}reflow_video.*.js")
                 //guard let res0 = results.first else { return }
                 getHTMLSourceCode(urlStr: currentURL) {_ in
-                PPPasteboardTool.downLoadDouYinVideoWithoutWaterMark(id: douyinVideoID)
+                    PPDouyinParser.downLoadDouYinVideoWithoutWaterMark(douyinVideoID, douyinRedirectURL)
                 }
             }
         }
     }
     
      
-    // 无水印解析来自：https://gist.github.com/d1y/cf8e21a1ad36b582e70da2941e624ea9
-    /// 解析抖音无水印视频并下载V1
-    class func downLoadDouYinVideoWithoutWaterMark(id:String) {
-        let parameters = ["item_ids": id]
-//        let headers: HTTPHeaders = ["User-Agent":"Mozilla/5.0 (Linux; Android 5.0; SM-G900P Build/LRX21T) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.25 Mobile Safari/537.36"]
-        AF.request("https://www.iesdouyin.com/web/api/v2/aweme/iteminfo/", parameters: parameters).responseData { response in
-            // debugPrint("weibo.com \(response.value ?? "")")
-            guard let jsonDic = response.data?.pp_JSONObject() else { return }
-            //目的：取jsonDic["item_list"][0]["video"]["play_addr"]["url_list"][0]
-            guard let item_list = jsonDic["item_list"] else {
-                return
-            }
-            let array:Array = item_list as! Array<Any>
-            let user = DouyinItem(JSON:array.first as! [String : Any] )
-            if let videoURL = user?.video?.playAddr?.urlList?[0] {
-                debugPrint(videoURL)
-                let videoURLWithoutWaterMark = videoURL.replacingOccurrences(of: "playwm", with: "play")
-                PPWebFileViewController.downloadVideo(url: videoURLWithoutWaterMark)
-                //HTTP HEAD 方法 请求资源的头部信息, 并且这些头部与 HTTP GET 方法请求时返回的一致. 该请求方法的一个使用场景是在下载一个大文件前先获取其大小再决定是否要下载, 以此可以节约带宽资源.
-                // https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Methods/HEAD
-//                AF.request(videoURL, method: .head, headers: headers).responseString { response in
-//                    if let realVideoURL = response.response?.allHeaderFields["Location"] {
-//                        debugPrint("无水印地址: \(realVideoURL)")
-//                    }
-//                }
-            }
-            
-        }
-        
-    }
     
+
     
     
 }

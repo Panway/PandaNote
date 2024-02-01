@@ -68,12 +68,15 @@
 		3B1F3FF92A99F798003A2756 /* PPMarkdownMiniMapCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B1F3FF82A99F798003A2756 /* PPMarkdownMiniMapCell.swift */; };
 		3B30DE452A8BDADD00D519AB /* PPSynologyFile.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B30DE442A8BDADD00D519AB /* PPSynologyFile.swift */; };
 		3B594A932A908CE600A5BC1E /* PPAttributedStringVisitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B594A922A908CE600A5BC1E /* PPAttributedStringVisitor.swift */; };
+		3B6CE3AD2B0BAC7100D86A1A /* PPDouyinParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B6CE3AC2B0BAC7000D86A1A /* PPDouyinParser.swift */; };
+		3B6CE3AF2B0BAE2F00D86A1A /* sign.js in Resources */ = {isa = PBXBuildFile; fileRef = 3B6CE3AE2B0BAE2F00D86A1A /* sign.js */; };
 		3B797E4D2A926BFC00D736E7 /* PPDownConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B797E4C2A926BFC00D736E7 /* PPDownConfig.swift */; };
 		3B8D11E92A6D2A8700EE801F /* PPiCloudDriveService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B8D11E82A6D2A8700EE801F /* PPiCloudDriveService.swift */; };
 		3B9E5CA82A924F9B0020E92F /* PPMDTextView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B9E5CA72A924F9B0020E92F /* PPMDTextView.swift */; };
 		3BA3C4C02A950B5800AA0BE6 /* NSAttributedString+PPExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BA3C4BF2A950B5800AA0BE6 /* NSAttributedString+PPExtension.swift */; };
 		3BAD09C22AAA294B00AD4006 /* PPImagePreviewer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BAD09C12AAA294B00AD4006 /* PPImagePreviewer.swift */; };
 		3BB478C92AF3493400562303 /* UITextField+PPTool.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BB478C82AF3493400562303 /* UITextField+PPTool.swift */; };
+		3BD88DED2B69591200CA1DFE /* PPDrawIconView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BD88DEC2B69591200CA1DFE /* PPDrawIconView.swift */; };
 		60011E40243A29E000BC6458 /* PlayerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60011E3E243A29E000BC6458 /* PlayerViewController.swift */; };
 		60011E41243A29E000BC6458 /* PlayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60011E3F243A29E000BC6458 /* PlayerView.swift */; };
 		6001B6342461A82400A40593 /* PPWebFileViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6001B6332461A82400A40593 /* PPWebFileViewController.swift */; };
@@ -210,12 +213,15 @@
 		3B1F3FF82A99F798003A2756 /* PPMarkdownMiniMapCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPMarkdownMiniMapCell.swift; sourceTree = "<group>"; };
 		3B30DE442A8BDADD00D519AB /* PPSynologyFile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPSynologyFile.swift; sourceTree = "<group>"; };
 		3B594A922A908CE600A5BC1E /* PPAttributedStringVisitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPAttributedStringVisitor.swift; sourceTree = "<group>"; };
+		3B6CE3AC2B0BAC7000D86A1A /* PPDouyinParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPDouyinParser.swift; sourceTree = "<group>"; };
+		3B6CE3AE2B0BAE2F00D86A1A /* sign.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = sign.js; sourceTree = "<group>"; };
 		3B797E4C2A926BFC00D736E7 /* PPDownConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPDownConfig.swift; sourceTree = "<group>"; };
 		3B8D11E82A6D2A8700EE801F /* PPiCloudDriveService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPiCloudDriveService.swift; sourceTree = "<group>"; };
 		3B9E5CA72A924F9B0020E92F /* PPMDTextView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPMDTextView.swift; sourceTree = "<group>"; };
 		3BA3C4BF2A950B5800AA0BE6 /* NSAttributedString+PPExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NSAttributedString+PPExtension.swift"; sourceTree = "<group>"; };
 		3BAD09C12AAA294B00AD4006 /* PPImagePreviewer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPImagePreviewer.swift; sourceTree = "<group>"; };
 		3BB478C82AF3493400562303 /* UITextField+PPTool.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UITextField+PPTool.swift"; sourceTree = "<group>"; };
+		3BD88DEC2B69591200CA1DFE /* PPDrawIconView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPDrawIconView.swift; sourceTree = "<group>"; };
 		445FC61B8328A513BADB990E /* Pods-PandaNoteTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-PandaNoteTests.release.xcconfig"; path = "Target Support Files/Pods-PandaNoteTests/Pods-PandaNoteTests.release.xcconfig"; sourceTree = "<group>"; };
 		5FC90B3D04D0AB60B2DBFED0 /* Pods-PandaNoteUITests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-PandaNoteUITests.release.xcconfig"; path = "Target Support Files/Pods-PandaNoteUITests/Pods-PandaNoteUITests.release.xcconfig"; sourceTree = "<group>"; };
 		60011E3E243A29E000BC6458 /* PlayerViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PlayerViewController.swift; sourceTree = "<group>"; };
@@ -374,6 +380,7 @@
 		1E526EBF26B673720026DC67 /* Tool */ = {
 			isa = PBXGroup;
 			children = (
+				3B6CE3B02B0BBB7D00D86A1A /* SocialTool */,
 				1ED54AC829DC736A00D4FF4C /* FoundationTool */,
 				1E6763CC28C4FE6300D1BE39 /* UIKitTool */,
 				1E526EC026B6781E0026DC67 /* PPCloudService */,
@@ -416,6 +423,7 @@
 			children = (
 				1E4E57962995E64E00701E84 /* PPFilePicker.swift */,
 				1E6763CD28C4FE8E00D1BE39 /* WKWebViewTool.swift */,
+				3BD88DEC2B69591200CA1DFE /* PPDrawIconView.swift */,
 			);
 			path = UIKitTool;
 			sourceTree = "<group>";
@@ -526,6 +534,24 @@
 			path = Tool;
 			sourceTree = "<group>";
 		};
+		3B6CE3B02B0BBB7D00D86A1A /* SocialTool */ = {
+			isa = PBXGroup;
+			children = (
+				3B6CE3B12B0BBB9100D86A1A /* douyin */,
+			);
+			path = SocialTool;
+			sourceTree = "<group>";
+		};
+		3B6CE3B12B0BBB9100D86A1A /* douyin */ = {
+			isa = PBXGroup;
+			children = (
+				3B6CE3AE2B0BAE2F00D86A1A /* sign.js */,
+				1EDE20952521E71A001331FE /* DouyinVideoModel.swift */,
+				3B6CE3AC2B0BAC7000D86A1A /* PPDouyinParser.swift */,
+			);
+			path = douyin;
+			sourceTree = "<group>";
+		};
 		3B8D11E72A6D27C300EE801F /* iCoudDrive */ = {
 			isa = PBXGroup;
 			children = (
@@ -615,7 +641,6 @@
 			isa = PBXGroup;
 			children = (
 				60A1F92B24398B23009E390C /* PPFileObject.swift */,
-				1EDE20952521E71A001331FE /* DouyinVideoModel.swift */,
 				1E03F840274C7C640085ACFB /* PPThemeModel.swift */,
 			);
 			path = Model;
@@ -943,6 +968,7 @@
 				60F5691B22F2ADCA00874994 /* LaunchScreen.storyboard in Resources */,
 				1E03F84A274CA8220085ACFB /* dark.json in Resources */,
 				1E03F847274C89ED0085ACFB /* default.json in Resources */,
+				3B6CE3AF2B0BAE2F00D86A1A /* sign.js in Resources */,
 				1E03F84B274CA8220085ACFB /* black.json in Resources */,
 				60F5691822F2ADCA00874994 /* Assets.xcassets in Resources */,
 				60F5691622F2ADC700874994 /* Main.storyboard in Resources */,
@@ -1075,6 +1101,7 @@
 				60A1F92C24398B23009E390C /* PPFileObject.swift in Sources */,
 				1E03F83F274C7B940085ACFB /* Data+PPTool.swift.swift in Sources */,
 				6056022823177274000809CD /* PPBaseTableViewCell.swift in Sources */,
+				3B6CE3AD2B0BAC7100D86A1A /* PPDouyinParser.swift in Sources */,
 				1E1DE37C2567BA0A00BB2D1C /* PPFileListViewController+Search.swift in Sources */,
 				1EEB0FF327538771006A5E26 /* PPOneDriveFile.swift in Sources */,
 				1E4E57972995E64E00701E84 /* PPFilePicker.swift in Sources */,
@@ -1144,6 +1171,7 @@
 				1E526ECE26B6F20B0026DC67 /* PPDropboxService.swift in Sources */,
 				60560252231778FF000809CD /* XDRefreshHeader.m in Sources */,
 				1E179BF925B549B0006C3A56 /* UIView+PPTool.swift in Sources */,
+				3BD88DED2B69591200CA1DFE /* PPDrawIconView.swift in Sources */,
 				60F5D04523275549004E988B /* XDCollectionViewCell.m in Sources */,
 				3B8D11E92A6D2A8700EE801F /* PPiCloudDriveService.swift in Sources */,
 				1E6763CE28C4FE8E00D1BE39 /* WKWebViewTool.swift in Sources */,

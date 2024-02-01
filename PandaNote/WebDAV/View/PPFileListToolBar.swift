@@ -15,13 +15,13 @@ public protocol PPFileListToolBarDelegate:AnyObject {
 class PPFileListToolBar: PPBaseView {
     var index = 0
     weak var delegate: PPFileListToolBarDelegate?
-
+    private let names = ["排序","视图","多选","刷新"]
+    private let icons = ["order_ascend","view_list","multi_select","refresh"]
     override func pp_addSubviews() {
         self.backgroundColor = .white
-        generateButton("order_ascend", "排序")
-        generateButton("view_list", "视图")
-        generateButton("multi_select", "多选")
-        generateButton("refresh", "刷新")
+        names.enumerated().forEach { (index, name) in
+            generateButton(icons[index], name)
+        }
 
     }
     func generateButton(_ imageName:String,_ title:String) -> Void {
@@ -51,7 +51,7 @@ class PPFileListToolBar: PPBaseView {
         }
     }
     @objc func toolButtonAction(sender:UIButton)  {
-        self.delegate?.didClickFileListToolBar(index: sender.tag,title:"",button: sender)
+        self.delegate?.didClickFileListToolBar(index: sender.tag,title:names[sender.tag],button: sender)
     }
     
     /*

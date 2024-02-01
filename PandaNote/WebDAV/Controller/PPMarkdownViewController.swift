@@ -66,6 +66,8 @@ final class PPMarkdownViewController: PPBaseViewController,
     
     //MARK: - Life Cycle
     override func viewDidLoad() {
+        PPAppConfig.shared.downColor = PPDownColorCollection()
+        PPAppConfig.shared.downColor.codeBlockBackground = "#dddddd".pp_HEXColor().withAlphaComponent(0.3)
         navigationController?.view.backgroundColor = .white
         if self.filePathStr.length < 1 {
             return //使用UISplitViewController的时候，没路径显示空白

@@ -65,6 +65,8 @@ open class PPFilePicker: NSObject {
         //导入所有类型的文件
 //https://developer.apple.com/library/archive/documentation/FileManagement/Conceptual/understanding_utis/understand_utis_intro/understand_utis_intro.html
         self.pickerController  = UIDocumentPickerViewController(documentTypes: ["public.item"], in: .import)
+//        self.pickerController = UIDocumentPickerViewController(documentTypes: ["public.content"], in: .open) //媒体和文档类型
+
         //打开视频和图片类型的文件
 //        self.pickerController = UIDocumentPickerViewController(documentTypes: [kUTTypeMovie as String, kUTTypeImage as String], in: .open)
         self.pickerController!.delegate = self
@@ -74,6 +76,7 @@ open class PPFilePicker: NSObject {
             
         }
         self.sourceType = .files
+        self.pickerController?.modalPresentationStyle = .formSheet
         self.presentationController?.present(self.pickerController!, animated: true)
     }
     public func fileAction(for type: SourceType, title: String) -> UIAlertAction? {

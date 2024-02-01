@@ -32,7 +32,13 @@ class PPFileListCell: PPBaseCollectionViewCell {
     weak var delegate: PPFileListCellDelegate?
     private let imageWidth = 50.0
     var cellIndex = 0
-    
+    var isSelect = false ///< 跟isSelected区分
+//    override var isSelected: Bool {
+//        didSet {
+//            // 在 isSelected 发生变化时执行的操作
+//            updateSelectedState()
+//        }
+//    }
     private var viewMode = PPFileListCellViewMode.list //默认是列表
     private var cellPadding = 8
     private var moreBtn = UIButton(type: .custom)
@@ -77,13 +83,31 @@ class PPFileListCell: PPBaseCollectionViewCell {
         return img
     }()
     
+    var selectedView : PPDrawIconView = {
+        let v = PPDrawIconView(frame: CGRect(x: 0, y: 0, width: 25, height: 25))
+        v.iconName = "selected"
+        v.backgroundColor = .white
+        v.isHidden = true
+        return v
+    }()
+    
+    var unselectedView : PPDrawIconView = {
+        let v = PPDrawIconView(frame: CGRect(x: 0, y: 0, width: 25, height: 25))
+        v.iconName = "unselected"
+        v.backgroundColor = .white
+        v.isHidden = true
+        return v
+    }()
+    
     override func pp_addSubViews() {
         self.contentView.addSubview(self.iconImage)
         self.contentView.addSubview(self.titleLabel)
         self.contentView.addSubview(self.timeLabel)
         self.contentView.addSubview(self.remarkLabel)
         self.contentView.addSubview(self.downloadFinishedImage)
-        
+        self.contentView.addSubview(self.selectedView)
+        self.contentView.addSubview(self.unselectedView)
+
         self.contentView.clipsToBounds = true
         
         //let moreBtn = UIButton(type: .custom)
@@ -122,6 +146,8 @@ class PPFileListCell: PPBaseCollectionViewCell {
         remarkLabel.frame = CGRect(x: cellW - remarkW - 50, y: cellH - timeH - 5, width: remarkW, height: timeH)
         moreBtn.frame = CGRect(x: cellW - 44, y: 0, width: 44, height: cellH)
         self.downloadFinishedImage.frame = CGRect(x: cellW - 30, y: cellH - 20, width: 20, height: 20)
+        self.selectedView.frame = CGRect(x: cellW - 30, y: (cellH - 25)/2, width: 25, height: 25)
+        self.unselectedView.frame = CGRect(x: cellW - 30, y: (cellH - 25)/2, width: 25, height: 25)
     }
     //已废弃
     func pp_listMode2() {
@@ -245,7 +271,9 @@ class PPFileListCell: PPBaseCollectionViewCell {
         let fileObj: PPFileObject = model as! PPFileObject
         self.titleLabel.text = fileObj.name
 //        debugPrint("====downloadProgress=====",fileObj.downloadProgress)
-        updateProgressBar(fileObj.downloadProgress)
+        if !fileObj.isDirectory {
+            updateProgressBar(fileObj.downloadProgress) //文件夹不显示下载完成图标
+        }
         if fileObj.isDirectory {
             self.iconImage.image = UIImage(named: "ico_folder")
         }
@@ -336,7 +364,19 @@ class PPFileListCell: PPBaseCollectionViewCell {
         }
         return CGSize.zero
     }
-    
+    func updateSelectedState() {
+        if isSelect {
+            // 选中状态的外观
+            debugPrint("isSelected",self.cellIndex)
+            self.selectedView.isHidden = false
+            self.unselectedView.isHidden = true
+        } else {
+            // 未选中状态的外观
+            debugPrint("unSelected",self.cellIndex)
+            self.selectedView.isHidden = true
+            self.unselectedView.isHidden = false
+        }
+    }
     @objc func moreBtnClick(sender:UIButton) {
         debugPrint("moreBtnClick:\(cellIndex)")
         self.delegate?.didClickMoreBtn(cellIndex: cellIndex,sender: sender)

@@ -23,6 +23,7 @@ class PPSynologyService: NSObject, PPCloudServiceProtocol {
 
     var remoteBaseURL = "" ///< 请求使用的远程QuickConnect服务地址
     var localBaseURL = "" ///< 请求使用的局域网地址
+    var getServerInfoURL = "https://global.quickconnect.cn/Serv.php"
     var useLANIP = false ///< 用来自动切换局域网和远程ip
     var forceUseRemote = false
     var sid = "" ///< Authorized session ID
@@ -79,6 +80,7 @@ class PPSynologyService: NSObject, PPCloudServiceProtocol {
         }
         */
         super.init()
+//        self.getServerInfo(url: url)
 
     }
     
@@ -108,8 +110,7 @@ class PPSynologyService: NSObject, PPCloudServiceProtocol {
             "command": "get_server_info",
             "version": "1"
         ]
-        let requestURL = "https://global.quickconnect.cn/Serv.php"
-        AF.request(requestURL, method: .post, parameters: parameters, encoding: JSONEncoding.default, headers: headers).responseData { response in
+        AF.request(getServerInfoURL, method: .post, parameters: parameters, encoding: JSONEncoding.default, headers: headers).responseData { response in
             switch response.result {
             case .success(_):
                 // 注意：国外IP不可访问
@@ -123,6 +124,13 @@ class PPSynologyService: NSObject, PPCloudServiceProtocol {
                     }
                 }
                 else {
+                    if let command = jsonDict["command"] as? String,
+                       let sites = jsonDict["sites"] as? [String],
+                       command == "get_server_info",
+                       sites.count > 0 {
+                        self.getServerInfoURL = "https://" + (sites.first ?? "") + "/Serv.php"
+                        self.getServerInfo(url: url, callback: callback)
+                    }
                     if let env = jsonDict["env"] as? [String:Any],
                        let control_host = env["control_host"] as? String {
                         self.getServerInfoCN(url: "https://" + control_host + "/Serv.php", serverID: serverID, callback: callback)
@@ -296,6 +304,14 @@ class PPSynologyService: NSObject, PPCloudServiceProtocol {
                             self.retryCount += 1 //自动刷新、防止死循环
                             self.contentsOfDirectory(path, pathID, completion: completion)
                         }
+                    }
+                    if let error = res?["error"] as? [String:Any] {
+                        error.printJSON()
+                        self.getServerInfo(url: self.url) { sid in
+                            self.retryCount += 1 //自动刷新、防止死循环
+                            self.contentsOfDirectory(path, pathID, completion: completion)
+                        }
+                        completion([], PPCloudServiceError.unknown)
                     }
                     debugPrint("DSfile response:" , response)
                     return

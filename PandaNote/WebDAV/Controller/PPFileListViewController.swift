@@ -158,6 +158,8 @@ class PPFileListViewController: PPBaseViewController,
             make.left.right.equalTo(self.view)
             make.bottom.equalTo(self.pp_safeLayoutGuideBottom());
         }
+        
+        collectionView.backgroundColor = .white // iOS 14 中 UICollectionView 默认的背景色是黑色
         collectionView.delegate = self
         collectionView.dataSource = self
         collectionView.register(PPFileListCell.self, forCellWithReuseIdentifier: kPPCollectionViewCellID)
@@ -183,6 +185,16 @@ class PPFileListViewController: PPBaseViewController,
         cell.updateUIWithData(fileObj as AnyObject)
         cell.updateCacheStatus(self.isCachedFile)
         cell.remarkLabel.isHidden = !isRecentFiles
+        if multipleSelectionMode {
+            cell.isSelect = false
+            cell.updateSelectedState()
+            cell.updateProgressBar(0)
+        }
+        else {
+            cell.selectedView.isHidden = true
+            cell.unselectedView.isHidden = true
+            cell.updateProgressBar(fileObj.downloadProgress)
+        }
         cell.delegate = self
         return cell
     }
@@ -249,8 +261,7 @@ class PPFileListViewController: PPBaseViewController,
                 self.present(nav, animated: true, completion: nil)
             }
             else if item == "多选" {
-                self.multipleSelectionMode = true
-//                self.topToolBarHeight?.updateOffset(amount: 99)
+                self.multiSelected()
             }
             else if item == "预览" {
                 self.fileQuickLookPreview(fileObj)
@@ -265,7 +276,7 @@ class PPFileListViewController: PPBaseViewController,
     //MARK: 顶部工具条
     func didClickFileListToolBar(index: Int, title: String, button:UIButton) {
         debugPrint("点击顶部工具条:\(index)\(title)")
-        if index == 1 {
+        if title == "视图" {
             let dataS = ["列表（小）","列表（中）","列表（大）","图标（小）","图标（中）","图标（大）"]
             let selectStr = dataS[PPAppConfig.shared.getIntItem("fileViewMode")];
             self.dropdown.dataSource = dataS.map({$0 == selectStr ? "\($0) ✅" : $0});
@@ -277,35 +288,29 @@ class PPFileListViewController: PPBaseViewController,
             self.dropdown.anchorView = button
             self.dropdown.show()
         }
-        else if index == 0 {
+        else if title == "排序" {
             showSortPopMenu(anchorView: button)
         }
-        else if index == 2 {
-            self.multipleSelectionMode = true
-            self.navigationItem.rightBarButtonItem = UIBarButtonItem(title: "取消选择", style: .plain, target: self, action: #selector(self.cancelMultiSelect))
+        else if title == "多选" {
+            multiSelected()
         }
-        else if index == 3 {
+        else if title == "刷新" {
             self.getFileListData()
         }
     }
     
     func collectionView(_ collectionView: UICollectionView, didDeselectItemAt indexPath: IndexPath) {
-        if multipleSelectionMode {
-            let cell = collectionView.cellForItem(at: indexPath)
-            cell?.backgroundColor = .clear
-        }
+        
     }
     //MARK: 点击文件 click file cell
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-//        let cell = collectionView.cellForItem(at: indexPath)
         guard let cell = collectionView.cellForItem(at: indexPath) as? PPFileListCell else {
             return
         }
-
         let fileObj = self.dataSource[indexPath.row]
         if multipleSelectionMode {
-            cell.backgroundColor = "4abf8a66".pp_HEXColor()
-                        collectionView.selectItem(at: indexPath, animated: true, scrollPosition: .right)
+            cell.isSelect = !cell.isSelect
+            cell.updateSelectedState()
             if (!collectionView.allowsMultipleSelection) {
                 if fileObj.isDirectory {
                     let vc = PPFileListViewController()
@@ -324,10 +329,7 @@ class PPFileListViewController: PPBaseViewController,
             PPUserInfo.shared.updateCurrentServerInfo(index: objIndex)
             PPFileManager.shared.initCloudServiceSetting()
         }
-
-
 //        debugPrint("文件：\(fileObj.path)")
-        
         if fileObj.isDirectory {
             let vc = PPFileListViewController()
             vc.pathStr = getPathNotEmpty(fileObj) + "/"
@@ -612,8 +614,16 @@ class PPFileListViewController: PPBaseViewController,
         self.dropdown.anchorView = sender
         self.dropdown.show()
     }
+    //多选
+    func multiSelected() {
+        self.multipleSelectionMode = true
+        self.navigationItem.rightBarButtonItem = UIBarButtonItem(title: "取消选择", style: .plain, target: self, action: #selector(self.cancelMultiSelect))
+        collectionView.reloadData()
+    }
+    //取消多选
     @objc func cancelMultiSelect() {
         multipleSelectionMode = false //取消多选
+        collectionView.reloadData()
         self.navigationItem.rightBarButtonItem = UIBarButtonItem(title: "更多", style: .plain, target: self, action: #selector(moreAction(_:)))
     }
     //MARK:新建文本文档 & 上传照片
@@ -677,7 +687,9 @@ class PPFileListViewController: PPBaseViewController,
                 PPUserInfo.pp_boolValue("uploadImageNameUseCreationDate") {
                 fileName = obj.fileURL.path.pp_getFileModificationDate().pp_stringWithoutColon() + "." + obj.fileURL.pathExtension
             }
-            PPFileManager.shared.createFile(path: self.pathStr + fileName, contents: objData) { (result, error) in
+            PPFileManager.shared.createFile(path: self.pathStr + fileName,
+                                            parentID: self.pathID,
+                                            contents: objData) { (result, error) in
                 if error != nil {
                     PPHUD.showHUDFromTop("新建失败", isError: true)
                 }
