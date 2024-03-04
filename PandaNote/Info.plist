@@ -62,6 +62,8 @@
 	<string>保存图片到您的相册</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>我们需要添加图片到笔记</string>
+	<key>NSFaceIDUsageDescription</key>
+	<string>点击允许以用Face ID解锁应用程序</string>
 	<key>NSUbiquitousContainers</key>
 	<dict>
 		<key>iCloud.com.agolddata.pandanotex</key>

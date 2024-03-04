@@ -22,7 +22,7 @@ public class PPAttributedStringVisitor {
     // MARK: - Properties
     var cacheDir = ""
     var images = [String]()
-    var headings = [NSMutableAttributedString]()
+    var headings = [String]()
 
     private let styler: Styler
     private let options: DownOptions
@@ -159,7 +159,7 @@ extension PPAttributedStringVisitor: Visitor {
         styler.style(heading: result, level: node.headingLevel)
         // #号颜色不要太深，否则影响我看标题内容
         result.pp_replaceAttribute(for: .foregroundColor, value: colors.bodyLight, inRange: NSRange(location: 0, length: node.headingLevel))
-        headings.append(result)
+        headings.append(result.string)
         if node.hasSuccessor { result.append(.pp_paragraphSeparator) }
         return result
     }

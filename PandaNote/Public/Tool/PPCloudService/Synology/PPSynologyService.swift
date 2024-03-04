@@ -45,7 +45,7 @@ class PPSynologyService: NSObject, PPCloudServiceProtocol {
         if useLANIP {
             return localBaseURL
         }
-        return remoteBaseURL
+        return remoteBaseURL.length > 0 ? remoteBaseURL : localBaseURL
     }
     
     init(url: String, remoteURL: String, localURL: String, username: String, password: String, otp_code: String, sid: String, did: String) {
@@ -98,7 +98,7 @@ class PPSynologyService: NSObject, PPCloudServiceProtocol {
             self.localBaseURL = url
             self.configChanged?("PPLocalBaseURL", url)
             if (self.sid.length == 0) {
-                self.login(username: self.username, password: self.password, otp_code: self.otp_code)
+                self.login(username: self.username, password: self.password, otp_code: self.otp_code, callback: callback)
             }
             return
         }
@@ -110,7 +110,7 @@ class PPSynologyService: NSObject, PPCloudServiceProtocol {
             "command": "get_server_info",
             "version": "1"
         ]
-        AF.request(getServerInfoURL, method: .post, parameters: parameters, encoding: JSONEncoding.default, headers: headers).responseData { response in
+        PPCloudHTTP.shared.request(getServerInfoURL, method: .post, parameters: parameters, encoding: JSONEncoding.default, headers: headers).responseData { response in
             switch response.result {
             case .success(_):
                 // 注意：国外IP不可访问
@@ -140,7 +140,7 @@ class PPSynologyService: NSObject, PPCloudServiceProtocol {
                
             case .failure(let error):
                 // 处理错误
-                debugPrint("alist error:",error)
+                debugPrint("SynologyService getServerInfo error:",error)
             }
         }
     }
@@ -153,11 +153,11 @@ class PPSynologyService: NSObject, PPCloudServiceProtocol {
             "command": "request_tunnel",
             "version": "1"
         ]
-        AF.request(url, method: .post, parameters: parameters, encoding: JSONEncoding.default, headers: headers).responseData { response in
+        PPCloudHTTP.shared.request(url, method: .post, parameters: parameters, encoding: JSONEncoding.default, headers: headers).responseData { response in
             switch response.result {
             case .success(_):
                 // 注意：国外IP不可访问
-                debugPrint("Synology getServerInfoCN:",response)
+                debugPrint("SynologyService getServerInfoCN:",response)
                 response.data?.pp_JSONObject()?.printJSON()
                 guard let jsonDict = response.data?.pp_JSONObject() as? [String:Any] else { return }
                 let getInfoSuccess = self.handleServerInfo(jsonDict)
@@ -168,7 +168,7 @@ class PPSynologyService: NSObject, PPCloudServiceProtocol {
                
             case .failure(let error):
                 // 处理错误
-                debugPrint("alist error:",error)
+                debugPrint("SynologyService getServerInfo error:",error)
             }
         }
     }
@@ -202,7 +202,7 @@ class PPSynologyService: NSObject, PPCloudServiceProtocol {
         if let otp_code = otp_code, otp_code.length > 0 {
             parameters["otp_code"] = otp_code
         }
-        AF.request(baseURL + "/webapi/auth.cgi", method: .post, parameters: parameters, encoding: URLEncoding.default, headers: headers).responseData { response in
+        PPCloudHTTP.shared.request(baseURL + "/webapi/auth.cgi", method: .post, parameters: parameters, encoding: URLEncoding.default, headers: headers).responseData { response in
             switch response.result {
             case .success(_):
                 // 使用解码后的对象
@@ -217,12 +217,23 @@ class PPSynologyService: NSObject, PPCloudServiceProtocol {
 }
 */
                 res?.printJSON()
+                if let error = res?["error"] as? [String:Any] {
+                    let errorObj = PPCSError(fromDictionary: error)
+                    if errorObj.code == 403 || errorObj.code == 404 {
+                        // 403:2-step verification code required。404:Failed to authenticate 2-step verification code
+                        callback?("twoFactorAuthCodeError")
+                    }
+                    else if errorObj.code == 400 {
+                        callback?("twoFactorAuthCodeError")
+                    }
+                    return
+                }
                 guard let data_ = res?["data"] as? [String:Any] else { return }
                 guard let sid = data_["sid"] as? String, let did = data_["did"] as? String else { return }
                 
                 self.sid = sid
                 self.did = did
-                debugPrint("DSfile response:" , response)
+                debugPrint("SynologyService login response:" , response)
                 self.configChanged?("sid", sid)
                 self.configChanged?("did", did)
                 //                    guard let responseHeader = response.response?.headers else {return}
@@ -231,7 +242,8 @@ class PPSynologyService: NSObject, PPCloudServiceProtocol {
                 
             case .failure(let error):
                 // 处理错误
-                debugPrint("DSfile error:",error)
+                debugPrint("SynologyService login error:",error)
+                callback?("forcedLoginRequired")
             }
         }
     }
@@ -243,7 +255,7 @@ class PPSynologyService: NSObject, PPCloudServiceProtocol {
 //        }
         let url = self.localBaseURL + "/webman/pingpong.cgi?quickconnect=true"
 
-        AF.request(url, method: .get, headers: headers){ $0.timeoutInterval = 3 }.response { response in
+        PPCloudHTTP.shared.request(url, method: .get, headers: headers){ $0.timeoutInterval = 3 }.response { response in
 //            debugPrint("checkLANStatus",response.response)
             if let statusCode = response.response?.statusCode,
                statusCode == 200 {
@@ -262,7 +274,15 @@ class PPSynologyService: NSObject, PPCloudServiceProtocol {
             path_ = String(path_.dropLast())
         }
         if self.sid.length == 0 {
-            self.getServerInfo(url: self.url) { sid in
+            self.getServerInfo(url: self.url) { res in
+                if res == "twoFactorAuthCodeError" {
+                    completion([], PPCloudServiceError.twoFactorAuthCodeError)
+                    return
+                }
+                if res != "success" && res.length > 0 {
+                    completion([], res == "forcedLoginRequired" ? PPCloudServiceError.forcedLoginRequired :PPCloudServiceError.unknown)
+                    return
+                }
                 self.contentsOfDirectory(path, pathID, completion: completion)
             }
             return
@@ -288,7 +308,7 @@ class PPSynologyService: NSObject, PPCloudServiceProtocol {
 //        parameters.printJSON()
 //        let url = "http://192.168.1.46:5000/webapi/entry.cgi"
 
-        AF.request(baseURL + "/webapi/entry.cgi", method: .post, parameters: parameters, encoding: URLEncoding.default, headers: headers)
+        PPCloudHTTP.shared.request(baseURL + "/webapi/entry.cgi", method: .post, parameters: parameters, encoding: URLEncoding.default, headers: headers)
             .responseData
         { response in
 //            debugPrint("DSfile response:" , response)
@@ -307,13 +327,21 @@ class PPSynologyService: NSObject, PPCloudServiceProtocol {
                     }
                     if let error = res?["error"] as? [String:Any] {
                         error.printJSON()
-                        self.getServerInfo(url: self.url) { sid in
+                        let errorObj = PPCSError(fromDictionary: error)
+                        if errorObj.code == 119 {
+                            self.sid = "" //SID not found, empty it
+                        }
+                        self.getServerInfo(url: self.url) { res in
+                            if res == "twoFactorAuthCodeError" {
+                                completion([], PPCloudServiceError.twoFactorAuthCodeError)
+                                return
+                            }
                             self.retryCount += 1 //自动刷新、防止死循环
                             self.contentsOfDirectory(path, pathID, completion: completion)
                         }
                         completion([], PPCloudServiceError.unknown)
                     }
-                    debugPrint("DSfile response:" , response)
+                    debugPrint("SynologyService filelist response:" , response)
                     return
                 }
                 if(path == "/") {
@@ -326,12 +354,11 @@ class PPSynologyService: NSObject, PPCloudServiceProtocol {
                 }
                 PPSynologyService.dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
 
-                let synologyFiles = PPSynologyFile.toModelArray(files, PPSynologyService.dateFormatter)
-
+                let synologyFiles = PPSynologyFile.toModelArray(files, PPSynologyService.dateFormatter, self.baseURL + "/webapi/entry.cgi?api=SYNO.FileStation.Thumb&method=get&version=2" + "&_sid=\(self.sid)")
                 completion(synologyFiles, nil)
             case .failure(let error):
                 // 处理错误
-                debugPrint("DSfile error:",error,response)
+                debugPrint("SynologyService filelist error:",error,response,response.response?.statusCode)
                 self.useLANIP = false
                 self.getServerInfo(url: self.url) { s in
                     if self.retryCount < 3 {
@@ -339,7 +366,7 @@ class PPSynologyService: NSObject, PPCloudServiceProtocol {
                         self.contentsOfDirectory(path, pathID, completion: completion)
                     }
                 }
-                completion([], error)
+                completion([], PPCloudServiceError.serverUnreachable)
             }
         }
         
@@ -376,7 +403,7 @@ class PPSynologyService: NSObject, PPCloudServiceProtocol {
             "version": "2"
         ]
         parameters.printJSON()
-        AF.request(baseURL + "/webapi/entry.cgi", method: .post, parameters: parameters, encoding: URLEncoding.default, headers: headers)
+        PPCloudHTTP.shared.request(baseURL + "/webapi/entry.cgi", method: .post, parameters: parameters, encoding: URLEncoding.default, headers: headers)
             .responseData { response in
                 completion(self.getResponseError(response))
             }
@@ -451,7 +478,7 @@ class PPSynologyService: NSObject, PPCloudServiceProtocol {
                 "version": "2"
             ]
         }
-        AF.request(baseURL + "/webapi/entry.cgi", method: .post, parameters: parameters, encoding: URLEncoding.default, headers: headers)
+        PPCloudHTTP.shared.request(baseURL + "/webapi/entry.cgi", method: .post, parameters: parameters, encoding: URLEncoding.default, headers: headers)
             .responseData { response in
                 completion(self.getResponseError(response))
             }
@@ -464,7 +491,7 @@ class PPSynologyService: NSObject, PPCloudServiceProtocol {
             "path": "[\"\(path)\"]",
             "version": "2"
         ]
-        AF.request(baseURL + "/webapi/entry.cgi", method: .post, parameters: parameters, encoding: URLEncoding.default, headers: headers)
+        PPCloudHTTP.shared.request(baseURL + "/webapi/entry.cgi", method: .post, parameters: parameters, encoding: URLEncoding.default, headers: headers)
             .responseData { response in
                 completion(self.getResponseError(response))
             }

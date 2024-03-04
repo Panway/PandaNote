@@ -49,6 +49,11 @@
       "detail": "数字越小越模糊，推荐设置0.5~0.2"
     },
     {
+      "name": "略缩图保持宽高比",
+      "key": "thumbnailPreserveRatio",
+      "showSwitch": "1"
+    },
+    {
       "name": "搜索递归层数",
       "key": "recursiveDepthWhenSearch",
       "showSwitch": "",

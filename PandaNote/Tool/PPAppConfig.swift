@@ -31,7 +31,7 @@ class PPAppConfig: NSObject {
     let popMenu = PPPopMenu()
     var downColor = PPDownColorCollection()
     var downFont = PPDownFontCollection()
-
+    var outlineMaxWidth = 300.0 // markdown编辑器目录(大纲)最大宽度
     func initSetting() {
         //将其格式选项中加入带小数秒的选项，并将时区设置为当前时区
         //dateFormatter.formatOptions.insert(.withFractionalSeconds)
@@ -109,7 +109,7 @@ class PPAppConfig: NSObject {
     
     func initWebServer() {
         webServer.addGETHandler(forBasePath: "/", directoryPath: PPDiskCache.shared.path, indexFilename: nil, cacheAge: 3600, allowRangeRequests: true)
-        webServer.start(withPort: 23333 , bonjourName: "GCD Web Server")
+        webServer.start(withPort: 23333 , bonjourName: "PandaNoteServer")
         print("Visit \(webServer.serverURL?.absoluteString ?? "") in your web browser")
     }
     //下载字体到沙盒Documents

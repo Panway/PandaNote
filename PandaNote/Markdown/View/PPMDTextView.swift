@@ -12,7 +12,7 @@ import Down
 import Highlightr
 //import libcmark
 public protocol PPMDTextViewDelegate: AnyObject {
-    func didUpdateHeading(_ headings:[NSMutableAttributedString])
+    func didUpdateHeading(_ headings:[String])
 }
 
 class PPMDTextView: UITextView {

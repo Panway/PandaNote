@@ -56,7 +56,7 @@ class PPAddCloudServiceViewController : PPBaseViewController,UITableViewDataSour
         return 50.0
     }
     
-    class func addCloudService(_ obj: String,_ sourceVC:UIViewController) {
+    class func addCloudService(_ obj: String,_ sourceVC:UIViewController,_ currentConfig:[String : String]? = nil) {
         let authMethods = ["App内授权登录","系统默认浏览器授权登录","手动输入配置"]
         if obj == "WebDAV（坚果云等）" {
             //https://www.jianguoyun.com/#/safety
@@ -163,13 +163,16 @@ class PPAddCloudServiceViewController : PPBaseViewController,UITableViewDataSour
             vc.password = ""
             sourceVC.navigationController?.pushViewController(vc, animated: true)
         }
-        else if obj == "群晖Synology" {
+        else if obj == "群晖Synology" || obj == PPCloudServiceType.synology.rawValue {
             let vc = PPWebDAVConfigViewController()
-            vc.serverURL = ""
+            vc.isEditMode = currentConfig?["PPWebDAVUserName"] != nil
+            vc.editIndex = PPUserInfo.shared.pp_lastSeverInfoIndex
+            vc.serverURL = currentConfig?["PPServerURL"] ?? ""
             vc.serverURLRemark = "地址或 QuickConnect ID"
+            vc.userName = currentConfig?["PPWebDAVUserName"] ?? ""
             vc.cloudType = "synology"
             vc.remark = "synology"
-            vc.password = ""
+            vc.password = currentConfig?["PPWebDAVPassword"] ?? ""
             vc.showOtpCode = true
             vc.optCodeRemark = "双重认证码（Secure Signin应用内）"
             sourceVC.navigationController?.pushViewController(vc, animated: true)

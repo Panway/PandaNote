@@ -96,4 +96,31 @@ extension UITextView {
             self.scrollRangeToVisible(lastSearchRange)
         }
     }
+    // current row and column 当前行和列
+    func currentRowColumnNumber() -> (line: Int, column: Int) {
+        guard let selectedRange = selectedTextRange else {
+            return (line: 0, column: 0)
+        }
+        
+        let cursorOffset = offset(from: beginningOfDocument, to: selectedRange.start)
+        let text = self.text ?? ""
+        let lines = text.components(separatedBy: .newlines)
+        
+        var lineCount = 0
+        var currentOffset = 0
+        
+        for line in lines {
+            let lineLength = line.count
+            if currentOffset + lineLength >= cursorOffset {
+                let column = cursorOffset - currentOffset
+                return (line: lineCount + 1, column: column + 1)
+            }
+            lineCount += 1
+            currentOffset += lineLength + 1 // Add 1 for the newline character
+        }
+        
+        return (line: 0, column: 0)
+    }
+    
+
 }

@@ -14,7 +14,7 @@ class PPSynologyFile: PPFileModel {
         super.mapping(map: map)
         name <- map["name"]
         isDirectory <- map["isdir"]
-        
+        path <- map["path"]
 
 
     }
@@ -35,7 +35,7 @@ class PPSynologyFile: PPFileModel {
        "name" : "App"
      }
      */
-    public class func toModelArray(_ fileList:[[String:Any]],_ dateFormatter:DateFormatter) -> [PPSynologyFile] {
+    public class func toModelArray(_ fileList:[[String:Any]],_ dateFormatter:DateFormatter,_ thumbBaseURL:String) -> [PPSynologyFile] {
         var dataSource = [PPSynologyFile]()
         for f in fileList {
             if let item = PPSynologyFile(JSON: f) {
@@ -49,6 +49,10 @@ class PPSynologyFile: PPFileModel {
                     let dateString = dateFormatter.string(from: date)
                     item.modifiedDate = dateString
                 }
+                if item.path.length > 0 && item.path.pp_isImageFile() {
+                    item.thumbnail = thumbBaseURL + "&path=%22\(item.path.pp_encodedURL)%22&size=small" //%22是`"`
+                }
+
                 
                 dataSource.append(item)
             }

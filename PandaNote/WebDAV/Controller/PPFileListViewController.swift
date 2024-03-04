@@ -58,6 +58,7 @@ class PPFileListViewController: PPBaseViewController,
     ///如果是展示最近访问的列表
     var isRecentFiles = false
     var isCachedFile = false
+    var thumbnailPreserveRatio = false //略缩图保持宽高比
     //---------------搜索功能↓---------------
     /// 展示在本控制器的上面的控制器 Search controller to help us with filtering items in the table view.
     var searchController: UISearchController!
@@ -164,6 +165,8 @@ class PPFileListViewController: PPBaseViewController,
         collectionView.dataSource = self
         collectionView.register(PPFileListCell.self, forCellWithReuseIdentifier: kPPCollectionViewCellID)
         collectionView.allowsMultipleSelection = true
+        
+        thumbnailPreserveRatio = PPUserInfo.pp_boolValue("thumbnailPreserveRatio")
     }
     //MARK: - UICollectionView 数据源及回调
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
@@ -185,15 +188,18 @@ class PPFileListViewController: PPBaseViewController,
         cell.updateUIWithData(fileObj as AnyObject)
         cell.updateCacheStatus(self.isCachedFile)
         cell.remarkLabel.isHidden = !isRecentFiles
+        cell.iconImage.contentMode = thumbnailPreserveRatio ? .scaleAspectFit : .scaleAspectFill
         if multipleSelectionMode {
             cell.isSelect = false
             cell.updateSelectedState()
             cell.updateProgressBar(0)
+            cell.moreBtn.isHidden = true
         }
         else {
             cell.selectedView.isHidden = true
             cell.unselectedView.isHidden = true
-            cell.updateProgressBar(fileObj.downloadProgress)
+            cell.updateProgressBar(fileObj.isDirectory ? 0 : fileObj.downloadProgress)
+            cell.moreBtn.isHidden = false
         }
         cell.delegate = self
         return cell
@@ -231,11 +237,17 @@ class PPFileListViewController: PPBaseViewController,
         PPHUD.shared.deleteBGView.removeFromSuperview()
     }
     func didClickMoreBtn(cellIndex: Int, sender:UIButton) {
-        debugPrint("==\(cellIndex)")
         if self.isMovingMode {
             return
         }
-        self.dropdown.dataSource = ["删除","重命名","移动","打开为文本","多选","预览","浏览器打开"]
+        self.dropdown.dataSource = ["删除","重命名","移动","多选"]
+        let clickItem = dataSource[cellIndex]
+        if !clickItem.isDirectory {
+            self.dropdown.dataSource.append(contentsOf: ["打开为文本","预览","浏览器打开"])
+#if targetEnvironment(macCatalyst)
+            self.dropdown.dataSource.append("在访达中显示")
+#endif
+        }
         self.dropdown.selectionAction = { (index: Int, item: String) in
             let fileObj = self.dataSource[cellIndex]
             if item == "删除" {
@@ -758,14 +770,22 @@ class PPFileListViewController: PPBaseViewController,
             if error != nil {
                 self.collectionView.endRefreshing()
                 if case let myError as PPCloudServiceError = error {
-                    if myError == .forcedLoginRequired {
+                    if myError == .forcedLoginRequired || myError == .twoFactorAuthCodeError {
                         PPHUD.showHUDFromTop("登录状态已失效，请重新登录", isError: true)
-                        debugPrint(PPUserInfo.shared.pp_serverInfoList[PPUserInfo.shared.pp_lastSeverInfoIndex])
+                        let currentConfig = PPUserInfo.shared.pp_serverInfoList[PPUserInfo.shared.pp_lastSeverInfoIndex]
+                        debugPrint(currentConfig)
+                        currentConfig.printJSON()
                         let serviceType = PPUserInfo.shared.getCurrentServerInfo("PPCloudServiceType")
-                        PPAddCloudServiceViewController.addCloudService(serviceType, self)
+                        PPAddCloudServiceViewController.addCloudService(serviceType, self, currentConfig)
                     }
                     else if myError == .certificateInvalid {
                         PPHUD.showHUDFromTop("服务器证书过期或无效", isError: true)
+                    }
+                    else if myError == .serverUnreachable {
+                        PPHUD.showHUDFromTop("服务器无法访问，请重试", isError: true)
+                    }
+                    else {
+                        PPHUD.showHUDFromTop("加载失败，请检查服务器配置", isError: true)
                     }
                 }
                 else {

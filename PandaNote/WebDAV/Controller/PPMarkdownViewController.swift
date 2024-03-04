@@ -10,6 +10,7 @@ import Foundation
 import FilesProvider
 import Down
 import Highlightr
+import SnapKit
 
 
 //typealias PPPTextView = PPPPTextView
@@ -52,6 +53,7 @@ final class PPMarkdownViewController: PPBaseViewController,
     var highlightrThemes = [String]()
     var highlightr: Highlightr? = nil
     let tocTable = XDFastTableView()
+    var tocTableWidthConstraint: Constraint?     // 存储 tocTable 的宽度约束
     var showTOC = false
     let imagePreviewer = PPImagePreviewer()
     lazy var dropdown : PPDropDown = {
@@ -62,7 +64,7 @@ final class PPMarkdownViewController: PPBaseViewController,
     let menuBtn = PPMarkdownEditorToolBar(frame: CGRect(x: 0,y: 0,width: 40*3,height: 40), images: ["menu"])
 
     var findReplaceView: PPFindReplaceView!
-
+    let rowColumnNumber = PPPaddedLabel()
     
     //MARK: - Life Cycle
     override func viewDidLoad() {
@@ -236,7 +238,17 @@ final class PPMarkdownViewController: PPBaseViewController,
         topToolView.delegate = self
         topToolView.tag = TopToolBarTag
 
-        
+        self.view.addSubview(rowColumnNumber)
+        rowColumnNumber.snp.makeConstraints { make in
+            make.right.equalTo(self.view).offset(-15)
+            make.bottom.equalTo(self.view).offset(-15)
+        }
+        rowColumnNumber.textInsets = UIEdgeInsets(top: 5, left: 10, bottom: 5, right: 10)
+        rowColumnNumber.textColor = .lightGray
+        rowColumnNumber.backgroundColor = "#eeeeee".pp_HEXColor()
+        rowColumnNumber.layer.borderColor = "#dddddd".pp_HEXColor().cgColor
+        rowColumnNumber.layer.cornerRadius = 3
+        rowColumnNumber.layer.borderWidth = 1
         
         let rightBarItem = UIBarButtonItem(customView: topToolView)
         
@@ -312,6 +324,13 @@ final class PPMarkdownViewController: PPBaseViewController,
         }
         return true
     }
+    
+    func textViewDidChangeSelection(_ textView: UITextView) {
+        // 当光标位置发生变化时执行
+        let (line, column) = textView.currentRowColumnNumber()
+        rowColumnNumber.text = "行：\(line)，列：\(column)"
+    }
+    
     func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
         let offsetKey = "\(PPFileManager.shared.currentServerUniqueID())\(self.filePathStr)".pp_md5
         debugPrint("滚动偏移量:\(scrollView.contentOffset.y)")
@@ -327,9 +346,18 @@ final class PPMarkdownViewController: PPBaseViewController,
             self.scrollToSameTextAsTextView()
         }
     }
-    func didUpdateHeading(_ headings: [NSMutableAttributedString]) {
-        tocTable.dataSource = headings
+    // textView重新渲染时调用
+    func didUpdateHeading(_ headings: [String]) {
+        tocTable.dataSource = headings.map({ title in
+            let model = PPMarkdownOutlineModel()
+            model.title = title
+            model.isSelected = false
+            return model
+        })
         tocTable.tableView.reloadData()
+        let maxWidth = 300.0 //用户允许的最大宽度
+        var maxTextWidth = PPAppConfig.shared.outlineMaxWidth + 40
+        tocTableWidthConstraint?.update(offset: min(maxWidth, maxTextWidth))
     }
     //MARK: - Private 私有方法
     func initTOC() {
@@ -346,17 +374,23 @@ final class PPMarkdownViewController: PPBaseViewController,
         tocTable.snp.makeConstraints { (make) in
             make.top.equalTo(self.view).offset(40)
             make.right.equalTo(self.view)
-            make.width.height.equalTo(self.view).multipliedBy(0.5).priority(.high)
-            make.width.lessThanOrEqualTo(400) // 添加这行限制宽度不大于 400
+            tocTableWidthConstraint = make.width.equalTo(300).constraint
+            make.height.equalTo(self.view).multipliedBy(0.6).priority(.high)
+//            make.width.lessThanOrEqualTo(400) // 添加这行限制宽度不大于 400
         }
         tocTable.isHidden = true
-        tocTable.registerCellClass(PPMarkdownMiniMapCell.self)
+        tocTable.registerCellClass(PPMarkdownOutlineCell.self)
         tocTable.dataSource = []
-        tocTable.backgroundColor = UIColor(white: 1.0, alpha: 0.6)
+        tocTable.backgroundColor = UIColor(white: 1.0, alpha: 0.8)
         tocTable.tableView.backgroundColor = .clear
         tocTable.didSelectRowAtIndexHandler = {(index: Int) ->Void in
-            if let obj = self.tocTable.dataSource[index] as? NSMutableAttributedString {
-                self.textView.pp_scrollSubstringToTop(obj.string, animated: true)
+            if let headString = self.tocTable.dataSource[index] as? PPMarkdownOutlineModel {
+                self.textView.pp_scrollSubstringToTop(headString.title, animated: true)
+                self.tocTable.dataSource.enumerated().forEach { (idx, model) in
+                    let selectModel = model as! PPMarkdownOutlineModel
+                    selectModel.isSelected = idx == index ? true : false
+                }
+                self.tocTable.tableView.reloadData()
             }
         }
         tocTable.layer.cornerRadius = 10.0
@@ -514,7 +548,10 @@ final class PPMarkdownViewController: PPBaseViewController,
 //        print("保存的是==========\n\(stringToUpload)\n=========="  )
         //MARK: 保存
 //        self.textView.resignFirstResponder()
-        PPFileManager.shared.createFile(path: self.filePathStr, contents: stringToUpload.data(using: .utf8), completionHandler: { (result, error) in
+        let localPath = "\(PPDiskCache.shared.path)/\(PPUserInfo.shared.webDAVRemark)"
+        guard let contents = stringToUpload.data(using: .utf8) else {return}
+        try? contents.write(to: URL(fileURLWithPath: localPath + self.filePathStr)) // 将数据写入磁盘，就算接口请求失败本地也有缓存
+        PPFileManager.shared.createFile(path: self.filePathStr, contents: contents, completionHandler: { (result, error) in
             if error != nil {
                 PPHUD.showHUDFromTop("保存失败", isError: true)
                 return

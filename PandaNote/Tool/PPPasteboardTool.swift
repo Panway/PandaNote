@@ -72,7 +72,7 @@ class PPPasteboardTool: NSObject {
 //        UIPasteboard.general.string = "http://v.douyin.com/mLjjtL/ 抖音的测试链接"
 //        UIPasteboard.general.string = "https://www.smzdm.com/p/20405394/?send_by=3716913905&from=other"
         guard let input = UIPasteboard.general.string else { return "" }
-        debugPrint("剪切板内容=\(input)")
+//        debugPrint("剪切板内容=\(input)")
         if input == PPAppConfig.shared.getItem("PPLastPasteBoardContent") {
             return ""
         }
@@ -92,14 +92,14 @@ class PPPasteboardTool: NSObject {
             PPHUD.showHUDFromTop("URL太多，已为你解析第一个URL")
         }
         urlString = urlNoTracking(urlString)
-        debugPrint("去除追踪参数的URL:\(urlString)")
+//        debugPrint("去除追踪参数的URL:\(urlString)")
         currentURL = urlString
         return urlString
     }
     
     class func getMoreInfomationOfURL() {
         guard let input = UIPasteboard.general.string else { return }
-        debugPrint("剪切板内容=\(input)")
+//        debugPrint("剪切板内容=\(input)")
         if input == PPAppConfig.shared.getItem("PPLastPasteBoardContent") {
             return
         }
@@ -267,6 +267,9 @@ class PPPasteboardTool: NSObject {
         // 有序列表
         let ols = body.css("ol")
         for ol in ols {
+            if ol.parent?.tagName == "pre" {
+                continue //pre里面包含ol的话，不加序号
+            }
             let lis = ol.css("li")
             for i in 0..<lis.count {
                 var li = lis[i]
@@ -460,6 +463,10 @@ class PPPasteboardTool: NSObject {
                 getHTMLSourceCode(urlStr: currentURL) {_ in
                     PPDouyinParser.downLoadDouYinVideoWithoutWaterMark(douyinVideoID, douyinRedirectURL)
                 }
+            }
+            else if (index == 0) {
+                // 取消
+                PPAppConfig.shared.setItem("PPLastPasteBoardContent", UIPasteboard.general.string ?? "")
             }
         }
     }

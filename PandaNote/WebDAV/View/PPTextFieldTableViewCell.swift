@@ -42,6 +42,8 @@ class PPTextFieldTableViewCell: PandaFastTableViewCell {
         }
 //        rightTF.placeholder = "服务器地址"
         rightTF.clearButtonMode = .whileEditing
+        rightTF.autocorrectionType = .no
+        
 //        rightTF.borderStyle = .bezel
     }
     override func updateUI(withData data: Any) {

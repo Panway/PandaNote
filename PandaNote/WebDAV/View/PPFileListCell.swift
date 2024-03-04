@@ -41,7 +41,7 @@ class PPFileListCell: PPBaseCollectionViewCell {
 //    }
     private var viewMode = PPFileListCellViewMode.list //默认是列表
     private var cellPadding = 8
-    private var moreBtn = UIButton(type: .custom)
+    var moreBtn = UIButton(type: .custom)
     private let progressBar = CALayer()
 //    private let screenWidth: CGFloat = UIScreen.main.bounds.width
     var iconImage : UIImageView = {
@@ -276,6 +276,7 @@ class PPFileListCell: PPBaseCollectionViewCell {
         }
         if fileObj.isDirectory {
             self.iconImage.image = UIImage(named: "ico_folder")
+            updateProgressBar(0)
         }
         else if (fileObj.name.pp_isImageFile())  {
             if fileObj.thumbnail.length > 0 {
@@ -303,9 +304,15 @@ class PPFileListCell: PPBaseCollectionViewCell {
             }
         }
         if let thumbnail = URL(string: fileObj.thumbnail), fileObj.thumbnail.length > 0 {
+            if PPUserInfo.shared.cloudServiceType == .aliyundrive {
             // 阿里云盘略缩图问号后每次都是不同的参数，去掉问号后面的参数，这样不用每次都下载略缩图
             let imageResource = KFImageResource(downloadURL: thumbnail, cacheKey: fileObj.thumbnail.pp_split("?").first)
             self.iconImage.kf.setImage(with: imageResource)
+            }
+            else {
+                let imageResource = KFImageResource(downloadURL: thumbnail)
+                self.iconImage.kf.setImage(with: imageResource)
+            }
         }
         if(fileObj.modifiedDate.hasSuffix("Z")) {
             if let date = PPAppConfig.shared.utcDateFormatter.date(from: fileObj.modifiedDate) {
