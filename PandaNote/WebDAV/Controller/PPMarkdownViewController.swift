@@ -11,6 +11,7 @@ import FilesProvider
 import Down
 import Highlightr
 import SnapKit
+import XLPagerTabStrip
 
 
 //typealias PPPTextView = PPPPTextView
@@ -30,6 +31,7 @@ final class PPMarkdownViewController: PPBaseViewController,
                                 PPEditorToolBarDelegate,
                                 PPFindReplaceDelegate,
                                 PPMDTextViewDelegate,
+                                      IndicatorInfoProvider,
                                 UISearchBarDelegate,
                                 UITextViewDelegate
 {
@@ -68,17 +70,14 @@ final class PPMarkdownViewController: PPBaseViewController,
     
     //MARK: - Life Cycle
     override func viewDidLoad() {
+        self.navigationController?.navigationBar.isHidden = true
         PPAppConfig.shared.downColor = PPDownColorCollection()
         PPAppConfig.shared.downColor.codeBlockBackground = "#dddddd".pp_HEXColor().withAlphaComponent(0.3)
         navigationController?.view.backgroundColor = .white
         if self.filePathStr.length < 1 {
             return //使用UISplitViewController的时候，没路径显示空白
         }
-        
-        cacheDir = "\(PPDiskCache.shared.path)/\(PPUserInfo.shared.webDAVRemark)\(filePathStr.replacingOccurrences(of: filePathStr.pp_split("/").last ?? "", with: ""))"
-            .replacingOccurrences(of: "//", with: "/")
         textView = PPMDTextView(frame: self.view.bounds)
-        textView.cacheDir = cacheDir
         initStyle()
         pp_initView()
         if filePathStr.isMarkdownFile() {
@@ -198,7 +197,9 @@ final class PPMarkdownViewController: PPBaseViewController,
             
         }
 
-        
+        cacheDir = "\(PPDiskCache.shared.path)/\(PPUserInfo.shared.webDAVRemark)\(filePathStr.replacingOccurrences(of: filePathStr.pp_split("/").last ?? "", with: ""))"
+            .replacingOccurrences(of: "//", with: "/")
+        textView.cacheDir = cacheDir //PPFileManager初始化后才能获取到webDAVRemark
         
         self.view.backgroundColor = .white
 
@@ -257,6 +258,9 @@ final class PPMarkdownViewController: PPBaseViewController,
         self.setLeftBarButton()
     }
     func changed() -> Bool {
+        if (self.textView == nil) {
+            return false
+        }
         let textWithoutReplacementCharacter = self.textView.text.replacingOccurrences(of: "￼", with: "")
         let textDidChanged = textWithoutReplacementCharacter != self.markdownStr
         debugPrint("文本改变:",textDidChanged)
@@ -345,6 +349,10 @@ final class PPMarkdownViewController: PPBaseViewController,
         if splitMode != .none {
             self.scrollToSameTextAsTextView()
         }
+    }
+    //tab title
+    func indicatorInfo(for pagerTabStripController: XLPagerTabStrip.PagerTabStripViewController) -> XLPagerTabStrip.IndicatorInfo {
+        IndicatorInfo(title: self.filePathStr.pp_split("/").last)
     }
     // textView重新渲染时调用
     func didUpdateHeading(_ headings: [String]) {

@@ -45,6 +45,7 @@ PODS:
     - TZImagePickerController/Location (= 3.8.3)
   - TZImagePickerController/Basic (3.8.3)
   - TZImagePickerController/Location (3.8.3)
+  - XLPagerTabStrip (9.0.0)
 
 DEPENDENCIES:
   - Alamofire (~> 5.0)
@@ -60,7 +61,7 @@ DEPENDENCIES:
   - GCDWebServer
   - Highlightr
   - IQKeyboardManager
-  - Kanna (~> 5.2.2)
+  - Kanna
   - Kingfisher (~> 6.3.1)
   - MBProgressHUD
   - MJRefresh
@@ -77,6 +78,7 @@ DEPENDENCIES:
   - SKPhotoBrowser
   - SnapKit
   - TZImagePickerController
+  - XLPagerTabStrip
 
 SPEC REPOS:
   trunk:
@@ -106,6 +108,7 @@ SPEC REPOS:
     - SKPhotoBrowser
     - SnapKit
     - TZImagePickerController
+    - XLPagerTabStrip
 
 EXTERNAL SOURCES:
   PPiOSKit:
@@ -144,7 +147,8 @@ SPEC CHECKSUMS:
   SKPhotoBrowser: cd95b95a6f352fc2a50992721299f75ead77f9ab
   SnapKit: e01d52ebb8ddbc333eefe2132acf85c8227d9c25
   TZImagePickerController: e9909edbadf7381140efc5b5c9f5bdbfd630f7d4
+  XLPagerTabStrip: 61c57fd61f611ee5f01ff1495ad6fbee8bf496c5
 
-PODFILE CHECKSUM: ac59f4d42cac90f154d6448909d5743125790536
+PODFILE CHECKSUM: 6fa26d2246fc1323d611d818d3e17564715e2789
 
 COCOAPODS: 1.14.3

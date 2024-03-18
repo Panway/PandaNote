@@ -164,9 +164,14 @@ class PPPasteboardTool: NSObject {
             var result = ""
             if let doc = try? HTML(html: sourceCode, encoding: .utf8) {
                 if url.hasPrefix("https://mp.weixin.qq.com/s") {
+                    var titleHTML = ""
+                    for link in doc.css("#activity-name") {
+                        titleHTML = link.toHTML ?? ""
+                    }
                     for var link in doc.css("#js_content") {
                         link["visibility"] = ""
                         result = link.toHTML ?? ""
+                        result = "原文链接:" + url + titleHTML + "<br>" + result // 标题+内容
                         let att = parseHTMLCode(result, parseOption: [PPParseHTMLOptions.useDataSrcInImg])
                         completion(att ?? "".pp_attributed)
                     }

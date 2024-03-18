@@ -357,7 +357,8 @@ class PPFileListViewController: PPBaseViewController,
             vc.filePathStr = getPathNotEmpty(fileObj)
             vc.fileID = fileObj.pathID
             vc.downloadURL = fileObj.downloadURL
-            self.pushDetail(vc)
+            vc.title = fileObj.name
+            self.pushDetail(vc, isMarkdown: true)
         }
         else if (fileObj.name.pp_isImageFile())  {
             cell.iconImage.contentMode = .scaleAspectFit

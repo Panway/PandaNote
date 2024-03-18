@@ -106,16 +106,39 @@ extension PPBaseViewController {
 #endif
     }
     
-    func pushDetail(_ viewController:UIViewController) {
-        if UIDevice.current.userInterfaceIdiom != .phone {
-            if let navController = self.splitViewController?.viewControllers.last as? UINavigationController {
+    func pushDetail(_ viewController:UIViewController, isMarkdown:Bool? = false) {
+        if UIDevice.current.userInterfaceIdiom != .phone,
+           let navController = self.splitViewController?.viewControllers.last as? UINavigationController{
+            //macOS & iPad
                 // navController.viewControllers = [viewController]
                 //self.splitViewController?.showDetailViewController(navController, sender: self)
-                navController.popToRootViewController(animated: false)
+            if let isMarkdown = isMarkdown, isMarkdown == true {
+                if let topVC = navController.viewControllers.last as? PPMultiTabsViewController {
+                    for (index, element) in topVC.vcs.enumerated() {
+                        if element.title == viewController.title {
+                            //已经打开过的页面 file than already opened
+                            topVC.moveToViewController(at: index, animated: true)
+                            return
+                        }
+                    }
+                    
+                    topVC.vcs.append(viewController)
+                    topVC.reloadPagerTabStripView()
+                    topVC.moveToViewController(at: topVC.vcs.count - 1, animated: true)
+                }
+                else {
+                    let multiTabs = PPMultiTabsViewController(vcs: [viewController])
+                    navController.pushViewController(multiTabs, animated: true)
+                }
+            }
+            else {
                 navController.pushViewController(viewController, animated: true)
             }
+            
+            
         }
         else {
+            // iPhone
             self.navigationController?.pushViewController(viewController, animated: true)
         }
     }

@@ -59,6 +59,9 @@ target 'PandaNote' do
 #  pod 'SwipeCellKit', '2.6.0'
   #  pod 'SVProgressHUD'
   pod 'MBProgressHUD'
+  pod 'XLPagerTabStrip'
+  
+  
 #  pod 'AFWebDAVManager', :git => 'https://github.com/AFNetworking/AFWebDAVManager.git'
 #  pod 'WechatOpenSDK'#,'1.8.4'
   pod 'MonkeyKing'
@@ -68,7 +71,7 @@ target 'PandaNote' do
   #pod 'DoraemonKit/Core', '3.0.7', :configurations => ['Debug']
 #  pod 'Weibo_SDK', :git => 'https://github.com/sinaweibosdk/weibo_ios_sdk.git'
   # XML解析 https://github.com/tid-kijyun/Kanna
-  pod 'Kanna', '~> 5.2.2'
+  pod 'Kanna' #, '~> 5.2.2'
   # JSON解析 https://github.com/tristanhimmelman/ObjectMapper
   # 中文指南 https://github.com/SwiftOldDriver/ObjectMapper-CN-Guide
   pod 'ObjectMapper'
@@ -110,8 +113,10 @@ end
 post_install do |installer|
   puts '因Personal Team账户不支持UniversalLink选项，故默认关闭，如果你知道如何配置请自行撤销文件PandaNote.entitlements的改动'
   output = %x( #{"sed -i '' -e '/associated-domains/,+3d' PandaNote/PandaNote.entitlements"} )
-  puts '在pod install之后执行脚本，修复警告或错误，如果出错请再执行一遍 pod install'
+  puts '在pod install之后执行脚本，修复警告或错误。'
+  puts '如果下方出现Traceback错误，请再执行一遍 pod install'
   output = %x( #{"ruby XcodeTool.rb fix_deployment_target 10"} ) #执行 XcodeTool.rb 脚本文件消除警告
-  output = %x( #{"sh config_tool.sh overwrite_pods"} ) #修改Pods源码
+  output = %x( #{"sh config_tool.sh overwrite_pods"} ) #覆盖Pods源码
+  output = %x( #{"sh config_tool.sh modify_pods_code"} ) #修改Pods源码
   puts output
 end

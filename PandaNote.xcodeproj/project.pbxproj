@@ -67,8 +67,11 @@
 		1EEB0FF327538771006A5E26 /* PPOneDriveFile.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1EEB0FF227538771006A5E26 /* PPOneDriveFile.swift */; };
 		3B0741682B6B7C9800AB3BD8 /* PPBiometricAuthentication.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B0741672B6B7C9800AB3BD8 /* PPBiometricAuthentication.swift */; };
 		3B07416A2B6B804A00AB3BD8 /* PPAppAuthenticationVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B0741692B6B804A00AB3BD8 /* PPAppAuthenticationVC.swift */; };
+		3B0FF1482B9759D5009D6D6A /* PPMultiTabsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B0FF1472B9759D5009D6D6A /* PPMultiTabsViewController.swift */; };
 		3B1F3FF92A99F798003A2756 /* PPMarkdownOutlineCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B1F3FF82A99F798003A2756 /* PPMarkdownOutlineCell.swift */; };
 		3B202A552B81FA1800CBEED1 /* PPCloudServiceError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B202A542B81FA1800CBEED1 /* PPCloudServiceError.swift */; };
+		3B28561E2BA809D3002F3153 /* PPButtonBarTabViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B28561D2BA809D3002F3153 /* PPButtonBarTabViewController.swift */; };
+		3B28570E2BA80DE2002F3153 /* PPTabCollectionViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B28570D2BA80DE2002F3153 /* PPTabCollectionViewCell.swift */; };
 		3B30DE452A8BDADD00D519AB /* PPSynologyFile.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B30DE442A8BDADD00D519AB /* PPSynologyFile.swift */; };
 		3B46C3112B908A8500061406 /* PPPaddedLabel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B46C3102B908A8500061406 /* PPPaddedLabel.swift */; };
 		3B594A932A908CE600A5BC1E /* PPAttributedStringVisitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B594A922A908CE600A5BC1E /* PPAttributedStringVisitor.swift */; };
@@ -216,8 +219,11 @@
 		1EFF08AA24E50B8000E84AD1 /* PandaNote.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = PandaNote.entitlements; sourceTree = "<group>"; };
 		3B0741672B6B7C9800AB3BD8 /* PPBiometricAuthentication.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPBiometricAuthentication.swift; sourceTree = "<group>"; };
 		3B0741692B6B804A00AB3BD8 /* PPAppAuthenticationVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPAppAuthenticationVC.swift; sourceTree = "<group>"; };
+		3B0FF1472B9759D5009D6D6A /* PPMultiTabsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPMultiTabsViewController.swift; sourceTree = "<group>"; };
 		3B1F3FF82A99F798003A2756 /* PPMarkdownOutlineCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPMarkdownOutlineCell.swift; sourceTree = "<group>"; };
 		3B202A542B81FA1800CBEED1 /* PPCloudServiceError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPCloudServiceError.swift; sourceTree = "<group>"; };
+		3B28561D2BA809D3002F3153 /* PPButtonBarTabViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPButtonBarTabViewController.swift; sourceTree = "<group>"; };
+		3B28570D2BA80DE2002F3153 /* PPTabCollectionViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPTabCollectionViewCell.swift; sourceTree = "<group>"; };
 		3B30DE442A8BDADD00D519AB /* PPSynologyFile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPSynologyFile.swift; sourceTree = "<group>"; };
 		3B46C3102B908A8500061406 /* PPPaddedLabel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPPaddedLabel.swift; sourceTree = "<group>"; };
 		3B594A922A908CE600A5BC1E /* PPAttributedStringVisitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPAttributedStringVisitor.swift; sourceTree = "<group>"; };
@@ -363,6 +369,7 @@
 				1E0D9E0B27736E9700E3AA73 /* PPMarkdownEditorToolBar.swift */,
 				3B1F3FF82A99F798003A2756 /* PPMarkdownOutlineCell.swift */,
 				1E8724EF29EAA51900F85BFA /* PPFindReplaceView.swift */,
+				3B28570D2BA80DE2002F3153 /* PPTabCollectionViewCell.swift */,
 			);
 			path = View;
 			sourceTree = "<group>";
@@ -582,6 +589,8 @@
 		3BAAD0852A9CF25F003B259C /* ViewController */ = {
 			isa = PBXGroup;
 			children = (
+				3B0FF1472B9759D5009D6D6A /* PPMultiTabsViewController.swift */,
+				3B28561D2BA809D3002F3153 /* PPButtonBarTabViewController.swift */,
 			);
 			path = ViewController;
 			sourceTree = "<group>";
@@ -1117,6 +1126,7 @@
 				60A1F8DA24388391009E390C /* PPWebViewController.swift in Sources */,
 				1E12094429D886A600D442A2 /* PPAliyunDriveFile.swift in Sources */,
 				1E12094229D8769500D442A2 /* PPAliyunDriveService.swift in Sources */,
+				3B0FF1482B9759D5009D6D6A /* PPMultiTabsViewController.swift in Sources */,
 				1EC4F0342608D66600377D97 /* Data+PPTool.swift in Sources */,
 				60A1F92C24398B23009E390C /* PPFileObject.swift in Sources */,
 				1E03F83F274C7B940085ACFB /* Data+PPTool.swift.swift in Sources */,
@@ -1136,6 +1146,7 @@
 				1EACF5DC29B3703B006FA718 /* PPSplitViewController.swift in Sources */,
 				604FFA4823DDEBCF0059BBC9 /* PPScanViewController.swift in Sources */,
 				3B46C3112B908A8500061406 /* PPPaddedLabel.swift in Sources */,
+				3B28570E2BA80DE2002F3153 /* PPTabCollectionViewCell.swift in Sources */,
 				6001B6342461A82400A40593 /* PPWebFileViewController.swift in Sources */,
 				607150CC2459ACF300E2FDEB /* PPWebResourceProtocol.swift in Sources */,
 				3B07416A2B6B804A00AB3BD8 /* PPAppAuthenticationVC.swift in Sources */,
@@ -1192,6 +1203,7 @@
 				1EDD7D4D2871A7F700EEDFCB /* PPFileListToolBar.swift in Sources */,
 				1E1B5894257B8118000860F6 /* NSAttributedString+PPTool.swift in Sources */,
 				1E0D9E0C27736E9700E3AA73 /* PPMarkdownEditorToolBar.swift in Sources */,
+				3B28561E2BA809D3002F3153 /* PPButtonBarTabViewController.swift in Sources */,
 				1E526ECE26B6F20B0026DC67 /* PPDropboxService.swift in Sources */,
 				60560252231778FF000809CD /* XDRefreshHeader.m in Sources */,
 				1E179BF925B549B0006C3A56 /* UIView+PPTool.swift in Sources */,
