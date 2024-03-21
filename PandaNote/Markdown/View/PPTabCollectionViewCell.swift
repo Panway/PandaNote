@@ -20,11 +20,25 @@ class PPTabCollectionViewCell: UICollectionViewCell {
     
     // 关闭按钮
     let closeButton: UIButton = {
-        let button = UIButton(type: .system)
+        let button = UIButton(type: .custom)
         button.translatesAutoresizingMaskIntoConstraints = false
-        button.setTitle("x", for: .normal)
-        button.setTitleColor(PPCOLOR_GREEN, for: .normal)
+        button.setImage(PPDrawIconView.iconImage(name: "x", width: 15, height: 15, color: PPCOLOR_GREEN), for: .normal)
         return button
+    }()
+    
+    
+    let bottomLine: UIView = {
+        let view = UIView()
+        view.backgroundColor = UIColor(hexRGBValue: 0xe5e5e5) //VSCode
+        view.translatesAutoresizingMaskIntoConstraints = false
+        return view
+    }()
+    
+    let rightLine: UIView = {
+        let view = UIView()
+        view.backgroundColor = UIColor(hexRGBValue: 0xe5e5e5) //VSCode
+        view.translatesAutoresizingMaskIntoConstraints = false
+        return view
     }()
     
     var cellIndex = 0
@@ -37,7 +51,9 @@ class PPTabCollectionViewCell: UICollectionViewCell {
         // 添加子视图
         self.contentView.addSubview(label)
         self.contentView.addSubview(closeButton)
-        
+        self.contentView.addSubview(bottomLine)
+        self.contentView.addSubview(rightLine)
+
         // UIKit自动布局AutoLayout设置约束
         NSLayoutConstraint.activate([
             label.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 8),
@@ -48,6 +64,17 @@ class PPTabCollectionViewCell: UICollectionViewCell {
             closeButton.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -1),
             closeButton.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -8),
 //            closeButton.centerYAnchor.constraint(equalTo: centerYAnchor)
+
+            bottomLine.leadingAnchor.constraint(equalTo: leadingAnchor),
+            bottomLine.heightAnchor.constraint(equalToConstant: 1),
+            bottomLine.bottomAnchor.constraint(equalTo: bottomAnchor),
+            bottomLine.trailingAnchor.constraint(equalTo: trailingAnchor),
+
+            rightLine.trailingAnchor.constraint(equalTo: trailingAnchor),
+            rightLine.heightAnchor.constraint(equalTo: heightAnchor),
+            rightLine.widthAnchor.constraint(equalToConstant: 1),
+            rightLine.bottomAnchor.constraint(equalTo: bottomAnchor),
+            
         ])
         
         // 为关闭按钮添加点击事件

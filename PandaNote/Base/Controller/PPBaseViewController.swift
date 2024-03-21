@@ -33,9 +33,17 @@ class PPBaseViewController: UIViewController {
     }
 
     @objc func pp_backAction() -> Void {
-        self.navigationController?.popViewController(animated: true)
+        if let navigationController = navigationController {
+            // 如果当前视图控制器是通过pushViewController方法展示的
+            if navigationController.viewControllers.count > 1 {
+                navigationController.popViewController(animated: true)
+            }
+        } else if presentingViewController != nil {
+            // 如果当前视图控制器是通过present方法展示的
+            dismiss(animated: true, completion: nil)
+        }
     }
-    
+
     func setLeftBarButton() -> Void {
         self.navigationItem.leftBarButtonItem = UIBarButtonItem.init(image: UIImage.init(named: "icon_back_black"), style: UIBarButtonItem.Style.plain, target: self, action: #selector(pp_backAction))
     }
@@ -117,14 +125,14 @@ extension PPBaseViewController {
                     for (index, element) in topVC.vcs.enumerated() {
                         if element.title == viewController.title {
                             //已经打开过的页面 file than already opened
-                            topVC.moveToViewController(at: index, animated: true)
+                            topVC.moveToViewController(at: index, animated: false)
                             return
                         }
                     }
                     
                     topVC.vcs.append(viewController)
                     topVC.reloadPagerTabStripView()
-                    topVC.moveToViewController(at: topVC.vcs.count - 1, animated: true)
+                    topVC.moveToViewController(at: topVC.vcs.count - 1, animated: false)
                 }
                 else {
                     let multiTabs = PPMultiTabsViewController(vcs: [viewController])

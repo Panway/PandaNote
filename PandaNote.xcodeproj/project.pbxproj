@@ -84,6 +84,7 @@
 		3BAD09C22AAA294B00AD4006 /* PPImagePreviewer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BAD09C12AAA294B00AD4006 /* PPImagePreviewer.swift */; };
 		3BB478C92AF3493400562303 /* UITextField+PPTool.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BB478C82AF3493400562303 /* UITextField+PPTool.swift */; };
 		3BD88DED2B69591200CA1DFE /* PPDrawIconView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BD88DEC2B69591200CA1DFE /* PPDrawIconView.swift */; };
+		3BF2C5FC2BAAB48D005472F1 /* PPFloatButtons.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BF2C5FB2BAAB48D005472F1 /* PPFloatButtons.swift */; };
 		60011E40243A29E000BC6458 /* PlayerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60011E3E243A29E000BC6458 /* PlayerViewController.swift */; };
 		60011E41243A29E000BC6458 /* PlayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60011E3F243A29E000BC6458 /* PlayerView.swift */; };
 		6001B6342461A82400A40593 /* PPWebFileViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6001B6332461A82400A40593 /* PPWebFileViewController.swift */; };
@@ -236,6 +237,7 @@
 		3BAD09C12AAA294B00AD4006 /* PPImagePreviewer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPImagePreviewer.swift; sourceTree = "<group>"; };
 		3BB478C82AF3493400562303 /* UITextField+PPTool.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UITextField+PPTool.swift"; sourceTree = "<group>"; };
 		3BD88DEC2B69591200CA1DFE /* PPDrawIconView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPDrawIconView.swift; sourceTree = "<group>"; };
+		3BF2C5FB2BAAB48D005472F1 /* PPFloatButtons.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPFloatButtons.swift; sourceTree = "<group>"; };
 		445FC61B8328A513BADB990E /* Pods-PandaNoteTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-PandaNoteTests.release.xcconfig"; path = "Target Support Files/Pods-PandaNoteTests/Pods-PandaNoteTests.release.xcconfig"; sourceTree = "<group>"; };
 		5FC90B3D04D0AB60B2DBFED0 /* Pods-PandaNoteUITests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-PandaNoteUITests.release.xcconfig"; path = "Target Support Files/Pods-PandaNoteUITests/Pods-PandaNoteUITests.release.xcconfig"; sourceTree = "<group>"; };
 		60011E3E243A29E000BC6458 /* PlayerViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PlayerViewController.swift; sourceTree = "<group>"; };
@@ -683,6 +685,7 @@
 				1EDD7D102870615200EEDFCB /* PPDropDown.swift */,
 				1EACF5DD29B47201006FA718 /* PPPopMenu.swift */,
 				1E59EAC829F52221005E8010 /* PPTextField.swift */,
+				3BF2C5FB2BAAB48D005472F1 /* PPFloatButtons.swift */,
 				1EE5A41425B2947000429CB8 /* PPTableViewHeaderFooterView.swift */,
 				6056027B23178B03000809CD /* XDFastTableView.h */,
 				6056027C23178B03000809CD /* XDFastTableView.m */,
@@ -1220,6 +1223,7 @@
 				1EAB8F4025AC60A700D721A9 /* AppDelegate+PPTool.swift in Sources */,
 				1E8724F029EAA51A00F85BFA /* PPFindReplaceView.swift in Sources */,
 				3B594A932A908CE600A5BC1E /* PPAttributedStringVisitor.swift in Sources */,
+				3BF2C5FC2BAAB48D005472F1 /* PPFloatButtons.swift in Sources */,
 				60A1F8D824349581009E390C /* NSAttributedString+Markdown.m in Sources */,
 				1E1F2DEB25384C75002B0426 /* PPDebugViewController.swift in Sources */,
 				6080D3F323333C3500F582B1 /* PPFileManager.swift in Sources */,

@@ -33,9 +33,29 @@ class PPDrawIconView: UIView {
         } else if iconName.lowercased() == "unselected" {
             drawUnselected(in: rect, context: context)
         }
+        else if iconName.lowercased() == "x" {
+//            drawX(context: context)
+        }
 
     }
-    
+    class func iconImage(name: String, width:CGFloat, height:CGFloat, color:UIColor) -> UIImage {
+        // 创建一个UIImage的上下文
+        UIGraphicsBeginImageContextWithOptions(CGSize(width: width, height: height), false, 0.0)
+        // 获取当前上下文
+        guard let context = UIGraphicsGetCurrentContext() else {
+            fatalError("Failed to get current context")
+        }
+        if name.lowercased() == "x" {
+            PPDrawIconView.drawX(width: width, height: height, color: color, context: context)
+        }
+        // 获取渲染后的图像
+        guard let image = UIGraphicsGetImageFromCurrentImageContext() else {
+            fatalError("Failed to get image from context")
+        }
+        // 结束上下文
+        UIGraphicsEndImageContext()
+        return image
+    }
     // svg来源： https://www.iconfont.cn/collections/detail?cid=575
     // 画布大小100*100的svg转成Swift代码所需App：PaintCode
     // 画布大小100*100的情况下，如果frame.size设置CGSize(width:20,height:20)，绘制这个100x100的圆会超出这个UIView
@@ -131,5 +151,29 @@ class PPDrawIconView: UIView {
             fillColor.setFill()
             bezierPath.fill()
         }
+    }
+    
+    //字母x形状 letter x shape , from https://www.iconfont.cn/collections/detail?cid=841
+    private class func drawX(width:CGFloat, height:CGFloat, color:UIColor, context: CGContext) {
+        // 设置缩放比例
+        context.scaleBy(x: width/40.0, y: height/40.0)
+        
+        let bezierPath = UIBezierPath()
+        bezierPath.move(to: CGPoint(x: 40, y: 4.03))
+        bezierPath.addLine(to: CGPoint(x: 24.03, y: 20))
+        bezierPath.addLine(to: CGPoint(x: 40, y: 35.97))
+        bezierPath.addLine(to: CGPoint(x: 35.97, y: 40))
+        bezierPath.addLine(to: CGPoint(x: 20, y: 24.03))
+        bezierPath.addLine(to: CGPoint(x: 4.03, y: 40))
+        bezierPath.addLine(to: CGPoint(x: 0, y: 35.97))
+        bezierPath.addLine(to: CGPoint(x: 15.97, y: 20))
+        bezierPath.addLine(to: CGPoint(x: 0, y: 4.03))
+        bezierPath.addLine(to: CGPoint(x: 4.03, y: 0))
+        bezierPath.addLine(to: CGPoint(x: 20, y: 15.97))
+        bezierPath.addLine(to: CGPoint(x: 35.97, y: 0))
+        bezierPath.addLine(to: CGPoint(x: 40, y: 4.03))
+        bezierPath.close()
+        color.setFill()
+        bezierPath.fill()
     }
 }

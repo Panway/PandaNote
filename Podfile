@@ -37,6 +37,8 @@ target 'PandaNote' do
 #  pod 'DoraemonKit/Core'
   # https://github.com/Flipboard/FLEX
   pod 'FLEX', :configurations => ['Debug']
+  
+  # ----- UI Components -----
   pod 'MJRefresh'
 #  pod 'YYText'
   #美图公司的富文本组件 https://github.com/meitu/MPITextKit
@@ -60,6 +62,8 @@ target 'PandaNote' do
   #  pod 'SVProgressHUD'
   pod 'MBProgressHUD'
   pod 'XLPagerTabStrip'
+#  浮动按钮组合 https://github.com/kciter/Floaty
+  pod 'Floaty'
   
   
 #  pod 'AFWebDAVManager', :git => 'https://github.com/AFNetworking/AFWebDAVManager.git'

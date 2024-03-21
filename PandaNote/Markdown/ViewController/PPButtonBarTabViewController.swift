@@ -14,7 +14,7 @@ public struct PPButtonBarPagerTabStripSettings {
 
     public struct Style {
         public var buttonBarBackgroundColor: UIColor?
-        public var buttonBarMinimumInteritemSpacing: CGFloat?
+        public var buttonBarMinimumInteritemSpacing: CGFloat = 0
         public var buttonBarMinimumLineSpacing: CGFloat?
         public var buttonBarLeftContentInset: CGFloat?
         public var buttonBarRightContentInset: CGFloat?
@@ -92,7 +92,7 @@ open class PPButtonBarTabViewController: PagerTabStripViewController, PagerTabSt
         buttonBarView.scrollsToTop = false
         let flowLayout = buttonBarView.collectionViewLayout as! UICollectionViewFlowLayout // swiftlint:disable:this force_cast
         flowLayout.scrollDirection = .horizontal
-        flowLayout.minimumInteritemSpacing = settings.style.buttonBarMinimumInteritemSpacing ?? flowLayout.minimumInteritemSpacing
+        flowLayout.minimumInteritemSpacing = settings.style.buttonBarMinimumInteritemSpacing 
         flowLayout.minimumLineSpacing = settings.style.buttonBarMinimumLineSpacing ?? flowLayout.minimumLineSpacing
         let sectionInset = flowLayout.sectionInset
         flowLayout.sectionInset = UIEdgeInsets(top: sectionInset.top, left: settings.style.buttonBarLeftContentInset ?? sectionInset.left, bottom: sectionInset.bottom, right: settings.style.buttonBarRightContentInset ?? sectionInset.right)
@@ -236,7 +236,7 @@ open class PPButtonBarTabViewController: PagerTabStripViewController, PagerTabSt
                 changeCurrentIndex(cells.first!, cells.last!, true)
             }
         }
-        moveToViewController(at: indexPath.item)
+        moveToViewController(at: indexPath.item, animated: false)
         buttonBarView.sendSubviewToBack(buttonBarView.selectedBar)
         buttonBarView.selectedBar.layer.zPosition = 0
     }

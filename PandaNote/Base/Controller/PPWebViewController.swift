@@ -11,7 +11,7 @@ import UIKit
 import WebKit.WKWebView
 import PDFKit
 
-class PPWebViewController: UIViewController,WKUIDelegate,WKNavigationDelegate,WKScriptMessageHandler, UIScrollViewDelegate {
+class PPWebViewController: PPBaseViewController,WKUIDelegate,WKNavigationDelegate,WKScriptMessageHandler, UIScrollViewDelegate {
     
     let Show_BottomToolbar = true
     
@@ -30,6 +30,16 @@ class PPWebViewController: UIViewController,WKUIDelegate,WKNavigationDelegate,WK
     var shouldGetAssets = false /// 获取网页静态资源
     var lastOffsetY : CGFloat = 0.0
     var bottomView : PPWebViewBottomToolbar!
+    lazy var topLine = {
+        let v = UIView()
+        v.backgroundColor = UIColor.lightGray
+        return v
+    }()
+    lazy var closeButton = {
+        let v = UIButton(type: .custom)
+        v.setImage(PPDrawIconView.iconImage(name: "x", width: 25, height: 25, color: PPCOLOR_GREEN), for: .normal)
+        return v
+    }()
     override func viewDidLoad() {
         super.viewDidLoad()
         self.view.backgroundColor = .white
@@ -279,6 +289,27 @@ class PPWebViewController: UIViewController,WKUIDelegate,WKNavigationDelegate,WK
             self.wkWebView.goForward()
         }
     }
+    func addTopLineIfNeeded() {
+        if topLine.superview != nil { return }
+        self.view.addSubview(topLine)
+        topLine.snp.makeConstraints { (make) in
+            make.left.right.equalTo(self.view)
+            make.top.equalTo(self.pp_safeLayoutGuideTop())
+            make.height.equalTo(0.5)
+        }
+    }
+    func addCloseButtonIfNeeded(addClickEvent:Bool? = false) {
+        if closeButton.superview != nil { return }
+        self.view.addSubview(closeButton)
+        if let c = addClickEvent, c == true {
+            closeButton.addTarget(self, action: #selector(pp_backAction), for: .touchUpInside)
+        }
+        closeButton.snp.makeConstraints { (make) in
+            make.top.left.equalTo(self.view).offset(10)
+            make.width.height.equalTo(30)
+        }
+    }
+
     @objc func moreAction()  {
         let items = ["提取本页面资源","刷新","复制当前网址URL","导出为PDF"]
         PPAlertAction.showSheet(withTitle: "更多操作", message: nil, cancelButtonTitle: "取消", destructiveButtonTitle: nil, otherButtonTitle: items) { (index) in

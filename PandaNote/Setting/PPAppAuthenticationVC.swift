@@ -37,7 +37,7 @@ class PPAppAuthenticationVC : PPBaseViewController {
                 // 验证成功
                 print("Authentication successful")
                 PPHUD.showHUDFromTop("验证成功")
-                self.dismiss(animated: true)
+                self.dismiss(animated: false)
                 
             } else {
                 // 验证失败，处理错误

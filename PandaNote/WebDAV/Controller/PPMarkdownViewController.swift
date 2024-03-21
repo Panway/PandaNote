@@ -32,6 +32,7 @@ final class PPMarkdownViewController: PPBaseViewController,
                                 PPFindReplaceDelegate,
                                 PPMDTextViewDelegate,
                                       IndicatorInfoProvider,
+                                      PPFloatButtonsDelegate,
                                 UISearchBarDelegate,
                                 UITextViewDelegate
 {
@@ -62,12 +63,12 @@ final class PPMarkdownViewController: PPBaseViewController,
         let drop = PPDropDown()
         return drop
     }()
-    let topToolView = PPMarkdownEditorToolBar(frame: CGRect(x: 0,y: 0,width: 40*3,height: 40), images: ["preview","done", "toolbar_more"])
+//    let topToolView = PPMarkdownEditorToolBar(frame: CGRect(x: 0,y: 0,width: 40*3,height: 40), images: ["preview","done", "toolbar_more"])
     let menuBtn = PPMarkdownEditorToolBar(frame: CGRect(x: 0,y: 0,width: 40*3,height: 40), images: ["menu"])
-
+    let floatButtons = PPFloatButtons()
     var findReplaceView: PPFindReplaceView!
     let rowColumnNumber = PPPaddedLabel()
-    
+    var webViewHeightRatio = 0.5
     //MARK: - Life Cycle
     override func viewDidLoad() {
         self.navigationController?.navigationBar.isHidden = true
@@ -236,8 +237,8 @@ final class PPMarkdownViewController: PPBaseViewController,
         editorToolBar.delegate = self
         textView.inputAccessoryView = editorToolBar
         
-        topToolView.delegate = self
-        topToolView.tag = TopToolBarTag
+//        topToolView.delegate = self
+//        topToolView.tag = TopToolBarTag
 
         self.view.addSubview(rowColumnNumber)
         rowColumnNumber.snp.makeConstraints { make in
@@ -251,11 +252,12 @@ final class PPMarkdownViewController: PPBaseViewController,
         rowColumnNumber.layer.cornerRadius = 3
         rowColumnNumber.layer.borderWidth = 1
         
-        let rightBarItem = UIBarButtonItem(customView: topToolView)
-        
-        self.navigationItem.rightBarButtonItem = rightBarItem
+//        let rightBarItem = UIBarButtonItem(customView: topToolView)
+//        self.navigationItem.rightBarButtonItem = rightBarItem
         
         self.setLeftBarButton()
+        floatButtons.delegate = self
+        floatButtons.showButtons(titles: ["预览","保存", "更多"], image: ["preview","done", "toolbar_more"], containerView: self.view)
     }
     func changed() -> Bool {
         if (self.textView == nil) {
@@ -364,7 +366,7 @@ final class PPMarkdownViewController: PPBaseViewController,
         })
         tocTable.tableView.reloadData()
         let maxWidth = 300.0 //用户允许的最大宽度
-        var maxTextWidth = PPAppConfig.shared.outlineMaxWidth + 40
+        let maxTextWidth = PPAppConfig.shared.outlineMaxWidth + 40
         tocTableWidthConstraint?.update(offset: min(maxWidth, maxTextWidth))
     }
     //MARK: - Private 私有方法
@@ -460,10 +462,9 @@ final class PPMarkdownViewController: PPBaseViewController,
                     maker.height.equalTo(self.view.safeAreaLayoutGuide.layoutFrame.height/2)
                 } else {
                     maker.left.right.equalTo(self.view)
-                    maker.height.equalTo(self.view).multipliedBy(0.5)
+                    maker.height.equalTo(self.view).multipliedBy(webViewHeightRatio)
                 }
             }
-            
         }
         
         var path = ""
@@ -476,12 +477,18 @@ final class PPMarkdownViewController: PPBaseViewController,
             webVC.urlString = path // file:///....
 //            webVC.urlString = "http://192.168.123.162:8081/markdown.html"
             webVC.markdownName = self.filePathStr
+            let lastPath = (self.filePathStr as NSString).lastPathComponent
+            webVC.imageRootPath = "\(PPDiskCache.shared.path)/\(PPUserInfo.shared.webDAVRemark)\(self.filePathStr.replacingOccurrences(of: lastPath, with: ""))"
+            webVC.imageRootPath = URL(fileURLWithPath: webVC.imageRootPath ?? "").absoluteString//主要是为了转码路径的中文
         }
 
         self.addChild(webVC)
         self.view.addSubview(webVC.view)
         webVC.view.frame = self.view.frame
         webVC.didMove(toParent: self)
+        webVC.addTopLineIfNeeded()
+        webVC.addCloseButtonIfNeeded()
+        webVC.closeButton.addTarget(self, action: #selector(cancelPreviewAction), for: .touchUpInside)
         let width = self.view.frame.size.width
         let height = self.view.frame.size.height
         if splitMode == .leftAndRight {
@@ -492,14 +499,17 @@ final class PPMarkdownViewController: PPBaseViewController,
 //            }
         }
         else if splitMode == .upAndDown {
-            webVC.view.frame = CGRect(x: 0, y: self.view.frame.size.height/2, width: self.view.frame.size.width, height: self.view.frame.size.height/2)
+            webVC.view.frame = CGRect(x: 0,
+                                      y: self.view.frame.size.height * (1 - webViewHeightRatio),
+                                      width: self.view.frame.size.width,
+                                      height: self.view.frame.size.height * webViewHeightRatio)
             // 不能用自动布局，不然再次push进入webVC就是一片黑,webVC.view不会复原
 //            webVC.view.snp.remakeConstraints { maker in
 //                maker.bottom.left.right.equalTo(self.view)
 //                maker.height.equalTo(self.view).multipliedBy(0.5)
 //            }
         }
-        
+        webViewHeightRatio = 0.5 //高度恢复成50%，以供上下预览
         PPUserInfo.shared.webViewController.markdownStr = textWithoutUselessChar()
         PPUserInfo.shared.webViewController.loadURL()
         
@@ -508,28 +518,14 @@ final class PPMarkdownViewController: PPBaseViewController,
     /// 预览markdown
     @objc func previewAction()  {
 //        self.splitMode = .none
-        self.switchSplitMode(.none)
+        webViewHeightRatio = 0.99
+        self.switchSplitMode(.upAndDown)
         self.textView.resignFirstResponder()
-        let webVC = PPUserInfo.shared.webViewController//PPWebViewController()
-        var path = ""
-        if self.filePathStr.hasSuffix("html") {//HTML文件直接显示
-            let urlStr = self.filePathStr.pp_fileCachePath()
-            webVC.fileURLStr = urlStr
-        }
-        else {
-            path = Bundle.main.url(forResource: "markdown", withExtension:"html")?.absoluteString ?? ""
-            webVC.markdownStr = textWithoutUselessChar()
-            webVC.urlString = path // file:///....
-//            webVC.urlString = "http://127.0.0.1:8083/markdown.html"//调试用 for Debug use
-            webVC.markdownName = self.filePathStr
-            let lastPath = (self.filePathStr as NSString).lastPathComponent
-            webVC.imageRootPath = "\(PPDiskCache.shared.path)/\(PPUserInfo.shared.webDAVRemark)\(self.filePathStr.replacingOccurrences(of: lastPath, with: ""))"
-            webVC.imageRootPath = URL(fileURLWithPath: webVC.imageRootPath ?? "").absoluteString//主要是为了转码路径的中文
-        }
         
-//        let fileURL = URL.init(fileURLWithPath: <#T##String#>)
-        self.navigationController?.pushViewController(webVC, animated: true)
-        
+    }
+    @objc func cancelPreviewAction() {
+        self.switchSplitMode(.none)
+
     }
     @objc func shareTextAction(sender:UIButton?)  {
         let fileURL = URL(fileURLWithPath: PPDiskCache.shared.path + self.filePathStr)
@@ -626,7 +622,7 @@ final class PPMarkdownViewController: PPBaseViewController,
                 self.textView.text = self.textView.text.replacingOccurrences(of: "\n", with: "")
             }
         }
-        self.dropdown.anchorView = topToolView
+        self.dropdown.anchorView = menuBtn
         self.dropdown.show()
     }
     //初始化样式
@@ -661,20 +657,22 @@ final class PPMarkdownViewController: PPBaseViewController,
         
     }
 
-
+    func didClickFloatButtons(title: String) {
+        if title == "预览" {
+            previewAction()
+        }
+        else if title == "保存" {
+            saveTextAction()
+        }
+        else if title == "更多" {
+            moreAction()
+        }
+    }
     // MARK: PPEditorToolBarDelegate
     func didClickEditorToolBar(toolBar: PPMarkdownEditorToolBar, index: Int,totalCount: Int) {
         debugPrint("didClickEditorToolBar:\(index)")
         if toolBar.tag == TopToolBarTag {
-            if index == 0 {
-                previewAction()
-            }
-            else if index == 1 {
-                saveTextAction()
-            }
-            else if index == 2 {
-                moreAction()
-            }
+            
             return
         }
         else if toolBar.tag == tocTag {

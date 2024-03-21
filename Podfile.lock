@@ -1,5 +1,5 @@
 PODS:
-  - Alamofire (5.7.1)
+  - Alamofire (5.9.0)
   - BTNavigationDropdownMenu (0.7)
   - ContextMenu (0.4.0)
   - CryptoSwift (1.5.1)
@@ -8,6 +8,7 @@ PODS:
   - FilesProvider (0.26.0)
   - FLAnimatedImage (1.0.17)
   - FLEX (5.22.10)
+  - Floaty (4.2.0)
   - FMDB (2.7.5):
     - FMDB/standard (= 2.7.5)
   - FMDB/standard (2.7.5)
@@ -21,7 +22,7 @@ PODS:
   - MBProgressHUD (1.2.0)
   - MJRefresh (3.7.5)
   - MonkeyKing (2.2.1)
-  - MPITextKit (0.2.1)
+  - MPITextKit (0.2.4)
   - NewPopMenu (2.1.2)
   - ObjectMapper (4.2.0)
   - PINCache (3.0.3):
@@ -40,11 +41,11 @@ PODS:
   - PPiOSKit/SwipePopGesture (0.0.1)
   - SKPhotoBrowser (7.1.0)
   - SnapKit (5.6.0)
-  - TZImagePickerController (3.8.3):
-    - TZImagePickerController/Basic (= 3.8.3)
-    - TZImagePickerController/Location (= 3.8.3)
-  - TZImagePickerController/Basic (3.8.3)
-  - TZImagePickerController/Location (3.8.3)
+  - TZImagePickerController (3.8.4):
+    - TZImagePickerController/Basic (= 3.8.4)
+    - TZImagePickerController/Location (= 3.8.4)
+  - TZImagePickerController/Basic (3.8.4)
+  - TZImagePickerController/Location (3.8.4)
   - XLPagerTabStrip (9.0.0)
 
 DEPENDENCIES:
@@ -57,6 +58,7 @@ DEPENDENCIES:
   - FilesProvider
   - FLAnimatedImage
   - FLEX
+  - Floaty
   - FMDB
   - GCDWebServer
   - Highlightr
@@ -91,6 +93,7 @@ SPEC REPOS:
     - FilesProvider
     - FLAnimatedImage
     - FLEX
+    - Floaty
     - FMDB
     - GCDWebServer
     - Highlightr
@@ -120,7 +123,7 @@ CHECKOUT OPTIONS:
     :git: https://github.com/Panway/CodeSnipetCollection.git
 
 SPEC CHECKSUMS:
-  Alamofire: 0123a34370cb170936ae79a8df46cc62b2edeb88
+  Alamofire: 02b772c9910e8eba1a079227c32fbd9e46c90a24
   BTNavigationDropdownMenu: 57a72c74dc211db3564f5be168f4f7643491a7de
   ContextMenu: f835e09a93f1c28c631b76ee94396d9570397fd1
   CryptoSwift: c4f2debceb38bf44c80659afe009f71e23e4a082
@@ -129,6 +132,7 @@ SPEC CHECKSUMS:
   FilesProvider: 2a8ae17d8b9c23a6feadb1308ee638fa31d21065
   FLAnimatedImage: bbf914596368867157cc71b38a8ec834b3eeb32b
   FLEX: f21ee4f498eed3f8a1eded66b21939fd3b7a22ce
+  Floaty: e2bd5a0f6f7f70899e26ff2da31081c8bee8d1b0
   FMDB: 2ce00b547f966261cd18927a3ddb07cb6f3db82a
   GCDWebServer: 2c156a56c8226e2d5c0c3f208a3621ccffbe3ce4
   Highlightr: 595f3e100737c8de41113385da8bd0b5b65212c6
@@ -138,7 +142,7 @@ SPEC CHECKSUMS:
   MBProgressHUD: 3ee5efcc380f6a79a7cc9b363dd669c5e1ae7406
   MJRefresh: fdf5e979eb406a0341468932d1dfc8b7f9fce961
   MonkeyKing: 196838a3b4c97e95915f3e7046fb2d6044f06101
-  MPITextKit: c35d4de736a88802122f957791504c16ed743e9d
+  MPITextKit: e9b17481ce626c6298be148c4ccea2ee872bc9a5
   NewPopMenu: c6129e08e8192f6257ceb5f9a4357e1b59c6e2e7
   ObjectMapper: 1eb41f610210777375fa806bf161dc39fb832b81
   PINCache: 7a8fc1a691173d21dbddbf86cd515de6efa55086
@@ -146,9 +150,9 @@ SPEC CHECKSUMS:
   PPiOSKit: 9f049cf7ff47cefda7f747a404254ee1a5ae7f85
   SKPhotoBrowser: cd95b95a6f352fc2a50992721299f75ead77f9ab
   SnapKit: e01d52ebb8ddbc333eefe2132acf85c8227d9c25
-  TZImagePickerController: e9909edbadf7381140efc5b5c9f5bdbfd630f7d4
+  TZImagePickerController: f1c9f1cae6ac0e30b31aaa9698f9bf4a7cf5b84f
   XLPagerTabStrip: 61c57fd61f611ee5f01ff1495ad6fbee8bf496c5
 
-PODFILE CHECKSUM: 6fa26d2246fc1323d611d818d3e17564715e2789
+PODFILE CHECKSUM: c59b27098117dcffeb25cc7d6c9532caedcd9a67
 
 COCOAPODS: 1.14.3
