@@ -18,6 +18,10 @@ import Photos
 import MonkeyKing
 import SnapKit
 
+#if targetEnvironment(macCatalyst)
+import Dynamic
+#endif
+
 fileprivate let tag_newfile = 2333
 fileprivate let tag_rename = 2334
 let tag_search = 2335
@@ -245,7 +249,9 @@ class PPFileListViewController: PPBaseViewController,
         if !clickItem.isDirectory {
             self.dropdown.dataSource.append(contentsOf: ["打开为文本","预览","浏览器打开"])
 #if targetEnvironment(macCatalyst)
-            self.dropdown.dataSource.append("在访达中显示")
+            if clickItem.downloadProgress == 1 {
+                self.dropdown.dataSource.append("在访达中显示")
+            }
 #endif
         }
         self.dropdown.selectionAction = { (index: Int, item: String) in
@@ -280,6 +286,14 @@ class PPFileListViewController: PPBaseViewController,
             }
             else if item == "打开为文本" {
                 self.openAsTextFile(fileObj)
+            }
+            else if item == "在访达中显示" {
+#if targetEnvironment(macCatalyst)
+                let fileObj = self.dataSource[cellIndex]
+                let path = fileObj.path.diskCachePath
+                let fileURL = URL(fileURLWithPath: path) // 指定要打开的文件路径
+                Dynamic.NSWorkspace.sharedWorkspace.activateFileViewerSelectingURLs([fileURL])
+#endif
             }
         }
         self.dropdown.anchorView = sender
@@ -400,7 +414,7 @@ class PPFileListViewController: PPBaseViewController,
     //https://stackoverflow.com/a/58006735/4493393
     //here is how I selecte file name `Panda` from `Panda.txt`
     func textFieldDidBeginEditing(_ textField: UITextField) {
-        guard let string = textField.text else { return }
+        guard textField.text != nil else { return }
         if textField.tag == tag_rename {
             textField.selectNamePartOfFileName()
         }
@@ -694,11 +708,18 @@ class PPFileListViewController: PPBaseViewController,
         debugPrint(documents)
         guard let documents = documents else { return }//为空返回
         for obj in documents {
-            guard let objData = try? Data(contentsOf: obj.fileURL) else { return }//为空返回
+            guard var objData = try? Data(contentsOf: obj.fileURL) else { return }//为空返回
             var fileName = obj.fileURL.lastPathComponent
             if obj.fileURL.absoluteString.pp_isMediaFile() &&
                 PPUserInfo.pp_boolValue("uploadImageNameUseCreationDate") {
                 fileName = obj.fileURL.path.pp_getFileModificationDate().pp_stringWithoutColon() + "." + obj.fileURL.pathExtension
+            }
+            //压缩图片
+            if fileName.pp_isImageFile() && PPUserInfo.pp_boolValue("pp_compressImageBeforeUpload") {
+                let compressionQuality = PPAppConfig.shared.getFloat("pp_imageCompressionQuality")
+                if let imageData = UIImage(data: objData)?.jpegData(compressionQuality: compressionQuality) {
+                    objData = imageData
+                }
             }
             PPFileManager.shared.createFile(path: self.pathStr + fileName,
                                             parentID: self.pathID,
@@ -805,18 +826,16 @@ class PPFileListViewController: PPBaseViewController,
     }
     
     func openAsTextFile(_ fileObj:PPFileObject) {
+        let vc = PPMarkdownViewController()
+        vc.filePathStr = self.getPathNotEmpty(fileObj)
         if(fileObj.size > 2048*1024) {
             PPAlertAction.showAlert(withTitle: "当前文件过大", msg: "是否继续", buttonsStatement: ["确定","取消"]) { index in
                 if index == 0 {
-                    let vc = PPMarkdownViewController()
-                    vc.filePathStr = self.getPathNotEmpty(fileObj)
                     self.navigationController?.pushViewController(vc, animated: true)
                 }
             }
         }
         else {
-            let vc = PPMarkdownViewController()
-            vc.filePathStr = self.getPathNotEmpty(fileObj)
             self.navigationController?.pushViewController(vc, animated: true)
         }
         

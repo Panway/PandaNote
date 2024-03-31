@@ -92,6 +92,10 @@ class PPAppConfig: NSObject {
         return Int(config[key] ?? "") ?? 0
     }
     
+    func getFloat(_ key:String) -> CGFloat {
+        return config[key]?.toCGFloat() ?? 0.0
+    }
+    
     func setItem(_ key:String, _ value:String) {
         config[key] = value
         saveToJSONFile()

@@ -5,6 +5,7 @@ PODS:
   - CryptoSwift (1.5.1)
   - Down (0.11.0)
   - DropDown (2.3.13)
+  - Dynamic (1.0.0)
   - FilesProvider (0.26.0)
   - FLAnimatedImage (1.0.17)
   - FLEX (5.22.10)
@@ -55,6 +56,7 @@ DEPENDENCIES:
   - CryptoSwift
   - Down
   - DropDown
+  - Dynamic (from `https://github.com/Panway/Dynamic.git`)
   - FilesProvider
   - FLAnimatedImage
   - FLEX
@@ -114,10 +116,15 @@ SPEC REPOS:
     - XLPagerTabStrip
 
 EXTERNAL SOURCES:
+  Dynamic:
+    :git: https://github.com/Panway/Dynamic.git
   PPiOSKit:
     :git: https://github.com/Panway/CodeSnipetCollection.git
 
 CHECKOUT OPTIONS:
+  Dynamic:
+    :commit: e05d45eb1546f2422ffb6bbbb66872a379e7e10e
+    :git: https://github.com/Panway/Dynamic.git
   PPiOSKit:
     :commit: 9ec2070fd9b29219661e5e5f3934f4775a58a17e
     :git: https://github.com/Panway/CodeSnipetCollection.git
@@ -129,6 +136,7 @@ SPEC CHECKSUMS:
   CryptoSwift: c4f2debceb38bf44c80659afe009f71e23e4a082
   Down: b6ba1bc985c9d2f4e15e3b293d2207766fa12612
   DropDown: 8a2116376c1981888557f72ec2ffc9a5e0e456ec
+  Dynamic: dd5221485aaa348877d6f1efa7d645506da8bd81
   FilesProvider: 2a8ae17d8b9c23a6feadb1308ee638fa31d21065
   FLAnimatedImage: bbf914596368867157cc71b38a8ec834b3eeb32b
   FLEX: f21ee4f498eed3f8a1eded66b21939fd3b7a22ce
@@ -153,6 +161,6 @@ SPEC CHECKSUMS:
   TZImagePickerController: f1c9f1cae6ac0e30b31aaa9698f9bf4a7cf5b84f
   XLPagerTabStrip: 61c57fd61f611ee5f01ff1495ad6fbee8bf496c5
 
-PODFILE CHECKSUM: c59b27098117dcffeb25cc7d6c9532caedcd9a67
+PODFILE CHECKSUM: 4039b28c22dcca558552ddd2736a6ce49bf96ab4
 
 COCOAPODS: 1.14.3

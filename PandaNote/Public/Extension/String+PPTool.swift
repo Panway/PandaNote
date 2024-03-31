@@ -113,6 +113,23 @@ extension String {
         }
         return result
     }
+    
+    func toCGFloat() -> CGFloat {
+        guard let doubleValue = Double(self) else {
+            return 0.0 //nil
+        }
+        return CGFloat(doubleValue)
+    }
+    
+    private func toCGFloat2() -> CGFloat {
+        if let n = NumberFormatter().number(from: self) {
+            return CGFloat(n.floatValue)
+        }
+        else {
+            return CGFloat(0)
+        }
+    }
+    
 }
 
 // MARK: - URL 相关处理

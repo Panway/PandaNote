@@ -93,6 +93,7 @@ target 'PandaNote' do
   pod 'PPiOSKit/CommomViews', :git=>'https://github.com/Panway/CodeSnipetCollection.git'
   #快捷AlertView和AlertAction (Block封装)
   pod 'PPiOSKit/PPAlertAction', :git=>'https://github.com/Panway/CodeSnipetCollection.git'
+  pod 'Dynamic', :git=>'https://github.com/Panway/Dynamic.git'
   #----------私有----------
   
   

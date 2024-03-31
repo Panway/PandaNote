@@ -394,8 +394,8 @@ class PPFileManager: NSObject {
             webdavService = PPWebDAVService(url: PPUserInfo.shared.webDAVServerURL,
                                             username: user,
                                             password: password)
-        default:
-            debugPrint("not init Cloud Service")
+//        default:
+//            debugPrint("not init Cloud Service")
         }
         return true
     }
@@ -451,8 +451,7 @@ class PPFileManager: NSObject {
                 if let name = PHAssetResource.assetResources(for: asset).first?.originalFilename {
                     originalFilename = name
                 }
-                let compressionQ = PPAppConfig.shared.getItem("pp_imageCompressionQuality")
-                let compressionQuality = NumberFormatter().number(from: compressionQ) as? CGFloat ?? CGFloat(0.5)
+                let compressionQuality = PPAppConfig.shared.getFloat("pp_imageCompressionQuality")
                 //"IMG_0111.HEIC" -> "IMG_0111.jpg"
                 originalFilename = String(originalFilename.split(separator: ".")[0]) + ".jpg"
                 if let imageData = restulImage?.jpegData(compressionQuality: compressionQuality) {

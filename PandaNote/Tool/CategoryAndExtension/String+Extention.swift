@@ -559,14 +559,6 @@ extension String{
         }
     }
     
-    func toCGFloat() -> CGFloat {
-        if let n = NumberFormatter().number(from: self) {
-            return CGFloat(n.floatValue)
-        }
-        else {
-            return CGFloat(0)
-        }
-    }
 }
 
 
@@ -648,6 +640,13 @@ extension Date {
     }
 }
 
+extension String {
+    
+    // 将方法定义为只读计算属性，然后在其中调用方法并返回其结果。这样做的话，你就可以像访问属性一样调用方法。
+    var diskCachePath: String {
+        return "\(PPDiskCache.shared.path)/\(PPUserInfo.shared.webDAVRemark)/\(self)".replacingOccurrences(of: "//", with: "/")
+    }
+}
 //extension String.Encoding {
 //    static let gb_18030_2000 = String.Encoding(rawValue: CFStringConvertEncodingToNSStringEncoding(CFStringEncoding(CFStringEncodings.GB_18030_2000.rawValue)))
 //}
