@@ -140,4 +140,22 @@ extension String {
         }
         return host //host.hasPrefix("www.") ? String(host.dropFirst(4)) : host
     }
+    
+    func pp_extractFileNameFromURL() -> String {
+        // 查找 "http" 开头的字符串
+//        if self.hasPrefix("http") {
+            // 分割字符串，获取最后一个路径组件
+            let components = self.components(separatedBy: "/")
+            if let lastComponent = components.last {
+                // 去除文件扩展名
+//                let fileName = (lastComponent as NSString).deletingPathExtension
+                let res = lastComponent.pp_split("?")
+                    if res.count > 1 {
+                    return res.first ?? ""
+                }
+                return lastComponent
+            }
+//        }
+        return ""
+    }
 }

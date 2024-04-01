@@ -19,7 +19,9 @@ typealias KFImageResource = Kingfisher.ImageResource
     case grid
     case gridLarge
     case gridSuperLarge
-    case photo
+    case photoAlbum
+    case photoAlbumLarge
+    case photoAlbumSuperLarge
 }
 
 public protocol PPFileListCellDelegate:AnyObject {
@@ -221,13 +223,26 @@ class PPFileListCell: PPBaseCollectionViewCell {
         downloadFinishedImage.frame = CGRect(x: cellW - 30, y: cellH - 20, width: 20, height: 20)
         
     }
+    
+    func pp_photoAlbumMode() {
+        let cellW = self.contentView.frame.size.width
+        let cellH = self.contentView.frame.size.height
+        if(cellW == 0) {return}
+        let top : CGFloat = 1.0
+        iconImage.frame = CGRect(x: top, y: top, width: cellW - top*2, height: cellW - top*2)
+        downloadFinishedImage.frame = CGRect(x: cellW - 20, y: cellH - 20, width: 20, height: 20)
+    }
+    
     override func layoutSubviews() {
         super.layoutSubviews()
         if self.viewMode.rawValue <= PPFileListCellViewMode.listSuperLarge.rawValue {
             pp_listMode()
         }
-        else {
+        else if self.viewMode.rawValue <= PPFileListCellViewMode.gridSuperLarge.rawValue {
             pp_gridMode()
+        }
+        else {
+            pp_photoAlbumMode()
         }
     }
     func updateLayout(_ mode:PPFileListCellViewMode) {
@@ -237,20 +252,27 @@ class PPFileListCell: PPBaseCollectionViewCell {
         self.viewMode = mode
         //debugPrint("布局",self.viewMode.rawValue)
         if mode.rawValue <= PPFileListCellViewMode.listSuperLarge.rawValue {
-//            pp_listMode()
+            titleLabel.isHidden = false
+            timeLabel.isHidden = false
             titleLabel.numberOfLines = viewMode == .listSuperLarge ? 2 : 1
             titleLabel.textAlignment = .left
             titleLabel.font = UIFont.boldSystemFont(ofSize: CGFloat(15 + viewMode.rawValue*1))
             timeLabel.textAlignment = .left
         }
-        else {
-//            pp_gridMode()
+        else if mode.rawValue <= PPFileListCellViewMode.gridSuperLarge.rawValue {
+            // 略缩图模式
+            titleLabel.isHidden = false
+            timeLabel.isHidden = true
             titleLabel.textAlignment = .center
             titleLabel.numberOfLines = 2
             titleLabel.font = UIFont.boldSystemFont(ofSize: 15)
-            timeLabel.isHidden = true
             timeLabel.textAlignment = .center
             moreBtn.setImage(UIImage(named: "more_actions"), for: .normal)
+        }
+        else {
+            // 相册模式 Photo Gallery / photo album mode
+            titleLabel.isHidden = true
+            timeLabel.isHidden = true
         }
     }
     // 更新进度条
@@ -344,27 +366,31 @@ class PPFileListCell: PPBaseCollectionViewCell {
             return CGSize(width: screenWidth, height: 70)
         }
         else if viewMode == .grid {
-            itemsPerRow = 3
-            if screenWidth > 414 {
-                itemsPerRow = CGFloat(Int(screenWidth / 80.0))
-            }
-            let widthPerItem = screenWidth / itemsPerRow
+            let columnNum = screenWidth > 414 ? max(4, floor(screenWidth / 80)) : 4
+            let widthPerItem = screenWidth / columnNum
             return CGSize(width: widthPerItem, height: widthPerItem + 70)
         }
         else if viewMode == .gridLarge {
-            itemsPerRow = 2
-            if screenWidth > 414 {
-                itemsPerRow = CGFloat(Int(screenWidth / 110))
-            }
-            let widthPerItem = screenWidth / itemsPerRow
+            let columnNum = screenWidth > 414 ? max(3, floor(screenWidth / 110)) : 3
+            let widthPerItem = screenWidth / columnNum
             return CGSize(width: widthPerItem, height: widthPerItem + 70)
         }
         else if viewMode == .gridSuperLarge {
-            itemsPerRow = CGFloat(Int(screenWidth / 140.0))
+            itemsPerRow = floor(screenWidth / 140.0)
             let widthPerItem = screenWidth / itemsPerRow
             return CGSize(width: widthPerItem, height: widthPerItem + 70)
         }
-        else if viewMode == .photo {
+        else if viewMode == .photoAlbum {
+            itemsPerRow = 5
+            let widthPerItem = screenWidth / itemsPerRow
+            return CGSize(width: widthPerItem, height: widthPerItem)
+        }
+        else if viewMode == .photoAlbumLarge {
+            itemsPerRow = 4
+            let widthPerItem = screenWidth / itemsPerRow
+            return CGSize(width: widthPerItem, height: widthPerItem)
+        }
+        else if viewMode == .photoAlbumSuperLarge {
             itemsPerRow = 3
             let widthPerItem = screenWidth / itemsPerRow
             return CGSize(width: widthPerItem, height: widthPerItem)

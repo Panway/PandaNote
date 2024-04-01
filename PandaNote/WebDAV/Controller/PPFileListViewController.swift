@@ -301,13 +301,27 @@ class PPFileListViewController: PPBaseViewController,
     }
     //MARK: 顶部工具条
     func didClickFileListToolBar(index: Int, title: String, button:UIButton) {
-        debugPrint("点击顶部工具条:\(index)\(title)")
+//        debugPrint("点击顶部工具条:\(index)\(title)")
         if title == "视图" {
-            let dataS = ["列表（小）","列表（中）","列表（大）","图标（小）","图标（中）","图标（大）"]
+            let dataS = ["列表（小）","列表（中）","列表（大）","图标（小）","图标（中）","图标（大）","相册"]
             let selectStr = dataS[PPAppConfig.shared.getIntItem("fileViewMode")];
             self.dropdown.dataSource = dataS.map({$0 == selectStr ? "\($0) ✅" : $0});
             self.dropdown.selectionAction = { (index: Int, item: String) in
-                self.cellStyle = PPFileListCellViewMode(rawValue: index) ?? .list
+                // 如果a=1，就让它等于2;如果a=2，就让它等于3;如果a=3，就让它等于1;如何用swift写出最精简的逻辑? -> a = (a % 3) + 1
+                let photoIndex = PPFileListCellViewMode.photoAlbum.rawValue
+                if index >= photoIndex {
+                    if self.cellStyle.rawValue >= photoIndex {
+                        self.cellStyle = PPFileListCellViewMode(rawValue: ((self.cellStyle.rawValue - 5) % 3) + 1 + 5) ?? .photoAlbum
+                    }
+                    else {
+                        self.cellStyle = PPFileListCellViewMode(rawValue: index) ?? .list
+                    }
+                    self.dataSource = self.imageArray
+                }
+                else {
+                    self.cellStyle = PPFileListCellViewMode(rawValue: index) ?? .list
+                    self.dataSource = self.rawDataSource
+                }
                 PPAppConfig.shared.setItem("fileViewMode","\(index)")
                 self.collectionView.reloadData()
             }
@@ -819,6 +833,9 @@ class PPFileListViewController: PPBaseViewController,
             self.rawDataSource = contents
             self.dataSource = self.sort(array: contents, orderBy: PPAppConfig.shared.fileListOrder, basePath: self.pathStr);
             self.imageArray = self.rawDataSource.filter{$0.name.pp_isImageFile()}
+            if self.cellStyle == .photoAlbum {
+                self.dataSource = self.imageArray
+            }
             self.collectionView.endRefreshing()
             self.collectionView.reloadData()
         }
