@@ -37,7 +37,29 @@ def fix_deployment_target(your_target,min_surpport_version)
     end
     puts "fix deployment target finished 已设置工程支持的最低版本为#{min_surpport_version.to_s}"
 end
-
+# https://stackoverflow.com/questions/63614048/xcode-12-sessiondelegate-has-different-definitions-in-different-modules
+# 解决问题：'SessionDelegate' has different definitions in different modules; first difference is definition in module 'Alamofire.Swift' found 0 referenced protocols
+def fix_has_different_definitions_in_different_modules(your_target)
+    project_name = your_target
+    full_proj_path = Dir.pwd #当前目录，比如/Users/xxx/Documents/Project/iOS/PandaNote
+    full_proj_path = full_proj_path + "/Pods/*.xcodeproj"
+    puts full_proj_path
+    all_file = Dir[full_proj_path]
+    all_file.each do |file_name|
+        project = Xcodeproj::Project.open(file_name)
+        project.targets.each do |target|
+            target.build_configurations.each do |config|
+                if target.name == 'Alamofire'
+                    target.build_configurations.each do |config|  
+                        config.build_settings['SWIFT_INSTALL_OBJC_HEADER'] = 'NO'                 
+                    end                                                        
+                end
+            end
+        end
+        project.save
+    end
+    puts "fix error: 'SessionDelegate' has different definitions in different modules; first difference is definition in module 'Alamofire.Swift' found 0 referenced protocols"
+end
 # 禁止该死的Documentation Issue
 def disableDocumentationIssue(your_target,isAllPods)
     puts isAllPods.class
@@ -107,6 +129,8 @@ end
 def handleCommand(command,param)
     if command == "fix_deployment_target"
         fix_deployment_target("PandaNote",param)
+    elsif command == "fix_has_different_definitions_in_different_modules"
+        fix_has_different_definitions_in_different_modules(param)
     else
         puts "sorry your command is not found"
     end

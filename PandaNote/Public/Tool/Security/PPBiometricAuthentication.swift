@@ -26,6 +26,20 @@ class PPBiometricAuthentication {
             }
         }
     }
+    func isFaceIDAvailable() -> Bool {
+        let context = LAContext()
+        var error: NSError?
+        // 检查设备是否支持生物识别
+        if context.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: &error) {
+            // 检查设备是否支持面容 ID
+            if #available(iOS 11.0, *) {
+                if context.biometryType == .faceID {
+                    return true
+                }
+            }
+        }
+        return false
+    }
 }
 
 enum PPBiometricAuthenticationError: Error {

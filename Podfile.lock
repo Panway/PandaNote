@@ -2,6 +2,7 @@ PODS:
   - Alamofire (5.9.0)
   - BTNavigationDropdownMenu (0.7)
   - ContextMenu (0.4.0)
+  - ContextMenuSwift (1.0.0)
   - CryptoSwift (1.5.1)
   - Down (0.11.0)
   - DropDown (2.3.13)
@@ -42,17 +43,18 @@ PODS:
   - PPiOSKit/SwipePopGesture (0.0.1)
   - SKPhotoBrowser (7.1.0)
   - SnapKit (5.6.0)
-  - TZImagePickerController (3.8.4):
-    - TZImagePickerController/Basic (= 3.8.4)
-    - TZImagePickerController/Location (= 3.8.4)
-  - TZImagePickerController/Basic (3.8.4)
-  - TZImagePickerController/Location (3.8.4)
+  - TZImagePickerController (3.8.8):
+    - TZImagePickerController/Basic (= 3.8.8)
+    - TZImagePickerController/Location (= 3.8.8)
+  - TZImagePickerController/Basic (3.8.8)
+  - TZImagePickerController/Location (3.8.8)
   - XLPagerTabStrip (9.0.0)
 
 DEPENDENCIES:
   - Alamofire (~> 5.0)
   - BTNavigationDropdownMenu
   - ContextMenu
+  - ContextMenuSwift
   - CryptoSwift
   - Down
   - DropDown
@@ -89,6 +91,7 @@ SPEC REPOS:
     - Alamofire
     - BTNavigationDropdownMenu
     - ContextMenu
+    - ContextMenuSwift
     - CryptoSwift
     - Down
     - DropDown
@@ -133,6 +136,7 @@ SPEC CHECKSUMS:
   Alamofire: 02b772c9910e8eba1a079227c32fbd9e46c90a24
   BTNavigationDropdownMenu: 57a72c74dc211db3564f5be168f4f7643491a7de
   ContextMenu: f835e09a93f1c28c631b76ee94396d9570397fd1
+  ContextMenuSwift: c89068a89ccd9210dfcaee3bdc558e65aa74899b
   CryptoSwift: c4f2debceb38bf44c80659afe009f71e23e4a082
   Down: b6ba1bc985c9d2f4e15e3b293d2207766fa12612
   DropDown: 8a2116376c1981888557f72ec2ffc9a5e0e456ec
@@ -158,9 +162,9 @@ SPEC CHECKSUMS:
   PPiOSKit: 9f049cf7ff47cefda7f747a404254ee1a5ae7f85
   SKPhotoBrowser: cd95b95a6f352fc2a50992721299f75ead77f9ab
   SnapKit: e01d52ebb8ddbc333eefe2132acf85c8227d9c25
-  TZImagePickerController: f1c9f1cae6ac0e30b31aaa9698f9bf4a7cf5b84f
+  TZImagePickerController: d084a7b97c82d387e7669dd86dc9a9057500aacf
   XLPagerTabStrip: 61c57fd61f611ee5f01ff1495ad6fbee8bf496c5
 
-PODFILE CHECKSUM: 4039b28c22dcca558552ddd2736a6ce49bf96ab4
+PODFILE CHECKSUM: ce365c248e37f24974a7df36d5de0f223d6bc866
 
-COCOAPODS: 1.14.3
+COCOAPODS: 1.16.2

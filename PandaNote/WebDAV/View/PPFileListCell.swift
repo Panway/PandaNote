@@ -353,9 +353,10 @@ class PPFileListCell: PPBaseCollectionViewCell {
     }
 
     //macOS 改变App窗口大小后，屏幕宽度还是固定值，不能用
-    func getSize(_ mode:PPFileListCellViewMode,_ screenWidth:CGFloat) -> CGSize {
+    class func getSize(_ mode:PPFileListCellViewMode,_ screenWidth:CGFloat ) -> CGSize {
 //        print("screenWidth===\(screenWidth)")
-        viewMode = mode
+        var itemsPerRow = 3.0;
+        let viewMode = mode
         if viewMode == .list {
             return CGSize(width: screenWidth, height: 50)
         }

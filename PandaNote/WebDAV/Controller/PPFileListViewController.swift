@@ -178,11 +178,12 @@ class PPFileListViewController: PPBaseViewController,
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        let cell = collectionView.dequeueReusableCell(
+        guard let cell = collectionView.dequeueReusableCell(
             withReuseIdentifier: kPPCollectionViewCellID,
-            for: indexPath) as! PPFileListCell
-        //        cell.backgroundColor = .black
-        // Configure the cell
+            for: indexPath) as? PPFileListCell else {
+            // 处理解包失败的情况，可以返回一个默认的 cell 或者抛出一个错误
+            return UICollectionViewCell()
+        }
         let fileObj = self.dataSource[indexPath.row]
         if fileObj.path.length == 0 {
             fileObj.path = pathStr + fileObj.name
@@ -214,11 +215,11 @@ class PPFileListViewController: PPBaseViewController,
         layout collectionViewLayout: UICollectionViewLayout,
         sizeForItemAt indexPath: IndexPath
     ) -> CGSize {
-        let cell = collectionView.dequeueReusableCell(
-            withReuseIdentifier: kPPCollectionViewCellID,
-            for: indexPath) as! PPFileListCell
+//        let cell = collectionView.dequeueReusableCell(
+//            withReuseIdentifier: kPPCollectionViewCellID,
+//            for: indexPath) as! PPFileListCell
         let width = view.frame.size.width
-        return cell.getSize(self.cellStyle, width)
+        return PPFileListCell.getSize(self.cellStyle, width)
     }
     // 3 返回单元格、页眉和页脚之间的间距
 //    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, insetForSectionAt section: Int
@@ -807,7 +808,11 @@ class PPFileListViewController: PPBaseViewController,
                 self.collectionView.endRefreshing()
                 if case let myError as PPCloudServiceError = error {
                     if myError == .forcedLoginRequired || myError == .twoFactorAuthCodeError {
-                        PPHUD.showHUDFromTop("登录状态已失效，请重新登录", isError: true)
+                        var tips = "登录状态已失效"
+                        if myError == .twoFactorAuthCodeError {
+                            tips = "两步认证验证码错误"
+                        }
+                        PPHUD.showHUDFromTop(tips + "，请重新登录", isError: true)
                         let currentConfig = PPUserInfo.shared.pp_serverInfoList[PPUserInfo.shared.pp_lastSeverInfoIndex]
                         debugPrint(currentConfig)
                         currentConfig.printJSON()
