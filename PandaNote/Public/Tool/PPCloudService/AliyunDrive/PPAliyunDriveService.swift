@@ -15,18 +15,23 @@
  文档1：https://next.api.aliyun.com/document/pds/2022-03-01/CreateFile
  http://apsara-doc.oss-cn-hangzhou.aliyuncs.com/apsara-pdf/enterprise/v_3_14_0_20210519/pds/zh/development-guide.pdf
  */
-import UIKit
-import Alamofire
 
-let aliyundrive_auth_url = "https://open.aliyundrive.com/o/oauth/authorize?client_id=4ef89a333545446db34c60c090b72b7f&redirect_uri=https://testcallback.aliyundrive.com&scope=user:base,user:phone,file:all:read,file:all:write"
+//let aliyundrive_auth_url = "https://open.aliyundrive.com/o/oauth/authorize?client_id=4ef89a333545446db34c60c090b72b7f&redirect_uri=https%3A%2F%2Ftestcallback.aliyundrive.com&scope=user:base,user:phone,file:all:read,file:all:write"
 let aliyundrive_callback_domain = "testcallback.aliyundrive.com"
 
 fileprivate let client_id = "4ef89a333545446db34c60c090b72b7f" //ES
 fileprivate let client_secret = "48b8170e32c14873" + "94017fa712323830" //ES 阿里云盘文档说不能泄露
 fileprivate var getQRCodeStatusCount = 0
+fileprivate let scope = "user:base,user:phone,file:all:read,file:all:write"
+fileprivate let host = "www.alipan.com"
+let aliyundrive_auth_url = "https://\(host)/o/oauth/authorize?client_id=\(client_id)&redirect_uri=https://\(aliyundrive_callback_domain)&scope=\(scope)"
+
+let httpClient = PPCloudHTTP.shared
+//let httpClient = PPCloudHTTP.configureProxy(host: "192.168.1.25", port: 9000, timeout: 60)
+
 
 class PPAliyunDriveService: NSObject, PPCloudServiceProtocol {
-    var url = "https://openapi.aliyundrive.com"
+    var url = "https://openapi.alipan.com"
     var access_token:String
     var refresh_token = ""
     var drive_id = "" ///< 每个用户对应的唯一ID
@@ -53,12 +58,21 @@ class PPAliyunDriveService: NSObject, PPCloudServiceProtocol {
     func getUserInfo(callback:((String) -> Void)? = nil) {
         let requestURL = self.url + "/adrive/v1.0/user/getDriveInfo"
         if(drive_id.length > 0) { return }
-
-        AF.request(requestURL, method: .post, encoding: JSONEncoding.default, headers: getHeaders()).responseData { response in
+        httpClient.post(url: requestURL, parameters: nil, headers: getHeaders()) { response in
             // 处理响应
             guard let jsonDic = response.data?.pp_JSONObject() as? [String : Any] else { return }
             debugPrint("getUserInfo")
             jsonDic.printJSON()
+            if let code = jsonDic["code"] as? String,code == "AccessTokenExpired" {
+                debugPrint("token过期 token expired")
+                self.refreshToken { a, r in
+                    if a == "needLogin" {
+                        callback?("needLogin")
+                        return
+                    }
+                }
+                
+            }
             guard let default_drive_id = jsonDic["default_drive_id"] as? String  else {
                 callback?("")
                 return
@@ -78,8 +92,7 @@ class PPAliyunDriveService: NSObject, PPCloudServiceProtocol {
             "code":code,
             "grant_type":"authorization_code"
         ]
-
-        AF.request(requestURL, method: .post, parameters: parameters, encoding: JSONEncoding.default).responseData { response in
+        httpClient.post(url: requestURL, parameters: parameters) { response in
             guard let jsonDic = response.data?.pp_JSONObject() as? [String : Any] else { return }
             debugPrint("aliyundrive getToken for the first time")
             jsonDic.printJSON()
@@ -101,8 +114,7 @@ class PPAliyunDriveService: NSObject, PPCloudServiceProtocol {
             "width": 320, //照顾下iPhone5S
             "height": 320
         ]
-
-        AF.request(requestURL, method: .post, parameters: parameters, encoding: JSONEncoding.default).responseData { response in
+        httpClient.post(url: requestURL, parameters: parameters) { response in
             guard let jsonDic = response.data?.pp_JSONObject() as? [String : Any] else { return }
             debugPrint("aliyundrive getToken for the first time")
             jsonDic.printJSON()
@@ -116,7 +128,7 @@ class PPAliyunDriveService: NSObject, PPCloudServiceProtocol {
     public class func getQRCodeStatus(sid: String,callback:((String) -> Void)? = nil) {
         let requestURL = "https://openapi.aliyundrive.com/oauth/qrcode/\(sid)/status"
         getQRCodeStatusCount += 1
-        AF.request(requestURL, method: .get, encoding: JSONEncoding.default).responseData { response in
+        httpClient.get(url: requestURL) { response in
             guard let jsonDic = response.data?.pp_JSONObject() as? [String : Any] else { return }
             debugPrint("aliyundrive getToken for the first time")
             jsonDic.printJSON()
@@ -146,7 +158,7 @@ class PPAliyunDriveService: NSObject, PPCloudServiceProtocol {
             "grant_type":"refresh_token"
         ]
         debugPrint("aliyundrive refreshToken param:",parameters)
-        AF.request(requestURL, method: .post, parameters: parameters, encoding: JSONEncoding.default, headers: getHeaders()).responseData { response in
+        httpClient.post(url: requestURL, parameters: parameters) { response in
             guard let jsonDic = response.data?.pp_JSONObject() as? [String : Any] else { return }
             debugPrint("aliyundrive refreshToken finished")
             jsonDic.printJSON()
@@ -157,13 +169,15 @@ class PPAliyunDriveService: NSObject, PPCloudServiceProtocol {
                 self.configChanged?("PPAccessToken", self.access_token)
                 self.configChanged?("PPRefreshToken", self.refresh_token)
                 callback?(access_token, refresh_token)
+            } else {
+                callback?("needLogin", "")
             }
         }
     }
     
     
-    func getHeaders() -> HTTPHeaders{
-        var headers: HTTPHeaders = [
+    func getHeaders() -> PPHTTPHeaders{
+        var headers: PPHTTPHeaders = [
             "User-Agent": "ESFileExplorer/2.3.2 (iPhone; iOS 16.3; Scale/3.00)",
         ]
         if (access_token.length > 0) {
@@ -180,6 +194,9 @@ class PPAliyunDriveService: NSObject, PPCloudServiceProtocol {
                     completion([],PPCloudServiceError.unknown)
                     // self.refreshToken()
                 } else {
+                    if driveID == "needLogin" {
+                        completion([], PPCloudServiceError.forcedLoginRequired)
+                    }
                     if self.retryCount < 4 {
                         self.retryCount += 1 //自动刷新、防止死循环
                         self.contentsOfDirectory(path, pathID, completion: completion)
@@ -202,8 +219,7 @@ class PPAliyunDriveService: NSObject, PPCloudServiceProtocol {
             "limit":100, //返回文件数量，默认 50，最大 100
             "type": "all"
         ]
-
-        AF.request(requestURL, method: .post, parameters: parameters, encoding: JSONEncoding.default, headers: getHeaders()).responseData { response in
+        httpClient.post(url: requestURL, parameters: parameters, headers: getHeaders()) { response in
             // 处理响应
             guard let jsonDic = response.data?.pp_JSONObject() as? [String : Any] else { return }
             jsonDic.printJSON(true)
@@ -218,12 +234,16 @@ class PPAliyunDriveService: NSObject, PPCloudServiceProtocol {
                 if code == "A403JE" || code == "AccessTokenInvalid" || code == "AccessTokenExpired" {
                     debugPrint("token过期 token expired")
                     self.refreshToken { a, r in
+                        if a == "needLogin" {
+                            completion([], PPCloudServiceError.forcedLoginRequired)
+                            return
+                        }
                         if self.retryCount < 3 {
                             self.retryCount += 1 //自动刷新、防止死循环
                             self.contentsOfDirectory(path, pathID, completion: completion)
                         }
                     }
-
+                    return
                 }
                 debugPrint("aliyundrive get list error")
                 completion([], PPCloudServiceError.fileNotExist)
@@ -255,8 +275,7 @@ class PPAliyunDriveService: NSObject, PPCloudServiceProtocol {
             "type": "folder",
             "drive_id": drive_id
         ]
-
-        AF.request(requestURL, method: .post, parameters: parameters, encoding: JSONEncoding.default, headers: getHeaders()).responseData { response in
+        httpClient.post(url: requestURL, parameters: parameters, headers: getHeaders()) { response in
             guard let jsonDic = response.data?.pp_JSONObject() as? [String : Any] else { return }
             debugPrint("createDirectory")
             jsonDic.printJSON()
@@ -273,18 +292,17 @@ class PPAliyunDriveService: NSObject, PPCloudServiceProtocol {
             "file_id":file_id,
             "upload_id":upload_id
         ]
-
-        AF.request(requestURL, method: .post, parameters: parameters, encoding: JSONEncoding.default, headers: getHeaders()).responseData { response in
+        httpClient.post(url: requestURL, parameters: parameters, headers: getHeaders()) { response in
             // 处理响应
             guard let jsonDic = response.data?.pp_JSONObject() as? [String : Any] else { return }
             debugPrint("/openFile/complete finished")
             jsonDic.printJSON()
-            switch response.result {
-            case .success(let value):
-                debugPrint("/openFile/complete success",value)
+            if response.statusCode == 200 {
+                debugPrint("/openFile/complete success")
                 callback?(nil)
-            case .failure(let error):
-                callback?(error)
+            }
+            else{
+                callback?(response.error)
             }
             
         }
@@ -302,7 +320,7 @@ class PPAliyunDriveService: NSObject, PPCloudServiceProtocol {
             "drive_id": drive_id
         ]
         // 1. create
-        AF.request(requestURL, method: .post, parameters: parameters, encoding: JSONEncoding.default, headers: getHeaders()).responseData { response in
+        httpClient.post(url: requestURL, parameters: parameters, headers: getHeaders()) { response in
             // 处理响应
             guard let jsonDic = response.data?.pp_JSONObject() as? [String : Any] else { return }
             debugPrint("openFile/create")
@@ -312,10 +330,8 @@ class PPAliyunDriveService: NSObject, PPCloudServiceProtocol {
                   let part_info_list = jsonDic["part_info_list"] as? [[String:Any]],
                   let upload_url = part_info_list[0]["upload_url"] as? String else { return }
             // 2. 上传
-            // https://github.com/Alamofire/Alamofire/issues/2811#issuecomment-490370829
-            let dataResponseSerializer = DataResponseSerializer(emptyResponseCodes: [200, 204, 205]) // Default is [204, 205]
-            AF.upload(contents, to: upload_url, method: .put).response(responseSerializer: dataResponseSerializer) { response in
-                //.responseData { response in
+            // 上传 Data
+            httpClient.upload(data: contents, to: upload_url) { response in
                 if let error = response.error {
                     completion(nil, error)
                     return
@@ -382,19 +398,18 @@ class PPAliyunDriveService: NSObject, PPCloudServiceProtocol {
             ]
         }
         parameters.printJSON()
-        
-        AF.request(requestURL, method: .post, parameters: parameters, encoding: JSONEncoding.default, headers: getHeaders()).responseData { response in
+        httpClient.post(url: requestURL, parameters: parameters, headers: getHeaders()) { response in
             // 处理响应
             guard let jsonDic = response.data?.pp_JSONObject() as? [String : Any] else { return }
             debugPrint("moveItem")
             jsonDic.printJSON()
-            switch response.result {
-            case .success(let value):
-                debugPrint("moveItem success",value)
+            if response.statusCode == 200 {
+                debugPrint("moveItem success")
                 completion(nil)
-            case .failure(let error):
-                debugPrint("moveItem fail",error)
-                completion(error)
+            }
+            else {
+                debugPrint("moveItem fail")
+                completion(response.error)
             }
             
         }
@@ -408,8 +423,7 @@ class PPAliyunDriveService: NSObject, PPCloudServiceProtocol {
             "drive_id": drive_id,
             "file_id": fileID
         ]
-        
-        AF.request(requestURL, method: .post, parameters: parameters, encoding: JSONEncoding.default, headers: getHeaders()).responseData { response in
+        httpClient.post(url: requestURL, parameters: parameters, headers: getHeaders()) { response in
             // 处理响应
             guard let jsonDic = response.data?.pp_JSONObject() as? [String : Any] else { return }
             debugPrint("removeItem")

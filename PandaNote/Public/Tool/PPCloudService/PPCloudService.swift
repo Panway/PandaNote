@@ -85,18 +85,3 @@ extension Dictionary {
     }
 }
 
-// 创建自定义的 Alamofire.Session 单例（5.0之前是SessionManager）
-class PPCloudHTTP {
-    static let shared: Session = {
-        // 创建一个HTTP代理配置
-//        let proxy = [kCFNetworkProxiesHTTPEnable as String: true,
-//                     kCFNetworkProxiesHTTPProxy as String: "127.0.0.1",
-//                     kCFNetworkProxiesHTTPPort as String: "1087"] as [String : Any]
-
-        // 创建会话管理器并设置代理配置
-        let configuration = URLSessionConfiguration.default
-//        configuration.connectionProxyDictionary = proxy
-        configuration.timeoutIntervalForRequest = 30
-        return Session(configuration: configuration)
-    }()
-}

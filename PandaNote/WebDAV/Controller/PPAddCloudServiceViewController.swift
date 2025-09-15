@@ -69,9 +69,9 @@ class PPAddCloudServiceViewController : PPBaseViewController,UITableViewDataSour
             vc.remark = obj
             sourceVC.navigationController?.pushViewController(vc, animated: true)
         }
-        else if obj == "阿里云盘" {
+        else if obj == "阿里云盘" || obj == "AliyunDrive" {
             PPAlertTool.showAction(title: "请选择登录方式", message: nil,
-                                   items: ["App内授权登录","扫二维码登录"]) //,"手动输入配置"])
+                                   items: ["App内授权登录","扫二维码登录","手动输入配置"])
             { index in
                 if index == 2 {
                     let vc = PPWebDAVConfigViewController()

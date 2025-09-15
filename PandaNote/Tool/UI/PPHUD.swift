@@ -251,6 +251,12 @@ class PPHUD: NSObject {
 
 
 class PPAlertTool {
+    // 继承与重写：static func 不能被子类重写，而 class func 可以被子类重写。
+    // 用途：static func 一般用于那些不希望被重写的功能，而 class func 则适用于需要在子类中重写的功能。
+    static func showAlert(title: String, message: String?, callback: ((Int) -> Void)? = nil) {
+        PPAlertAction.showAlert(withTitle: title, msg: message, buttonsStatement: ["确定", "取消"], choose: callback)
+    }
+    
     class func showAction(title: String, message: String?, items: [String], callback: @escaping((_ index:Int)->())) {
         PPAlertAction.showSheet(withTitle: title, message: message, cancelButtonTitle: "取消", destructiveButtonTitle: nil, otherButtonTitle: items) { (index) in
             debugPrint("index===========",index)

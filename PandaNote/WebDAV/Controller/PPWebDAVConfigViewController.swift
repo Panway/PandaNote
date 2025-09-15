@@ -80,13 +80,13 @@ class PPWebDAVConfigViewController: PPBaseViewController {
             isOptional.append(1)
         }
         if showToken {
-            leftNames.append("access token")
+            leftNames.append("AccessToken")
             placeHolders.append("access token")
             texts.append(accessToken)
             isOptional.append(0)
         }
         if showRefreshToken {
-            leftNames.append("refresh token")
+            leftNames.append("RefreshToken")
             placeHolders.append("refresh token")
             texts.append(refreshToken)
             isOptional.append(0)
@@ -190,8 +190,14 @@ class PPWebDAVConfigViewController: PPBaseViewController {
             self.accessToken = keyValue["Token"] ?? ""
         }
         var newServer = ["PPCloudServiceType":self.cloudType]
-        let desc_keys = [("URL","PPWebDAVServerURL"),("账号","PPWebDAVUserName"),(passwordDesc,"PPWebDAVPassword"),
-                         ("备注","PPWebDAVRemark"),("验证码","PPOptCode"),(extraDesc,"PPCloudServiceExtra")]
+        let desc_keys = [("URL","PPWebDAVServerURL"),
+                         ("账号","PPWebDAVUserName"),
+                         (passwordDesc,"PPWebDAVPassword"),
+                         ("备注","PPWebDAVRemark"),
+                         ("验证码","PPOptCode"),
+                         ("AccessToken","PPAccessToken"),
+                         ("RefreshToken","PPRefreshToken"),
+                         (extraDesc,"PPCloudServiceExtra")]
         for desc_key in desc_keys {
             let (desc, key) = desc_key
             if let value = keyValue[desc], value.length > 0 {
@@ -201,9 +207,9 @@ class PPWebDAVConfigViewController: PPBaseViewController {
         if accessToken.length > 0 {
             newServer["PPAccessToken"] = accessToken
         }
-        if refreshToken.length > 0 {
-            newServer["PPRefreshToken"] = refreshToken
-        }
+//        if refreshToken.length > 0 {
+//            newServer["PPRefreshToken"] = refreshToken
+//        }
         debugPrint(newServer)
         if isEditMode {
             PPUserInfo.shared.pp_serverInfoList[editIndex] = newServer
@@ -214,20 +220,31 @@ class PPWebDAVConfigViewController: PPBaseViewController {
             }
             if duplicated.count > 0 {
                 PPHUD.showHUDFromTop("备注不能重复")
+                PPAlertTool.showAlert(title: "已存在名为\"\(keyValue["备注"] ?? "")\"的配置", message: "是否更新当前配置") { aIndex in
+                    debugPrint(aIndex)
+                    if aIndex == 0 {
+                        PPUserInfo.shared.pp_serverInfoList[PPUserInfo.shared.pp_lastSeverInfoIndex] = newServer
+                        self.updateConfig(PPUserInfo.shared.pp_lastSeverInfoIndex, keyValue["备注"] ?? "")
+                    }
+                }
                 return
             }
             // debugPrint(duplicated)
             PPUserInfo.shared.pp_serverInfoList.append(newServer)
         }
+        updateConfig(PPUserInfo.shared.pp_serverInfoList.count - 1, keyValue["备注"] ?? "")
+    }
+    
+    func updateConfig(_ index: Int, _ remark: String) {
         PPHUD.showHUDFromTop("设置成功")
         PPUserInfo.shared.initConfig()
         //新添加的配置设为当前服务器配置（选中最后一个）
-        PPUserInfo.shared.pp_lastSeverInfoIndex = PPUserInfo.shared.pp_serverInfoList.count - 1
+        PPUserInfo.shared.pp_lastSeverInfoIndex = index
         PPAppConfig.shared.setItem("pp_lastSeverInfoIndex", "\(PPUserInfo.shared.pp_lastSeverInfoIndex)")
         PPFileManager.shared.initCloudServiceSetting()
         //如果采用UISplitViewController，home是右侧的navigationController
         if let home = self.navigationController?.viewControllers[0],let vc = home as? PPFileListViewController {
-            vc.setNavTitle(keyValue["备注"],true)
+            vc.setNavTitle(remark,true)
         }
         PPUserInfo.shared.refreshFileList = true
         DispatchQueue.main.asyncAfter(deadline: .now()+1) {
