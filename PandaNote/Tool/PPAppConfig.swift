@@ -32,6 +32,19 @@ class PPAppConfig: NSObject {
     var downColor = PPDownColorCollection()
     var downFont = PPDownFontCollection()
     var outlineMaxWidth = 300.0 // markdown编辑器目录(大纲)最大宽度
+    // 懒加载 DateFormatter
+    private lazy var yearMonthFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyyMM"
+        return formatter
+    }()
+    
+    // 懒加载属性：当前年月字符串
+    lazy var currentYearMonth: String = {
+        return yearMonthFormatter.string(from: Date())
+    }()
+    // 懒加载 上传任务数组
+    lazy var uploadTasks: [PPFileModel] = []
     func initSetting() {
         //将其格式选项中加入带小数秒的选项，并将时区设置为当前时区
         //dateFormatter.formatOptions.insert(.withFractionalSeconds)

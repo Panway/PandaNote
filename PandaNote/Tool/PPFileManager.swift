@@ -25,7 +25,7 @@ class PPFileManager: NSObject {
     var synologyService: PPSynologyService?
     var aliyunDriveService: PPAliyunDriveService?
     var baiduwangpan : BaiduyunAPITool?
-    var currentPath = ""
+    private var currentPath = ""
     var currentPathID = "" ///< 阿里云盘等需要
     var baiduFSID = 0
     /// 下载保存的文件路径，只读
@@ -34,7 +34,7 @@ class PPFileManager: NSObject {
             return "\(PPDiskCache.shared.path)/\(currentService?.baseURL.pp_md5 ?? "fileCache")"
         }
     }
-
+    
     ///获取当前云服务读写文件的对象
     open internal(set) var currentService: PPCloudServiceProtocol? {
         get {
@@ -56,7 +56,7 @@ class PPFileManager: NSObject {
             case .icloud:
                 return iCloudService
             default:
-                return iCloudService
+                return localFileService
             }
         }
         set {
@@ -67,42 +67,21 @@ class PPFileManager: NSObject {
         PPFileManager.dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
         initCloudServiceSetting()//初始化服务器配置
     }
-    //MARK: get file
-    /// 获取文件列表对象数组然后缓存
-    private func getFileListThenCache(path:String,
-                                      pathID:String? = "",
-                                      archieveKey:String,
-                                      completion:@escaping(_ data:[PPFileObject],_ isFromCache:Bool,_ error:Error?) -> Void) {
-        if let pathID = pathID,pathID.length > 0 {
+    //MARK: - 文件列表操作
+    /// 获取文件列表（先取本地再获取最新）
+    func pp_getFileList(path:String, pathID:String, disableCache:Bool = false,completionHandler:@escaping(_ data:[PPFileObject],_ isFromCache:Bool,_ error:Error?) -> Void) {
+        self.currentPath = path
+        self.currentPathID = pathID
+        //禁用缓存的话直接取远程数据
+        if disableCache ||
+            PPUserInfo.shared.cloudServiceType == .local ||
+            PPUserInfo.shared.cloudServiceType == .icloud {
             currentService?.contentsOfDirectory(path, pathID, completion: { fileList, error in
-                do {
-                    let encoded = try JSONEncoder().encode(fileList)
-                    PPDiskCache.shared.setData(encoded, key:archieveKey)
-                } catch {
-                    debugPrint(error.localizedDescription)
-                }
-                DispatchQueue.main.async {
-                    completion(fileList,false,error)
-                }
+                completionHandler(fileList,false,error)
             })
             return
         }
-        //获取本地缓存失败就去服务器获取
-        currentService?.contentsOfDirectory(path, "", completion: { fileList, error in
-            if error == nil {
-                let encoded = try? JSONEncoder().encode(fileList)
-                PPDiskCache.shared.setData(encoded, key:archieveKey)
-            }
-            DispatchQueue.main.async {
-                completion(fileList,false,error)
-            }
-        })
-    }
-    //MARK: - 文件列表操作
-    /// 获取文件列表（先取本地再获取最新）
-    func pp_getFileList(path:String,pathID:String,completionHandler:@escaping(_ data:[PPFileObject],_ isFromCache:Bool,_ error:Error?) -> Void) {
-        self.currentPath = path
-        self.currentPathID = pathID
+        //获取本地缓存成功了还是去服务器获取一下,保证数据最新
         //先获取本地缓存数据
         let archieveKey = self.apiCachePrefix + "\(self.currentService?.baseURL ?? "")\(path)".pp_md5
         PPDiskCache.shared.fetchData(key: archieveKey) { (data) in
@@ -112,7 +91,7 @@ class PPFileManager: NSObject {
             }
             do {
                 let archieveArray = try JSONDecoder().decode([PPFileObject].self, from: fileData)
-                debugPrint("获取解档文件个数\(archieveArray.count)")
+                debugPrint("[path]\(path):\(archieveArray.count)")
                 DispatchQueue.main.async {
                     completionHandler(archieveArray,true,nil)
                 }
@@ -123,7 +102,17 @@ class PPFileManager: NSObject {
             
         }
         //获取本地缓存成功了还是去服务器获取一下,保证数据最新
-        self.getFileListThenCache(path: path,pathID:pathID, archieveKey: archieveKey, completion: completionHandler)
+        let validPathID = (pathID.isEmpty == false) ? pathID : ""
+//        获取远程服务器文件列表数据然后缓存
+        currentService?.contentsOfDirectory(path, validPathID, completion: { fileList, error in
+            if error == nil {
+                let encoded = try? JSONEncoder().encode(fileList)
+                PPDiskCache.shared.setData(encoded, key:archieveKey)
+            }
+            DispatchQueue.main.async {
+                completionHandler(fileList,false,error)
+            }
+        })
     }
     
     //MARK:- 文件操作
@@ -216,7 +205,7 @@ class PPFileManager: NSObject {
         // 1 从本地磁盘获取文件缓存
         PPDiskCache.shared.fetchData(key: PPUserInfo.shared.webDAVRemark + path) { data in
             // 2 本地磁盘有，按需从服务器获取最新的
-            debugPrint("getFileData exist")
+//            debugPrint("getFileData exist")
             completion(data,true,nil) //先给本地的
             if alwaysDownload == true {
                 self.downloadFile(path: path, fileID:fileID, downloadURL:downloadURL, cacheToDisk: true, progress: progress, completion: completion) // 即使本地有文件也下载
@@ -264,6 +253,49 @@ class PPFileManager: NSObject {
             }
             return
         }
+        if PPUserInfo.pp_boolValue("uploadFileSortByYearMonth") {
+            PPFileManager.shared.pp_getFileList(path: path.pp_directoryPath, pathID: parentID ?? "", disableCache: true) { data, isFromCache, error in
+                // 过滤出目录且等于path
+                let fileName = path.pp_getFileName()
+                let yearMonth = fileName.pp_extractYearMonth()
+                let dirs = data.filter { (item) -> Bool in
+                    return item.isDirectory && item.path == path.pp_directoryPath + "/" + yearMonth
+                }
+                // 如果dirs为0，就创建目录
+                let newPath = path.pp_directoryPath + "/" + yearMonth + "/" + fileName
+                if dirs.count == 0 {
+                    PPFileManager.shared.createFolder(folder: yearMonth, at: path.pp_directoryPath, parentID: parentID ?? "") { (error) in
+                        if error == nil {
+                            PPHUD.showHUDFromTop("新建成功")
+                            self.currentService?.createFile(newPath, parentID ?? "", contents: contents, completion: { res,error in
+                                DispatchQueue.main.async {
+                                    completionHandler(res, error)
+                                }
+                            })
+                        }
+                        else {
+                            PPHUD.showHUDFromTop("新建失败", isError: true)
+                        }
+                    }
+                }
+                else {
+                    self.currentService?.createFile(newPath, parentID ?? "", contents: contents, completion: { res,error in
+                        DispatchQueue.main.async {
+                            completionHandler(res, error)
+                        }
+                    })
+                }
+                
+            }
+            return
+//            PPFileManager.shared.pp_getFileList(path: path, parentID) { (contents,isFromCache, error) in
+//            }
+//            path = PPAppConfig.shared.currentYearMonth + "/" + path
+
+        }
+//        let localPath = "\(PPDiskCache.shared.path)/\(PPUserInfo.shared.webDAVRemark)"
+        // 将数据写入文件，就算接口请求失败本地也有缓存
+//        try? contents.write(to: URL(fileURLWithPath: localPath + path))
         currentService?.createFile(path, parentID ?? "", contents: contents, completion: { res,error in
             DispatchQueue.main.async {
                 completionHandler(res, error)
@@ -363,7 +395,7 @@ class PPFileManager: NSObject {
             let sid = PPUserInfo.shared.getCurrentServerInfo("sid")
             let did = PPUserInfo.shared.getCurrentServerInfo("did")
             let url = PPUserInfo.shared.getCurrentServerInfo("PPWebDAVServerURL")
-            let remoteURL = PPUserInfo.shared.getCurrentServerInfo("PPServerURL")
+            let remoteURL = PPUserInfo.shared.getCurrentServerInfo("PPRemoteBaseURL")
             let localURL = PPUserInfo.shared.getCurrentServerInfo("PPLocalBaseURL")
             let otp_code = PPUserInfo.shared.getCurrentServerInfo("PPOptCode")
             synologyService = PPSynologyService(url:url,
@@ -387,9 +419,9 @@ class PPFileManager: NSObject {
                 PPUserInfo.shared.updateCurrentServerInfo(key: key, value: value)
             }
         case .local:
-            self.iCloudService = PPiCloudDriveService(containerId: PPAppConfig.shared.iCloudContainerId)
-        case .icloud:
             localFileService = PPLocalFileService()
+        case .icloud:
+            self.iCloudService = PPiCloudDriveService(containerId: PPAppConfig.shared.iCloudContainerId)
         case .webdav:
             webdavService = PPWebDAVService(url: PPUserInfo.shared.webDAVServerURL,
                                             username: user,
@@ -400,6 +432,13 @@ class PPFileManager: NSObject {
         return true
     }
     //MARK: 图片（PHAsset）相关处理
+    func getAssetsInfo(_ asset: PHAsset) -> [String:String]{
+        let imageInfoDict = ["creationDate":(asset.creationDate != nil) ? asset.creationDate!.pp_stringFromDate() : "",
+                             "modificationDate":(asset.modificationDate != nil) ? asset.creationDate!.pp_stringFromDate() : "",
+                             "pixelWidth":"\(asset.pixelWidth)",
+                             "pixelHeight":"\(asset.pixelHeight)"]
+        return imageInfoDict
+    }
     /// 从PHAsset获取NSData
     func getImageDataFromAsset(asset: PHAsset, completion: @escaping (_ data: Data?,_ fileURL:String,_ imageInfo:[String:String]) -> Void) {
         let manager = PHImageManager.default()
@@ -429,7 +468,7 @@ class PPFileManager: NSObject {
                              "pixelHeight":"\(asset.pixelHeight)"]
         //如果是视频
         if asset.mediaType == .video {
-            requestVideoURL(with: asset) { url in
+            PPPhotoTool.requestVideoURL(with: asset) { url in
                 if let vURL = url {
                     let videoData = try? Data(contentsOf: vURL)
                     completion(videoData,url?.absoluteString ?? "",imageInfoDict)
@@ -481,20 +520,7 @@ class PPFileManager: NSObject {
         
         
     }
-    func requestVideoURL(with asset: PHAsset?, success: @escaping (_ videoURL: URL?) -> Void) {
-        if let asset = asset {
-            let options = PHVideoRequestOptions()
-            options.deliveryMode = .automatic
-            options.isNetworkAccessAllowed = true
-            PHImageManager.default().requestAVAsset(forVideo: asset, options: options, resultHandler: { avasset, audioMix, info in
-                // NSLog(@"AVAsset URL: %@",myAsset.URL);
-                if avasset is AVURLAsset {
-                    let url = (avasset as? AVURLAsset)?.url
-                        success(url)
-                }
-            })
-        }
-    }
+    
     //https://stackoverflow.com/a/59869659
     ///删除相册图片
     func deletePhotos(_ assetsToDeleteFromDevice:[PHAsset]) {
@@ -519,17 +545,45 @@ class PPFileManager: NSObject {
     //    }
     //    })
     //上传多张图片
-    func uploadPhotos(_ mediaItems:[PHAsset], completion: ((_ uploadedAssets:[PHAsset]) -> Void)? = nil) {
+    func uploadPhotos(toDir: String,_ mediaItems:[PHAsset], completion: ((_ uploadedAssets:[PHAsset]) -> Void)? = nil) {
         let group = DispatchGroup()
         var assetsToDeleteFromDevice = [PHAsset]()
-        let path = self.currentPath
+//        let path = self.currentPath
         //多图上传
         for asset in mediaItems {
             group.enter() // 将以下任务添加进group，相当于把某个任务添加到组队列中执行
+            if PPPhotoTool.isLivePhoto(asset) {
+                let imageInfo = getAssetsInfo(asset)
+                PPPhotoTool.exportLivePhotoData(for: asset) { imgData, videoData, imgName, videoName, error in
+                    // 1先上传图片
+                    let uploadName = PPFileManager.imageVideoName(urlString: imgName, imageInfo: imageInfo)
+                    let remotePath = toDir + uploadName
+                    PPFileManager.shared.createFile(path: remotePath, parentID: self.currentPathID, contents: imgData) { (result, error) in
+                        if let error = error {
+                            debugPrint("上传出错:\(error.localizedDescription)")
+                            return
+                        }
+                        // 2再上传视频
+                        let uploadName = PPFileManager.imageVideoName(urlString: videoName, imageInfo: imageInfo)
+                        let vPath = toDir + uploadName
+                        PPFileManager.shared.createFile(path: vPath, parentID: self.currentPathID, contents: videoData) { (result, error) in
+                            if let error = error {
+                                debugPrint("上传出错:\(error.localizedDescription)")
+                                return
+                            }
+                            PPHUD.showHUDFromTop("上传+1")
+                            assetsToDeleteFromDevice.append(asset)
+                            group.leave() //本次任务完成（即本次for循环任务完成），将任务从group中移除
+                        }
+                        
+                    }
+                }
+            }
+            else {
             PPFileManager.shared.getImageDataFromAsset(asset: asset, completion: { (imageData,urlString,imageInfo) in
                 let uploadName = PPFileManager.imageVideoName(urlString: urlString, imageInfo: imageInfo)
-                let remotePath = path + uploadName
-//                debugPrint(imageLocalURL)
+                let remotePath = toDir + uploadName
+                debugPrint("start_upload_file\(uploadName) -> \(toDir)")
                 
                 PPFileManager.shared.createFile(path: remotePath, parentID: self.currentPathID, contents: imageData) { (result, error) in
                     if let error = error {
@@ -542,6 +596,7 @@ class PPFileManager: NSObject {
                 }
                 
             })
+            }
             
         }
         

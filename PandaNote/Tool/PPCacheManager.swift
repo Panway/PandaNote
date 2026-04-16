@@ -54,6 +54,10 @@ class PPDiskCache {
             debugPrint("Failed to setDataSynchronously for key \(key)")
         }
     }
+    open func cacheExist(key: String) -> Bool {
+        let path = self.fullPath(forKey: key)
+        return FileManager.default.fileExists(atPath: path)
+    }
     open func fetchData(key: String,
                         returnURL : Bool? = false,
                         success: @escaping (Data?) -> (),

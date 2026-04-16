@@ -129,11 +129,42 @@ extension String {
             return CGFloat(0)
         }
     }
+    // 提取字符串开头的年月（格式：YYYYMM）
+    // 支持格式：2025-10-01、2025/10/01、2025.10.01、20251001
+    // 提取字符串开头的年月（格式：YYYYMM）
+    func pp_extractYearMonth() -> String {
+        let pattern = #"^(\d{4})[-/.\s]?(\d{1,2})"#
+        
+        guard let regex = try? NSRegularExpression(pattern: pattern),
+              let match = regex.firstMatch(in: self, range: NSRange(self.startIndex..., in: self)) else {
+            return ""
+        }
+        
+        guard let yearRange = Range(match.range(at: 1), in: self),
+              let monthRange = Range(match.range(at: 2), in: self) else {
+            return ""
+        }
+        
+        let year = String(self[yearRange])
+        var month = String(self[monthRange])
+        
+        // 使用 Swift 标准库的 padding 方法
+        if month.count == 1 {
+            month = "0" + month
+        }
+        
+        return year + month
+    }
     
 }
 
 // MARK: - URL 相关处理
 extension String {
+    /// 提取文件路径中的目录部分
+    var pp_directoryPath: String {
+        return (self as NSString).deletingLastPathComponent
+    }
+    
     func pp_getDomain() -> String {
         guard let urlComponents = URLComponents(string: self), let host = urlComponents.host else {
             return ""
@@ -141,7 +172,7 @@ extension String {
         return host //host.hasPrefix("www.") ? String(host.dropFirst(4)) : host
     }
     
-    func pp_extractFileNameFromURL() -> String {
+    func pp_getFileName() -> String {
         // 查找 "http" 开头的字符串
 //        if self.hasPrefix("http") {
             // 分割字符串，获取最后一个路径组件

@@ -27,6 +27,7 @@ class PPWebViewController: PPBaseViewController,WKUIDelegate,WKNavigationDelegat
     var preloadJSNameInBundle: String?
     /// 是否注册scheme来拦截http资源
     var registerHTTPSchemeForCustomProtocol = false
+    var isRegisterHTTPSchemeForCustomProtocol = false
     var shouldGetAssets = false /// 获取网页静态资源
     var lastOffsetY : CGFloat = 0.0
     var bottomView : PPWebViewBottomToolbar!
@@ -50,7 +51,9 @@ class PPWebViewController: PPBaseViewController,WKUIDelegate,WKNavigationDelegat
             PPWebViewController.registerHTTPScheme()
         }
         else {
-            PPWebViewController.unregisterHTTPScheme()
+            if isRegisterHTTPSchemeForCustomProtocol {
+                PPWebViewController.unregisterHTTPScheme()
+            }
         }
         let config = WKWebViewConfiguration()
         config.userContentController.add(self, name: "pppanda")

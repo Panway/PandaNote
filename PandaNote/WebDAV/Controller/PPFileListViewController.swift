@@ -622,11 +622,14 @@ class PPFileListViewController: PPBaseViewController,
         if isRecentFiles {
             menuTitile = ["清空访问历史"]
         }
+        menuTitile.append("按文件创建日期整理到月份文件夹")
+        menuTitile.append("按文件名日期整理到月份文件夹")
+
         self.dropdown.dataSource = menuTitile
         self.dropdown.selectionAction = { (index: Int, title: String) in
             if title == "从相册添加图片" {
                 self.showImagePicker { selectedAssets in
-                    PPFileManager.shared.uploadPhotos(selectedAssets, completion: { photoAssets in
+                    PPFileManager.shared.uploadPhotos(toDir:self.pathStr, selectedAssets, completion: { photoAssets in
                         self.getFileListData()
                     })
                 }
@@ -650,6 +653,12 @@ class PPFileListViewController: PPBaseViewController,
             else if title == "清空访问历史" {
                 PPUserInfo.shared.recentFiles.removeAll()
                 self.getFileListData()
+            }
+            else if title == "按文件创建日期整理到月份文件夹" {
+                self.moveFilesByYearMonth("bydate")
+            }
+            else if title == "按文件名日期整理到月份文件夹" {
+                self.moveFilesByYearMonth("byname")
             }
         }
         
@@ -807,17 +816,23 @@ class PPFileListViewController: PPBaseViewController,
             if error != nil {
                 self.collectionView.endRefreshing()
                 if case let myError as PPCloudServiceError = error {
+                    debugPrint("登录失败：", error?.localizedDescription)
                     if myError == .forcedLoginRequired || myError == .twoFactorAuthCodeError {
                         var tips = "登录状态已失效"
                         if myError == .twoFactorAuthCodeError {
                             tips = "两步认证验证码错误"
                         }
-                        PPHUD.showHUDFromTop(tips + "，请重新登录", isError: true)
-                        let currentConfig = PPUserInfo.shared.pp_serverInfoList[PPUserInfo.shared.pp_lastSeverInfoIndex]
-                        debugPrint(currentConfig)
-                        currentConfig.printJSON()
-                        let serviceType = PPUserInfo.shared.getCurrentServerInfo("PPCloudServiceType")
-                        PPAddCloudServiceViewController.addCloudService(serviceType, self, currentConfig)
+//                        PPHUD.showHUDFromTop(tips + "，请重新登录", isError: true)
+                        PPAlertTool.showAlert(title: tips, message: "是否重新登录") { index in
+                            if index == 0 {
+                                let currentConfig = PPUserInfo.shared.pp_serverInfoList[PPUserInfo.shared.pp_lastSeverInfoIndex]
+                                debugPrint(currentConfig)
+                                currentConfig.printJSON()
+                                let serviceType = PPUserInfo.shared.getCurrentServerInfo("PPCloudServiceType")
+                                PPAddCloudServiceViewController.addCloudService(serviceType, self, currentConfig)
+                                
+                            }
+                        }
                     }
                     else if myError == .certificateInvalid {
                         PPHUD.showHUDFromTop("服务器证书过期或无效", isError: true)
@@ -863,6 +878,65 @@ class PPFileListViewController: PPBaseViewController,
         
     }
     
+    // 获取文件的创建日期，并移动到年份文件夹下
+    func moveFilesByYearMonth(_ type : String) {
+        PPFloatingButton.shared.show()
+        let dispatchGroup = DispatchGroup()
+
+        // 1. 先收集所有需要创建的目录（去重）
+        var yearMonthSet = Set<String>()
+        for file in self.dataSource {
+            var yearMonth = file.modifiedDate.pp_extractYearMonth()
+            if type == "byname" {
+                yearMonth = file.name.pp_extractYearMonth()
+            }
+            yearMonthSet.insert(yearMonth)
+        }
+
+        // 2. 批量创建所有目录
+        for yearMonth in yearMonthSet {
+            dispatchGroup.enter()
+            PPFileManager.shared.createFolder(folder: yearMonth, at: self.dataSource.first!.path.pp_directoryPath, parentID: "") { createError in
+                if let createError = createError {
+                    debugPrint("创建目录失败: \(yearMonth), 错误: \(createError)")
+                }
+                debugPrint("已创建目录: \(yearMonth)")
+                dispatchGroup.leave()
+            }
+        }
+
+        // 3. 等待所有目录创建完成后，再移动文件
+        dispatchGroup.notify(queue: .main) {
+            let moveGroup = DispatchGroup()
+            
+            for file in self.dataSource {
+                if file.isDirectory {
+                    continue
+                }
+                var yearMonth = file.modifiedDate.pp_extractYearMonth()
+                if type == "byname" {
+                    yearMonth = file.name.pp_extractYearMonth()
+                }
+                let newDestPath = file.path.pp_directoryPath + "/" + yearMonth + "/" + file.name
+                
+                moveGroup.enter()
+                PPFileManager.shared.moveFile(srcPath: file.path, destPath: newDestPath, isRename: false) { moveError in
+                    debugPrint("移动文件: \(file.name)到\(newDestPath) ")
+                    if let moveError = moveError {
+                        PPHUD.showHUDFromTop("移动文件失败: \(file.name) 错误: \(moveError)")
+                    }
+                    moveGroup.leave()
+                }
+            }
+            
+            // 所有文件移动完成
+            moveGroup.notify(queue: .main) {
+                debugPrint("所有文件整理完成")
+                PPHUD.showHUDFromTop("文件整理完成")
+            }
+        }
+        
+    }
     
     
     

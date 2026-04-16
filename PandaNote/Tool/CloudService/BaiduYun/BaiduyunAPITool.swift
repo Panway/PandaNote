@@ -276,7 +276,7 @@ open class BaiduyunAPITool: NSObject, PPCloudServiceProtocol {
     
     
     func createDirectory(_ folderName: String, _ atPath: String, _ parentID: String, completion: @escaping (Error?) -> Void) {
-        self.createFolder(path: folderName, completion: completion)
+        self.createFolder(path: atPath + folderName, completion: completion)
     }
     
     /// 单步上传（适合2GB以下的文件）

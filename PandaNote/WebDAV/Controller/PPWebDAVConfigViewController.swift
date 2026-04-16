@@ -213,6 +213,7 @@ class PPWebDAVConfigViewController: PPBaseViewController {
         debugPrint(newServer)
         if isEditMode {
             PPUserInfo.shared.pp_serverInfoList[editIndex] = newServer
+            updateConfig(editIndex, keyValue["备注"] ?? "")
         }
         else {
             let duplicated = PPUserInfo.shared.pp_serverInfoList.filter {
@@ -231,8 +232,8 @@ class PPWebDAVConfigViewController: PPBaseViewController {
             }
             // debugPrint(duplicated)
             PPUserInfo.shared.pp_serverInfoList.append(newServer)
+            updateConfig(PPUserInfo.shared.pp_serverInfoList.count - 1, keyValue["备注"] ?? "")
         }
-        updateConfig(PPUserInfo.shared.pp_serverInfoList.count - 1, keyValue["备注"] ?? "")
     }
     
     func updateConfig(_ index: Int, _ remark: String) {
