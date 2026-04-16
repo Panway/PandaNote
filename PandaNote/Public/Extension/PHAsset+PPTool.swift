@@ -10,7 +10,7 @@ import Foundation
 
 extension PHAsset {
     // https://stackoverflow.com/a/44630089/4493393
-    func getURL(completionHandler: @escaping ((_ responseURL: URL?) -> Void)) {
+    func pp_getURL(completionHandler: @escaping ((_ responseURL: URL?) -> Void)) {
         if mediaType == .image {
             let options = PHContentEditingInputRequestOptions()
             options.canHandleAdjustmentData = { (_: PHAdjustmentData) -> Bool in

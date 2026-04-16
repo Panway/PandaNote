@@ -683,7 +683,7 @@ final class PPMarkdownViewController: PPBaseViewController,
         }
         if index == 0 {
             self.showImagePicker { selectedAssets in
-                PPFileManager.shared.uploadPhotos(selectedAssets, completion: { photoAssets in
+                PPFileManager.shared.uploadPhotos(toDir:self.filePathStr, selectedAssets, completion: { photoAssets in
                     debugPrint(photoAssets)
                     for asset in photoAssets {
                         PPFileManager.shared.getImageDataFromAsset(asset: asset, completion: { (imageData,urlString,imageInfo) in
