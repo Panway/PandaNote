@@ -43,4 +43,13 @@ extension PHAsset {
             completionHandler(nil)
         }
     }
+    //https://stackoverflow.com/a/59869659
+    ///删除相册图片
+    class func pp_deletePhotos(_ assetsToDeleteFromDevice:[PHAsset]) {
+        let assetIdentifiers = assetsToDeleteFromDevice.map({ $0.localIdentifier })
+        let assets = PHAsset.fetchAssets(withLocalIdentifiers: assetIdentifiers, options: nil)
+        PHPhotoLibrary.shared().performChanges({
+            PHAssetChangeRequest.deleteAssets(assets)
+        })
+    }
 }

@@ -92,9 +92,16 @@ class PPSettingViewController: PPBaseViewController,UITableViewDataSource,UITabl
                 let totalSize = dir.pp_calculateDirectorySize() + Int64(imageSize)
                 cell.detailLB.text = totalSize > 0 ? totalSize.pp_SizeString() : "0KB"
             }
+        } else {
+            cell.detailLB.text = ""
         }
+        
         if let showSwitch = item["showSwitch"],showSwitch.bool == true {
+            cell.switchBtn.isHidden = false
             cell.switchBtn.isOn = PPUserInfo.pp_boolValue(item["key"] ?? "")
+        }
+        else {
+            cell.switchBtn.isHidden = true
         }
         cell.pp_section = indexPath.section
         cell.pp_row = indexPath.row

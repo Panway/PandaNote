@@ -68,6 +68,7 @@
 		3B0741682B6B7C9800AB3BD8 /* PPBiometricAuthentication.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B0741672B6B7C9800AB3BD8 /* PPBiometricAuthentication.swift */; };
 		3B07416A2B6B804A00AB3BD8 /* PPAppAuthenticationVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B0741692B6B804A00AB3BD8 /* PPAppAuthenticationVC.swift */; };
 		3B0FF1482B9759D5009D6D6A /* PPMultiTabsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B0FF1472B9759D5009D6D6A /* PPMultiTabsViewController.swift */; };
+		3B182B1B2F950AD0002B711B /* PPWebDAVFileService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B182B1A2F950AD0002B711B /* PPWebDAVFileService.swift */; };
 		3B1F3FF92A99F798003A2756 /* PPMarkdownOutlineCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B1F3FF82A99F798003A2756 /* PPMarkdownOutlineCell.swift */; };
 		3B202A552B81FA1800CBEED1 /* PPCloudServiceError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B202A542B81FA1800CBEED1 /* PPCloudServiceError.swift */; };
 		3B28561E2BA809D3002F3153 /* PPButtonBarTabViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B28561D2BA809D3002F3153 /* PPButtonBarTabViewController.swift */; };
@@ -75,6 +76,14 @@
 		3B30DE452A8BDADD00D519AB /* PPSynologyFile.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B30DE442A8BDADD00D519AB /* PPSynologyFile.swift */; };
 		3B3DE8612EADE9EA005F0F1F /* PPFloatingButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B3DE8602EADE9EA005F0F1F /* PPFloatingButton.swift */; };
 		3B46C3112B908A8500061406 /* PPPaddedLabel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B46C3102B908A8500061406 /* PPPaddedLabel.swift */; };
+		3B4DB04B2F93E6510030F6B1 /* WebDAVXMLParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B4DB04A2F93E6510030F6B1 /* WebDAVXMLParser.swift */; };
+		3B4DB04C2F93E6510030F6B1 /* WebDAVProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B4DB0492F93E6510030F6B1 /* WebDAVProvider.swift */; };
+		3B4DB0532F93E6820030F6B1 /* CloudDriveModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B4DB0512F93E6820030F6B1 /* CloudDriveModels.swift */; };
+		3B4DB0542F93E6820030F6B1 /* CloudDriveProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B4DB0522F93E6820030F6B1 /* CloudDriveProvider.swift */; };
+		3B4DB0552F93E6820030F6B1 /* CloudDriveFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B4DB0502F93E6820030F6B1 /* CloudDriveFactory.swift */; };
+		3B4DB0562F93E6820030F6B1 /* CloudDriveCredential.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B4DB04E2F93E6820030F6B1 /* CloudDriveCredential.swift */; };
+		3B4DB0572F93E6820030F6B1 /* CloudDriveCacheManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B4DB04D2F93E6820030F6B1 /* CloudDriveCacheManager.swift */; };
+		3B4DB0582F93E6820030F6B1 /* CloudDriveError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B4DB04F2F93E6820030F6B1 /* CloudDriveError.swift */; };
 		3B594A932A908CE600A5BC1E /* PPAttributedStringVisitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B594A922A908CE600A5BC1E /* PPAttributedStringVisitor.swift */; };
 		3B6CE3AD2B0BAC7100D86A1A /* PPDouyinParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B6CE3AC2B0BAC7000D86A1A /* PPDouyinParser.swift */; };
 		3B6CE3AF2B0BAE2F00D86A1A /* sign.js in Resources */ = {isa = PBXBuildFile; fileRef = 3B6CE3AE2B0BAE2F00D86A1A /* sign.js */; };
@@ -228,6 +237,7 @@
 		3B0741672B6B7C9800AB3BD8 /* PPBiometricAuthentication.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPBiometricAuthentication.swift; sourceTree = "<group>"; };
 		3B0741692B6B804A00AB3BD8 /* PPAppAuthenticationVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPAppAuthenticationVC.swift; sourceTree = "<group>"; };
 		3B0FF1472B9759D5009D6D6A /* PPMultiTabsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPMultiTabsViewController.swift; sourceTree = "<group>"; };
+		3B182B1A2F950AD0002B711B /* PPWebDAVFileService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPWebDAVFileService.swift; sourceTree = "<group>"; };
 		3B1F3FF82A99F798003A2756 /* PPMarkdownOutlineCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPMarkdownOutlineCell.swift; sourceTree = "<group>"; };
 		3B202A542B81FA1800CBEED1 /* PPCloudServiceError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPCloudServiceError.swift; sourceTree = "<group>"; };
 		3B28561D2BA809D3002F3153 /* PPButtonBarTabViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPButtonBarTabViewController.swift; sourceTree = "<group>"; };
@@ -235,6 +245,14 @@
 		3B30DE442A8BDADD00D519AB /* PPSynologyFile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPSynologyFile.swift; sourceTree = "<group>"; };
 		3B3DE8602EADE9EA005F0F1F /* PPFloatingButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPFloatingButton.swift; sourceTree = "<group>"; };
 		3B46C3102B908A8500061406 /* PPPaddedLabel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPPaddedLabel.swift; sourceTree = "<group>"; };
+		3B4DB0492F93E6510030F6B1 /* WebDAVProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebDAVProvider.swift; sourceTree = "<group>"; };
+		3B4DB04A2F93E6510030F6B1 /* WebDAVXMLParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebDAVXMLParser.swift; sourceTree = "<group>"; };
+		3B4DB04D2F93E6820030F6B1 /* CloudDriveCacheManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloudDriveCacheManager.swift; sourceTree = "<group>"; };
+		3B4DB04E2F93E6820030F6B1 /* CloudDriveCredential.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloudDriveCredential.swift; sourceTree = "<group>"; };
+		3B4DB04F2F93E6820030F6B1 /* CloudDriveError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloudDriveError.swift; sourceTree = "<group>"; };
+		3B4DB0502F93E6820030F6B1 /* CloudDriveFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloudDriveFactory.swift; sourceTree = "<group>"; };
+		3B4DB0512F93E6820030F6B1 /* CloudDriveModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloudDriveModels.swift; sourceTree = "<group>"; };
+		3B4DB0522F93E6820030F6B1 /* CloudDriveProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloudDriveProvider.swift; sourceTree = "<group>"; };
 		3B594A922A908CE600A5BC1E /* PPAttributedStringVisitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPAttributedStringVisitor.swift; sourceTree = "<group>"; };
 		3B6CE3AC2B0BAC7000D86A1A /* PPDouyinParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPDouyinParser.swift; sourceTree = "<group>"; };
 		3B6CE3AE2B0BAE2F00D86A1A /* sign.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = sign.js; sourceTree = "<group>"; };
@@ -429,7 +447,14 @@
 				1E45F16229C708230009E16F /* alist */,
 				1E9180CF2A8B4FB400A0F883 /* Synology */,
 				1EEB0FF127538758006A5E26 /* OneDrive */,
+				3B4DB0482F93E6410030F6B1 /* WebDAV */,
 				1E526EC126B6788A0026DC67 /* PPCloudService.swift */,
+				3B4DB04D2F93E6820030F6B1 /* CloudDriveCacheManager.swift */,
+				3B4DB04E2F93E6820030F6B1 /* CloudDriveCredential.swift */,
+				3B4DB04F2F93E6820030F6B1 /* CloudDriveError.swift */,
+				3B4DB0502F93E6820030F6B1 /* CloudDriveFactory.swift */,
+				3B4DB0512F93E6820030F6B1 /* CloudDriveModels.swift */,
+				3B4DB0522F93E6820030F6B1 /* CloudDriveProvider.swift */,
 				3B77BD662E23F53E00DB172A /* PPCloudHTTP.swift */,
 			);
 			path = PPCloudService;
@@ -570,6 +595,16 @@
 				3B0741672B6B7C9800AB3BD8 /* PPBiometricAuthentication.swift */,
 			);
 			path = Security;
+			sourceTree = "<group>";
+		};
+		3B4DB0482F93E6410030F6B1 /* WebDAV */ = {
+			isa = PBXGroup;
+			children = (
+				3B4DB0492F93E6510030F6B1 /* WebDAVProvider.swift */,
+				3B4DB04A2F93E6510030F6B1 /* WebDAVXMLParser.swift */,
+				3B182B1A2F950AD0002B711B /* PPWebDAVFileService.swift */,
+			);
+			path = WebDAV;
 			sourceTree = "<group>";
 		};
 		3B594A912A908CDB00A5BC1E /* Tool */ = {
@@ -1151,6 +1186,8 @@
 				1E12093F29D67F5E00D442A2 /* PPEditCloudServiceVC.swift in Sources */,
 				6056024C231778D0000809CD /* String+Extention.swift in Sources */,
 				1E50942824DBB15B00238678 /* PPWebViewBottomToolbar.swift in Sources */,
+				3B4DB04B2F93E6510030F6B1 /* WebDAVXMLParser.swift in Sources */,
+				3B4DB04C2F93E6510030F6B1 /* WebDAVProvider.swift in Sources */,
 				60A1F8DA24388391009E390C /* PPWebViewController.swift in Sources */,
 				1E12094429D886A600D442A2 /* PPAliyunDriveFile.swift in Sources */,
 				1E12094229D8769500D442A2 /* PPAliyunDriveService.swift in Sources */,
@@ -1166,6 +1203,7 @@
 				1E4E57972995E64E00701E84 /* PPFilePicker.swift in Sources */,
 				1EDD7D0F287042D100EEDFCB /* PPFileListCell.swift in Sources */,
 				1EAA7F0727CDC48F008318E6 /* WKWebView+PPTool.swift in Sources */,
+				3B182B1B2F950AD0002B711B /* PPWebDAVFileService.swift in Sources */,
 				3B202A552B81FA1800CBEED1 /* PPCloudServiceError.swift in Sources */,
 				1EDD7D0D2870420600EEDFCB /* PPBaseCollectionViewCell.swift in Sources */,
 				1E07779C29AB3168005619E4 /* PPDetailViewController.swift in Sources */,
@@ -1242,6 +1280,12 @@
 				60560252231778FF000809CD /* XDRefreshHeader.m in Sources */,
 				1E179BF925B549B0006C3A56 /* UIView+PPTool.swift in Sources */,
 				3BD88DED2B69591200CA1DFE /* PPDrawIconView.swift in Sources */,
+				3B4DB0532F93E6820030F6B1 /* CloudDriveModels.swift in Sources */,
+				3B4DB0542F93E6820030F6B1 /* CloudDriveProvider.swift in Sources */,
+				3B4DB0552F93E6820030F6B1 /* CloudDriveFactory.swift in Sources */,
+				3B4DB0562F93E6820030F6B1 /* CloudDriveCredential.swift in Sources */,
+				3B4DB0572F93E6820030F6B1 /* CloudDriveCacheManager.swift in Sources */,
+				3B4DB0582F93E6820030F6B1 /* CloudDriveError.swift in Sources */,
 				60F5D04523275549004E988B /* XDCollectionViewCell.m in Sources */,
 				3B8D11E92A6D2A8700EE801F /* PPiCloudDriveService.swift in Sources */,
 				1E6763CE28C4FE8E00D1BE39 /* WKWebViewTool.swift in Sources */,

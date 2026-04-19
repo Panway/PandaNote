@@ -16,7 +16,7 @@ class PPFileManager: NSObject {
     
     static let shared = PPFileManager()
     static let dateFormatter = DateFormatter()
-    var webdavService : PPWebDAVService?
+    var webdavService : PPWebDAVFileService?
     var dropbox: PPDropboxService?//未配置服务器地址时刷新可能为空
     var localFileService: PPLocalFileService?
     var oneDriveService: PPOneDriveService?
@@ -160,9 +160,16 @@ class PPFileManager: NSObject {
             return
         }
         // 局部闭包
-        let handleResult = { (_ data:Data?,_ error:Error?) -> Void in
+        let handleResult = { (_ data:Data?,url:String?,_ error:Error?) -> Void in
             if let error = error {
                 debugPrint("下载失败：\(error.localizedDescription)")
+                return
+            }
+            if let url = url {
+                try? FileManager.default.moveItem(atPath: url, toPath: path.pp_fileCachePath())
+                DispatchQueue.main.async {
+                    completion(data,false,error)
+                }
                 return
             }
             if data == nil {return}
@@ -181,7 +188,7 @@ class PPFileManager: NSObject {
             return
         }
         currentService?.getFileData(path, fileID ?? "", completion: { data, url, error in
-            handleResult(data, error)
+            handleResult(data, url, error)
         })
         
             
@@ -231,7 +238,7 @@ class PPFileManager: NSObject {
             completion(filePath.replacingOccurrences(of: "//", with: "/"))
         }
     }
-    func getRemoteURL(path:String,
+    private func getRemoteURL(path:String,
                     fileID:String?,
                      completion: @escaping (( _ url:String) -> Void)) {
         let type = PPUserInfo.shared.cloudServiceType
@@ -317,6 +324,7 @@ class PPFileManager: NSObject {
                     PPHUD.showHUDFromTop("移动或重命名失败",isError: true)
                     return
                 }
+                PPHUD.showHUDFromTop("移动成功")
                 let downloadPath = "\(PPDiskCache.shared.path)/\(PPUserInfo.shared.webDAVRemark)"
                 //移动本地的文件
                 if FileManager.default.fileExists(atPath: downloadPath + srcPath) {
@@ -423,9 +431,11 @@ class PPFileManager: NSObject {
         case .icloud:
             self.iCloudService = PPiCloudDriveService(containerId: PPAppConfig.shared.iCloudContainerId)
         case .webdav:
-            webdavService = PPWebDAVService(url: PPUserInfo.shared.webDAVServerURL,
+            
+            webdavService = PPWebDAVFileService(url: PPUserInfo.shared.webDAVServerURL,
                                             username: user,
-                                            password: password)
+                                            password: password,
+                                                id: PPUserInfo.shared.getCurrentServerInfo("PPWebDAVRemark"))
 //        default:
 //            debugPrint("not init Cloud Service")
         }
@@ -521,21 +531,6 @@ class PPFileManager: NSObject {
         
     }
     
-    //https://stackoverflow.com/a/59869659
-    ///删除相册图片
-    func deletePhotos(_ assetsToDeleteFromDevice:[PHAsset]) {
-        let assetIdentifiers = assetsToDeleteFromDevice.map({ $0.localIdentifier })
-        let assets = PHAsset.fetchAssets(withLocalIdentifiers: assetIdentifiers, options: nil)
-        PHPhotoLibrary.shared().performChanges({
-            PHAssetChangeRequest.deleteAssets(assets)
-        })
-    }
-    func getImageDataFromPHAsset(asset: PHAsset) -> Data {
-        let options = PHImageRequestOptions()
-        options.isNetworkAccessAllowed = true
-        options.isSynchronous = false
-        return Data()
-    }
     //   let myQueue = DispatchQueue.global()
     //    group.enter()//
     //    myQueue.async(group: group, qos: .default, flags: [], execute: {
@@ -608,7 +603,7 @@ class PPFileManager: NSObject {
                 completion(assetsToDeleteFromDevice)
             }
             if PPUserInfo.pp_boolValue("deletePhotoAfterUploading") {
-                PPFileManager.shared.deletePhotos(assetsToDeleteFromDevice)
+                PHAsset.pp_deletePhotos(assetsToDeleteFromDevice)
             }
         }
 
@@ -632,52 +627,6 @@ class PPFileManager: NSObject {
         return uploadName
     }
     
-    
-    //MARK:- deprecated废弃的方法
-    func loadAndSaveImage(imageURL:String,completionHandler: ((Data) -> Void)? = nil) {
-        let imagePath = PPUserInfo.shared.pp_mainDirectory + imageURL
-
-        if FileManager.default.fileExists(atPath: imagePath) {
-            let imageData = try?Data(contentsOf: URL(fileURLWithPath: imagePath))
-            if let handler = completionHandler {
-                    handler(imageData!)
-            }
-            
-            /*
-            if ((cachedData) == nil) {//KingFisher用
-                //DefaultCacheSerializer会对大图压缩后缓存，所以这里用自定义序列化类实现缓存原始图片数据
-                cache.store(UIImage.init(data: imageData! )!, original: imageData, forKey: imageURL, processorIdentifier: "", cacheSerializer: PandaCacheSerializer.default, toDisk: true) {
-                }
-                //cache.store(UIImage.init(data: imageData! )!, original: imageData, forKey:fileObj.path )
-            }
- */
-        }
-        else {
-            currentService?.getFileData(imageURL, "", completion: { data, url, error in
-                guard let contents = data else {
-                    return
-                }
-                if !FileManager.default.fileExists(atPath: PPUserInfo.shared.pp_mainDirectory + imageURL) {
-                    do {
-                        var array = imageURL.split(separator: "/")
-                        array.removeLast()
-                        let newStr:String = array.joined(separator: "/")
-                        try FileManager.default.createDirectory(atPath: PPUserInfo.shared.pp_mainDirectory+"/"+newStr, withIntermediateDirectories: true, attributes: nil)
-                    } catch  {
-                        debugPrint("==FileManager Crash")
-                    }
-                }
-                
-                FileManager.default.createFile(atPath: PPUserInfo.shared.pp_mainDirectory + imageURL, contents: contents, attributes: nil)
-                
-                if let handler = completionHandler {
-                    handler(contents)
-                }
-                
-            })
-            
-        }
-    }
     
 }
 

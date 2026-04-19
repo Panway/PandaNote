@@ -47,7 +47,7 @@ final class PPMarkdownViewController: PPBaseViewController,
     var fileID = ""
     var fileExtension = ""
     var downloadURL = ""
-    var cacheDir = ""
+    var cacheDir = "" ///< 本地缓存目录绝对路径
 //    var webdav: WebDAVFileProvider?
     var closeAfterSave : Bool = false
     var textChanged : Bool = false//文本改变的话就不需要再比较字符串了
@@ -89,8 +89,13 @@ final class PPMarkdownViewController: PPBaseViewController,
         PPFileManager.shared.getFileData(path: filePathStr,
                                          fileID: fileID,
                                          downloadURL:downloadURL,
-                                         alwaysDownload:true) { (contents: Data?,isFromCache, error) in
-            guard let contents = contents else {
+                                         alwaysDownload:true) { (contentsData: Data?,isFromCache, error) in
+            var c = contentsData
+            let fileExist = FileManager.default.fileExists(atPath: self.filePathStr.pp_fileCachePath())
+            if fileExist {
+                c = try? Data(contentsOf: URL(fileURLWithPath: self.filePathStr.pp_fileCachePath()))
+            }
+            guard let contents = c, fileExist == true else {
                 PPHUD.showHUDFromTop("获取内容失败，请进入文件夹刷新",isError: true)
                 return
             }
@@ -708,21 +713,22 @@ final class PPMarkdownViewController: PPBaseViewController,
 // https://developer.apple.com/documentation/uikit/mac_catalyst/handling_key_presses_made_on_a_physical_keyboard/
     override func pressesBegan(_ presses: Set<UIPress>, with event: UIPressesEvent?) {
         
-        var didHandleEvent = false
-        var pressCommandKey = false
+        let didHandleEvent = false
+//        var pressCommandKey = false
         for press in presses {
             guard let key = press.key else { continue }
             let keyName = key.charactersIgnoringModifiers
-            debugPrint("用户按下：\(keyName)")
-            if key.modifierFlags.contains(.command) {
-                pressCommandKey = true
-                print("用户按下command")
-                if let num = Int(keyName),
-                   num > 0 && num < 6 {
-                    self.textView.updateCurrentLineWithHeadingLevel(num)
-                }
+            print("用户按下：\(keyName)")
+            if key.modifierFlags.contains(.command) == false {
+                super.pressesBegan(presses, with: event)
+                return
+//                pressCommandKey = true
+//                print("包含了command键")
             }
-            if pressCommandKey {
+            if let num = Int(keyName),
+               num > 0 && num < 6 {
+                self.textView.updateCurrentLineWithHeadingLevel(num)
+            }
                 if keyName == "s" {
                     saveTextAction() //保存
                 }
@@ -730,8 +736,10 @@ final class PPMarkdownViewController: PPBaseViewController,
                     self.findReplaceView.isHidden = false
                     self.findReplaceView.searchField.becomeFirstResponder()
                 }
-                
+            else if keyName == "b" {
+                self.textView.setBold()
             }
+            
         }
         
         if didHandleEvent == false {

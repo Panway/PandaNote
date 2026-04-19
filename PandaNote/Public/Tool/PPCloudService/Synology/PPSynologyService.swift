@@ -99,14 +99,14 @@ class PPSynologyService: NSObject, PPCloudServiceProtocol {
             }
             return
         }
-        serverID = url //QuickConnect ID
+        serverID = url // QuickConnect ID
         // TODO: 局域网URL直接登录
         let parameters: Parameters = [
             "get_ca_fingerprints": true,
             "id": "dsm",
             "serverID": serverID,
             "command": "get_server_info",
-            "version": "1"
+            "version": "1",
         ]
         httpClient.post(url: getServerInfoURL, parameters: parameters) { response in
             switch response.statusCode {
@@ -433,8 +433,9 @@ class PPSynologyService: NSObject, PPCloudServiceProtocol {
                 completion(nil, self.getResponseError(response))
             }
     }
+
     /// 暂未使用
-    func mimeType(forFileName filename: String) -> String {
+    func mimeType(forFileName _: String) -> String {
 //        if filename.contains(".") {
 //            let pathExtension = String(filename.split(separator: ".").last!)
 //            if let id = UTTypeCreatePreferredIdentifierForTag(kUTTagClassFilenameExtension, pathExtension as CFString, nil)?.takeRetainedValue(),
@@ -445,66 +446,131 @@ class PPSynologyService: NSObject, PPCloudServiceProtocol {
 //        }
         return "application/octet-stream"
     }
-    
-    func moveItem(srcPath: String, destPath: String, srcItemID: String, destItemID: String, isRename: Bool, completion: @escaping (Error?) -> Void) {
-        //rename
+
+    func moveItem(srcPath: String, destPath: String, srcItemID _: String, destItemID _: String, isRename: Bool, completion: @escaping (Error?) -> Void) {
+        // rename
         let filename = destPath.pp_split("/").last ?? ""
         // path/to/file.jpg --> path/to
         let dest_folder_path = destPath.replacingOccurrences(of: "/" + filename, with: "")
         var parameters: Parameters = [:]
         if isRename {
             parameters = [
+                "_sid": sid,
                 "api": "SYNO.FileStation.Rename",
                 "method": "rename",
                 "name": "\"\(filename)\"",
                 "path": "\"\(srcPath)\"",
-                "version": "2"
+                "version": "2",
             ]
-        }
-        else {
+        } else {
             parameters = [
+                "_sid": sid,
                 "api": "SYNO.FileStation.CopyMove",
                 "dest_folder_path": "\"\(dest_folder_path)\"",
                 "method": "start",
                 "overwrite": "true",
                 "remove_src": "true",
                 "path": "[\"\(srcPath)\"]",
-                "version": "2"
+                "version": "2",
             ]
         }
         httpClient.postForm(url: baseURL + "/webapi/entry.cgi", parameters: parameters, headers: headers) { response in
-                completion(response.error)
-            }
+            completion(response.error)
+        }
     }
-    
-    func removeItem(_ path: String, _ fileID: String, completion: @escaping (Error?) -> Void) {
+
+    func removeItem(_ path: String, _: String, completion: @escaping (Error?) -> Void) {
         let parameters: Parameters = [
             "api": "SYNO.FileStation.Delete",
             "method": "start",
             "path": "[\"\(path)\"]",
-            "version": "2"
+            "_sid": sid,
+            "version": "2",
         ]
         httpClient.postForm(url: baseURL + "/webapi/entry.cgi", parameters: parameters, headers: headers) { response in
-                    
-            completion(response.error)
+//            completion(self.realError(response.data))
+            guard let json = response.data?.pp_JSONObject() else { return }
+            if let success = json["success"] as? Bool, success == true,
+               let data = json["data"] as? [String: String],
+               let taskid = data["taskid"]
+            {
+                self.getDeleteStatus(taskid: taskid, completion: completion)
             }
+        }
     }
-    
-    func getResponseError(_ response:AFDataResponse<Data>) -> Error? {
-        //debugPrint("DSfile response:" , response)
+
+    func getDeleteStatus(taskid: String, completion: @escaping (Error?) -> Void) {
+        let parameters: Parameters = [
+            "api": "SYNO.FileStation.Delete",
+            "method": "status",
+            "taskid": taskid,
+            "_sid": sid,
+            "version": "1",
+        ]
+        httpClient.postForm(url: baseURL + "/webapi/entry.cgi", parameters: parameters, headers: headers) { response in
+            if self.getDeleteReason(response.data).length > 0 {
+                completion(PPCloudServiceError.permissionDenied)
+            } else {
+                completion(nil)
+            }
+        }
+    }
+
+    func getResponseError(_ response: AFDataResponse<Data>) -> Error? {
+        // debugPrint("DSfile response:" , response)
         switch response.result {
-        case .success(_):
+        case .success:
             guard let json = response.data?.pp_JSONObject() else { return PPCloudServiceError.unknown }
             if let success = json["success"] as? Bool, success == true {
                 return nil
-            }
-            else {
+            } else {
                 json.printJSON()
                 return PPCloudServiceError.unknown
             }
-        case .failure(let error):
+        case let .failure(error):
             return error
         }
     }
-    
+
+    func realError(_ jsonData: Data?) -> Error? {
+        guard let json = jsonData?.pp_JSONObject() else { return PPCloudServiceError.unknown }
+        if let success = json["success"] as? Bool, success == true {
+            return nil
+        } else {
+            json.printJSON()
+            return PPCloudServiceError.unknown
+        }
+    }
+
+    /* {
+         "data": {
+             "errors": [
+                 {
+                     "code": 900,
+                     "path": "/docker/tmp/202602/20260417.jpg"
+                 }
+             ],
+             "finished": true
+         },
+         "success": true
+     } */
+    func getDeleteReason(_ idata: Data?) -> String {
+        guard let jsonData = idata else { return "" }
+        let decoder = JSONDecoder()
+
+        do {
+            let response = try decoder.decode(SynologyResponse<SynologyDeleteFileData>.self, from: jsonData)
+
+            if response.success, let dt = response.data, let ers = dt.errors {
+                for error in ers {
+                    if error.code == 900 {
+                        return "删除失败，请检查您是否有适当的权限"
+                    }
+                }
+            }
+        } catch {
+            return "解析失败"
+        }
+        return ""
+    }
 }
