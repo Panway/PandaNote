@@ -374,6 +374,37 @@ final class PPMarkdownViewController: PPBaseViewController,
         let maxTextWidth = PPAppConfig.shared.outlineMaxWidth + 40
         tocTableWidthConstraint?.update(offset: min(maxWidth, maxTextWidth))
     }
+    // 更新内容（渲染）时调用
+    func didUpdateContent() {
+        for item in textView.visitor.images {
+            let path = "\(cacheDir)/\(item)".replacingOccurrences(of: "//", with: "/").pp_split(PPUserInfo.shared.webDAVRemark).last ?? ""
+            // 是完整的http路径，缓存到 `/Library/Caches/PandaCache/XXX/7217078bf5868444aa1dd421eafbd956`
+            if item.hasPrefix("http://") || item.hasPrefix("https://") {
+                var fileName = item.pp_getFileName()
+                if fileName.length == 0 {
+                    fileName = item.pp_md5
+                }
+                let absPath = "\(cacheDir)/\(fileName)".replacingOccurrences(of: "//", with: "/")
+                if FileManager.default.fileExists(atPath: absPath) {
+                    continue
+                }
+                let dir_to_upload = self.filePathStr.replacingOccurrences(of: self.filePathStr.pp_getFileName(), with: "")
+                PPFileManager.shared.downloadThenCache(url: item, path: absPath.pp_split(PPUserInfo.shared.webDAVRemark).last ?? "") { contents, isFromCache, error in
+                    PPFileManager.shared.createFile(path: dir_to_upload + fileName, contents: contents) { res, error in
+                        if let e = error {
+                            print(e.localizedDescription)
+                        }
+                    }
+                }
+                continue
+            }
+            //不是完整的http路径
+            PPFileManager.shared.getFileData(path: path,
+                                             fileID: nil,
+                                             alwaysDownload:false) { (contents: Data?,isFromCache, error) in
+            }
+        }
+    }
     //MARK: - Private 私有方法
     func initTOC() {
         menuBtn.delegate = self

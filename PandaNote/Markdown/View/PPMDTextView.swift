@@ -13,6 +13,7 @@ import Highlightr
 //import libcmark
 public protocol PPMDTextViewDelegate: AnyObject {
     func didUpdateHeading(_ headings:[String])
+    func didUpdateContent()
 }
 
 class PPMDTextView: UITextView {
@@ -160,7 +161,7 @@ class PPMDTextView: UITextView {
         let offsetY = self.contentOffset.y
 //        self.text = self.text.replacingOccurrences(of: "￼", with: "") //去掉替代字符
         let ttttt = self.text.replacingOccurrences(of: "￼", with: "")
-        print("render==========\n\(ttttt)\n=========="  )
+//        print("render==========\n\(ttttt)\n=========="  )
         let down = Down(markdownString: ttttt)
         
         guard let document = try? down.toDocument(DownOptions.hardBreaks) else { return }
@@ -172,29 +173,13 @@ class PPMDTextView: UITextView {
         attributedText = attText
         self.markdownDelegate?.didUpdateHeading(visitor.headings)
         didRender = true
-        debugPrint("===========")
+        markdownDelegate?.didUpdateContent()
+//        debugPrint("===========")
         // 恢复光标位置
         if selectedRange.location != NSNotFound {
             self.selectedRange = selectedRange
         }
-        for item in visitor.images {
-            let path = "\(cacheDir)/\(item)".replacingOccurrences(of: "//", with: "/").pp_split(PPUserInfo.shared.webDAVRemark).last ?? ""
-            // 是完整的http路径，缓存到 `/Library/Caches/PandaCache/XXX/7217078bf5868444aa1dd421eafbd956`
-            if item.hasPrefix("http://") || item.hasPrefix("https://") {
-                let absPath = "\(cacheDir)/\(item.pp_md5)".replacingOccurrences(of: "//", with: "/")
-                if FileManager.default.fileExists(atPath: absPath) {
-                    continue
-                }
-                PPFileManager.shared.downloadThenCache(url: item, path: absPath.pp_split(PPUserInfo.shared.webDAVRemark).last ?? "") { contents, isFromCache, error in
-                }
-                continue
-            }
-            //不是完整的http路径
-            PPFileManager.shared.getFileData(path: path,
-                                             fileID: nil,
-                                             alwaysDownload:false) { (contents: Data?,isFromCache, error) in
-            }
-        }
+        
         self.setContentOffset(CGPoint(x: 0, y: offsetY), animated: false)
     }
     // 如何在UITextView已经显示的attributedText当前光标处插入一个NSAttributedString对象
@@ -236,7 +221,56 @@ class PPMDTextView: UITextView {
             }
         }
     }
-    
+    /// 设置粗体
+    func setBold() {
+        // 获取光标所在行的文本范围
+        guard let selectedRange = self.selectedTextRange else { return }
+        // 获取光标所在行的 NSRange
+        let cursorPosition = self.offset(from: self.beginningOfDocument, to: selectedRange.start)
+        let selectedTextRange = NSRange(location: cursorPosition, length: self.offset(from: selectedRange.start, to: selectedRange.end))
+        let currentLineText = self.attributedText.attributedSubstring(from: selectedTextRange)
+        if currentLineText.string.length == 0 { return }
+        // 左边2个字符范围
+        var leftTwoCharRange = NSRange(location: selectedTextRange.location - 2, length: 2)
+        leftTwoCharRange.location = max(leftTwoCharRange.location, 0) // 确保不小于0
+        // 右边2个字符范围
+        var rightTwoCharRange = NSRange(location: selectedTextRange.location + selectedTextRange.length,
+                                        length: min(2, self.attributedText.length - selectedTextRange.location - selectedTextRange.length))
+        rightTwoCharRange.location = min(rightTwoCharRange.location, self.attributedText.length) // 确保不超过字符串长度
+        
+        
+        
+        
+        let leftTwoChar = self.attributedText.attributedSubstring(from: leftTwoCharRange)
+        let rightTwoChar = self.attributedText.attributedSubstring(from: rightTwoCharRange)
+        debugPrint("=====\(leftTwoChar.string)\(currentLineText.string)\(rightTwoChar.string)")
+        let mutableAttributedString = NSMutableAttributedString(attributedString: self.attributedText)
+        var cursorRangeNew = selectedTextRange //编辑后光标的位置，初始的默认值无意义
+        // 检查当前行文本的左右两侧是否有两个 * 号
+        if (leftTwoChar.string == "**" && rightTwoChar.string == "**") {
+            // 如果左右两侧有两个 * 号，则移除左右的 * 号
+            mutableAttributedString.deleteCharacters(in: NSRange(location: leftTwoCharRange.location, length: 2))
+            mutableAttributedString.deleteCharacters(in: NSRange(location: rightTwoCharRange.location - 2, length: 2))
+            self.attributedText = mutableAttributedString
+            cursorRangeNew = NSRange(location: selectedTextRange.location - 2, length: selectedTextRange.length)
+
+        } else {
+            // 如果左右两侧没有两个 * 号，则在左右各添加两个 * 号
+            let newAttributedString = NSAttributedString(string: "**\(currentLineText.string)**", attributes: currentLineText.pp_attributes(at: 0))
+            mutableAttributedString.replaceCharacters(in: selectedTextRange, with: newAttributedString)
+            cursorRangeNew = NSRange(location: selectedTextRange.location + 2, length: selectedTextRange.length)
+        }
+        // 备份，以供Command + Z撤销
+        self.undoManager?.registerUndo(withTarget: self, selector: #selector(undoAttributedTextChange), object: mutableAttributedString)
+        self.attributedText = mutableAttributedString
+        self.render()
+        // 恢复光标位置
+        if selectedTextRange.location != NSNotFound {
+            self.becomeFirstResponder()
+            self.selectedRange = cursorRangeNew
+        }
+        
+    }
     // https://stackoverflow.com/a/34922332
     func moveCursor(offset:Int) {
         if let selectedRange = self.selectedTextRange {

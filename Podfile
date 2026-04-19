@@ -2,13 +2,14 @@
 #source 'https://cdn.jsdelivr.net/cocoa/'
 source 'https://cdn.cocoapods.org/'
 # Uncomment the next line to define a global platform for your project
-platform :ios, 10.0
+platform :ios, 11.0
 #禁止所有来自CocoaPods的警告
 inhibit_all_warnings!
 
 install! 'cocoapods',
-#生成多个 Xcodeproj
+#生成多个 Xcodeproj。为你的项目中的每个 Pod 库生成一个独立的 Xcode 目标（Target）。可以更好地利用 Xcode 的并行构建能力。当只修改了其中一个 Pod 时，Xcode 可以只重新编译那个特定的目标，显著减少整体构建时间。
 generate_multiple_pod_projects: true,
+lock_pod_sources: false,
 #增量安装
 incremental_installation: true
 

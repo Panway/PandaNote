@@ -1,9 +1,9 @@
 PODS:
-  - Alamofire (5.9.0)
+  - Alamofire (5.11.2)
   - BTNavigationDropdownMenu (0.7)
   - ContextMenu (0.4.0)
   - ContextMenuSwift (1.0.0)
-  - CryptoSwift (1.5.1)
+  - CryptoSwift (1.8.4)
   - Down (0.11.0)
   - DropDown (2.3.13)
   - Dynamic (1.0.0)
@@ -18,11 +18,11 @@ PODS:
     - GCDWebServer/Core (= 3.5.4)
   - GCDWebServer/Core (3.5.4)
   - Highlightr (2.1.0)
-  - IQKeyboardManager (6.5.11)
+  - IQKeyboardManager (6.5.19)
   - Kanna (5.2.7)
   - Kingfisher (6.3.1)
   - MBProgressHUD (1.2.0)
-  - MJRefresh (3.7.5)
+  - MJRefresh (3.7.6)
   - MonkeyKing (2.2.1)
   - MPITextKit (0.2.4)
   - NewPopMenu (2.1.2)
@@ -43,11 +43,11 @@ PODS:
   - PPiOSKit/SwipePopGesture (0.0.1)
   - SKPhotoBrowser (7.1.0)
   - SnapKit (5.6.0)
-  - TZImagePickerController (3.8.8):
-    - TZImagePickerController/Basic (= 3.8.8)
-    - TZImagePickerController/Location (= 3.8.8)
-  - TZImagePickerController/Basic (3.8.8)
-  - TZImagePickerController/Location (3.8.8)
+  - TZImagePickerController (3.8.12):
+    - TZImagePickerController/Basic (= 3.8.12)
+    - TZImagePickerController/Location (= 3.8.12)
+  - TZImagePickerController/Basic (3.8.12)
+  - TZImagePickerController/Location (3.8.12)
   - XLPagerTabStrip (9.0.0)
 
 DEPENDENCIES:
@@ -129,15 +129,15 @@ CHECKOUT OPTIONS:
     :commit: e05d45eb1546f2422ffb6bbbb66872a379e7e10e
     :git: https://github.com/Panway/Dynamic.git
   PPiOSKit:
-    :commit: 9ec2070fd9b29219661e5e5f3934f4775a58a17e
+    :commit: 1b2fcf22b9b4bd81ecb62a63409bf41f414620c7
     :git: https://github.com/Panway/CodeSnipetCollection.git
 
 SPEC CHECKSUMS:
-  Alamofire: 02b772c9910e8eba1a079227c32fbd9e46c90a24
+  Alamofire: 400275dd1c6d87d95a041861d2a59da4b520a203
   BTNavigationDropdownMenu: 57a72c74dc211db3564f5be168f4f7643491a7de
   ContextMenu: f835e09a93f1c28c631b76ee94396d9570397fd1
   ContextMenuSwift: c89068a89ccd9210dfcaee3bdc558e65aa74899b
-  CryptoSwift: c4f2debceb38bf44c80659afe009f71e23e4a082
+  CryptoSwift: e64e11850ede528a02a0f3e768cec8e9d92ecb90
   Down: b6ba1bc985c9d2f4e15e3b293d2207766fa12612
   DropDown: 8a2116376c1981888557f72ec2ffc9a5e0e456ec
   Dynamic: dd5221485aaa348877d6f1efa7d645506da8bd81
@@ -148,11 +148,11 @@ SPEC CHECKSUMS:
   FMDB: 2ce00b547f966261cd18927a3ddb07cb6f3db82a
   GCDWebServer: 2c156a56c8226e2d5c0c3f208a3621ccffbe3ce4
   Highlightr: 595f3e100737c8de41113385da8bd0b5b65212c6
-  IQKeyboardManager: ef43ce1ba1e5aaf4adf222c0a46f39761f246879
+  IQKeyboardManager: c8665b3396bd0b79402b4c573eac345a31c7d485
   Kanna: 01cfbddc127f5ff0963692f285fcbc8a9d62d234
   Kingfisher: 016c8b653a35add51dd34a3aba36b580041acc74
   MBProgressHUD: 3ee5efcc380f6a79a7cc9b363dd669c5e1ae7406
-  MJRefresh: fdf5e979eb406a0341468932d1dfc8b7f9fce961
+  MJRefresh: 2fe7fb43a5167ceda20bb7e63f130c04fd1814a5
   MonkeyKing: 196838a3b4c97e95915f3e7046fb2d6044f06101
   MPITextKit: e9b17481ce626c6298be148c4ccea2ee872bc9a5
   NewPopMenu: c6129e08e8192f6257ceb5f9a4357e1b59c6e2e7
@@ -162,9 +162,9 @@ SPEC CHECKSUMS:
   PPiOSKit: 9f049cf7ff47cefda7f747a404254ee1a5ae7f85
   SKPhotoBrowser: cd95b95a6f352fc2a50992721299f75ead77f9ab
   SnapKit: e01d52ebb8ddbc333eefe2132acf85c8227d9c25
-  TZImagePickerController: d084a7b97c82d387e7669dd86dc9a9057500aacf
+  TZImagePickerController: 3751b9b850d00802e9f4f7bd8e1365ee5c4f0990
   XLPagerTabStrip: 61c57fd61f611ee5f01ff1495ad6fbee8bf496c5
 
-PODFILE CHECKSUM: ce365c248e37f24974a7df36d5de0f223d6bc866
+PODFILE CHECKSUM: 528e0aaae1813f4bd18970e0ae8622cf82476241
 
 COCOAPODS: 1.16.2
