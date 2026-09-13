@@ -573,14 +573,18 @@ extension String {
         return textSuffixs.contains { name.hasSuffix($0) }
     }
     func isTextFile() -> Bool {
-        let textSuffixs = ["md","txt","js","css","json",
-                           "html","c","h","m","swift",
-                           "sh","java","py","rb","cpp",
-                           "go","mm","plist","xml"]
-        let name = self.lowercased()
-        return textSuffixs.contains { name.hasSuffix($0) }
-//        let existedFile = textSuffixs.filter{self.hasSuffix($0)}
-//        return existedFile.count > 0
+        // 使用 Set 提高查询性能，O(1) 复杂度
+        let textExtensions: Set<String> = [
+            "md", "txt", "js", "css", "json",
+            "html", "c", "h", "m", "swift",
+            "sh", "java", "py", "rb", "cpp",
+            "go", "mm", "plist", "xml"
+        ]
+        
+        // 提取真正的扩展名，比如 "1.heic" 提取出 "heic"，"a.b.txt" 提取出 "txt"
+        let ext = (self as NSString).pathExtension.lowercased()
+        
+        return textExtensions.contains(ext)
     }
     /// 是图片文件
     func pp_isImageFile() -> Bool {

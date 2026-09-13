@@ -129,11 +129,11 @@ class PPCloudHTTP {
                 kCFNetworkProxiesHTTPPort: port,
             ]
         }
-        configuration.connectionProxyDictionary = [
-            kCFNetworkProxiesHTTPEnable: true,
-            kCFNetworkProxiesHTTPProxy: "127.0.0.1",
-            kCFNetworkProxiesHTTPPort: 9000,
-        ]
+//        configuration.connectionProxyDictionary = [
+//            kCFNetworkProxiesHTTPEnable: true,
+//            kCFNetworkProxiesHTTPProxy: "127.0.0.1",
+//            kCFNetworkProxiesHTTPPort: 9000,
+//        ]
 
         // 20260419 interceptor 传入 Session，让所有请求自动附加认证头
         session = Session(configuration: configuration, interceptor: interceptor)

@@ -345,7 +345,7 @@ public final class CloudDriveCacheManager {
         fileSize: Int64,
         etag: String?
     ) {
-        let cacheID = "\(providerID):\(remotePath)".stableHash
+        let cacheID = "\(providerID):\(remotePath)".pp_md5
         dbQueue.async(flags: .barrier) { [weak self] in
             guard let self, let db = self.db else { return }
             let sql = """
@@ -443,9 +443,9 @@ public final class CloudDriveCacheManager {
 
 private extension String {
     /// 用于生成缓存 ID，使用 MD5
-    var stableHash: String {
-        let data = Data(utf8)
-        let digest = Insecure.MD5.hash(data: data)
-        return digest.map { String(format: "%02x", $0) }.joined()
-    }
+//    var stableHash: String {
+//        let data = Data(utf8)
+//        let digest = Insecure.MD5.hash(data: data)
+//        return digest.map { String(format: "%02x", $0) }.joined()
+//    }
 }

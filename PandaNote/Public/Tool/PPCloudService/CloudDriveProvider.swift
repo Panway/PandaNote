@@ -55,10 +55,10 @@ open class CloudDriveProvider {
     public private(set) var loginState: CloudDriveLoginState = .loggedOut
 
     /// ✅ 是否开启文件列表 SQLite 缓存（默认开启）
-    public var enableListCache: Bool = true
+    public var enableListCache: Bool = false
 
     /// ✅ 是否开启下载文件沙盒缓存（默认开启）
-    public var enableDownloadCache: Bool = true
+    public var enableDownloadCache: Bool = false
 
     /// 缓存管理器（内部使用）
     let cache = CloudDriveCacheManager.shared
@@ -196,10 +196,15 @@ open class CloudDriveProvider {
 
     /// 根据远端路径构建本地沙盒文件 URL
     public func localFileURL(for remotePath: String) -> URL {
-        let fileName = URL(fileURLWithPath: remotePath).lastPathComponent
+//        let fileName = URL(fileURLWithPath: remotePath).lastPathComponent
         // 使用 remotePath 的哈希前缀防止同名文件冲突
-        let prefix = String(remotePath.hashValue & 0xFFFF, radix: 16)
-        return localDownloadDirectory().appendingPathComponent("\(prefix)_\(fileName)")
+//        let prefix = String(remotePath.hashValue & 0xFFFF, radix: 16)
+        let localFilePath = localDownloadDirectory().appendingPathComponent(remotePath)
+        // 如果localFilePath不存在，则创建
+        if !FileManager.default.fileExists(atPath: localFilePath.path) {
+            try? FileManager.default.createDirectory(at: localFilePath.deletingLastPathComponent(), withIntermediateDirectories: true)
+        }
+        return localDownloadDirectory().appendingPathComponent(remotePath)//"\(prefix)_\(fileName)")
     }
 
     /// 检查远端文件是否有沙盒缓存且文件仍然存在

@@ -15,6 +15,7 @@ import UIKit
 
 // MARK: - Main Split View Controller
 
+@available(iOS 13.0, *)
 class MainSplitViewController: UISplitViewController {
     private var sidebarTabBarController: UITabBarController!
     private var detailTabBarController: DetailTabBarController!
@@ -93,11 +94,13 @@ class MainSplitViewController: UISplitViewController {
 
 // MARK: - Split View Controller Delegate
 
+@available(iOS 13.0, *)
 extension MainSplitViewController: UISplitViewControllerDelegate {
     func splitViewController(_: UISplitViewController, collapseSecondary _: UIViewController, onto _: UIViewController) -> Bool {
         // 在iPhone上折叠时，不显示次要视图控制器
         return true
     }
+    @available(iOS 14.0, *)
     @available(macCatalyst 14.0, *)
     func splitViewController(_ svc: UISplitViewController,
                                  topColumnForCollapsingToProposedTopColumn proposedTopColumn: UISplitViewController.Column) -> UISplitViewController.Column {
@@ -107,6 +110,7 @@ extension MainSplitViewController: UISplitViewControllerDelegate {
 
 // MARK: - Files View Controller Delegate
 
+@available(iOS 13.0, *)
 extension MainSplitViewController: FilesViewControllerDelegate {
     func filesViewController(_ controller: FilesViewController, didSelectFile file: FileItem) {
         let detailVC = FileDetailViewController(file: file)
@@ -123,6 +127,7 @@ extension MainSplitViewController: FilesViewControllerDelegate {
 
 // MARK: - Detail Tab Bar Controller
 
+@available(iOS 13.0, *)
 class DetailTabBarController: UIViewController {
     private var containerView: UIView!
     private var tabBarContainerView: UIView!
@@ -396,12 +401,14 @@ struct FileItem {
 
 // MARK: - Files View Controller Delegate Protocol
 
+@available(iOS 13.0, *)
 protocol FilesViewControllerDelegate: AnyObject {
     func filesViewController(_ controller: FilesViewController, didSelectFile file: FileItem)
 }
 
 // MARK: - Files View Controller
 
+@available(iOS 13.0, *)
 class FilesViewController: UIViewController {
     weak var delegate: FilesViewControllerDelegate?
 
@@ -450,6 +457,7 @@ class FilesViewController: UIViewController {
 
 // MARK: - Files Table View Data Source & Delegate
 
+@available(iOS 13.0, *)
 extension FilesViewController: UITableViewDataSource, UITableViewDelegate {
     func tableView(_: UITableView, numberOfRowsInSection _: Int) -> Int {
         return files.count
@@ -475,6 +483,7 @@ extension FilesViewController: UITableViewDataSource, UITableViewDelegate {
 
 // MARK: - File Table View Cell
 
+@available(iOS 13.0, *)
 class FileTableViewCell: UITableViewCell {
     private let fileIconImageView = UIImageView()
     private let fileNameLabel = UILabel()
@@ -583,6 +592,7 @@ class FileTableViewCell: UITableViewCell {
 
 // MARK: - File Detail View Controller
 
+@available(iOS 13.0, *)
 class FileDetailViewController: UIViewController {
     private let file: FileItem
     private var scrollView: UIScrollView!
@@ -784,6 +794,7 @@ class FileDetailViewController: UIViewController {
 
 // MARK: - Welcome View Controller
 
+@available(iOS 13.0, *)
 class WelcomeViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -838,6 +849,7 @@ class WelcomeViewController: UIViewController {
 
 // MARK: - Placeholder View Controller
 
+@available(iOS 13.0, *)
 class PlaceholderViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()

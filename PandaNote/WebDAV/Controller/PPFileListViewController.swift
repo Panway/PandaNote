@@ -381,15 +381,28 @@ class PPFileListViewController: PPBaseViewController,
             }
             self.navigationController?.pushViewController(vc, animated: true)
         }
-        else if (fileObj.name.isTextFile())  {
-            let vc = PPMarkdownViewController()
-            vc.filePathStr = getPathNotEmpty(fileObj)
-            vc.fileID = fileObj.pathID
-            vc.downloadURL = fileObj.downloadURL
-            vc.title = fileObj.name
-            self.pushDetail(vc, isMarkdown: true)
-        }
+        
         else if (fileObj.name.pp_isImageFile())  {
+            // 如果self.dataSource里有同名的MOV文件，当做Live Photo处理
+            var movFile : PPFileModel? = nil
+            for item in self.dataSource {
+                if item.name.pp_fileExtension.lowercased().hasSuffix("mov") {
+                    movFile = item
+                    break
+                }
+            }
+            if let movFile = movFile {
+                cell.downloadFile(fileObj) { imageURL in
+                    cell.downloadFile(movFile) { videoURL in
+                        let vc = PPLivePhotoPreviewViewController()
+                        vc.imagePath = imageURL
+                        vc.videoPath = videoURL
+                        self.pushDetail(vc)
+                        
+                    }
+                }
+                return
+            }
             cell.iconImage.contentMode = .scaleAspectFit
             cell.downloadFile(fileObj) { localFilePath in
                 self.showImage(fromView:cell, imageName: fileObj.path, imageURL:localFilePath) {
@@ -397,6 +410,14 @@ class PPFileListViewController: PPBaseViewController,
                     collectionView.reloadItems(at: [indexPath]) //下载成功后再刷新
                 }
             }
+        }
+        else if (fileObj.name.isTextFile())  {
+            let vc = PPMarkdownViewController()
+            vc.filePathStr = getPathNotEmpty(fileObj)
+            vc.fileID = fileObj.pathID
+            vc.downloadURL = fileObj.downloadURL
+            vc.title = fileObj.name
+            self.pushDetail(vc, isMarkdown: true)
         }
         else if (fileObj.name.hasSuffix("pdf"))  {
             PPFileManager.shared.getLocalURL(path: getPathNotEmpty(fileObj), fileID: fileObj.pathID) { filePath in

@@ -68,6 +68,9 @@
 		3B0741682B6B7C9800AB3BD8 /* PPBiometricAuthentication.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B0741672B6B7C9800AB3BD8 /* PPBiometricAuthentication.swift */; };
 		3B07416A2B6B804A00AB3BD8 /* PPAppAuthenticationVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B0741692B6B804A00AB3BD8 /* PPAppAuthenticationVC.swift */; };
 		3B0FF1482B9759D5009D6D6A /* PPMultiTabsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B0FF1472B9759D5009D6D6A /* PPMultiTabsViewController.swift */; };
+		3B14863E2F966328008CC890 /* PPLivePhotoTool.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B14863D2F966328008CC890 /* PPLivePhotoTool.swift */; };
+		3B1486402F967E92008CC890 /* PPLivePhotoPreviewViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B14863F2F967E92008CC890 /* PPLivePhotoPreviewViewController.swift */; };
+		3B1486422F968A72008CC890 /* PPToast.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B1486412F968A72008CC890 /* PPToast.swift */; };
 		3B182B1B2F950AD0002B711B /* PPWebDAVFileService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B182B1A2F950AD0002B711B /* PPWebDAVFileService.swift */; };
 		3B1F3FF92A99F798003A2756 /* PPMarkdownOutlineCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B1F3FF82A99F798003A2756 /* PPMarkdownOutlineCell.swift */; };
 		3B202A552B81FA1800CBEED1 /* PPCloudServiceError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B202A542B81FA1800CBEED1 /* PPCloudServiceError.swift */; };
@@ -237,6 +240,9 @@
 		3B0741672B6B7C9800AB3BD8 /* PPBiometricAuthentication.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPBiometricAuthentication.swift; sourceTree = "<group>"; };
 		3B0741692B6B804A00AB3BD8 /* PPAppAuthenticationVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPAppAuthenticationVC.swift; sourceTree = "<group>"; };
 		3B0FF1472B9759D5009D6D6A /* PPMultiTabsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPMultiTabsViewController.swift; sourceTree = "<group>"; };
+		3B14863D2F966328008CC890 /* PPLivePhotoTool.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPLivePhotoTool.swift; sourceTree = "<group>"; };
+		3B14863F2F967E92008CC890 /* PPLivePhotoPreviewViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPLivePhotoPreviewViewController.swift; sourceTree = "<group>"; };
+		3B1486412F968A72008CC890 /* PPToast.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPToast.swift; sourceTree = "<group>"; };
 		3B182B1A2F950AD0002B711B /* PPWebDAVFileService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPWebDAVFileService.swift; sourceTree = "<group>"; };
 		3B1F3FF82A99F798003A2756 /* PPMarkdownOutlineCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPMarkdownOutlineCell.swift; sourceTree = "<group>"; };
 		3B202A542B81FA1800CBEED1 /* PPCloudServiceError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPCloudServiceError.swift; sourceTree = "<group>"; };
@@ -485,6 +491,7 @@
 				3B46C3102B908A8500061406 /* PPPaddedLabel.swift */,
 				3BBA66B22E9F9C2400563F2E /* PPPhotoTool.swift */,
 				3B3DE8602EADE9EA005F0F1F /* PPFloatingButton.swift */,
+				3B14863D2F966328008CC890 /* PPLivePhotoTool.swift */,
 			);
 			path = UIKitTool;
 			sourceTree = "<group>";
@@ -493,6 +500,7 @@
 			isa = PBXGroup;
 			children = (
 				1E8F64F12898292100819C60 /* PPPreviewController.swift */,
+				3B14863F2F967E92008CC890 /* PPLivePhotoPreviewViewController.swift */,
 			);
 			path = Preview;
 			sourceTree = "<group>";
@@ -521,6 +529,7 @@
 			isa = PBXGroup;
 			children = (
 				1E8F64F0289828E500819C60 /* Preview */,
+				3B1486412F968A72008CC890 /* PPToast.swift */,
 			);
 			path = View;
 			sourceTree = "<group>";
@@ -1195,6 +1204,7 @@
 				3B7A4D612E787AA800B72522 /* SynologyNASClient.swift in Sources */,
 				1EC4F0342608D66600377D97 /* Data+PPTool.swift in Sources */,
 				60A1F92C24398B23009E390C /* PPFileObject.swift in Sources */,
+				3B1486402F967E92008CC890 /* PPLivePhotoPreviewViewController.swift in Sources */,
 				1E03F83F274C7B940085ACFB /* Data+PPTool.swift.swift in Sources */,
 				6056022823177274000809CD /* PPBaseTableViewCell.swift in Sources */,
 				3B6CE3AD2B0BAC7100D86A1A /* PPDouyinParser.swift in Sources */,
@@ -1251,6 +1261,7 @@
 				3B3DE8612EADE9EA005F0F1F /* PPFloatingButton.swift in Sources */,
 				60F5691322F2ADC700874994 /* ViewController.swift in Sources */,
 				1E526EC226B6788A0026DC67 /* PPCloudService.swift in Sources */,
+				3B14863E2F966328008CC890 /* PPLivePhotoTool.swift in Sources */,
 				60F5D042232751D8004E988B /* PPShareManager.m in Sources */,
 				1E03F841274C7C640085ACFB /* PPThemeModel.swift in Sources */,
 				3B77BD672E23F53E00DB172A /* PPCloudHTTP.swift in Sources */,
@@ -1276,6 +1287,7 @@
 				1E1B5894257B8118000860F6 /* NSAttributedString+PPTool.swift in Sources */,
 				1E0D9E0C27736E9700E3AA73 /* PPMarkdownEditorToolBar.swift in Sources */,
 				3B28561E2BA809D3002F3153 /* PPButtonBarTabViewController.swift in Sources */,
+				3B1486422F968A72008CC890 /* PPToast.swift in Sources */,
 				1E526ECE26B6F20B0026DC67 /* PPDropboxService.swift in Sources */,
 				60560252231778FF000809CD /* XDRefreshHeader.m in Sources */,
 				1E179BF925B549B0006C3A56 /* UIView+PPTool.swift in Sources */,
