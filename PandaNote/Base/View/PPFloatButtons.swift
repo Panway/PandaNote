@@ -18,10 +18,11 @@ public class PPFloatButtons {
     var titles = [String]()
     weak var delegate: PPFloatButtonsDelegate?
 
-    func showButtons(titles:[String], image:[String], containerView:UIView) {
+    func showButtons(titles:[String], image:[String], containerView:UIView) -> UIView {
         self.titles = titles
         let floaty = Floaty()
         floaty.isDraggable = true
+        floaty.paddingY = 44
         floaty.overlayColor = UIColor.black.withAlphaComponent(0.1)
         titles.enumerated().forEach { (index, title) in
             floaty.addItem(titles[index], icon: UIImage(named: image[index])!) { item in
@@ -29,5 +30,6 @@ public class PPFloatButtons {
             }
         }
         containerView.addSubview(floaty)
+        return floaty
     }
 }

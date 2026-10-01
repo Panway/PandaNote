@@ -2,7 +2,7 @@
 #source 'https://cdn.jsdelivr.net/cocoa/'
 source 'https://cdn.cocoapods.org/'
 # Uncomment the next line to define a global platform for your project
-platform :ios, 11.0
+platform :ios, 15.0
 #禁止所有来自CocoaPods的警告
 inhibit_all_warnings!
 
@@ -69,7 +69,6 @@ target 'PandaNote' do
   pod 'Floaty'
   
   
-#  pod 'AFWebDAVManager', :git => 'https://github.com/AFNetworking/AFWebDAVManager.git'
 #  pod 'WechatOpenSDK'#,'1.8.4'
   pod 'MonkeyKing'
   pod 'FMDB'
@@ -123,7 +122,7 @@ post_install do |installer|
   output = %x( #{"sed -i '' -e '/associated-domains/,+3d' PandaNote/PandaNote.entitlements"} )
   puts '在pod install之后执行脚本，修复警告或错误。'
   puts '如果下方出现Traceback错误，请再执行一遍 pod install'
-  output = %x( #{"ruby XcodeTool.rb fix_deployment_target 10"} ) #执行 XcodeTool.rb 脚本文件消除警告
+  output = %x( #{"ruby XcodeTool.rb fix_deployment_target 15"} ) #执行 XcodeTool.rb 脚本文件消除警告
   output = %x( #{"ruby XcodeTool.rb fix_has_different_definitions_in_different_modules PandaNote"} ) #执行 XcodeTool.rb 脚本文件消除警告
   output = %x( #{"sh config_tool.sh overwrite_pods"} ) #覆盖Pods源码
   output = %x( #{"sh config_tool.sh modify_pods_code"} ) #修改Pods源码

@@ -30,7 +30,7 @@ fileprivate let tocTag = 3
 final class PPMarkdownViewController: PPBaseViewController,
                                 PPEditorToolBarDelegate,
                                 PPFindReplaceDelegate,
-                                PPMDTextViewDelegate,
+                                PPMarkdownTextViewDelegate,
                                       IndicatorInfoProvider,
                                       PPFloatButtonsDelegate,
                                 UISearchBarDelegate,
@@ -39,7 +39,7 @@ final class PPMarkdownViewController: PPBaseViewController,
 //    let markdownParser = MarkdownParser()
     var markdownStr = "I support a *lot* of custom Markdown **Elements**, even `code`!"
 //    var historyList = [String]()
-    var textView : PPMDTextView!
+    var textView : PPMarkdownTextView!
     let backgroundImage  = UIImageView()
     ///文件相对路径
     var filePathStr: String = ""
@@ -71,14 +71,14 @@ final class PPMarkdownViewController: PPBaseViewController,
     var webViewHeightRatio = 0.5
     //MARK: - Life Cycle
     override func viewDidLoad() {
-        self.navigationController?.navigationBar.isHidden = true
+//        self.navigationController?.navigationBar.isHidden = true
         PPAppConfig.shared.downColor = PPDownColorCollection()
         PPAppConfig.shared.downColor.codeBlockBackground = "#dddddd".pp_HEXColor().withAlphaComponent(0.3)
         navigationController?.view.backgroundColor = .white
         if self.filePathStr.length < 1 {
             return //使用UISplitViewController的时候，没路径显示空白
         }
-        textView = PPMDTextView(frame: self.view.bounds)
+        textView = PPMarkdownTextView(frame: self.view.bounds)
         initStyle()
         pp_initView()
         if filePathStr.isMarkdownFile() {
@@ -109,78 +109,26 @@ final class PPMarkdownViewController: PPBaseViewController,
                 return
             }
             self.markdownStr = text_encoded
-            
+            //PPFileManager初始化后才能获取到webDAVRemark，但必须在第一次渲染前定好，
+            //否则图片相对路径会解析到空目录（缓存命中时尤其明显）。
+            self.cacheDir = "\(PPDiskCache.shared.path)/\(PPUserInfo.shared.webDAVRemark)\(self.filePathStr.replacingOccurrences(of: self.filePathStr.pp_split("/").last ?? "", with: ""))"
+                .replacingOccurrences(of: "//", with: "/")
+            self.textView.cacheDir = self.cacheDir
+
             if isFromCache {
-                self.textView.text = text_encoded
+                self.textView.sourceText = text_encoded
+                self.textChanged = false
                 return
             }
-            //如果是代码文件
+            //目前不支持txt
             if let suffix = self.filePathStr.pp_split(".").last,
-               suffix.isTextFile() == true {
-                self.fileExtension = suffix
-                //目前不支持txt
+               self.filePathStr.isTextFile() == true {
                 self.fileExtension = suffix == "txt" ? "md" : suffix
             }
-            //markdown解析的方式
-            let method = PPAppConfig.shared.getItem("pp_markdownParseMethod")
-            self.textView.renderMethod = method
-            if method != "" {
-                if method == "NSAttributedString+Markdown" && self.filePathStr.isMarkdownFile() {
-                    //NSAttributedString+Markdown 解析
-                    self.textView.attributedText = NSAttributedString(markdownRepresentation: self.markdownStr, attributes: [.font : UIFont.systemFont(ofSize: 17.0), .foregroundColor: self.theme.baseTextColor.pp_HEXColor()])
-                    self.textView.linkTextAttributes = [.foregroundColor:self.theme.linkTextColor.pp_HEXColor()]
-
-                }
-                else if method == "Down" && self.filePathStr.isMarkdownFile(){
-                    //MARK: Down渲染
-                    self.textView.text = self.markdownStr
-                    if(!self.textView.didRender) {
-                        self.textView.render()
-                    }
-                    self.textView.backgroundColor = .clear
-//                    let down = Down(markdownString: self.markdownStr)
-                    //DownAttributedStringRenderable 31行
-//                    let attributedString = try? down.toAttributedString(DownOptions.default, stylesheet: "* {font-family: Helvetica } code, pre { font-family: Menlo } code {position: relative;background-color: #f6f8fa;border-radius: 6px;} img {max-width: 100%;display: block;margin-left: auto;margin-right: auto;}")
-//                    self.textView.attributedText = attributedString
-                    
-                }
-                else if method == "Highlightr" || !self.filePathStr.isMarkdownFile() {
-                    // 获取bundle中所有以min.css结尾的文件路径
-                    self.highlightr = Highlightr()
-                    let bundle = Bundle(for: Highlightr.self)
-                    let cssURLs = bundle.urls(forResourcesWithExtension: "min.css", subdirectory: nil) ?? []
-                    self.highlightrThemes.removeAll()
-                    // 将URL转化为文件路径，并添加到数组中
-                    for url in cssURLs {
-                        self.highlightrThemes.append(url.lastPathComponent.pp_split(".").first ?? "")
-                    }
-                    self.highlightrThemes.sort()
-
-                    let userTheme = PPAppConfig.shared.getItem("PPHighlightTheme")
-                    self.highlightr?.setTheme(to: userTheme.length > 0 ? userTheme : "atom-one-light")
-                    self.highlightr?.theme.setCodeFont(RPFont(name: "Courier", size: 18)!)
-                    let textStorage = CodeAttributedString(highlightr: self.highlightr!)
-                    textStorage.language = self.fileExtension
-                    let layoutManager = NSLayoutManager()
-                    textStorage.addLayoutManager(layoutManager)
-                    // 高度为.greatestFiniteMagnitude才可滑动 enable scroll
-                    let textContainer = NSTextContainer(size: CGSize(width: self.view.bounds.width, height: .greatestFiniteMagnitude))
-                    layoutManager.addTextContainer(textContainer)
-
-                    self.textView = PPMDTextView(frame: self.view.bounds)//, textContainer: textContainer)
-                    self.view.addSubview(self.textView)
-                    self.pp_viewEdgeEqualToSafeArea(self.textView)
-                    
-                    let highlightedCode = self.highlightr?.highlight(self.markdownStr, as: self.fileExtension)
-                    self.textView.attributedText = highlightedCode
-                    self.textView.backgroundColor = self.highlightr?.theme.themeBackgroundColor
-                }
-                else {
-                    self.textView.text = self.markdownStr
-                }
-            }
-            else {//没设置
-                self.textView.text = self.markdownStr
+            //Markdown 只有一条渲染路径：内核直接扫源码贴属性。
+            self.textView.sourceText = self.markdownStr
+            if !self.filePathStr.isMarkdownFile() {
+                self.renderAsCode()
             }
             
             //定位到上次滚动的位置
@@ -203,15 +151,12 @@ final class PPMarkdownViewController: PPBaseViewController,
             
         }
 
-        cacheDir = "\(PPDiskCache.shared.path)/\(PPUserInfo.shared.webDAVRemark)\(filePathStr.replacingOccurrences(of: filePathStr.pp_split("/").last ?? "", with: ""))"
-            .replacingOccurrences(of: "//", with: "/")
-        textView.cacheDir = cacheDir //PPFileManager初始化后才能获取到webDAVRemark
-        
         self.view.backgroundColor = .white
 
     }
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
+//        self.navigationController?.navigationBar.isHidden = false
         if !changed() {
             debugPrint("文本未修改",self.filePathStr)
             return
@@ -230,7 +175,7 @@ final class PPMarkdownViewController: PPBaseViewController,
         self.pp_viewEdgeEqualToSafeArea(backgroundImage)
 
         self.view.addSubview(textView)
-        textView.textContainerInset = UIEdgeInsets(top: 0, left: 8, bottom: 0, right: 8)//Padding,内边距
+        textView.contentInsetPadding = UIEdgeInsets(top: 0, left: 8, bottom: 0, right: 8)//Padding,内边距
         self.pp_viewEdgeEqualToSafeArea(textView)
         textView.font = UIFont.systemFont(ofSize: 16.0)
         
@@ -262,17 +207,23 @@ final class PPMarkdownViewController: PPBaseViewController,
         
         self.setLeftBarButton()
         floatButtons.delegate = self
-        floatButtons.showButtons(titles: ["预览","保存", "更多"], image: ["preview","done", "toolbar_more"], containerView: self.view)
+        let fv = floatButtons.showButtons(titles: ["预览","保存", "更多"], image: ["preview","done", "toolbar_more"], containerView: view)
+        textView.bringSubviewToFront(fv)
+        // 2秒后再次移动到前面
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+            self.textView.bringSubviewToFront(fv)
+        }
     }
     func changed() -> Bool {
         if (self.textView == nil) {
             return false
         }
-        let textWithoutReplacementCharacter = self.textView.text.replacingOccurrences(of: "￼", with: "")
-        let textDidChanged = textWithoutReplacementCharacter != self.markdownStr
-        debugPrint("文本改变:",textDidChanged)
-        return textDidChanged
+//        let textWithoutReplacementCharacter = self.textView.text.replacingOccurrences(of: "￼", with: "")
+//        let textDidChanged = textWithoutReplacementCharacter != self.markdownStr
+//        debugPrint("文本改变:",textDidChanged)
+        return textChanged
     }
+    
     override func pp_backAction() {
         self.textView.resignFirstResponder()
         //心疼CPU，文本有修改的话就不全部比较了>_<
@@ -376,7 +327,7 @@ final class PPMarkdownViewController: PPBaseViewController,
     }
     // 更新内容（渲染）时调用
     func didUpdateContent() {
-        for item in textView.visitor.images {
+        for item in textView.imageURLs {
             let path = "\(cacheDir)/\(item)".replacingOccurrences(of: "//", with: "/").pp_split(PPUserInfo.shared.webDAVRemark).last ?? ""
             // 是完整的http路径，缓存到 `/Library/Caches/PandaCache/XXX/7217078bf5868444aa1dd421eafbd956`
             if item.hasPrefix("http://") || item.hasPrefix("https://") {
@@ -509,7 +460,7 @@ final class PPMarkdownViewController: PPBaseViewController,
         }
         else {
             path = Bundle.main.url(forResource: "markdown", withExtension:"html")?.absoluteString ?? ""
-            webVC.markdownStr = textWithoutUselessChar()
+            webVC.markdownStr = textView.sourceText
             webVC.urlString = path // file:///....
 //            webVC.urlString = "http://192.168.123.162:8081/markdown.html"
             webVC.markdownName = self.filePathStr
@@ -546,7 +497,7 @@ final class PPMarkdownViewController: PPBaseViewController,
 //            }
         }
         webViewHeightRatio = 0.5 //高度恢复成50%，以供上下预览
-        PPUserInfo.shared.webViewController.markdownStr = textWithoutUselessChar()
+        PPUserInfo.shared.webViewController.markdownStr = textView.sourceText
         PPUserInfo.shared.webViewController.loadURL()
         
     }
@@ -571,16 +522,27 @@ final class PPMarkdownViewController: PPBaseViewController,
         }
         present(shareSheet, animated: true)
     }
-    func textWithoutUselessChar() -> String {
-        // 去除16进制为`EFBFBC`的REPLACEMENT CHARACTER（替代字符）
-        let textWithoutReplacementCharacter = self.textView.text.replacingOccurrences(of: "￼", with: "")
-        //            .replacingOccurrences(of: "\u{FFFD}", with: "")//, options: NSString.CompareOptions.literal, range: nil)
-        return textWithoutReplacementCharacter
+    /// 非 Markdown 的代码文件：用 Highlightr 一次性把颜色写进 attributedText，并让内核让位（`stylesMarkdown = false`），否则下一次着色会把外来颜色刷掉。
+    /// 旧实现还建了一套 CodeAttributedString + NSLayoutManager + NSTextContainer，但视图依旧是 `init(frame:)` 自建文本栈，那套从来没用上。
+    func renderAsCode() {
+        if highlightr == nil {
+            highlightr = Highlightr()
+            let bundle = Bundle(for: Highlightr.self)
+            let cssURLs = bundle.urls(forResourcesWithExtension: "min.css", subdirectory: nil) ?? []
+            highlightrThemes = cssURLs.map { $0.lastPathComponent.pp_split(".").first ?? "" }.sorted()
+        }
+        guard let highlightr = highlightr else { return }
+        let userTheme = PPAppConfig.shared.getItem("PPHighlightTheme")
+        highlightr.setTheme(to: userTheme.length > 0 ? userTheme : "atom-one-light")
+        highlightr.theme.setCodeFont(RPFont(name: "Courier", size: 18)!)
+        guard let highlighted = highlightr.highlight(textView.sourceText,
+                                                    as: self.fileExtension) else { return }
+        textView.stylesMarkdown = false
+        textView.attributedText = highlighted
     }
-    
+
     @objc func saveTextAction()  {
-        textView.render()
-        let stringToUpload = textWithoutUselessChar()
+        let stringToUpload = textView.sourceText
         if stringToUpload.length < 1 {
             PPHUD.showHUDFromTop("不支持保存空文件")
             return
@@ -605,10 +567,8 @@ final class PPMarkdownViewController: PPBaseViewController,
     }
     @objc func moreAction()  {
         var menuTitile = ["分享文本","搜索","左右分栏模式","上下分栏模式","关闭分栏","保存链接为Markdown"]
-        let method = PPAppConfig.shared.getItem("pp_markdownParseMethod")
-
-        if method == "Highlightr" {
-            menuTitile.append("更换主题")            
+        if !self.filePathStr.isMarkdownFile() {
+            menuTitile.append("更换主题")
         }
         menuTitile.append("去掉换行符")
         self.dropdown.dataSource = menuTitile
@@ -645,12 +605,9 @@ final class PPMarkdownViewController: PPBaseViewController,
                 PPAppConfig.shared.popMenu.showWithCallback(sourceView:self.dropdown,
                                                             stringArray: self.highlightrThemes,
                                                             sourceVC: self) { index, string in
-                    debugPrint(string)
-                    self.highlightr?.setTheme(to: string)
-                    let highlightedCode = self.highlightr?.highlight(self.markdownStr, as: self.fileExtension)
-                    self.textView.attributedText = highlightedCode
-                    self.textView.backgroundColor = self.highlightr?.theme.themeBackgroundColor
                     PPAppConfig.shared.setItem("PPHighlightTheme", string)
+                    self.renderAsCode()
+                    self.textView.backgroundColor = self.highlightr?.theme.themeBackgroundColor
                 }
                 PPAppConfig.shared.popMenu.dismissOnSelection = false
             }
@@ -688,7 +645,7 @@ final class PPMarkdownViewController: PPBaseViewController,
         else {
             textView.backgroundColor = theme.backgroundColor.pp_HEXColor()
         }
-        textView.textColor = theme.baseTextColor.pp_HEXColor()
+        PPAppConfig.shared.downColor.body = theme.baseTextColor.pp_HEXColor()
         
         
     }

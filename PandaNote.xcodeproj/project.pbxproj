@@ -65,6 +65,7 @@
 		1EE5A41A25B2DBB500429CB8 /* app_setting_option.json in Resources */ = {isa = PBXBuildFile; fileRef = 1EE5A41925B2DBB500429CB8 /* app_setting_option.json */; };
 		1EEB0FF02753456E006A5E26 /* PPFileModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1EEB0FEF2753456E006A5E26 /* PPFileModel.swift */; };
 		1EEB0FF327538771006A5E26 /* PPOneDriveFile.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1EEB0FF227538771006A5E26 /* PPOneDriveFile.swift */; };
+		37BF030E21B9E2593B508E9F /* PPMarkdownKernelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B834EB9AB7FA0A35E9DD6E3D /* PPMarkdownKernelTests.swift */; };
 		3B0741682B6B7C9800AB3BD8 /* PPBiometricAuthentication.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B0741672B6B7C9800AB3BD8 /* PPBiometricAuthentication.swift */; };
 		3B07416A2B6B804A00AB3BD8 /* PPAppAuthenticationVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B0741692B6B804A00AB3BD8 /* PPAppAuthenticationVC.swift */; };
 		3B0FF1482B9759D5009D6D6A /* PPMultiTabsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B0FF1472B9759D5009D6D6A /* PPMultiTabsViewController.swift */; };
@@ -95,6 +96,16 @@
 		3B7A4D612E787AA800B72522 /* SynologyNASClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B7A4D602E787AA800B72522 /* SynologyNASClient.swift */; };
 		3B85B0652E8ADBDC00ADFB7E /* MainSplitViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B85B0642E8ADBDC00ADFB7E /* MainSplitViewController.swift */; };
 		3B8D11E92A6D2A8700EE801F /* PPiCloudDriveService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B8D11E82A6D2A8700EE801F /* PPiCloudDriveService.swift */; };
+		3B9C4BD4306E468A00EBC54D /* PPMarkdownSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B9C4BCF306E468A00EBC54D /* PPMarkdownSource.swift */; };
+		3B9C4BD5306E468A00EBC54D /* PPMarkdownBlock.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B9C4BC9306E468A00EBC54D /* PPMarkdownBlock.swift */; };
+		3B9C4BD6306E468A00EBC54D /* PPMarkdownDecoration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B9C4BCB306E468A00EBC54D /* PPMarkdownDecoration.swift */; };
+		3B9C4BD7306E468A00EBC54D /* PPMarkdownStyler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B9C4BD1306E468A00EBC54D /* PPMarkdownStyler.swift */; };
+		3B9C4BD8306E468A00EBC54D /* PPMarkdownBlockScanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B9C4BCA306E468A00EBC54D /* PPMarkdownBlockScanner.swift */; };
+		3B9C4BD9306E468A00EBC54D /* PPMarkdownStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B9C4BD0306E468A00EBC54D /* PPMarkdownStyle.swift */; };
+		3B9C4BDA306E468A00EBC54D /* PPMarkdownTextView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B9C4BD2306E468A00EBC54D /* PPMarkdownTextView.swift */; };
+		3B9C4BDB306E468A00EBC54D /* PPMarkdownLayoutManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B9C4BCE306E468A00EBC54D /* PPMarkdownLayoutManager.swift */; };
+		3B9C4BDC306E468A00EBC54D /* PPMarkdownImageCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B9C4BCC306E468A00EBC54D /* PPMarkdownImageCache.swift */; };
+		3B9C4BDD306E468A00EBC54D /* PPMarkdownInlineScanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B9C4BCD306E468A00EBC54D /* PPMarkdownInlineScanner.swift */; };
 		3B9E5CA82A924F9B0020E92F /* PPMDTextView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B9E5CA72A924F9B0020E92F /* PPMDTextView.swift */; };
 		3BA3C4C02A950B5800AA0BE6 /* NSAttributedString+PPExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BA3C4BF2A950B5800AA0BE6 /* NSAttributedString+PPExtension.swift */; };
 		3BAD09C22AAA294B00AD4006 /* PPImagePreviewer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BAD09C12AAA294B00AD4006 /* PPImagePreviewer.swift */; };
@@ -154,9 +165,12 @@
 		60F5693122F2ADCA00874994 /* PandaNoteUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60F5693022F2ADCA00874994 /* PandaNoteUITests.swift */; };
 		60F5D042232751D8004E988B /* PPShareManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 60F5D040232751D7004E988B /* PPShareManager.m */; };
 		60F5D04523275549004E988B /* XDCollectionViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 60F5D04323275548004E988B /* XDCollectionViewCell.m */; };
+		61FF1A14681B9DCC4554221A /* PPMarkdownInlineScannerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 374E50563DF6C23FE75683DE /* PPMarkdownInlineScannerTests.swift */; };
 		7994CC25F691AAF65DE02B6F /* Pods_PandaNote.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A63EFDBFAF88B7CA5F848DC6 /* Pods_PandaNote.framework */; };
 		A5F39C04BBB25A6A043BF097 /* Pods_PandaNoteUITests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 67D2458649E87818F04AC5C8 /* Pods_PandaNoteUITests.framework */; };
 		AB6D37ACD9D1B79CCAF24F7F /* Pods_PandaNoteTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = EAD3F70F4894A8DA81DA6166 /* Pods_PandaNoteTests.framework */; };
+		B7FA2E45256C9D47D0694E0D /* PPMarkdownBlockScannerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A0B1EBA4FFEB1F3E680B18A /* PPMarkdownBlockScannerTests.swift */; };
+		C9AD1EE3879F9B7F34786473 /* PPMarkdownHeadingMarkerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2317E9589CA8BBC82535F88F /* PPMarkdownHeadingMarkerTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -238,6 +252,8 @@
 		1EEB0FEF2753456E006A5E26 /* PPFileModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPFileModel.swift; sourceTree = "<group>"; };
 		1EEB0FF227538771006A5E26 /* PPOneDriveFile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPOneDriveFile.swift; sourceTree = "<group>"; };
 		1EFF08AA24E50B8000E84AD1 /* PandaNote.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = PandaNote.entitlements; sourceTree = "<group>"; };
+		2317E9589CA8BBC82535F88F /* PPMarkdownHeadingMarkerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPMarkdownHeadingMarkerTests.swift; sourceTree = "<group>"; };
+		374E50563DF6C23FE75683DE /* PPMarkdownInlineScannerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPMarkdownInlineScannerTests.swift; sourceTree = "<group>"; };
 		3B0741672B6B7C9800AB3BD8 /* PPBiometricAuthentication.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPBiometricAuthentication.swift; sourceTree = "<group>"; };
 		3B0741692B6B804A00AB3BD8 /* PPAppAuthenticationVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPAppAuthenticationVC.swift; sourceTree = "<group>"; };
 		3B0FF1472B9759D5009D6D6A /* PPMultiTabsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPMultiTabsViewController.swift; sourceTree = "<group>"; };
@@ -268,6 +284,16 @@
 		3B7A4D602E787AA800B72522 /* SynologyNASClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SynologyNASClient.swift; sourceTree = "<group>"; };
 		3B85B0642E8ADBDC00ADFB7E /* MainSplitViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainSplitViewController.swift; sourceTree = "<group>"; };
 		3B8D11E82A6D2A8700EE801F /* PPiCloudDriveService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPiCloudDriveService.swift; sourceTree = "<group>"; };
+		3B9C4BC9306E468A00EBC54D /* PPMarkdownBlock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPMarkdownBlock.swift; sourceTree = "<group>"; };
+		3B9C4BCA306E468A00EBC54D /* PPMarkdownBlockScanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPMarkdownBlockScanner.swift; sourceTree = "<group>"; };
+		3B9C4BCB306E468A00EBC54D /* PPMarkdownDecoration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPMarkdownDecoration.swift; sourceTree = "<group>"; };
+		3B9C4BCC306E468A00EBC54D /* PPMarkdownImageCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPMarkdownImageCache.swift; sourceTree = "<group>"; };
+		3B9C4BCD306E468A00EBC54D /* PPMarkdownInlineScanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPMarkdownInlineScanner.swift; sourceTree = "<group>"; };
+		3B9C4BCE306E468A00EBC54D /* PPMarkdownLayoutManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPMarkdownLayoutManager.swift; sourceTree = "<group>"; };
+		3B9C4BCF306E468A00EBC54D /* PPMarkdownSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPMarkdownSource.swift; sourceTree = "<group>"; };
+		3B9C4BD0306E468A00EBC54D /* PPMarkdownStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPMarkdownStyle.swift; sourceTree = "<group>"; };
+		3B9C4BD1306E468A00EBC54D /* PPMarkdownStyler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPMarkdownStyler.swift; sourceTree = "<group>"; };
+		3B9C4BD2306E468A00EBC54D /* PPMarkdownTextView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPMarkdownTextView.swift; sourceTree = "<group>"; };
 		3B9E5CA72A924F9B0020E92F /* PPMDTextView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPMDTextView.swift; sourceTree = "<group>"; };
 		3BA3C4BF2A950B5800AA0BE6 /* NSAttributedString+PPExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NSAttributedString+PPExtension.swift"; sourceTree = "<group>"; };
 		3BAD09C12AAA294B00AD4006 /* PPImagePreviewer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPImagePreviewer.swift; sourceTree = "<group>"; };
@@ -346,7 +372,9 @@
 		60F5D04323275548004E988B /* XDCollectionViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XDCollectionViewCell.m; sourceTree = "<group>"; };
 		60F5D04423275549004E988B /* XDCollectionViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XDCollectionViewCell.h; sourceTree = "<group>"; };
 		67D2458649E87818F04AC5C8 /* Pods_PandaNoteUITests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_PandaNoteUITests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		6A0B1EBA4FFEB1F3E680B18A /* PPMarkdownBlockScannerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPMarkdownBlockScannerTests.swift; sourceTree = "<group>"; };
 		A63EFDBFAF88B7CA5F848DC6 /* Pods_PandaNote.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_PandaNote.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		B834EB9AB7FA0A35E9DD6E3D /* PPMarkdownKernelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPMarkdownKernelTests.swift; sourceTree = "<group>"; };
 		CF2B9783C8EE2E6EF131B345 /* Pods-PandaNoteTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-PandaNoteTests.debug.xcconfig"; path = "Target Support Files/Pods-PandaNoteTests/Pods-PandaNoteTests.debug.xcconfig"; sourceTree = "<group>"; };
 		EAD3F70F4894A8DA81DA6166 /* Pods_PandaNoteTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_PandaNoteTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		ED86FE0AA4D8252DD43FC221 /* Pods-PandaNote.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-PandaNote.debug.xcconfig"; path = "Target Support Files/Pods-PandaNote/Pods-PandaNote.debug.xcconfig"; sourceTree = "<group>"; };
@@ -520,6 +548,7 @@
 		1ECEE1C025BD20EC00454966 /* Public */ = {
 			isa = PBXGroup;
 			children = (
+				3B9C4BD3306E468A00EBC54D /* MarkdownEditor */,
 				1E526EBF26B673720026DC67 /* Tool */,
 				1ECEE1CB25BD225D00454966 /* Extension */,
 				1ECEE1C125BD20FB00454966 /* View */,
@@ -651,6 +680,23 @@
 				3B8D11E82A6D2A8700EE801F /* PPiCloudDriveService.swift */,
 			);
 			path = iCoudDrive;
+			sourceTree = "<group>";
+		};
+		3B9C4BD3306E468A00EBC54D /* MarkdownEditor */ = {
+			isa = PBXGroup;
+			children = (
+				3B9C4BC9306E468A00EBC54D /* PPMarkdownBlock.swift */,
+				3B9C4BCA306E468A00EBC54D /* PPMarkdownBlockScanner.swift */,
+				3B9C4BCB306E468A00EBC54D /* PPMarkdownDecoration.swift */,
+				3B9C4BCC306E468A00EBC54D /* PPMarkdownImageCache.swift */,
+				3B9C4BCD306E468A00EBC54D /* PPMarkdownInlineScanner.swift */,
+				3B9C4BCE306E468A00EBC54D /* PPMarkdownLayoutManager.swift */,
+				3B9C4BCF306E468A00EBC54D /* PPMarkdownSource.swift */,
+				3B9C4BD0306E468A00EBC54D /* PPMarkdownStyle.swift */,
+				3B9C4BD1306E468A00EBC54D /* PPMarkdownStyler.swift */,
+				3B9C4BD2306E468A00EBC54D /* PPMarkdownTextView.swift */,
+			);
+			path = MarkdownEditor;
 			sourceTree = "<group>";
 		};
 		3BAAD0852A9CF25F003B259C /* ViewController */ = {
@@ -917,6 +963,10 @@
 		60F5692422F2ADCA00874994 /* PandaNoteTests */ = {
 			isa = PBXGroup;
 			children = (
+				6A0B1EBA4FFEB1F3E680B18A /* PPMarkdownBlockScannerTests.swift */,
+				374E50563DF6C23FE75683DE /* PPMarkdownInlineScannerTests.swift */,
+				2317E9589CA8BBC82535F88F /* PPMarkdownHeadingMarkerTests.swift */,
+				B834EB9AB7FA0A35E9DD6E3D /* PPMarkdownKernelTests.swift */,
 				60F5692522F2ADCA00874994 /* PandaNoteTests.swift */,
 				60F5692722F2ADCA00874994 /* Info.plist */,
 			);
@@ -1213,6 +1263,16 @@
 				3B6CE3AD2B0BAC7100D86A1A /* PPDouyinParser.swift in Sources */,
 				1E1DE37C2567BA0A00BB2D1C /* PPFileListViewController+Search.swift in Sources */,
 				1EEB0FF327538771006A5E26 /* PPOneDriveFile.swift in Sources */,
+				3B9C4BD4306E468A00EBC54D /* PPMarkdownSource.swift in Sources */,
+				3B9C4BD5306E468A00EBC54D /* PPMarkdownBlock.swift in Sources */,
+				3B9C4BD6306E468A00EBC54D /* PPMarkdownDecoration.swift in Sources */,
+				3B9C4BD7306E468A00EBC54D /* PPMarkdownStyler.swift in Sources */,
+				3B9C4BD8306E468A00EBC54D /* PPMarkdownBlockScanner.swift in Sources */,
+				3B9C4BD9306E468A00EBC54D /* PPMarkdownStyle.swift in Sources */,
+				3B9C4BDA306E468A00EBC54D /* PPMarkdownTextView.swift in Sources */,
+				3B9C4BDB306E468A00EBC54D /* PPMarkdownLayoutManager.swift in Sources */,
+				3B9C4BDC306E468A00EBC54D /* PPMarkdownImageCache.swift in Sources */,
+				3B9C4BDD306E468A00EBC54D /* PPMarkdownInlineScanner.swift in Sources */,
 				1E4E57972995E64E00701E84 /* PPFilePicker.swift in Sources */,
 				1EDD7D0F287042D100EEDFCB /* PPFileListCell.swift in Sources */,
 				1EAA7F0727CDC48F008318E6 /* WKWebView+PPTool.swift in Sources */,
@@ -1510,7 +1570,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = "";
 				INFOPLIST_FILE = PandaNote/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 15;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
