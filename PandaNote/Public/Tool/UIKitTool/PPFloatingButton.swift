@@ -26,6 +26,14 @@ class PPFloatingButton {
     
     private func setupFloatingWindow() {
         floatingWindow = UIWindow(frame: CGRect(x: 0, y: 0, width: 60, height: 60))
+        // 采用 UIScene 生命周期后，UIWindow 必须挂到一个 windowScene 上才会显示。
+        // 只写 UIWindow(frame:) 不指定 scene 的话，这个浮动窗口是隐形的（不报错，就是看不见）。
+        // 这里取当前已连接的场景挂上去即可 —— 单场景 App 只会有一个
+        if let windowScene = UIApplication.shared.connectedScenes
+            .compactMap({ $0 as? UIWindowScene })
+            .first {
+            floatingWindow?.windowScene = windowScene
+        }
         floatingWindow?.windowLevel = .alert + 1
         floatingWindow?.backgroundColor = .clear
         floatingWindow?.rootViewController = UIViewController()

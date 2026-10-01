@@ -103,6 +103,7 @@
 		3BBA66B32E9F9C2400563F2E /* PPPhotoTool.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BBA66B22E9F9C2400563F2E /* PPPhotoTool.swift */; };
 		3BD88DED2B69591200CA1DFE /* PPDrawIconView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BD88DEC2B69591200CA1DFE /* PPDrawIconView.swift */; };
 		3BDE2BD02F39C722008AECE3 /* SettingViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BDE2BCF2F39C722008AECE3 /* SettingViewController.swift */; };
+		3BF1FA0D1E2C3B4A5F600001 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BF1FA0D1E2C3B4A5F600002 /* SceneDelegate.swift */; };
 		3BF2C5FC2BAAB48D005472F1 /* PPFloatButtons.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BF2C5FB2BAAB48D005472F1 /* PPFloatButtons.swift */; };
 		60011E40243A29E000BC6458 /* PlayerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60011E3E243A29E000BC6458 /* PlayerViewController.swift */; };
 		60011E41243A29E000BC6458 /* PlayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60011E3F243A29E000BC6458 /* PlayerView.swift */; };
@@ -275,6 +276,7 @@
 		3BBA66B22E9F9C2400563F2E /* PPPhotoTool.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPPhotoTool.swift; sourceTree = "<group>"; };
 		3BD88DEC2B69591200CA1DFE /* PPDrawIconView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPDrawIconView.swift; sourceTree = "<group>"; };
 		3BDE2BCF2F39C722008AECE3 /* SettingViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingViewController.swift; sourceTree = "<group>"; };
+		3BF1FA0D1E2C3B4A5F600002 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
 		3BF2C5FB2BAAB48D005472F1 /* PPFloatButtons.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPFloatButtons.swift; sourceTree = "<group>"; };
 		445FC61B8328A513BADB990E /* Pods-PandaNoteTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-PandaNoteTests.release.xcconfig"; path = "Target Support Files/Pods-PandaNoteTests/Pods-PandaNoteTests.release.xcconfig"; sourceTree = "<group>"; };
 		5FC90B3D04D0AB60B2DBFED0 /* Pods-PandaNoteUITests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-PandaNoteUITests.release.xcconfig"; path = "Target Support Files/Pods-PandaNoteUITests/Pods-PandaNoteUITests.release.xcconfig"; sourceTree = "<group>"; };
@@ -895,6 +897,7 @@
 			children = (
 				1EFF08AA24E50B8000E84AD1 /* PandaNote.entitlements */,
 				60F5691022F2ADC700874994 /* AppDelegate.swift */,
+				3BF1FA0D1E2C3B4A5F600002 /* SceneDelegate.swift */,
 				60F5691222F2ADC700874994 /* ViewController.swift */,
 				1ECEE1C025BD20EC00454966 /* Public */,
 				6056014F23166BAE000809CD /* Base */,
@@ -1268,6 +1271,7 @@
 				1E8B658A27BAA05200552A25 /* PHAsset+PPTool.swift in Sources */,
 				60011E41243A29E000BC6458 /* PlayerView.swift in Sources */,
 				60F5691122F2ADC700874994 /* AppDelegate.swift in Sources */,
+				3BF1FA0D1E2C3B4A5F600001 /* SceneDelegate.swift in Sources */,
 				60E61426243DC16E00630B4B /* PPPDFViewController.swift in Sources */,
 				1E526EC526B699FB0026DC67 /* PPWebDAVService.swift in Sources */,
 				1E0D9EB42774C1C700E3AA73 /* PPAppConfig.swift in Sources */,
@@ -1325,6 +1329,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B7FA2E45256C9D47D0694E0D /* PPMarkdownBlockScannerTests.swift in Sources */,
+				61FF1A14681B9DCC4554221A /* PPMarkdownInlineScannerTests.swift in Sources */,
+				C9AD1EE3879F9B7F34786473 /* PPMarkdownHeadingMarkerTests.swift in Sources */,
+				37BF030E21B9E2593B508E9F /* PPMarkdownKernelTests.swift in Sources */,
 				60F5692622F2ADCA00874994 /* PandaNoteTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1528,7 +1536,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = "";
 				INFOPLIST_FILE = PandaNote/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 15;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -1558,6 +1566,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.cocoapods.PandaNoteTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_INCLUDE_PATHS = "$(inherited) $(SRCROOT)/Pods/Down/Sources/cmark/**";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/PandaNote.app/PandaNote";
@@ -1579,6 +1588,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.cocoapods.PandaNoteTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_INCLUDE_PATHS = "$(inherited) $(SRCROOT)/Pods/Down/Sources/cmark/**";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/PandaNote.app/PandaNote";
