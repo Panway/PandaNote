@@ -109,12 +109,13 @@ class PPSynologyService: NSObject, PPCloudServiceProtocol {
             "version": "1",
         ]
         httpClient.post(url: getServerInfoURL, parameters: parameters) { response in
+            debugPrint("/Serv.php statusCode: \(response.statusCode)")
             switch response.statusCode {
             case 200:
                 // 注意：国外IP不可访问
-                debugPrint("Synology getServerInfo:",response.statusCode, self.sid)
+                debugPrint("Synology getServerInfo:", response.statusCode, self.sid)
                 response.data?.pp_JSONObject()?.printJSON()
-                guard let jsonDict = response.data?.pp_JSONObject() as? [String:Any] else { return }
+                guard let jsonDict = response.data?.pp_JSONObject() as? [String: Any] else { return }
                 let getInfoSuccess = self.handleServerInfo(jsonDict)
                 if getInfoSuccess {
                     if self.sid.length == 0 {
@@ -136,24 +137,24 @@ class PPSynologyService: NSObject, PPCloudServiceProtocol {
                     }
                 }
 
-               
             default:
                 // 处理错误
-                debugPrint("SynologyService getServerInfo error:",response.error ?? "")
+                debugPrint("SynologyService getServerInfo error:", response.error ?? "")
                 if response.error?.localizedDescription == "请求超时" {
                     debugPrint("超时了,弹框重新登录")
                 }
             }
         }
     }
-    func getServerInfoCN(url: String, serverID: String, callback:((String) -> Void)? = nil) {
+
+    func getServerInfoCN(url: String, serverID: String, callback: ((String) -> Void)? = nil) {
         let parameters: Parameters = [
             "location": "zh_CN",
             "id": "dsm",
             "platform": "iPhone14,5",
             "serverID": serverID,
             "command": "request_tunnel",
-            "version": "1"
+            "version": "1",
         ]
         httpClient.post(url: url, parameters: parameters, headers: headers) { response in
             debugPrint("SynologyService getServerInfoCN:", response.statusCode, response.error ?? "")
@@ -162,20 +163,20 @@ class PPSynologyService: NSObject, PPCloudServiceProtocol {
             }
             // 注意：国外IP不可访问
             response.data?.pp_JSONObject()?.printJSON()
-            guard let jsonDict = response.data?.pp_JSONObject() as? [String:Any] else { return }
+            guard let jsonDict = response.data?.pp_JSONObject() as? [String: Any] else { return }
             let getInfoSuccess = self.handleServerInfo(jsonDict)
             if getInfoSuccess, self.sid.length == 0 {
-                self.login(username: self.username, password: self.password ,callback: callback)
+                self.login(username: self.username, password: self.password, callback: callback)
             }
         }
     }
-    
-    func handleServerInfo(_ jsonDict: [String:Any]) -> Bool {
-        guard let service = jsonDict["service"] as? [String:Any] ,
-              let server = jsonDict["server"] as? [String:Any] else { return false}
+
+    func handleServerInfo(_ jsonDict: [String: Any]) -> Bool {
+        guard let service = jsonDict["service"] as? [String: Any],
+              let server = jsonDict["server"] as? [String: Any] else { return false }
         guard let relay_ip = service["relay_ip"] as? String,
               let relay_port = service["relay_port"] as? Int,
-              let local_port = service["port"] as? Int else { return false}
+              let local_port = service["port"] as? Int else { return false }
 
         remoteBaseURL = "http://\(relay_ip):\(relay_port)" // "103.78.228.13"
         configChanged?("PPRemoteBaseURL", remoteBaseURL)
@@ -187,36 +188,44 @@ class PPSynologyService: NSObject, PPCloudServiceProtocol {
         debugPrint("SynologyService localIP:\(localIP) \nrelay_ip:\(relay_ip)")
         return true
     }
-    
-    func login(username:String, password:String, otp_code:String? = nil, callback:((String) -> Void)? = nil) {
+
+    func login(username: String, password: String, otp_code: String? = nil, callback: ((String) -> Void)? = nil) {
+        // Debug !!!!
+//        self.sid = "SSS"
+//        self.did = "DDD"
+//        debugPrint("SynologyService login response:")
+//        self.configChanged?("sid", sid)
+//        self.configChanged?("did", did)
+//        callback?("success")
+//        return
         var parameters: Parameters = [
             "account": username,
             "api": "SYNO.API.Auth",
             "method": "login",
             "passwd": password,
             "session": "FileStation",
-            "version": "3"
+            "version": "3",
         ]
         if let otp_code = otp_code, otp_code.length > 0 {
             parameters["otp_code"] = otp_code
         }
-        
+
         httpClient.postForm(url: baseURL + "/webapi/auth.cgi", parameters: parameters, headers: headers) { response in
             switch response.statusCode {
             case 200:
                 // 使用解码后的对象
                 let res = response.data?.pp_JSONObject()
-/* 响应体：
-{
-  "data" : {
-    "did" : "AAAAAAAAAA",
-    "sid" : "BBBBBBBBBB"
-  },
-  "success" : true
-}
-*/
+                /* 响应体：
+                 {
+                   "data" : {
+                     "did" : "AAAAAAAAAA",
+                     "sid" : "BBBBBBBBBB"
+                   },
+                   "success" : true
+                 }
+                 */
                 res?.printJSON()
-                if let error = res?["error"] as? [String:Any] {
+                if let error = res?["error"] as? [String: Any] {
                     let errorObj = PPCSError(fromDictionary: error)
                     if errorObj.code == 403 || errorObj.code == 404 {
                         // 403:2-step verification code required。404:Failed to authenticate 2-step verification code
@@ -226,32 +235,33 @@ class PPSynologyService: NSObject, PPCloudServiceProtocol {
                     }
                     return
                 }
-                guard let data_ = res?["data"] as? [String:Any] else { return }
+                guard let data_ = res?["data"] as? [String: Any] else { return }
                 guard let sid = data_["sid"] as? String, let did = data_["did"] as? String else { return }
-                
+
                 self.sid = sid
                 self.did = did
-                debugPrint("SynologyService login response:" , response)
+                debugPrint("SynologyService login response:", response)
                 self.configChanged?("sid", sid)
                 self.configChanged?("did", did)
                 self.configChanged?("PPOptCode", "")
                 //                    guard let responseHeader = response.response?.headers else {return}
                 //                    guard let cookie = responseHeader["Set-Cookie"] else { return }
                 callback?("success")
-                
+
             default:
                 // 处理错误
-                debugPrint("SynologyService login error:",response)
+                debugPrint("SynologyService login error:", response)
                 callback?("forcedLoginRequired")
             }
         }
     }
+
     // 每隔3次请求检查本地网络可用性
     func checkLANStatus() {
-//        requestCount += 1
-//        if requestCount % 3 != 0 {
-//            return
-//        }
+        requestCount += 1
+        if requestCount % 5 != 0 {
+            return
+        }
         let url = localBaseURL + "/webman/pingpong.cgi?quickconnect=true"
         httpClient.get(url: url, headers: headers) { response in
             debugPrint("SynologyService checkLANStatus", response.statusCode)
@@ -261,22 +271,22 @@ class PPSynologyService: NSObject, PPCloudServiceProtocol {
                 self.useLANIP = false
             }
         }
-        
     }
+
     func contentsOfDirectory(_ path: String, _ pathID: String, completion: @escaping ([PPFileObject], Error?) -> Void) {
-        self.checkLANStatus()
+        checkLANStatus()
         var path_ = path
-        if(path_.hasSuffix("/")) {
+        if path_.hasSuffix("/") {
             path_ = String(path_.dropLast())
         }
-        if self.sid.length == 0 {
-            self.getServerInfo(url: self.url) { res in
+        if sid.length == 0 {
+            getServerInfo(url: url) { res in
                 if res == "twoFactorAuthCodeError" {
                     completion([], PPCloudServiceError.twoFactorAuthCodeError)
                     return
                 }
-                if res != "success" && res.length > 0 {
-                    completion([], res == "forcedLoginRequired" ? PPCloudServiceError.forcedLoginRequired :PPCloudServiceError.unknown)
+                if res != "success", res.length > 0 {
+                    completion([], res == "forcedLoginRequired" ? PPCloudServiceError.forcedLoginRequired : PPCloudServiceError.unknown)
                     return
                 }
                 self.contentsOfDirectory(path, pathID, completion: completion)
@@ -284,7 +294,7 @@ class PPSynologyService: NSObject, PPCloudServiceProtocol {
             return
         }
         var parameters: [String: Any] = [
-            "_sid": self.sid,
+            "_sid": sid,
 //            "additional": "[\"real_path\",\"size\",\"owner\",\"perm\",\"time\",\"worm_share\"]", //iOS DS file
             "additional": "[\"size\", \"time\", \"type\"]",
             "api": "SYNO.FileStation.List",
@@ -294,80 +304,76 @@ class PPSynologyService: NSObject, PPCloudServiceProtocol {
             "folder_path": "\"\(path_)\"",
             "sort_by": "name",
             "sort_direction": "asc",
-            "version": 2
+            "version": 2,
         ]
 
-        if(path == "/") {
+        if path == "/" {
             parameters["folder_path"] = nil
             parameters["method"] = "list_share"
         }
 //        parameters.printJSON()
 //        let url = "http://192.168.1.46:5000/webapi/entry.cgi"
         httpClient.postForm(url: baseURL + "/webapi/entry.cgi", parameters: parameters, headers: headers) { response in
-                    switch response.statusCode {
+            switch response.statusCode {
             case 200:
                 // 使用解码后的对象
                 let res = response.data?.pp_JSONObject()
 //                res?.printJSON()
-                var files = [[String:Any]]()
-                guard let data_ = res?["data"] as? [String:Any] else {
+                var files = [[String: Any]]()
+                guard let data_ = res?["data"] as? [String: Any] else {
                     if response.statusCode == 400, self.retryCount < 3 {
-                        self.getServerInfo(url: self.url) { sid in
-                            self.retryCount += 1 //自动刷新、防止死循环
+                        self.getServerInfo(url: self.url) { _ in
+                            self.retryCount += 1 // 自动刷新、防止死循环
                             self.contentsOfDirectory(path, pathID, completion: completion)
                         }
                     }
-                    if let error = res?["error"] as? [String:Any] {
+                    if let error = res?["error"] as? [String: Any] {
                         error.printJSON()
                         let errorObj = PPCSError(fromDictionary: error)
                         // 实测sid过期是101错误
                         if errorObj.code == 119 || errorObj.code == 101 {
-                            self.sid = "" //SID not found, empty it
+                            self.sid = "" // SID not found, empty it
                         }
                         self.getServerInfo(url: self.url) { res in
                             if res == "twoFactorAuthCodeError" {
                                 completion([], PPCloudServiceError.twoFactorAuthCodeError)
                                 return
                             }
-                            self.retryCount += 1 //自动刷新、防止死循环
+                            self.retryCount += 1 // 自动刷新、防止死循环
                             self.contentsOfDirectory(path, pathID, completion: completion)
                         }
                         completion([], PPCloudServiceError.unknown)
                     }
-                    debugPrint("SynologyService filelist response:" , response)
+                    debugPrint("SynologyService filelist response:", response)
                     return
                 }
-                if(path == "/") {
-                    guard let shares = data_["shares"] as? [[String:Any]] else { return }
+                if path == "/" {
+                    guard let shares = data_["shares"] as? [[String: Any]] else { return }
                     files = shares
-                }
-                else {
-                    guard let files_ = data_["files"] as? [[String:Any]] else { return }
+                } else {
+                    guard let files_ = data_["files"] as? [[String: Any]] else { return }
                     files = files_
                 }
                 PPSynologyService.dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
 
                 let synologyFiles = PPSynologyFile.toModelArray(files, PPSynologyService.dateFormatter, self.baseURL + "/webapi/entry.cgi?api=SYNO.FileStation.Thumb&method=get&version=2" + "&_sid=\(self.sid)")
                 completion(synologyFiles, nil)
-                    default:
+            default:
                 // 处理错误
-                debugPrint("SynologyService filelist error:",response)
+                debugPrint("SynologyService filelist error:", response)
                 self.useLANIP = false
-                self.getServerInfo(url: self.url) { s in
+                self.getServerInfo(url: self.url) { _ in
                     if self.retryCount < 3 {
-                        self.retryCount += 1 //自动刷新、防止死循环
+                        self.retryCount += 1 // 自动刷新、防止死循环
                         self.contentsOfDirectory(path, pathID, completion: completion)
                     }
                 }
                 completion([], PPCloudServiceError.serverUnreachable)
             }
         }
-        
-
-
     }
-    
-    func getFileData(_ path: String, _ extraParams: String, completion: @escaping (Data?, String, Error?) -> Void) {
+
+    func getFileData(_ path: String, _: String, completion: @escaping (Data?, String, Error?) -> Void) {
         guard let data = path.data(using: .utf8) else {
             return
         }
@@ -377,55 +383,53 @@ class PPSynologyService: NSObject, PPCloudServiceProtocol {
         let nameEncoded = URLEncoding.default.escape(filename)
         let dlinkEncoded = URLEncoding.default.escape(dlink)
         let sidEncoded = URLEncoding.default.escape(sid)
-        let urlString = "\(self.baseURL)/fbdownload/\(nameEncoded)?dlink=\(dlinkEncoded)&_sid=\(sidEncoded)&mime=1"
+        let urlString = "\(baseURL)/fbdownload/\(nameEncoded)?dlink=\(dlinkEncoded)&_sid=\(sidEncoded)&mime=1"
         completion(nil, urlString, nil)
-
     }
-    
-    func createDirectory(_ folderName: String, _ atPath: String, _ parentID: String, completion: @escaping (Error?) -> Void) {
+
+    func createDirectory(_ folderName: String, _ atPath: String, _: String, completion: @escaping (Error?) -> Void) {
         var path_ = atPath
-        if(path_.hasSuffix("/")) {
+        if path_.hasSuffix("/") {
             path_ = String(path_.dropLast())
         }
         let parameters: Parameters = [
-            "_sid": self.sid,
+            "_sid": sid,
             "api": "SYNO.FileStation.CreateFolder",
             "method": "create",
             "folder_path": "\"\(path_)\"",
             "name": "\"\(folderName)\"",
-            "version": "2"
+            "version": "2",
         ]
         parameters.printJSON()
         httpClient.postForm(url: baseURL + "/webapi/entry.cgi", parameters: parameters, headers: headers) { response in
-            
             completion(response.error)
 //                completion(self.getResponseError(response))
-            }
+        }
     }
-    
-    func createFile(_ path: String, _ pathID: String, contents: Data, completion: @escaping ([String : String]?, Error?) -> Void) {
+
+    func createFile(_ path: String, _: String, contents: Data, completion: @escaping ([String: String]?, Error?) -> Void) {
         struct PPUploadParam {
             var key: String
             var value: String
         }
-        
+
         let filename = path.pp_split("/").last ?? ""
         let dest_folder_path = path.replacingOccurrences(of: "/" + filename, with: "")
-                
-        let urlString = self.baseURL.appending("/webapi/entry.cgi?api=SYNO.FileStation.Upload&method=upload&version=2")
+
+        let urlString = baseURL.appending("/webapi/entry.cgi?api=SYNO.FileStation.Upload&method=upload&version=2")
         let uploadURL = urlString.appending("&_sid=\(sid)")
-        
+
         var parameters: [PPUploadParam] = []
         parameters.append(PPUploadParam(key: "path", value: dest_folder_path))
         parameters.append(PPUploadParam(key: "create_parents", value: "true"))
-        parameters.append(PPUploadParam(key: "overwrite", value: "\(overwriteFile)")) //上传时覆盖
+        parameters.append(PPUploadParam(key: "overwrite", value: "\(overwriteFile)")) // 上传时覆盖
 
         let multipart: (MultipartFormData) -> Void = { formData in
             for param in parameters {
                 formData.append(Data(param.value.utf8), withName: param.key)
             }
-            //let mimeType = self.mimeType(forFileName: filename)
-            formData.append(contents, withName: "file", fileName: filename) //,mimeType: mimeType)
+            // let mimeType = self.mimeType(forFileName: filename)
+            formData.append(contents, withName: "file", fileName: filename) // ,mimeType: mimeType)
         }
         // headers.add(name: "Cookie", value: self.access_token ?? "")
         AF.upload(multipartFormData: multipart, to: uploadURL, method: .post, headers: HTTPHeaders(headers))
