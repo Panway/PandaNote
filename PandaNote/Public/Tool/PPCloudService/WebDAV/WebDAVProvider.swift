@@ -28,10 +28,14 @@ public final class WebDAVProvider: CloudDriveProvider {
     /// PPCloudHTTP 实例（注入了 BasicAuthInterceptor，无需每次手动传 Authorization header）
     private var http: PPCloudHTTP!
 
+    /// 上次请求真正连通的服务器地址。坚果云会把 http 强制 308 跳到 https，记住之后就不用每次都多跑一跳
+    private var resolvedServerURL: String?
+
     // MARK: - Credential 快捷访问
 
     private var serverURL: String {
-        var url = credential[CloudCredentialKey.serverURL] ?? ""
+        // 优先用上次连通的地址，没有再读用户配置的那个
+        var url = resolvedServerURL ?? credential[CloudCredentialKey.serverURL] ?? ""
         // 去除末尾斜杠，统一拼接处理
         while url.hasSuffix("/") {
             url = String(url.dropLast())
@@ -122,13 +126,49 @@ public final class WebDAVProvider: CloudDriveProvider {
         ) { [weak self] response in
             guard let self else { return }
             if response.isSuccess {
+                // 服务器如果偷偷把地址跳到了 https，这里把它记下来，后面所有请求直接发到新地址
+                self.adoptFinalURL(response.finalURL)
                 self.setLoginState(.loggedIn)
                 completion(.success(()))
             } else {
                 let error = self.mapHTTPError(response)
-                self.setLoginState(.error(error.localizedDescription ?? ""))
+                self.setLoginState(.error(error.localizedDescription))
                 completion(.failure(error))
             }
+        }
+    }
+
+    /// 把服务端跳转后的地址采纳为新地址，下次请求就不用再吃一次 308
+    /// 只认「同一个域名、只是 http 变 https」这一种，跳到别的主机说明中间有反向代理，硬改反而可能连不上
+    private func adoptFinalURL(_ finalURL: URL?) {
+        guard let finalURL,
+              let current = URL(string: serverURL),
+              current.scheme?.lowercased() == "http",
+              finalURL.scheme?.lowercased() == "https",
+              finalURL.host == current.host else { return }
+
+        var components = URLComponents(url: current, resolvingAgainstBaseURL: false)
+        components?.scheme = "https"
+        guard let upgraded = components?.string,
+              upgraded != serverURL else { return }
+
+        resolvedServerURL = upgraded
+        rebuildHTTPClient()
+        debugPrint("WebDAV 服务器已从 http 升级到 https：\(upgraded)")
+    }
+
+    /// 确认登录状态，没登录过或上次登录失败过就自己登一次
+    /// 为什么不直接用基类的 ensureAuthenticated：它在这两种状态下会直接把错误返回，一个请求都不发，
+    /// 用户下拉刷新时看到的是上一次的旧提示，连网络都没动，还以为 App 卡住了
+    private func ensureLoggedIn(_ done: @escaping (Result<Void, CloudDriveError>) -> Void) {
+        switch loginState {
+        case .loggedOut, .error:
+            login { result in
+                done(result)
+            }
+        default:
+            // 已登录、token 过期、正在登录这几种交给基类，它有对应的刷新和等待逻辑
+            ensureAuthenticated(then: done)
         }
     }
 
@@ -157,7 +197,7 @@ public final class WebDAVProvider: CloudDriveProvider {
         }
 
         // 2️⃣ 再拉取网络最新数据（isCached: false）
-        ensureAuthenticated { [weak self] result in
+        ensureLoggedIn { [weak self] result in
             guard let self else { return }
             if case let .failure(e) = result { completion(.failure(e)); return }
             self.fetchRemoteFileList(path: normalized) { fetchResult in
@@ -223,7 +263,7 @@ public final class WebDAVProvider: CloudDriveProvider {
             return
         }
 
-        ensureAuthenticated { [weak self] result in
+        ensureLoggedIn { [weak self] result in
             guard let self else { return }
             if case let .failure(e) = result { completion(.failure(e)); return }
 
@@ -271,7 +311,7 @@ public final class WebDAVProvider: CloudDriveProvider {
     ) {
         let normalized = normalizePath(remotePath)
 
-        ensureAuthenticated { [weak self] result in
+        ensureLoggedIn { [weak self] result in
             guard let self else { return }
             if case let .failure(e) = result { completion(.failure(e)); return }
 
@@ -302,7 +342,7 @@ public final class WebDAVProvider: CloudDriveProvider {
     override public func deleteFile(path: String, completion: @escaping CloudOperationCallback) {
         let normalized = normalizePath(path)
 
-        ensureAuthenticated { [weak self] result in
+        ensureLoggedIn { [weak self] result in
             guard let self else { return }
             if case let .failure(e) = result { completion(.failure(e)); return }
 
@@ -340,7 +380,7 @@ public final class WebDAVProvider: CloudDriveProvider {
             return
         }
 
-        ensureAuthenticated { [weak self] result in
+        ensureLoggedIn { [weak self] result in
             guard let self else { return }
             if case let .failure(e) = result { completion(.failure(e)); return }
 
@@ -370,7 +410,7 @@ public final class WebDAVProvider: CloudDriveProvider {
     override public func createDirectory(path: String, completion: @escaping CloudOperationCallback) {
         let normalized = normalizePath(path)
 
-        ensureAuthenticated { [weak self] result in
+        ensureLoggedIn { [weak self] result in
             guard let self else { return }
             if case let .failure(e) = result { completion(.failure(e)); return }
 

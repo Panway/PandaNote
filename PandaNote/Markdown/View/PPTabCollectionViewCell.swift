@@ -61,8 +61,8 @@ class PPTabCollectionViewCell: UICollectionViewCell {
             label.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -15),
             label.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -30),
 
-            closeButton.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -1),
-            closeButton.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -8),
+            closeButton.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -8),
+            closeButton.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -10),
 //            closeButton.centerYAnchor.constraint(equalTo: centerYAnchor)
 
             bottomLine.leadingAnchor.constraint(equalTo: leadingAnchor),

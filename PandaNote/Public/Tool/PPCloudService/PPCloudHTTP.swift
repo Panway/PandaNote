@@ -55,6 +55,16 @@ struct PPCloudHTTPResponse<T> {
     let statusCode: Int
     let headers: PPHTTPHeaders?
     let error: PPCloudHTTPError?
+    /// 请求最终落到的地址。中间被 308 / 301 跳过之后，这里和发起时的地址不一样
+    let finalURL: URL?
+
+    init(data: T?, statusCode: Int, headers: PPHTTPHeaders?, error: PPCloudHTTPError?, finalURL: URL? = nil) {
+        self.data = data
+        self.statusCode = statusCode
+        self.headers = headers
+        self.error = error
+        self.finalURL = finalURL
+    }
 
     var isSuccess: Bool {
         return error == nil && (200 ... 299).contains(statusCode)
@@ -62,6 +72,32 @@ struct PPCloudHTTPResponse<T> {
 }
 
 typealias PPHTTPHeaders = [String: String]
+
+// MARK: - 跳转时保住认证头
+
+/// URLSession 遇到跨域跳转（域名、端口、协议任意一个变了）会主动删掉 Authorization 头，这是规范要求，防的是跳到第三方站点时把密码送出去。
+/// 麻烦在于 http 换成 https 也算跨域，而坚果云这类服务就是把 http://dav.jianguoyun.com 308 跳到 https://dav.jianguoyun.com（还是同一台服务器）。
+/// 认证头一丢，第二个请求必然 401（服务端回 WWW-Authenticate: Basic），用户看到的就是「加载失败，请检查服务器配置」。
+/// 这里只在域名不变的前提下把认证头补回去，真跳到别的域名就不管，凭据不能给外人。
+struct PPAuthPreservingRedirectHandler: RedirectHandler {
+    func task(_ task: URLSessionTask,
+              willBeRedirectedTo request: URLRequest,
+              for _: HTTPURLResponse,
+              completion: @escaping (URLRequest?) -> Void)
+    {
+        var newRequest = request
+        let originalRequest = task.currentRequest ?? task.originalRequest
+        let sameHost = originalRequest?.url?.host == newRequest.url?.host
+        // 系统有时会保留一部分头、删掉另一些，所以先看新请求里有没有，没有再补
+        if sameHost,
+           newRequest.value(forHTTPHeaderField: "Authorization") == nil,
+           let authorization = originalRequest?.value(forHTTPHeaderField: "Authorization")
+        {
+            newRequest.setValue(authorization, forHTTPHeaderField: "Authorization")
+        }
+        completion(newRequest)
+    }
+}
 
 // MARK: - 完成回调类型
 
@@ -141,7 +177,10 @@ class PPCloudHTTP {
         }
 
         // 20260419 interceptor 传入 Session，让所有请求自动附加认证头
-        session = Session(configuration: configuration, interceptor: interceptor)
+        // redirectHandler 负责在服务器跳转（尤其是 http → https）时把认证头补回来，不然第二次请求会被当成未登录
+        session = Session(configuration: configuration,
+                          interceptor: interceptor,
+                          redirectHandler: PPAuthPreservingRedirectHandler())
     }
 
     // MARK: - 配置方法
@@ -368,7 +407,8 @@ class PPCloudHTTP {
                     data: data,
                     statusCode: statusCode,
                     headers: headers,
-                    error: error
+                    error: error,
+                    finalURL: response.response?.url
                 )
                 DispatchQueue.main.async { completion(result) }
             }
@@ -615,7 +655,8 @@ class PPCloudHTTP {
             data: response.data,
             statusCode: statusCode,
             headers: headers,
-            error: error
+            error: error,
+            finalURL: response.response?.url
         )
 
         DispatchQueue.main.async {
@@ -632,7 +673,8 @@ class PPCloudHTTP {
             data: response.value,
             statusCode: statusCode,
             headers: headers,
-            error: error
+            error: error,
+            finalURL: response.response?.url
         )
 
         DispatchQueue.main.async {

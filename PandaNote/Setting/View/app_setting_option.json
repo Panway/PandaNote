@@ -33,6 +33,12 @@
       "showSwitch": "1"
     },
     {
+      "name": "上传文件按年月文件夹归类",
+      "key": "uploadFileSortByYearMonth",
+      "category": "文件设置",
+      "showSwitch": "1"
+    },
+    {
       "name": "上传照片后删除原照片",
       "key": "deletePhotoAfterUploading",
       "showSwitch": "1",

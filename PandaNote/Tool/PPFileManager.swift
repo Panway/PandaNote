@@ -144,7 +144,7 @@ class PPFileManager: NSObject {
                 completion(nil, false, PPCloudServiceError.unknown)
                 return
             }
-            PPDiskCache.shared.setData(data, key: localPath)
+            PPDiskCache.shared.setDataSynchronously(data, key: localPath)
             completion(data, false, nil)
         }
     }
@@ -209,6 +209,24 @@ class PPFileManager: NSObject {
                             returnURL : Bool? = false,
                             progress: ((Progress) -> Void)? = nil,
                             completion: @escaping ((_ contents: Data?, _ isFromCache:Bool, _ error: Error?) -> Void)) {
+        let dict = PPUserInfo.shared.pp_serverInfoList[PPUserInfo.shared.pp_lastSeverInfoIndex]
+        if dict["PPCloudServiceType"] == PPCloudServiceType.local.rawValue {
+            //从沙盒Documents取数据返回
+            let documentsURL = FileManager.default.urls(
+                for: .documentDirectory,
+                in: .userDomainMask
+            )[0]
+            // 去掉开头所有连续的斜杠
+            let path2 = String(path.drop(while: { $0 == "/" }))
+            let fileURL = documentsURL.appendingPathComponent(path2)
+            do {
+                let data = try Data(contentsOf: fileURL)
+                completion(data, true, nil)
+            } catch {
+                completion(nil, false, error)
+            }
+            return
+        }
         // 1 从本地磁盘获取文件缓存
         PPDiskCache.shared.fetchData(key: PPUserInfo.shared.webDAVRemark + path) { data in
             // 2 本地磁盘有，按需从服务器获取最新的
@@ -230,6 +248,11 @@ class PPFileManager: NSObject {
                      downloadURL:String? = nil,
                      progress: ((Progress) -> Void)? = nil,
                      completion: @escaping (( _ url:String) -> Void)) {
+        let dict = PPUserInfo.shared.pp_serverInfoList[PPUserInfo.shared.pp_lastSeverInfoIndex]
+        if dict["PPCloudServiceType"] == PPCloudServiceType.local.rawValue {
+            completion(NSHomeDirectory() + "/Documents" + path)
+            return
+        }
         getFileData(path: path, fileID: fileID, downloadURL: downloadURL, alwaysDownload: false, returnURL: true, progress: progress) { contents, isFromCache, error in
             if error != nil {
                 return
@@ -251,8 +274,7 @@ class PPFileManager: NSObject {
             completion("")
         }
     }
-    //MARK: 新建文件 new file
-    /// 通过WebDAV上传到服务器
+    //MARK: 新建文件(上传到服务器) upload file
     func createFile(path: String, parentID:String? = nil,contents: Data?, completionHandler:@escaping(_ res:[String:String]?,_ error:Error?) -> Void) {
         guard let contents = contents else {
             DispatchQueue.main.async {
@@ -295,14 +317,7 @@ class PPFileManager: NSObject {
                 
             }
             return
-//            PPFileManager.shared.pp_getFileList(path: path, parentID) { (contents,isFromCache, error) in
-//            }
-//            path = PPAppConfig.shared.currentYearMonth + "/" + path
-
         }
-//        let localPath = "\(PPDiskCache.shared.path)/\(PPUserInfo.shared.webDAVRemark)"
-        // 将数据写入文件，就算接口请求失败本地也有缓存
-//        try? contents.write(to: URL(fileURLWithPath: localPath + path))
         currentService?.createFile(path, parentID ?? "", contents: contents, completion: { res,error in
             DispatchQueue.main.async {
                 completionHandler(res, error)
@@ -633,6 +648,10 @@ class PPFileManager: NSObject {
 
 extension String {
     func pp_fileCachePath() -> String {
+        let dict = PPUserInfo.shared.pp_serverInfoList[PPUserInfo.shared.pp_lastSeverInfoIndex]
+        if dict["PPCloudServiceType"] == PPCloudServiceType.local.rawValue {
+            return "\(NSHomeDirectory())/Documents/\(self)"
+        }
         let filePath = "\(PPDiskCache.shared.path)/\(PPUserInfo.shared.webDAVRemark)/\(self)"
         return filePath
     }

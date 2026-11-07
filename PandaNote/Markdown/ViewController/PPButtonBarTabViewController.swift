@@ -105,11 +105,98 @@ open class PPButtonBarTabViewController: PagerTabStripViewController, PagerTabSt
         buttonBarView.selectedBarVerticalAlignment = settings.style.selectedBarVerticalAlignment
 
         buttonBarView.register(PPTabCollectionViewCell.self, forCellWithReuseIdentifier:"Cell")
+
+        // iOS 26 起，滚动视图默认会在四周挂一圈「滚动边缘效果」（就是 Liquid Glass 那层毛玻璃）。
+        // 问题是这个标签栏只有 80 点高，上下两条毛玻璃一铺就把按钮条整个糊成一片白，
+        // 标签文字和关闭按钮全被盖住 —— 在 Mac Catalyst 上鼠标划过去尤其明显。
+        // 这个标签栏是横向滚动的，上下两条边缘效果本来也没任何意义，直接关掉；
+        // 左右两条保留，内容超宽时还能提示「旁边还有标签」
+        if #available(iOS 26.0, *) {
+            buttonBarView.topEdgeEffect.isHidden = true
+            buttonBarView.bottomEdgeEffect.isHidden = true
+        }
     }
 
     open override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         buttonBarView.layoutIfNeeded()
+    }
+
+    // MARK: - 分屏（Mac Catalyst / iPad）安全区适配
+    //
+    // 背景：在 Mac Catalyst 上（iPad 的浮层式分屏也一样），UISplitViewController 右侧那一列
+    // 在 frame 上是铺满整个窗口的 —— 被左边侧边栏盖住的那部分宽度不会体现在 frame 里，
+    // 只会体现在 safeAreaInsets.left 上。顶部导航栏同理，只体现在 safeAreaInsets.top 上。
+    // 而 XLPagerTabStrip 内部一律拿 view.bounds.width 当「一页有多宽」，它不认识安全区，
+    // 于是每一页都按整个窗口宽度去排版，右边多出来的那截被推到窗口外面，用户就看不见了。
+    //
+    // 解决思路：先算出可用宽度（自身宽度 − 左右安全区），然后
+    //   1. 把顶部按钮条和分页容器挪进安全区（右边让开侧边栏、下面让开导航栏）；
+    //   2. 让每一页的宽度也按这个可用宽度走（见下面 offsetForChild / updateContent 两个重写）。
+    // 全程不去动 pager 自己的 view.frame —— 那会跟 UINavigationController 互相重置，
+    // 形成无限布局循环（实测能刷出 5 万多轮）。
+
+    /// 真正能用来放内容的宽度：自身宽度减掉左右安全区。
+    /// 没有分屏时（比如 iPhone）左右安全区都是 0，算出来就等于自身宽度，行为跟改动前完全一致。
+    private var pp_availableWidth: CGFloat {
+        let insets = view.safeAreaInsets
+        return max(0, view.bounds.width - insets.left - insets.right)
+    }
+
+    /// 把顶部按钮条和分页容器挪进安全区，宽度收窄到可用宽度
+    private func pp_applySafeAreaInsets() {
+        // 只有「在分屏里」才需要处理：那时右侧列铺满整个窗口，被侧边栏挡住的那部分宽度
+        // 只体现在安全区上。普通的 iPhone 不在分屏里（左右安全区本来就是 0），
+        // 横屏时刘海虽然也会产生安全区，但页面本来就是铺满整屏的，收窄反而会让按钮条的
+        // 背景色在边缘露出缝隙，所以这里干脆不去动它
+        guard splitViewController != nil else { return }
+
+        let insets = view.safeAreaInsets
+        let availableWidth = pp_availableWidth
+        // 宽度还没量出来（是 0）时先跳过，免得把布局改成 0 宽
+        guard availableWidth > 0 else { return }
+
+        // 1. 顶部按钮条：x 让开侧边栏，y 让开导航栏，宽度收窄到可用宽度
+        if let buttonBarView = buttonBarView {
+            // 关掉 autoresizing，否则它下一次布局时会按旧规律把宽度又撑回全宽
+            buttonBarView.autoresizingMask = []
+            let barHeight = settings.style.buttonBarHeight ?? 44
+            var barFrame = buttonBarView.frame
+            barFrame.origin.x = insets.left
+            // Mac Catalyst 下导航栏也是浮层，按钮条原本 y=0 会被压在导航栏底下，
+            // 用户看着标签是亮的，点下去却被导航栏的按钮接走了，所以这里必须让开顶部安全区。
+            // iPad 上 view 已经被导航栏推下来，insets.top 是 0，这一行等于没改
+            barFrame.origin.y = insets.top
+            barFrame.size.width = availableWidth
+            barFrame.size.height = barHeight
+            // 值没变就别碰，避免每帧都刷新 collection view 造成闪烁
+            if buttonBarView.frame != barFrame {
+                buttonBarView.frame = barFrame
+                // 宽度变了，每个 tab 的宽度要重算，并让布局失效一次
+                cachedCellWidths = calculateWidths()
+                buttonBarView.collectionViewLayout.invalidateLayout()
+            }
+        }
+
+        // 2. 分页容器：跟着按钮条一起下移，高度扣掉顶部安全区和按钮条
+        containerView.autoresizingMask = []
+        let barHeight = settings.style.buttonBarHeight ?? 44
+        var containerFrame = containerView.frame
+        containerFrame.origin.x = insets.left
+        containerFrame.origin.y = insets.top + barHeight
+        containerFrame.size.width = availableWidth
+        containerFrame.size.height = view.bounds.height - insets.top - barHeight - insets.bottom
+        if containerView.frame != containerFrame {
+            containerView.frame = containerFrame
+        }
+    }
+
+    /// 每次布局前先把按钮条和容器摆好。这样紧接着的 viewDidLayoutSubviews 里，
+    /// 父类算出来的 pageWidth（也就是 containerView.bounds.width）已经是收窄后的值了
+    open override func viewWillLayoutSubviews() {
+        super.viewWillLayoutSubviews()
+        guard isViewLoaded else { return }
+        pp_applySafeAreaInsets()
     }
 
     open override func viewDidLayoutSubviews() {
@@ -127,6 +214,38 @@ open class PPButtonBarTabViewController: PagerTabStripViewController, PagerTabSt
         
         buttonBarView.sendSubviewToBack(buttonBarView.selectedBar)
         buttonBarView.selectedBar.layer.zPosition = 0
+    }
+
+    // MARK: - 让分页宽度跟着可用宽度走
+
+    /// 父类的实现里带了一项「居中修正」：拿容器宽度和自身宽度的差值折半再加到偏移上。
+    /// 容器被我们收窄之后这个差值会变成负数，把每一页整体往左推，所以这里去掉它，
+    /// 改成直接用容器宽度做步进 —— 这样跟父类里 pageOffsetForChild（决定滚动到第几页）的口径就一致了
+    open override func offsetForChild(at index: Int) -> CGFloat {
+        return CGFloat(index) * containerView.bounds.width
+    }
+
+    /// 父类给每一页定的宽度是 view.bounds.width，也就是整个窗口的宽度，这正是溢出的直接来源。
+    /// 这里等它排完之后，把宽度改成可用宽度。
+    /// 注意只改宽度、不动 x：x 是父类按当前滚动位置算好的（快速跨页切换时它还会临时调整页序），
+    /// 跟着它走才不会错位。
+    open override func updateContent() {
+        super.updateContent()
+
+        let availableWidth = pp_availableWidth
+        // 没有分屏时可用宽度就等于自身宽度，不需要介入，完全保持父类原样
+        guard availableWidth > 0, availableWidth < view.bounds.width - 0.5 else { return }
+
+        for childController in viewControllers {
+            // isViewLoaded 是安全检查，不会把「还没用到的页面」的 view 提前创建出来；
+            // 再看一眼 superview，确认这一页此刻确实挂在分页容器里
+            guard childController.isViewLoaded,
+                  childController.view.superview === containerView else { continue }
+            // 宽度已经对了就别重复赋值，省掉没必要的布局
+            if abs(childController.view.frame.size.width - availableWidth) > 0.5 {
+                childController.view.frame.size.width = availableWidth
+            }
+        }
     }
 
     // MARK: - Public Methods
