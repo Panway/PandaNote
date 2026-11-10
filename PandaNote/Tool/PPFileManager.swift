@@ -261,6 +261,75 @@ class PPFileManager: NSObject {
             completion(filePath.replacingOccurrences(of: "//", with: "/"))
         }
     }
+    /// 给"边播边缓存"用：只取可直接流式播放的直连地址 + 认证请求头 + 本地缓存路径，不下载。
+    /// 回调三个值：
+    /// - url 非空：让播放器流式拉这个地址（同时写缓存到 cachePath）
+    /// - url 为空：没有可流式的直连地址，调用方直接用 cachePath 当本地文件播（已缓存 / 已回退下载）
+    func getStreamInfo(path: String,
+                       fileID: String?,
+                       downloadURL: String? = nil,
+                       completion: @escaping (_ url: String, _ headers: [String: String], _ cachePath: String) -> Void) {
+        let key = PPUserInfo.shared.webDAVRemark + path
+        // 缓存文件就放在 PPDiskCache 认的位置，写完后 cacheExist(key:) 能命中，实现下次本地秒开
+        let cachePath = PPDiskCache.shared.fullPath(forKey: key)
+
+        // 本地服务（沙盒 Documents 里的文件）没有网络地址可流式，直接走老路返回本地路径
+        let dict = PPUserInfo.shared.pp_serverInfoList[PPUserInfo.shared.pp_lastSeverInfoIndex]
+        if dict["PPCloudServiceType"] == PPCloudServiceType.local.rawValue {
+            getLocalURL(path: path, fileID: fileID, downloadURL: downloadURL) { local in
+                completion("", [:], local)
+            }
+            return
+        }
+
+        // 1) 已经缓存过 → 直接本地播，不用再联网。
+        // 加个体积校验：早期版本解析 Content-Range 出错时，会把几字节的碎片当成"完整缓存"存下来，
+        // 这种文件存在但根本没法播。不删掉的话每次点都命中坏缓存，用户会以为视频坏了
+        if PPDiskCache.shared.cacheExist(key: key) {
+            let attrs = try? FileManager.default.attributesOfItem(atPath: cachePath)
+            let size = (attrs?[.size] as? NSNumber)?.int64Value ?? 0
+            if size > 1024 {
+                completion("", [:], cachePath)
+                return
+            }
+            try? FileManager.default.removeItem(atPath: cachePath)
+            debugPrint("流媒体缓存只有 \(size) 字节，判定为坏缓存已删除：\(cachePath)")
+        }
+
+        // 2) 服务能自己拼出带认证的直连地址（目前 WebDAV 走这里，附 Basic 认证头）
+        if let req = currentService?.streamRequest(path: path, fileID: fileID), req.url.length > 1 {
+            completion(req.url, req.headers, cachePath)
+            return
+        }
+
+        // 3) 文件对象自带直连下载地址（OneDrive / 阿里云盘 / AList，签名 URL 无需额外请求头）
+        if let du = downloadURL, du.length > 1 {
+            completion(du, [:], cachePath)
+            return
+        }
+
+        // 4) 百度 / AList / 阿里云盘 / 群晖：getFileData 会返回一个轻量签名直连 URL（不是整包下载）
+        let type = PPUserInfo.shared.cloudServiceType
+        if type == .baiduyun || type == .alist || type == .aliyundrive || type == .synology {
+            currentService?.getFileData(path, fileID ?? "", completion: { _, url, error in
+                if error == nil && url.length > 1 {
+                    completion(url, [:], cachePath)
+                } else {
+                    // 拿不到直连地址就退回老路：下载完再本地播
+                    self.getLocalURL(path: path, fileID: fileID, downloadURL: downloadURL) { local in
+                        completion("", [:], local)
+                    }
+                }
+            })
+            return
+        }
+
+        // 5) 其它（Dropbox / iCloud / 未知）：暂时不支持直连流式，退回老路下载完再本地播
+        getLocalURL(path: path, fileID: fileID, downloadURL: downloadURL) { local in
+            completion("", [:], local)
+        }
+    }
+
     private func getRemoteURL(path:String,
                     fileID:String?,
                      completion: @escaping (( _ url:String) -> Void)) {

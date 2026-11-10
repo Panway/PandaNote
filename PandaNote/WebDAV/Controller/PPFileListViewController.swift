@@ -431,10 +431,19 @@ class PPFileListViewController: PPBaseViewController,
             }
         }
         else if (fileObj.name.pp_isVideoAudioFile())  {
-            PPFileManager.shared.getLocalURL(path: self.getPathNotEmpty(fileObj), fileID: fileObj.pathID, downloadURL: fileObj.downloadURL) { filePath in
+            // 边播边缓存：不再等整个文件下载完，拿到直连地址就立刻推流播放，同时把数据存进本地缓存
+            PPFileManager.shared.getStreamInfo(path: self.getPathNotEmpty(fileObj), fileID: fileObj.pathID, downloadURL: fileObj.downloadURL) { url, headers, cachePath in
                 let vc = PlayerViewController()
-                vc.localFileURL = URL(fileURLWithPath: filePath)
                 vc.name = fileObj.name
+                if url.isEmpty {
+                    // 已有本地缓存，或该服务不支持直连流式（已回退成下载好的本地文件）→ 直接播本地
+                    vc.localFileURL = URL(fileURLWithPath: cachePath)
+                } else {
+                    // 流式播放，并把边播的数据缓存到 cachePath，下次打开就是本地秒开
+                    vc.httpURL = url
+                    vc.httpHeaders = headers
+                    vc.cacheFilePath = cachePath
+                }
                 self.pushDetail(vc)
             }
         }
@@ -863,6 +872,22 @@ class PPFileListViewController: PPBaseViewController,
                     }
                     else {
                         PPHUD.showHUDFromTop("加载失败，请检查服务器配置", isError: true)
+                    }
+                }
+                else if let driveError = error as? CloudDriveError {
+                    // WebDAV 走的是新的云盘协议，错误类型是 CloudDriveError，上面那个分支认不出来，
+                    // 不单独处理的话「密码错了」「没权限」全都会显示成「请检查服务器配置」，用户不知道该改什么
+                    switch driveError {
+                    case .authenticationFailed:
+                        PPHUD.showHUDFromTop("用户名或密码错误，请重新配置", isError: true)
+                    case .permissionDenied:
+                        PPHUD.showHUDFromTop("没有权限访问该目录", isError: true)
+                    case let .fileNotFound(path):
+                        PPHUD.showHUDFromTop("文件不存在：\(path)", isError: true)
+                    case let .networkError(msg):
+                        PPHUD.showHUDFromTop("网络错误：\(msg)", isError: true)
+                    default:
+                        PPHUD.showHUDFromTop(driveError.errorDescription ?? "加载失败，请检查服务器配置", isError: true)
                     }
                 }
                 else {

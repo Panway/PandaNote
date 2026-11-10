@@ -57,10 +57,19 @@ protocol PPCloudServiceProtocol {
     /// 删除文件
     func removeItem(_ path: String, _ fileID: String, completion: @escaping(_ error: Error?) -> Void)
 
+    /// 只取"可直接流式播放的直连地址 + 认证请求头"，不发起下载。
+    /// 用于边播边缓存：播放器拿这个地址自己流式拉取。
+    /// 返回 nil 表示该服务不支持直连流式（调用方回退到"先下载再播放"）。
+    func streamRequest(path: String, fileID: String?) -> (url: String, headers: [String: String])?
+
 }
 
 extension PPCloudServiceProtocol {
 
+    /// 默认不支持直连流式播放，需要的服务自己重写
+    func streamRequest(path: String, fileID: String?) -> (url: String, headers: [String: String])? {
+        return nil
+    }
 
 }
 

@@ -93,8 +93,16 @@ class PlayerViewController: PPBaseViewController {
         }
 	}
     var localFilePath:String = ""
-    var localFileURL:URL!
+    /// 本地文件地址。原来声明成 URL!（隐式解包），调用方忘赋值也不报错，现在改成安全的可选类型
+    var localFileURL: URL?
+    /// 网络播放地址（http/https 开头）。设置了就优先于 localFileURL，边缓冲边播放
     var httpURL = ""
+    /// 播放 httpURL 时附加到每个 HTTP 请求上的自定义请求头（比如 WebDAV 的 Authorization）
+    var httpHeaders: [String: String] = [:]
+    /// 边播边缓存：把流式下载的数据顺手存到这个本地文件，下次直接本地秒开。留空则只播不缓存
+    var cacheFilePath: String = ""
+    /// 必须持有它：AVAsset 对 resourceLoader 的 delegate 是弱引用，这里不存就没人管下载了
+    private var streamLoader: PPStreamResourceLoader?
     open var filePathStr: String = ""//文件相对路径
 
 
@@ -128,28 +136,37 @@ class PlayerViewController: PPBaseViewController {
         addObserver(self, forKeyPath: #keyPath(PlayerViewController.player.currentItem.status), options: [.new, .initial], context: &playerViewControllerKVOContext)
         
         playerView.playerLayer.player = player
-        
-//        let movieURL = Bundle.main.url(forResource: "ElephantSeals", withExtension: "mov")!
-        guard let movieURL = localFileURL else {return}
-        //URL(string: "http://music.163.com/song/media/outer/url?id=545558246.mp3")
 
-//        if ((movieURL.absoluteString.hasPrefix("http")) != nil) {
-//            let cachePath = NSTemporaryDirectory() + "myCache"
-//            let cacheURL = URL(fileURLWithPath: cachePath)
-//            asset = AVURLAsset(url: movieURL, options: [AVURLAssetOptionShouldCacheKey: true, AVURLAssetCacheKey: AVAssetCache(url: cacheURL)])
-//            
-//        }
+        // 决定播放源：优先网络流（带自定义请求头，边缓冲边播），其次本地文件；两者都没有就明确报错，不再静默返回
+        if !httpURL.isEmpty, let realURL = URL(string: httpURL),
+           let fakeURL = PPStreamResourceLoader.fakeSchemeURL(for: realURL) {
+            // 传了 cacheFilePath 就边播边缓存到该文件，否则只播不缓存
+            let cacheURL = cacheFilePath.isEmpty ? nil : URL(fileURLWithPath: cacheFilePath)
+            let loader = PPStreamResourceLoader(headers: httpHeaders, cacheFileURL: cacheURL)
+            self.streamLoader = loader
+            let urlAsset = AVURLAsset(url: fakeURL, options: nil)
+            // 把假协议 URL 的数据请求交给 loader 处理，它才能真正带上请求头去下载
+            urlAsset.resourceLoader.setDelegate(loader, queue: DispatchQueue(label: "PlayerVC.resourceLoader"))
+            asset = urlAsset
+        }
+        else if let movieURL = localFileURL {
+            asset = AVURLAsset(url: movieURL, options: nil)
+            debugPrint("AVURLAsset:", movieURL)
+        }
+        else {
+            handleErrorWithMessage("无法播放：没有传入文件路径（localFileURL）或网络地址（httpURL）")
+        }
 
-        asset = AVURLAsset(url: movieURL, options: nil)
-        debugPrint("AVURLAsset:",movieURL)
         // Make sure we don't have a strong reference cycle by only capturing self as weak.
         let interval = CMTimeMake(value: 1, timescale: 1)
-		timeObserverToken = player.addPeriodicTimeObserver(forInterval: interval, queue: DispatchQueue.main) { [unowned self] time in
-			let timeElapsed = Float(CMTimeGetSeconds(time))
-			
-			self.timeSlider.value = Float(timeElapsed)
-			self.startTimeLabel.text = self.createTimeString(time: timeElapsed)
-		}
+        // 用 weak self 而不是 unowned：控制器若在观察者移除前被释放，unowned 会崩溃，weak 只是跳过
+        timeObserverToken = player.addPeriodicTimeObserver(forInterval: interval, queue: DispatchQueue.main) { [weak self] time in
+            guard let self = self else { return }
+            let timeElapsed = Float(CMTimeGetSeconds(time))
+
+            self.timeSlider.value = Float(timeElapsed)
+            self.startTimeLabel.text = self.createTimeString(time: timeElapsed)
+        }
         self.tabBarController?.tabBar.isHidden = true
 
     }
@@ -168,6 +185,10 @@ class PlayerViewController: PPBaseViewController {
         }
         
         player.pause()
+
+        // 停掉网络下载并解除 URLSession 对 loader 的强引用，避免内存泄漏
+        streamLoader?.shutdown()
+        streamLoader = nil
         
         removeObserver(self, forKeyPath: #keyPath(PlayerViewController.player.currentItem.duration), context: &playerViewControllerKVOContext)
         removeObserver(self, forKeyPath: #keyPath(PlayerViewController.player.rate), context: &playerViewControllerKVOContext)
@@ -238,24 +259,24 @@ class PlayerViewController: PPBaseViewController {
     // MARK: - IBActions
 
 	@IBAction func playPauseButtonWasPressed(_ sender: UIButton) {
-		if player.rate != 1.0 {
-            // Not playing forward, so play.
- 			if currentTime == duration {
-                // At end, so got back to begining.
-				currentTime = 0.0
-			}
-
-			player.play()
-		}
+        // rate == 0 才是"暂停中"。原来的 != 1.0 判断有缺陷：快进到 2.0 倍速时点按钮不会暂停
+        if player.rate == 0 {
+            if duration.isFinite && duration > 0 && currentTime >= duration {
+                // 已播到结尾，回到开头再播
+                currentTime = 0.0
+            }
+            player.play()
+        }
         else {
-            // Playing, so pause.
-			player.pause()
-		}
+            player.pause()
+        }
 	}
 	
 	@IBAction func rewindButtonWasPressed(_ sender: UIButton) {
-        // Rewind no faster than -2.0.
-        rate = max(player.rate - 2.0, -2.0)
+        // 原版示例用负 rate 倒放，那是 macOS 的能力，iOS 的 AVPlayer 不支持负 rate（设了也不会倒放）。
+        // 改成 iOS 用户习惯的行为：每点一次往回跳 10 秒
+        guard currentTime.isFinite else { return }
+        currentTime = max(currentTime - 10.0, 0.0)
 	}
 	
 	@IBAction func fastForwardButtonWasPressed(_ sender: UIButton) {
@@ -358,8 +379,9 @@ class PlayerViewController: PPBaseViewController {
         return affectedKeyPathsMappingByKey[key] ?? super.keyPathsForValuesAffectingValue(forKey: key)
 	}
     deinit {
-//        removePlayerObserver()
-
+        // 兜底：正常路径 viewDidDisappear -> removePlayerObserver 已经清理过；
+        // 这里防止控制器没走 disappear 就被释放时，URLSession 还强引用着 loader 造成泄漏
+        streamLoader?.shutdown()
     }
     // MARK: - Error Handling
 
@@ -394,92 +416,87 @@ class PlayerViewController: PPBaseViewController {
         self.title = self.name
         playerView = PlayerView()
         self.view.addSubview(playerView)
-        
-        
+
         let bottomView = UIView()
         self.view.addSubview(bottomView)
         bottomView.backgroundColor = .white
         bottomView.snp.makeConstraints { (make) in
             make.leading.trailing.equalToSuperview()
             make.bottom.equalTo(self.pp_safeLayoutGuideBottom())
-            make.height.equalTo(80)
+            make.height.equalTo(110)
         }
-        
+
         playerView.snp.makeConstraints { (make) in
             make.top.equalTo(self.pp_safeLayoutGuideTop())
             make.left.right.equalTo(self.view)
             make.bottom.equalTo(bottomView.snp.top)
         }
-        
-        rewindButton = UIButton(type: .custom)
-        bottomView.addSubview(rewindButton)
-        rewindButton.frame = CGRect(x: 40, y: 0, width: 40, height: 40)
-        rewindButton.setTitle("⏪", for: .normal)
-        rewindButton.addTarget(self, action: #selector(rewindButtonWasPressed(_:)), for: .touchUpInside)
-        rewindButton.snp.makeConstraints { (make) in
-            make.top.equalToSuperview().offset(40)
-            make.right.equalTo(bottomView.snp.centerX).offset(-35)
-            make.width.equalTo(70)
-            make.height.equalTo(30)
-        }
-        
-        playPauseButton = UIButton(type: .custom)
-        bottomView.addSubview(playPauseButton)
-        playPauseButton.frame = CGRect(x: 40, y: 0, width: 40, height: 40)
-        //        rewindButton.setImage(UIImage.init(named: "share"), for: .normal)
-        playPauseButton.setTitle("▶️", for: .normal)
-        playPauseButton.addTarget(self, action: #selector(playPauseButtonWasPressed(_:)), for: .touchUpInside)
-        playPauseButton.snp.makeConstraints { (make) in
-            make.top.equalTo(rewindButton)
-            make.left.equalTo(rewindButton.snp.right)
-            make.width.equalTo(70)
-            make.height.equalTo(30)
-        }
-        
-        fastForwardButton = UIButton(type: .custom)
-        bottomView.addSubview(fastForwardButton)
-        fastForwardButton.frame = CGRect(x: 40, y: 0, width: 40, height: 40)
-        //        rewindButton.setImage(UIImage.init(named: "share"), for: .normal)
-        fastForwardButton.setTitle("⏩", for: .normal)
-        fastForwardButton.addTarget(self, action: #selector(fastForwardButtonWasPressed(_:)), for: .touchUpInside)
-        fastForwardButton.snp.makeConstraints { (make) in
-            make.top.equalTo(rewindButton)
-            make.left.equalTo(playPauseButton.snp.right)
-            make.width.equalTo(70)
-            make.height.equalTo(30)
-        }
-        
+
+        // 底部面板从上到下三行：进度条、时间标签、按钮。
+        // 原来 frame 和约束混写，frame 全是白写的，而且滑条会压住时间标签，现在统一用约束
+
+        // 第一行：进度条
         timeSlider = UISlider()
         bottomView.addSubview(timeSlider)
         timeSlider.snp.makeConstraints { (make) in
-            make.right.left.equalToSuperview().offset(8)
-            make.top.equalToSuperview().offset(0)
+            make.top.equalToSuperview().offset(8)
+            make.leading.equalToSuperview().offset(12)
+            make.trailing.equalToSuperview().offset(-12)
         }
         timeSlider.tintColor = UIColor(red:0.27, green:0.68, blue:0.49, alpha:1.00)//VUE绿
         timeSlider.addTarget(self, action: #selector(timeSliderDidChange(_:)), for: .valueChanged)
-        
-        startTimeLabel = UILabel(frame: CGRect(x: 15, y: 16, width: 100, height: 40))
-        //        aLB.autoresizingMask = [.flexibleWidth, .flexibleHeight]
-        //        aLB.backgroundColor = .white
+
+        // 第二行：左边已播时间，右边总时长
+        startTimeLabel = UILabel()
         startTimeLabel.textColor = .gray
-        //        aLB.textAlignment = .center
-        startTimeLabel.font = UIFont.systemFont(ofSize: 16)
+        startTimeLabel.font = UIFont.systemFont(ofSize: 14)
         startTimeLabel.text = "0:00"
         bottomView.addSubview(startTimeLabel)
-        
-        
-        durationLabel = UILabel(frame: CGRect(x: 300, y: 16, width: 100, height: 40))
-        //        aLB.autoresizingMask = [.flexibleWidth, .flexibleHeight]
-        //        aLB.backgroundColor = .white
+        startTimeLabel.snp.makeConstraints { (make) in
+            make.top.equalTo(timeSlider.snp.bottom).offset(2)
+            make.leading.equalTo(timeSlider)
+        }
+
+        durationLabel = UILabel()
         durationLabel.textColor = .gray
-        //        aLB.textAlignment = .center
-        durationLabel.font = UIFont.systemFont(ofSize: 16)
+        durationLabel.font = UIFont.systemFont(ofSize: 14)
         durationLabel.text = "-:--"
         bottomView.addSubview(durationLabel)
         durationLabel.snp.makeConstraints { (make) in
-            make.right.equalToSuperview().offset(-8)
-            make.top.equalToSuperview().offset(26)
+            make.centerY.equalTo(startTimeLabel)
+            make.trailing.equalTo(timeSlider)
         }
-        
+
+        // 第三行：播放按钮居中，倒带在左，快进在右
+        playPauseButton = UIButton(type: .custom)
+        playPauseButton.setTitle("▶️", for: .normal)
+        playPauseButton.addTarget(self, action: #selector(playPauseButtonWasPressed(_:)), for: .touchUpInside)
+        bottomView.addSubview(playPauseButton)
+        playPauseButton.snp.makeConstraints { (make) in
+            make.top.equalTo(startTimeLabel.snp.bottom).offset(6)
+            make.centerX.equalToSuperview()
+            make.width.equalTo(70)
+            make.height.equalTo(30)
+        }
+
+        rewindButton = UIButton(type: .custom)
+        rewindButton.setTitle("⏪", for: .normal)
+        rewindButton.addTarget(self, action: #selector(rewindButtonWasPressed(_:)), for: .touchUpInside)
+        bottomView.addSubview(rewindButton)
+        rewindButton.snp.makeConstraints { (make) in
+            make.centerY.equalTo(playPauseButton)
+            make.trailing.equalTo(playPauseButton.snp.leading).offset(-10)
+            make.width.height.equalTo(playPauseButton)
+        }
+
+        fastForwardButton = UIButton(type: .custom)
+        fastForwardButton.setTitle("⏩", for: .normal)
+        fastForwardButton.addTarget(self, action: #selector(fastForwardButtonWasPressed(_:)), for: .touchUpInside)
+        bottomView.addSubview(fastForwardButton)
+        fastForwardButton.snp.makeConstraints { (make) in
+            make.centerY.equalTo(playPauseButton)
+            make.leading.equalTo(playPauseButton.snp.trailing).offset(10)
+            make.width.height.equalTo(playPauseButton)
+        }
     }
 }

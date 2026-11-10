@@ -85,6 +85,12 @@ class PPWebDAVFileService: NSObject, PPCloudServiceProtocol {
         }
     }
 
+    /// 流式播放：直接返回 WebDAV 文件的直连地址 + Basic 认证头，不下载。
+    /// 认证由 WebDAVProvider 用它自己保存的当前账号凭据拼，避免多账号时取错密码。
+    func streamRequest(path: String, fileID: String?) -> (url: String, headers: [String: String])? {
+        return (drive as? WebDAVProvider)?.streamRequest(remotePath: path)
+    }
+
     func createDirectory(_ folderName: String, _ atPath: String, _: String, completion: @escaping (Error?) -> Void) {
         drive?.createDirectory(path: atPath + folderName, completion: { res in
             completion(self.getError(res))

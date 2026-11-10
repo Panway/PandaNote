@@ -439,6 +439,15 @@ public final class WebDAVProvider: CloudDriveProvider {
         URL(string: serverURL + encodePath(normalizePath(path)))
     }
 
+    /// 流式播放专用：返回该文件的完整直连地址 + Basic 认证头，不发起任何下载。
+    /// 认证格式和 BasicAuthInterceptor 完全一致（"Basic " + base64(账号:密码)），
+    /// 播放器带着这个头自己去拉数据，就能边下边播。
+    public func streamRequest(remotePath: String) -> (url: String, headers: [String: String])? {
+        guard let fullURL = buildFullURL(path: remotePath) else { return nil }
+        let encoded = Data("\(username):\(password)".utf8).base64EncodedString()
+        return (fullURL.absoluteString, ["Authorization": "Basic \(encoded)"])
+    }
+
     /// 对路径每个分量做百分比编码，保留 /
     private func encodePath(_ path: String) -> String {
         path.split(separator: "/", omittingEmptySubsequences: false)
