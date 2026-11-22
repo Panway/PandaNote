@@ -405,7 +405,13 @@ class PPFileListViewController: PPBaseViewController,
             }
             cell.iconImage.contentMode = .scaleAspectFit
             cell.downloadFile(fileObj) { localFilePath in
-                self.showImage(fromView:cell, imageName: fileObj.path, imageURL:localFilePath) {
+                // 空路径说明下载失败了（网络断了、直连地址过期等）。不拦一下的话
+                // SKPhotoBrowser 会一直显示列表那张缩略图，看着像「图片只有小图」
+                if localFilePath.isEmpty {
+                    PPHUD.showHUDFromTop("图片下载失败，请检查网络后重试", isError: true)
+                    return
+                }
+                self.showImage(fromView:cell.iconImage, imageName: fileObj.path, imageURL:localFilePath) {
                     fileObj.downloadProgress = 1.0
                     collectionView.reloadItems(at: [indexPath]) //下载成功后再刷新
                 }
@@ -436,6 +442,10 @@ class PPFileListViewController: PPBaseViewController,
                 let vc = PlayerViewController()
                 vc.name = fileObj.name
                 if url.isEmpty {
+                    guard FileManager.default.fileExists(atPath: cachePath) else {
+                        PPHUD.showHUDFromTop("视频下载失败，请检查网络后重试", isError: true)
+                        return
+                    }
                     // 已有本地缓存，或该服务不支持直连流式（已回退成下载好的本地文件）→ 直接播本地
                     vc.localFileURL = URL(fileURLWithPath: cachePath)
                 } else {
@@ -565,6 +575,11 @@ class PPFileListViewController: PPBaseViewController,
                 return
             }
             cell.downloadFile(obj) { localFilePath in
+                // 下载失败就别刷新了，否则 SKPhotoBrowser 会把上一张图（列表缩略图）当成结果留着
+                if localFilePath.isEmpty {
+                    PPHUD.showHUDFromTop("图片下载失败，请检查网络后重试", isError: true)
+                    return
+                }
                 obj.downloadProgress = 1.0
                 self.collectionView.reloadItems(at: [indexPath])
                 let obj2 = browser.photos[index]

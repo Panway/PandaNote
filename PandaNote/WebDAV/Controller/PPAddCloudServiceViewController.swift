@@ -7,7 +7,6 @@
 //
 
 import UIKit
-import Alamofire
 
 
 class PPAddCloudServiceViewController : PPBaseViewController,UITableViewDataSource,UITableViewDelegate {
@@ -221,6 +220,20 @@ class PPAddCloudServiceViewController : PPBaseViewController,UITableViewDataSour
     }
     
 
+    /// 换到 token 之后统一走这里建服务器配置。两个登录入口只有 client_id 不同，其余字段一模一样
+    class func pushOneDriveConfig(accessToken: String, refreshToken: String, clientID: String) {
+        let vc = PPWebDAVConfigViewController()
+        vc.cloudType = "OneDrive"
+        vc.serverURL = "https://graph.microsoft.com/"
+        // userName 会被当成 clientID 存进配置，刷新 token 时要靠它和 refresh_token 配对，
+        // 所以这里必须传真正签发 token 的那个，别两个入口混着用
+        vc.userName = clientID
+        vc.remark = "OneDrive"
+        vc.password = accessToken
+        vc.extraString = refreshToken
+        UIViewController.pp_topViewController()?.navigationController?.pushViewController(vc, animated: true)
+    }
+
     class func handleCloudServiceRedirect(_ url:URL) {
         debugPrint("callbackURL:", url)
         if url.host == "msredirect" {
@@ -229,38 +242,23 @@ class PPAddCloudServiceViewController : PPBaseViewController,UITableViewDataSour
             if let code = urlWithCode.pp_valueOf("code") {
                 debugPrint("microsoft code is:\(code)")
                 
-                let parameters: [String: String] = [
-                    "client_id": onedrive_client_id_pandanote,
-//                    "redirect_uri": "pandanote://msredirect",
-                    "redirect_uri": "https://login.microsoftonline.com/common/oauth2/nativeclient",//ES
-                    "code": code,
-//                    "scope":"User.Read Files.ReadWrite.All",//ES?
-                    "grant_type": "authorization_code"
-                ]
-//                let url = "https://login.live.com/oauth20_token.srf"
-                let url = "https://login.microsoftonline.com/common/oauth2/v2.0/token"
-                AF.request(url, method: .post, parameters: parameters).responseJSON { response in
-                    debugPrint("GET OneDrive token info:\(response.value ?? "")")
-                    let jsonDic = response.value as? [String : Any]
-//                    let access_token = jsonDic["access_token"] as? String
-                    if let access_token = jsonDic?["access_token"] as? String,let refresh_token = jsonDic?["refresh_token"] as? String {
-                        debugPrint("microsoft access_token is:\(access_token)")
-                        let vc = PPWebDAVConfigViewController()
-                        vc.cloudType = "OneDrive"
-                        vc.serverURL = "https://graph.microsoft.com/"
-                        vc.userName = onedrive_client_id_pandanote
-                        vc.remark = "OneDrive"
-                        vc.password = access_token
-                        vc.extraString = refresh_token
-                        UIViewController.pp_topViewController()?.navigationController?.pushViewController(vc, animated: true)
+                // redirect_uri 和 scope 必须和 onedrive_auth_url 里发的完全一致，
+                // 不一致会被直接拒（AADSTS70000 / AADSTS70011）。
+                // 千万别抄 ES 分支的 nativeclient，那是另一个应用注册的回调地址
+                PPOneDriveService.exchangeAuthorizationCode(code,
+                                                            clientID: onedrive_client_id_pandanote,
+                                                            redirectUri: onedrive_redirect_uri_pandanote,
+                                                            scope: onedrive_scope_pandanote) { accessToken, refreshToken, errorMessage in
+                    guard let accessToken = accessToken, let refreshToken = refreshToken else {
+                        // 以前失败是静默的，只能去控制台翻日志。微软会把原因写在 error_description 里，
+                        // 直接弹出来省得来回猜
+                        PPAlertTool.showAlert(title: "OneDrive 授权失败", message: errorMessage ?? "未知原因")
+                        return
                     }
-                    
-                    
+                    PPAddCloudServiceViewController.pushOneDriveConfig(accessToken: accessToken,
+                                                                       refreshToken: refreshToken,
+                                                                       clientID: onedrive_client_id_pandanote)
                 }
-                
-                
-                
-                
             }
         }
         else if url.host == "login.microsoftonline.com" {//ES文件浏览器
@@ -269,38 +267,17 @@ class PPAddCloudServiceViewController : PPBaseViewController,UITableViewDataSour
             if let code = urlWithCode.pp_valueOf("code") {
                 debugPrint("microsoft code is:",code)
                 
-                let parameters: [String: String] = [
-                    "client_id": onedrive_client_id_es,
-                    "redirect_uri": onedrive_redirect_uri_es,
-                    "code": code,
-//                    "code":"M.R3_BAY.37d890e7-9204-183f-a8b4-6dbd4b5030af",
-//                    "scope":"User.Read Files.ReadWrite.All",
-                    "grant_type": "authorization_code"
-                ]
-//                let url = "https://login.live.com/oauth20_token.srf"
-                let url = "https://login.microsoftonline.com/common/oauth2/v2.0/token"//同ES文件浏览器
-                AF.request(url, method: .post, parameters: parameters).responseJSON { response in
-                    debugPrint("GET OneDrive token info:\(response.value ?? "")")
-                    let jsonDic = response.value as? [String : Any]
-//                    let access_token = jsonDic["access_token"] as? String
-                    if let access_token = jsonDic?["access_token"] as? String,let refresh_token = jsonDic?["refresh_token"] as? String {
-                        debugPrint("microsoft access_token is:\(access_token)")
-                        let vc = PPWebDAVConfigViewController()
-                        vc.cloudType = "OneDrive"
-                        vc.serverURL = "https://graph.microsoft.com/"
-                        vc.userName = "064f5b62-97a8-4dae-b5c1-aaf44439939d"
-                        vc.remark = "OneDrive"
-                        vc.password = access_token
-                        vc.extraString = refresh_token
-                        UIViewController.pp_topViewController()?.navigationController?.pushViewController(vc, animated: true)
-                    }
-                    
-                    
+                // ES 那条老流程一直没带 scope，这里也保持不带，改了反而可能被要求重新同意
+                PPOneDriveService.exchangeAuthorizationCode(code,
+                                                            clientID: onedrive_client_id_es,
+                                                            redirectUri: onedrive_redirect_uri_es,
+                                                            scope: nil) { accessToken, refreshToken, _ in
+                    // 这条入口历史上失败是静默的，保持原样，失败信息只在控制台
+                    guard let accessToken = accessToken, let refreshToken = refreshToken else { return }
+                    PPAddCloudServiceViewController.pushOneDriveConfig(accessToken: accessToken,
+                                                                       refreshToken: refreshToken,
+                                                                       clientID: onedrive_client_id_es)
                 }
-                
-                
-                
-                
             }
         }
         else if url.host == "baiduwangpan" {

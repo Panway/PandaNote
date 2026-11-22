@@ -364,6 +364,45 @@ class PPCloudHTTP {
                     emptyResponseCodes: emptyResponseCodes, completion: completion)
     }
 
+    // MARK: - 20261115 新增：PATCH / DELETE 语义化方法
+
+    //
+    // 解决的问题：
+    //   OneDrive 改名、移动走 PATCH，删除走 DELETE。原来只有 request(url:method:) 一个入口，
+    //   调用方为了写出 .patch / .delete 必须 import Alamofire，等于把第三方库又漏回业务代码里。
+    //   这里补两个方法，业务侧只认 PPCloudHTTP 就够了。
+
+    /// PATCH 请求 - 局部更新资源，body 用 JSON 字典
+    @discardableResult
+    func patch(url: String,
+               json: [String: Any]?,
+               headers: PPHTTPHeaders? = nil,
+               completion: @escaping PPCloudHTTPCompletion<Data>) -> DataRequest?
+    {
+        // 字典转 Data 失败说明参数里有不能序列化的东西（比如自定义对象），这里直接回调错误，
+        // 否则会静默发出一个空 body，服务端返回 400，排查起来完全看不出原因
+        var bodyData: Data?
+        if let json = json {
+            do {
+                bodyData = try JSONSerialization.data(withJSONObject: json)
+            } catch {
+                completion(PPCloudHTTPResponse(data: nil, statusCode: 0, headers: nil, error: .unknown(error)))
+                return nil
+            }
+        }
+        return send(url, method: .patch, bodyData: bodyData, headers: headers,
+                    contentType: Self.jsonContentType, completion: completion)
+    }
+
+    /// DELETE 请求 - 成功时服务端一般返回 204，没有 body
+    @discardableResult
+    func delete(url: String,
+                headers: PPHTTPHeaders? = nil,
+                completion: @escaping PPCloudHTTPCompletion<Data>) -> DataRequest?
+    {
+        return send(url, method: .delete, headers: headers, completion: completion)
+    }
+
     // MARK: - 20260419 新增：文件下载（支持进度、本地缓存路径）
 
     //
