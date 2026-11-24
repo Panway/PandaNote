@@ -138,6 +138,13 @@ class PPOneDriveService: NSObject, PPCloudServiceProtocol {
 
     /// 刷新 access_token，成功后通过 configChanged 通知外面落盘
     func refreshAccessToken(_ completion: @escaping (Bool) -> Void) {
+        // 没有 refresh_token 就不用往服务端打了：微软一定回 400 invalid_request，两套 client_id 各打一次纯属白等。
+        // 这种配置基本是老版本保存时把 refresh_token 丢了（配置页没显示那一行），只能重新授权，日志里说清楚原因
+        guard refresh_token.isEmpty == false else {
+            debugPrint("OneDrive 没有 refresh_token，无法自动续期，需要重新授权")
+            completion(false)
+            return
+        }
         // 已经有请求在刷了，排它后面等同一个结果，别并发去刷
         if isRefreshingToken {
             refreshWaiters.append(completion)
@@ -183,6 +190,9 @@ class PPOneDriveService: NSObject, PPCloudServiceProtocol {
                 return
             }
             self.access_token = accessToken
+            // 记住这次成功的 client_id。之前是 fallback 到另一套才成功的话，下次刷新还是先用错的那套再试一遍，
+            // 白打一次请求还可能刷出 invalid_client 的噪音日志
+            self.clientID = clientID
             // 微软不是每次都回新的 refresh_token，没回就继续用旧的
             if let newRefreshToken = json["refresh_token"] as? String, newRefreshToken.isEmpty == false {
                 self.refresh_token = newRefreshToken

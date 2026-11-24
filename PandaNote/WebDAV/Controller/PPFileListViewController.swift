@@ -7,7 +7,6 @@
 //
 
 import UIKit
-//import FilesProvider
 import SKPhotoBrowser
 import Kingfisher
 #if USE_YPImagePicker
@@ -323,6 +322,7 @@ class PPFileListViewController: PPBaseViewController,
                     self.cellStyle = PPFileListCellViewMode(rawValue: index) ?? .list
                     self.dataSource = self.rawDataSource
                 }
+                debugPrint("=========\(index)===\(self.cellStyle)")
                 PPAppConfig.shared.setItem("fileViewMode","\(index)")
                 self.collectionView.reloadData()
             }
@@ -644,6 +644,12 @@ class PPFileListViewController: PPBaseViewController,
                                           srcFileID: fileObj.pathID,
                                           destFileID: fileObj.pathID,
                                           isRename: true) { error in
+                // 原来不判断失败，重命名没成功也会弹「修改成功」并把本地列表改掉，看起来像是成功了
+                if let error = error {
+                    debugPrint("重命名失败：\(error.localizedDescription)")
+                    PPHUD.showHUDFromTop("重命名失败", isError: true)
+                    return
+                }
                 PPHUD.showHUDFromTop("修改成功")
                 let fileNew = fileObj
                 fileNew.name = newName
@@ -969,6 +975,10 @@ class PPFileListViewController: PPBaseViewController,
         // 3. 等待所有目录创建完成后，再移动文件
         dispatchGroup.notify(queue: .main) {
             let moveGroup = DispatchGroup()
+            // 成功和失败都先记数，最后只弹一条汇总。
+            // 原来每个文件失败弹一次，几十个文件同时失败会刷出一屏 HUD，还会把后续提示挤到屏幕外
+            var successCount = 0
+            var failedCount = 0
             
             for file in self.dataSource {
                 if file.isDirectory {
@@ -983,8 +993,12 @@ class PPFileListViewController: PPBaseViewController,
                 moveGroup.enter()
                 PPFileManager.shared.moveFile(srcPath: file.path, destPath: newDestPath, isRename: false) { moveError in
                     debugPrint("移动文件: \(file.name)到\(newDestPath) ")
+                    // 回调都在主线程，直接改计数不需要加锁
                     if let moveError = moveError {
-                        PPHUD.showHUDFromTop("移动文件失败: \(file.name) 错误: \(moveError)")
+                        failedCount += 1
+                        debugPrint("移动失败：\(file.name) \(moveError.localizedDescription)")
+                    } else {
+                        successCount += 1
                     }
                     moveGroup.leave()
                 }
@@ -993,7 +1007,11 @@ class PPFileListViewController: PPBaseViewController,
             // 所有文件移动完成
             moveGroup.notify(queue: .main) {
                 debugPrint("所有文件整理完成")
-                PPHUD.showHUDFromTop("文件整理完成")
+                if failedCount == 0 {
+                    PPHUD.showHUDFromTop("文件整理完成，共移动 \(successCount) 个")
+                } else {
+                    PPHUD.showHUDFromTop("整理完成：成功 \(successCount) 个，失败 \(failedCount) 个", isError: true)
+                }
             }
         }
         

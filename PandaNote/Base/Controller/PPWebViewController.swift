@@ -362,19 +362,22 @@ class PPWebViewController: PPBaseViewController,WKUIDelegate,WKNavigationDelegat
 extension PPWebViewController {
     func handleMyStartLoad(_ urlString:String) -> Bool {
         debugPrint("handleMyStartLoad",urlString)
-        //获取Dropbox的access_token
-        if urlString.hasPrefix("filemgr://oauth-callback") {
-            let urlWithToken = urlString.removingPercentEncoding?.replacingOccurrences(of: "#access_token", with: "?access_token")
-            let access_token = urlWithToken?.pp_valueOf("access_token")
-//            let account_id = urlWithToken?.pp_valueOf("account_id")
-            debugPrint(access_token)
-            
-            let vc = PPWebDAVConfigViewController()
-            vc.cloudType = "Dropbox"
-            vc.serverURL = ""
-            vc.remark = "Dropbox"
-            vc.password = access_token ?? ""
-            self.navigationController?.pushViewController(vc, animated: true)
+        //获取Dropbox的授权回调（授权码 + PKCE，回调地址是 pandanote://oauth-callback/dropbox?code=xxx）
+        if urlString.hasPrefix(dropbox_redirect_uri_pandanote) {
+            guard let url = URL(string: urlString),
+                  let code = PPDropboxService.authorizationCode(fromCallback: url) else {
+                PPHUD.showHUDFromTop("Dropbox 授权失败，请重试", isError: true)
+                // 返回 false 取消这次导航，不然 WebView 会去加载一个不认识的 scheme 然后报错
+                return false
+            }
+            PPDropboxService.exchangeAuthorizationCode(code) { accessToken, refreshToken, errorMessage in
+                guard let accessToken = accessToken, let refreshToken = refreshToken else {
+                    PPAlertTool.showAlert(title: "Dropbox 授权失败", message: errorMessage ?? "未知原因")
+                    return
+                }
+                PPAddCloudServiceViewController.pushDropboxConfig(accessToken: accessToken, refreshToken: refreshToken)
+            }
+            return false
         }
         //获取百度网盘的access_token
         else if urlString.hasPrefix("http://www.estrongs.com") || urlString.hasPrefix("pandanote://baiduwangpan"){

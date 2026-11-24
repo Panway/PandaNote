@@ -43,10 +43,15 @@ class PPAliyunDriveFile: PPFileModel {
     }
     
     public class func toModelArray(_ fileList:[[String:Any]]) -> [PPAliyunDriveFile] {
-        if let modelsArray = Mapper<PPAliyunDriveFile>().mapArray(JSONObject: fileList) {
-            return modelsArray
+        guard let modelsArray = Mapper<PPAliyunDriveFile>().mapArray(JSONObject: fileList) else {
+            return []
         }
-        return []
+        for item in modelsArray {
+            // 阿里云盘缩略图 URL 问号后的签名参数每次都变，去掉 query 才是稳定的缓存 key，
+            // 否则 Kingfisher 每次刷新都命不中缓存、重新下载
+            item.thumbnailCacheKey = item.thumbnail.pp_split("?").first ?? ""
+        }
+        return modelsArray
     }
 
 }

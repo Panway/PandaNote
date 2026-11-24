@@ -31,6 +31,10 @@ public class PPFileModel:NSObject,Mappable,Codable {
     var clickCount : Int64 = 0 ///< 用户点击次数，仅本地排序用
     var downloadProgress : Double = 0.0 ///< 下载进度，仅本地用
     var cellIndex = 0 ///< 列表显示时临时使用
+    /// 缩略图的缓存 key。留空表示用 URL 本身当 key；
+    /// 阿里云盘这类每次签名参数都变的服务，解析时就填成去掉 query 的稳定串。
+    /// 要参与 Codable：文件列表和最近文件都会落盘再读出来，不落盘的话缓存列表里 key 丢失，阿里云盘缩略图会退回「每次重新下载」
+    var thumbnailCacheKey = ""
     
     ///遵循Equatable协议，判断两个对象是否相等
     public static func == (lhs: PPFileModel, rhs: PPFileModel) -> Bool {
@@ -67,6 +71,7 @@ public class PPFileModel:NSObject,Mappable,Codable {
         case associatedServerName
         case clickCount
         case downloadProgress
+        case thumbnailCacheKey
     }
     // JSONDecoder().decode() 时调用，将转换成Data类型的json文本转换成对象
     required public init(from decoder: Decoder) throws {
@@ -85,6 +90,8 @@ public class PPFileModel:NSObject,Mappable,Codable {
         // 在为PPFileModel新增加属性的时候，会导致之前的json文件不存在某个key，此时需要使用decodeIfPresent https://stackoverflow.com/a/66308592/4493393
         // 排查container.decode异常 https://stackoverflow.com/a/55391123/4493393
         downloadProgress = try container.decodeIfPresent(Double.self, forKey: .downloadProgress) ?? 0
+        // 老缓存文件没有这个 key，decodeIfPresent 拿到 nil 就回落空串（用 URL 当 key），不会解码失败
+        thumbnailCacheKey = try container.decodeIfPresent(String.self, forKey: .thumbnailCacheKey) ?? ""
     }
         
     public func encode(to encoder: Encoder) throws {
@@ -101,6 +108,7 @@ public class PPFileModel:NSObject,Mappable,Codable {
         try container.encode(associatedServerName, forKey: .associatedServerName)
         try container.encode(clickCount, forKey: .clickCount)
         try container.encode(downloadProgress, forKey: .downloadProgress)
+        try container.encode(thumbnailCacheKey, forKey: .thumbnailCacheKey)
     }
     
     public override var description: String {

@@ -42,6 +42,8 @@ class PPFileListCell: PPBaseCollectionViewCell {
 //        }
 //    }
     private var viewMode = PPFileListCellViewMode.list //默认是列表
+    /// 当前正在等缩略图的文件路径。cell 是复用的，异步回调回来必须核对一遍，否则快速滚动时会出现「A 的位置显示 B 的图」
+    private var thumbnailPath = ""
     private var cellPadding = 8
     var moreBtn = UIButton(type: .custom)
     private let progressBar = CALayer()
@@ -130,6 +132,16 @@ class PPFileListCell: PPBaseCollectionViewCell {
         
         self.layer.addSublayer(progressBar)
     }
+
+    override func prepareForReuse() {
+        super.prepareForReuse()
+        // 这一格要拿去显示别的文件了，之前那次缩略图请求的回调已经对不上号，清掉免得贴错图
+        // 图片本身不用在这里清：updateUIWithData 每个分支都会重新赋值，而且 Kingfisher 没传 keepCurrentImageWhileLoading 时自己也会把 image 置空
+        thumbnailPath = ""
+        iconImage.kf.cancelDownloadTask()
+        updateProgressBar(0)
+    }
+
     func pp_listMode() {
         let cellW = self.contentView.frame.size.width
         let cellH = self.contentView.frame.size.height
@@ -291,6 +303,10 @@ class PPFileListCell: PPBaseCollectionViewCell {
     // MARK: - 更新文件列表界面 update UI
     override func updateUIWithData(_ model: AnyObject) {
         let fileObj: PPFileObject = model as! PPFileObject
+        // 记录这一格当前显示的文件路径，迟到的缩略图回调靠它判断格子是否已换文件。
+        // 在方法开头统一赋值：不管这次走哪个分支（文件夹、带缩略图直连地址），旧路径都会被覆盖，
+        // 上一次请求的回调就不会盖到新内容上
+        self.thumbnailPath = fileObj.path
         self.titleLabel.text = fileObj.name
 //        debugPrint("====downloadProgress=====",fileObj.downloadProgress)
         if !fileObj.isDirectory {
@@ -302,7 +318,9 @@ class PPFileListCell: PPBaseCollectionViewCell {
         }
         else if (fileObj.name.pp_isImageFile())  {
             if fileObj.thumbnail.length > 0 {
-//                self.iconImage.kf.setImage(with: URL(string: fileObj.thumbnail))
+                // 先用占位图顶住，真正的大图在方法末尾统一交给 Kingfisher
+                // 万一 thumbnail 串解析不出 URL（老数据里带空格或中文）那里会被整块跳过，不清这一下就会残留上一个文件的图
+                self.iconImage.image = UIImage(named: "ico_jpg")
             }
             else {
             let imagePath = "\(PPDiskCache.shared.path)/\(PPUserInfo.shared.webDAVRemark)/\(fileObj.path)"
@@ -314,6 +332,15 @@ class PPFileListCell: PPBaseCollectionViewCell {
             }
             else {
                 self.iconImage.image = UIImage(named: "ico_jpg")
+                // 没有缩略图直连地址的服务（Dropbox）自己产图：协议默认实现直接回 nil，
+                // 不支持的服务走到这里就保持占位图标，不会发请求
+                PPFileManager.shared.currentService?.loadThumbnail(path: fileObj.path,
+                                                                   fileID: fileObj.pathID) { [weak self] image in
+                    guard let self = self, let image = image else { return }
+                    // 回调回来时这一格很可能已经换成别的文件了，路径对不上就别覆盖，否则会串图
+                    guard self.thumbnailPath == fileObj.path else { return }
+                    self.iconImage.image = image
+                }
             }
             }
         }
@@ -326,15 +353,18 @@ class PPFileListCell: PPBaseCollectionViewCell {
             }
         }
         if let thumbnail = URL(string: fileObj.thumbnail), fileObj.thumbnail.length > 0 {
-            if PPUserInfo.shared.cloudServiceType == .aliyundrive {
-            // 阿里云盘略缩图问号后每次都是不同的参数，去掉问号后面的参数，这样不用每次都下载略缩图
-            let imageResource = KFImageResource(downloadURL: thumbnail, cacheKey: fileObj.thumbnail.pp_split("?").first)
-            self.iconImage.kf.setImage(with: imageResource)
+            let imageResource: KFImageResource
+            if fileObj.thumbnailCacheKey.length > 0 {
+                // 服务在解析时填好的稳定缓存 key（如阿里云盘去掉问号后每次都变的签名参数），
+                // 避免同一张图每次刷新都重新下载
+                imageResource = KFImageResource(downloadURL: thumbnail, cacheKey: fileObj.thumbnailCacheKey)
             }
             else {
-                let imageResource = KFImageResource(downloadURL: thumbnail)
-                self.iconImage.kf.setImage(with: imageResource)
+                // 没有服务提供的稳定 key 就走 Kingfisher 默认（URL 自己当 key），
+                // 不要强行传 thumbnail 字符串，否则所有服务的缓存 key 都会变、升级后缩略图重下一次
+                imageResource = KFImageResource(downloadURL: thumbnail)
             }
+            self.iconImage.kf.setImage(with: imageResource)
         }
         if(fileObj.modifiedDate.hasSuffix("Z")) {
             if let date = PPAppConfig.shared.utcDateFormatter.date(from: fileObj.modifiedDate) {

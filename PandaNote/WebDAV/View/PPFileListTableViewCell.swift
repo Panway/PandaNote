@@ -7,7 +7,6 @@
 //
 
 import UIKit
-import FilesProvider
 import Kingfisher
 
 class PPFileListTableViewCell: PPBaseTableViewCell {

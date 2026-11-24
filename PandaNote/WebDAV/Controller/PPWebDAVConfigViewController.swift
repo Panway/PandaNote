@@ -52,6 +52,13 @@ class PPWebDAVConfigViewController: PPBaseViewController {
         super.viewDidLoad()
         self.title = "云服务配置"
         self.view.backgroundColor = UIColor(red:0.93, green:0.93, blue:0.93, alpha:1.00)
+        // OneDrive、Dropbox 的服务器地址和账号都由程序决定，露出来只会让用户改错，
+        // 改错的表现是请求打到错误域名或换 token 报 400。
+        // 放在这里而不是各个调用方，是因为新增和编辑走的是两个入口，只要漏一个就又把风险露回来了
+        if cloudType == PPCloudServiceType.onedrive.rawValue || cloudType == "Dropbox" {
+            showServerURL = false
+            showUserName = false
+        }
         var leftNames = [String]() //["服务器","账号","密码","备注"]
         var placeHolders = [String]() //["服务器地址","账号（Dropbox不需要）","密码或token","备注（显示用）"]
         var texts = [String]() //[serverURL,userName,password,remark]
@@ -184,6 +191,20 @@ class PPWebDAVConfigViewController: PPBaseViewController {
                     
                 }
             }
+        }
+
+        // 保存只遍历界面上可见的行，隐藏或滚出屏幕的字段读不到，值会被静默丢掉（refresh_token 之前就是这么丢的）。
+        // 这里统一用进来时预置的值兜底：宁可多写一次，也别把配置存成空
+        if keyValue[extraDesc] == nil, extraString.isEmpty == false {
+            keyValue[extraDesc] = extraString
+        }
+        // OneDrive 的 URL 和账号在界面上收起来了，但 client_id 必须落到配置里：
+        // 刷新 token 时要靠它和 refresh_token 配对，缺了就会先用错的那套 client_id 失败一次
+        if showServerURL == false, keyValue["URL"] == nil, serverURL.isEmpty == false {
+            keyValue["URL"] = serverURL
+        }
+        if showUserName == false, keyValue["账号"] == nil, userName.isEmpty == false {
+            keyValue["账号"] = userName
         }
 
         if(keyValue["Token"] != nil) {

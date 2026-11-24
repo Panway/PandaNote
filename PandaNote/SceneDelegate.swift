@@ -118,8 +118,9 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     /// 冷启动和热启动两个入口都会走到这里，保证行为一致
     private func handle(url: URL) {
         if url.host == "oauth-callback" {
-            // 支付跳转支付宝钱包进行支付，处理支付结果
-            // 授权跳转支付宝钱包进行支付，处理支付结果
+            // Dropbox 授权回调（pandanote://oauth-callback/dropbox?code=xxx）。
+            // 从系统浏览器授权回来时走这里，App 内 WebView 授权不经过这个方法
+            PPAddCloudServiceViewController.handleCloudServiceRedirect(url)
         }
         else if url.host == "msredirect" || url.host == "baiduwangpan" {
             PPAddCloudServiceViewController.handleCloudServiceRedirect(url)

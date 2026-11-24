@@ -117,12 +117,14 @@ class PPAddCloudServiceViewController : PPBaseViewController,UITableViewDataSour
                     sourceVC.navigationController?.pushViewController(vc, animated: true)
                 }
                 else if index == 0 {
+                    // 授权地址里带 PKCE 的 code_challenge，每次登录都要重新生成，不能存成常量反复用
                     let vc = PPWebViewController()
-                    vc.urlString = dropbox_auth_url
+                    vc.urlString = PPDropboxService.makeAuthorizationURL()
                     sourceVC.navigationController?.pushViewController(vc, animated: true)
                 }
                 else if index == 1 {
-                    
+                    guard let authURL = URL(string: PPDropboxService.makeAuthorizationURL()) else { return }
+                    UIApplication.shared.open(authURL, options: [:], completionHandler: nil)
                 }
                 
             }
@@ -224,19 +226,51 @@ class PPAddCloudServiceViewController : PPBaseViewController,UITableViewDataSour
     class func pushOneDriveConfig(accessToken: String, refreshToken: String, clientID: String) {
         let vc = PPWebDAVConfigViewController()
         vc.cloudType = "OneDrive"
+        // 下面这两个值只写进配置，不在界面上展示（配置页会按类型把这两行收起来），免得用户手一滑改错地址或 client_id，导致请求打到错误域名或刷新 token 报 400
         vc.serverURL = "https://graph.microsoft.com/"
-        // userName 会被当成 clientID 存进配置，刷新 token 时要靠它和 refresh_token 配对，
-        // 所以这里必须传真正签发 token 的那个，别两个入口混着用
+        // userName 会被当成 clientID 存进配置，刷新 token 时要靠它和 refresh_token 配对，所以这里必须传真正签发 token 的那个，别两个入口混着用
         vc.userName = clientID
         vc.remark = "OneDrive"
         vc.password = accessToken
         vc.extraString = refreshToken
+        // 这一行必须打开。保存逻辑只收集界面上可见的行，不显示的话 refresh_token 进不了配置，access_token 一小时过期后就没法续期了
+        vc.showExtra = true
+        vc.extraDesc = "RefreshToken"
+        UIViewController.pp_topViewController()?.navigationController?.pushViewController(vc, animated: true)
+    }
+
+    /// 换到 token 之后统一走这里建 Dropbox 配置。
+    /// 服务器地址和账号都由程序固定，配置页会把这两行藏起来，免得用户改错导致请求打歪
+    class func pushDropboxConfig(accessToken: String, refreshToken: String) {
+        let vc = PPWebDAVConfigViewController()
+        vc.cloudType = "Dropbox"
+        vc.remark = "Dropbox"
+        vc.password = accessToken
+        vc.extraString = refreshToken
+        // 这一行必须打开：保存逻辑只收集界面上可见的行，
+        // 不显示的话 refresh_token 进不了配置，access_token 四小时过期后就再也续不上
+        vc.showExtra = true
+        vc.extraDesc = "RefreshToken"
         UIViewController.pp_topViewController()?.navigationController?.pushViewController(vc, animated: true)
     }
 
     class func handleCloudServiceRedirect(_ url:URL) {
         debugPrint("callbackURL:", url)
-        if url.host == "msredirect" {
+        if url.host == "oauth-callback" {
+            // Dropbox 授权回调：pandanote://oauth-callback/dropbox?code=xxx&state=DROPBOX
+            // 系统浏览器授权走的是这条，App 内 WebView 授权则在 PPWebViewController 里就近处理
+            guard let code = PPDropboxService.authorizationCode(fromCallback: url) else {
+                return
+            }
+            PPDropboxService.exchangeAuthorizationCode(code) { accessToken, refreshToken, errorMessage in
+                guard let accessToken = accessToken, let refreshToken = refreshToken else {
+                    PPAlertTool.showAlert(title: "Dropbox 授权失败", message: errorMessage ?? "未知原因")
+                    return
+                }
+                PPAddCloudServiceViewController.pushDropboxConfig(accessToken: accessToken, refreshToken: refreshToken)
+            }
+        }
+        else if url.host == "msredirect" {
             let urlWithCode = url.absoluteString
             debugPrint("microsoft redirect is:\(urlWithCode)")
             if let code = urlWithCode.pp_valueOf("code") {

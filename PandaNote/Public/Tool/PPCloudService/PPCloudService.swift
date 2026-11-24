@@ -9,6 +9,7 @@ public typealias PPCSCompletionhandler = (_ error:Error?) -> Void
 
 import Foundation
 import Alamofire
+import UIKit // loadThumbnail 的签名用到 UIImage
 
 ///PPSwiftTips:  自定义错误
 public enum PPCloudServiceError: Error {
@@ -62,6 +63,13 @@ protocol PPCloudServiceProtocol {
     /// 返回 nil 表示该服务不支持直连流式（调用方回退到"先下载再播放"）。
     func streamRequest(path: String, fileID: String?) -> (url: String, headers: [String: String])?
 
+    /// 取一张列表用的小缩略图。默认不支持（直接回 nil），需要的服务自己重写。
+    /// 给没有缩略图直连地址的服务用（如 Dropbox）；有直连地址的服务填 PPFileModel.thumbnail 即可，不用实现这个。
+    /// completion 在主线程回调。
+    /// 注意：必须在 protocol 主体里声明成 requirement，只写在 extension 里的话，
+    /// 通过协议类型调用会永远走默认实现，具体服务的实现被静默忽略（参考上面的 streamRequest）
+    func loadThumbnail(path: String, fileID: String?, completion: @escaping (UIImage?) -> Void)
+
 }
 
 extension PPCloudServiceProtocol {
@@ -69,6 +77,11 @@ extension PPCloudServiceProtocol {
     /// 默认不支持直连流式播放，需要的服务自己重写
     func streamRequest(path: String, fileID: String?) -> (url: String, headers: [String: String])? {
         return nil
+    }
+
+    /// 默认不提供缩略图：不发任何请求，直接回 nil，调用方保持占位图标
+    func loadThumbnail(path: String, fileID: String?, completion: @escaping (UIImage?) -> Void) {
+        completion(nil)
     }
 
 }

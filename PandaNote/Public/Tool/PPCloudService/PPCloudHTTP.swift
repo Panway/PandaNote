@@ -403,6 +403,20 @@ class PPCloudHTTP {
         return send(url, method: .delete, headers: headers, completion: completion)
     }
 
+    /// POST 原始 body（二进制或空 body），返回服务端原始字节。
+    /// Dropbox 的上传、下载都是这个形状：参数放在请求头里，body 就是文件内容或者空，
+    /// 用 parameters 字典表达不出来（会被编码成 JSON），而上传系列的 upload 默认又是 PUT，方法也对不上
+    @discardableResult
+    func postRaw(url: String,
+                 bodyData: Data? = nil,
+                 headers: PPHTTPHeaders? = nil,
+                 contentType: String? = nil,
+                 completion: @escaping PPCloudHTTPCompletion<Data>) -> DataRequest?
+    {
+        return send(url, method: .post, bodyData: bodyData, headers: headers,
+                    contentType: contentType, completion: completion)
+    }
+
     // MARK: - 20260419 新增：文件下载（支持进度、本地缓存路径）
 
     //

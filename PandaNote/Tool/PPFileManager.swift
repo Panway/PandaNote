@@ -17,7 +17,7 @@ class PPFileManager: NSObject {
     static let shared = PPFileManager()
     static let dateFormatter = DateFormatter()
     var webdavService : PPWebDAVFileService?
-    var dropbox: PPDropboxService?//未配置服务器地址时刷新可能为空
+    private(set) var dropbox: PPDropboxService?//未配置服务器地址时刷新可能为空。只允许类内赋值，外部一律走 currentService 协议
     var localFileService: PPLocalFileService?
     var oneDriveService: PPOneDriveService?
     var iCloudService: PPiCloudDriveService?
@@ -163,9 +163,15 @@ class PPFileManager: NSObject {
         let handleResult = { (_ data:Data?,url:String?,_ error:Error?) -> Void in
             if let error = error {
                 debugPrint("下载失败：\(error.localizedDescription)")
+                // 以前这里只 return，调用方的 completion 永远等不到回调：图片预览会一直停在列表那张缩略图上（SKPhotoBrowser 拿不到原图就不刷新），视频点了没反应（getStreamInfo 的回调不发），表现都像「坏了」。失败也要把错误传回去，让上层至少能提示用户或者重试
+                DispatchQueue.main.async {
+                    completion(nil, false, error)
+                }
                 return
             }
-            if let url = url {
+            // url 非空才代表「服务端给了本地临时文件，挪过去就行」。
+            // Dropbox / OneDrive 这类自己没有直链的服务返回的是 ("", 内容)，url 不是 nil 而是空串，光判 nil 会走进这个分支，moveItem 拿空路径必然失败（try? 又把错误吃掉），内容压根没写进缓存。表现就是列表能看、点开图片和视频全失败，而 progress 还显示下载完成
+            if let url = url, url.isEmpty == false {
                 try? FileManager.default.moveItem(atPath: url, toPath: path.pp_fileCachePath())
                 DispatchQueue.main.async {
                     completion(data,false,error)
@@ -254,7 +260,10 @@ class PPFileManager: NSObject {
             return
         }
         getFileData(path: path, fileID: fileID, downloadURL: downloadURL, alwaysDownload: false, returnURL: true, progress: progress) { contents, isFromCache, error in
-            if error != nil {
+            if let error = error {
+                // 下载失败也要回调，只是给个空路径。直接 return 的话调用方一直在等，图片预览停在缩略图、视频页面永远不 push，用户完全看不到发生了什么
+                debugPrint("getLocalURL 下载失败：\(error.localizedDescription)")
+                completion("")
                 return
             }
             let filePath = "\(PPDiskCache.shared.path)/\(PPUserInfo.shared.webDAVRemark)/\(path)"
@@ -394,21 +403,26 @@ class PPFileManager: NSObject {
         })
     }
     /// 移动文件（夹）、重命名文件（夹）
+    /// 成功失败都不在这里弹提示，交给调用方决定文案和时机：批量移动时每个文件都弹一次会把 HUD 刷满，
+    /// 而 HUD 的纵向位置是累加的，堆到后面直接跑到屏幕外，用户就以为「什么都没发生」
     func moveFile(srcPath: String,
                   destPath: String,
                   srcFileID: String? = nil,
                   destFileID: String? = nil,
                   isRename: Bool,
                   completionHandler:@escaping(_ error:Error?) -> Void) {
+        // 没有当前服务就直接回调失败。原来用可选链，currentService 为 nil 时 completion 永远不执行，调用方一直干等
+        guard let service = currentService else {
+            completionHandler(PPCloudServiceError.unknown)
+            return
+        }
         // 局部闭包
         let handleResult = { (_ error:Error?) -> Void in
             DispatchQueue.main.async {
                 completionHandler(error)
                 if error != nil {
-                    PPHUD.showHUDFromTop("移动或重命名失败",isError: true)
                     return
                 }
-                PPHUD.showHUDFromTop("移动成功")
                 let downloadPath = "\(PPDiskCache.shared.path)/\(PPUserInfo.shared.webDAVRemark)"
                 //移动本地的文件
                 if FileManager.default.fileExists(atPath: downloadPath + srcPath) {
@@ -417,15 +431,13 @@ class PPFileManager: NSObject {
                 }
             }
         }
-        currentService?.moveItem(srcPath: srcPath,
-                                 destPath: destPath,
-                                 srcItemID: srcFileID ?? "",
-                                 destItemID: destFileID ?? "",
-                                 isRename: isRename, completion: { error in
+        service.moveItem(srcPath: srcPath,
+                         destPath: destPath,
+                         srcItemID: srcFileID ?? "",
+                         destItemID: destFileID ?? "",
+                         isRename: isRename, completion: { error in
             handleResult(error)
         })
-
-
     }
     /// 新建文件夹
     func createFolder(folder folderName: String, at atPath: String, parentID: String, completionHandler:@escaping(_ error:Error?) -> Void) {
@@ -467,13 +479,23 @@ class PPFileManager: NSObject {
         }
         switch PPUserInfo.shared.cloudServiceType {
         case .dropbox:
-            dropbox = PPDropboxService(access_token: password)
+            // refresh_token 存在 PPCloudServiceExtra 里，没有它的老配置只能等 401 后提示重新授权
+            dropbox = PPDropboxService(access_token: password,
+                                       refresh_token: PPUserInfo.shared.cloudServiceExtra)
+            dropbox?.configChanged = {key,value in
+                PPUserInfo.shared.updateCurrentServerInfo(key: key, value: value)
+            }
         case .baiduyun:
             baiduwangpan = BaiduyunAPITool(access_token: password)
         case .onedrive:
             let refresh_token = PPUserInfo.shared.cloudServiceExtra
+            // 登录时填的 userName 就是申请 token 用的 client_id，刷新 token 得用同一个，用错微软会回 400
             oneDriveService = PPOneDriveService(access_token: password,
-                                                refresh_token: refresh_token)
+                                                refresh_token: refresh_token,
+                                                clientID: user)
+            oneDriveService?.configChanged = {key,value in
+                PPUserInfo.shared.updateCurrentServerInfo(key: key, value: value)
+            }
         case .alist:
             let a = PPUserInfo.shared.getCurrentServerInfo("PPAccessToken")
             alistService = PPAlistService(url:PPUserInfo.shared.webDAVServerURL,

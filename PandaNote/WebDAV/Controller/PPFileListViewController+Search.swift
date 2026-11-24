@@ -223,11 +223,14 @@ extension PPFileListViewController {
                                               srcFileID: self.srcFileIDForMove,
                                               destFileID: self.pathID,
                                               isRename: false) { error in
-                    debugPrint(error?.localizedDescription)
-                    if error == nil {
-                        PPHUD.showHUDFromTop("移动成功，请刷新当前页面")
-                        self.dismissSelf()
+                    // 失败要明确告诉用户，不然点了确定什么都没发生，只能自己去刷新列表猜
+                    if let error = error {
+                        debugPrint("移动失败：\(error.localizedDescription)")
+                        PPHUD.showHUDFromTop("移动失败", isError: true)
+                        return
                     }
+                    PPHUD.showHUDFromTop("移动成功，请刷新当前页面")
+                    self.dismissSelf()
                 }
                 
             }
