@@ -8,7 +8,7 @@
 
 import Foundation
 import ObjectMapper
-import FilesProvider
+//import FilesProvider
 
 typealias PPFileObject = PPFileModel
 
@@ -122,6 +122,7 @@ public class PPFileModel:NSObject,Mappable,Codable {
 extension PPFileObject {
     //MARK: 数据处理 FileObject转PPFileObject
     /// FileObject Array to PPFileObject Array
+    /*
     class func toPPFileObjects(_ contents:[FileObject]) -> [PPFileObject] {
         var fileArray = [PPFileObject]()
         var dirCount = 0
@@ -146,6 +147,7 @@ extension PPFileObject {
         }
         return fileArray
     }
+     */
     class func toPPFileArray(_ contents:[CloudFile]) -> [PPFileObject] {
         var fileArray = [PPFileObject]()
         var dirCount = 0
@@ -170,4 +172,5 @@ extension PPFileObject {
         }
         return fileArray
     }
+     
 }

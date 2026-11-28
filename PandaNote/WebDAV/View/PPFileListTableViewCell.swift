@@ -56,7 +56,8 @@ class PPFileListTableViewCell: PPBaseTableViewCell {
         }
         else if (fileObj.name.pp_isImageFile())  {
 //            let imagePath = PPFileManager.shared.downloadPath + fileObj.path
-            let imagePath = "\(PPDiskCache.shared.path)/\(PPUserInfo.shared.webDAVRemark)/\(fileObj.path)"
+            // 本地服务读 Documents 里的原文件，其它服务读 PandaCache 里的副本
+            let imagePath = PPFileManager.shared.localPath(for: fileObj.path)
 
             if FileManager.default.fileExists(atPath: imagePath) {
                 //使用略缩图 显示略缩图 减少内存占用

@@ -323,7 +323,9 @@ class PPFileListCell: PPBaseCollectionViewCell {
                 self.iconImage.image = UIImage(named: "ico_jpg")
             }
             else {
-            let imagePath = "\(PPDiskCache.shared.path)/\(PPUserInfo.shared.webDAVRemark)/\(fileObj.path)"
+            // 本地服务直接读 Documents 里的原文件，其它服务读 PandaCache 里的副本。
+            // 各拼各的路径会在「本地服务」上错位：缓存里根本没有那个文件，格子永远只显示占位图标
+            let imagePath = PPFileManager.shared.localPath(for: fileObj.path)
             if FileManager.default.fileExists(atPath: imagePath) {
                 //使用略缩图 显示略缩图 减少内存占用
                 //https://github.com/onevcat/Kingfisher/wiki/Cheat-Sheet#processor

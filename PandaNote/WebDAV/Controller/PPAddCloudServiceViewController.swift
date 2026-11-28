@@ -12,6 +12,7 @@ import UIKit
 class PPAddCloudServiceViewController : PPBaseViewController,UITableViewDataSource,UITableViewDelegate {
     var dataSource:Array<String> = ["WebDAV（坚果云等）",
                                     "阿里云盘",
+                                    "iCloud Drive",
                                     "Dropbox",
                                     "OneDrive",
                                     "alist",
@@ -101,6 +102,25 @@ class PPAddCloudServiceViewController : PPBaseViewController,UITableViewDataSour
                             PPAddCloudServiceViewController.aliyundriveLoginWithCode(code)
                         }
                     }
+                }
+            }
+        }
+        else if obj == "iCloud Drive" || obj == PPCloudServiceType.icloud.rawValue {
+            // iCloud 的登录状态跟着系统账号走，App 里没有登录入口，所以添加之前先探一下能不能用。
+            // 不可用也允许继续添加：开发包没带 iCloud 权限时也能先把配置建出来，但原因必须说清楚，不然用户只会看到列表刷不出来
+            PPiCloudDriveService.unavailableReason(containerId: PPAppConfig.shared.iCloudContainerId) { reason in
+                if let reason = reason {
+                    // 如果不可用：先说原因，再让用户自己决定要不要硬加一个暂时用不了的配置
+                    PPAlertTool.showAlert(title: "iCloud Drive 暂时不可用",
+                                          message: "\(reason)\n\n是否仍然添加？添加后要等 iCloud 可用，列表里才会有文件") { index in
+                        if index == 0 {
+                            PPAddCloudServiceViewController.pushICloudConfig(sourceVC)
+                        }
+                    }
+                }
+                else {
+                    // 可用，直接进配置页
+                    PPAddCloudServiceViewController.pushICloudConfig(sourceVC)
                 }
             }
         }
@@ -252,6 +272,21 @@ class PPAddCloudServiceViewController : PPBaseViewController,UITableViewDataSour
         vc.showExtra = true
         vc.extraDesc = "RefreshToken"
         UIViewController.pp_topViewController()?.navigationController?.pushViewController(vc, animated: true)
+    }
+
+    /// iCloud Drive 没有服务器、账号、密码这些字段，只留一行「备注」让用户决定列表里显示什么名字。
+    /// 复用通用配置页是为了不把保存、备注查重、切换当前服务、刷新列表这几段逻辑再抄一份，抄一份以后改一边总会漏一边
+    class func pushICloudConfig(_ sourceVC: UIViewController) {
+        let vc = PPWebDAVConfigViewController()
+        // 必须写 rawValue（"icloud"）：PPUserInfo 是按 PPCloudServiceType(rawValue:) 解析这个字符串的，写中文名会解析失败回落到 webdav，最后拿一个空地址去发请求
+        vc.cloudType = PPCloudServiceType.icloud.rawValue
+        vc.remark = "iCloud Drive"
+        // 这几项对 iCloud 本来就没有值，全部收起来，免得用户以为还得填点什么才能保存
+        vc.showServerURL = false
+        vc.showUserName = false
+        vc.showPassword = false
+        vc.tips = "注意：\niCloud Drive 不需要填服务器和账号\n文件来自系统 iCloud 云盘，登录状态跟着系统设置走"
+        sourceVC.navigationController?.pushViewController(vc, animated: true)
     }
 
     class func handleCloudServiceRedirect(_ url:URL) {

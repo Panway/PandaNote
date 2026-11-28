@@ -34,6 +34,27 @@ class PPFileManager: NSObject {
             return "\(PPDiskCache.shared.path)/\(currentService?.baseURL.pp_md5 ?? "fileCache")"
         }
     }
+
+    /// 当前服务是不是「本地文件」：文件本来就在沙盒 Documents 里，不需要也不应该再往 PandaCache 复制一份
+    var isLocalService: Bool {
+        // 运行时类型和配置字典各判一次。正常情况两者一致，但老配置里可能缺 PPCloudServiceType 这个 key，只认一个会在那类配置上判断失败，图片就会又跑去 PandaCache 找一个根本不存在的文件
+        if PPUserInfo.shared.cloudServiceType == .local {
+            return true
+        }
+        // 走 currentServerInfo 而不是自己按下标取：索引和数组分开维护，删过配置之后下标可能越界，这里每次算路径都会进来
+        return PPUserInfo.shared.currentServerInfo["PPCloudServiceType"] == PPCloudServiceType.local.rawValue
+    }
+
+    /// 某个文件在当前服务下的落盘绝对路径（只算路径，不保证文件已存在）
+    /// - 本地服务：Documents 里的原文件，省掉一次「复制到缓存」的磁盘开销
+    /// - 其它服务：下载后存在 PandaCache 里的副本
+    /// 全项目只认这一个口径：缓存写入、缩略图读取、图片浏览器都调它，三处各拼各的必然会在「带不带前导斜杠」这种细节上对不上，表现就是列表能看、点开是空的
+    func localPath(for path: String) -> String {
+        if isLocalService {
+            return URL(fileURLWithPath: NSHomeDirectory()).appendingPathComponent("Documents").appendingPathComponent(path).path
+        }
+        return PPDiskCache.shared.fullPath(forKey: PPUserInfo.shared.webDAVRemark + path)
+    }
     
     ///获取当前云服务读写文件的对象
     open internal(set) var currentService: PPCloudServiceProtocol? {
@@ -215,18 +236,10 @@ class PPFileManager: NSObject {
                             returnURL : Bool? = false,
                             progress: ((Progress) -> Void)? = nil,
                             completion: @escaping ((_ contents: Data?, _ isFromCache:Bool, _ error: Error?) -> Void)) {
-        let dict = PPUserInfo.shared.pp_serverInfoList[PPUserInfo.shared.pp_lastSeverInfoIndex]
-        if dict["PPCloudServiceType"] == PPCloudServiceType.local.rawValue {
-            //从沙盒Documents取数据返回
-            let documentsURL = FileManager.default.urls(
-                for: .documentDirectory,
-                in: .userDomainMask
-            )[0]
-            // 去掉开头所有连续的斜杠
-            let path2 = String(path.drop(while: { $0 == "/" }))
-            let fileURL = documentsURL.appendingPathComponent(path2)
+        if isLocalService {
+            // 从沙盒 Documents 直接读，不再经过缓存
             do {
-                let data = try Data(contentsOf: fileURL)
+                let data = try Data(contentsOf: URL(fileURLWithPath: localPath(for: path)))
                 completion(data, true, nil)
             } catch {
                 completion(nil, false, error)
@@ -254,9 +267,9 @@ class PPFileManager: NSObject {
                      downloadURL:String? = nil,
                      progress: ((Progress) -> Void)? = nil,
                      completion: @escaping (( _ url:String) -> Void)) {
-        let dict = PPUserInfo.shared.pp_serverInfoList[PPUserInfo.shared.pp_lastSeverInfoIndex]
-        if dict["PPCloudServiceType"] == PPCloudServiceType.local.rawValue {
-            completion(NSHomeDirectory() + "/Documents" + path)
+        if isLocalService {
+            // 本地文件本来就在 Documents 里，直接给原路径，不复制到缓存
+            completion(localPath(for: path))
             return
         }
         getFileData(path: path, fileID: fileID, downloadURL: downloadURL, alwaysDownload: false, returnURL: true, progress: progress) { contents, isFromCache, error in
@@ -266,8 +279,7 @@ class PPFileManager: NSObject {
                 completion("")
                 return
             }
-            let filePath = "\(PPDiskCache.shared.path)/\(PPUserInfo.shared.webDAVRemark)/\(path)"
-            completion(filePath.replacingOccurrences(of: "//", with: "/"))
+            completion(self.localPath(for: path))
         }
     }
     /// 给"边播边缓存"用：只取可直接流式播放的直连地址 + 认证请求头 + 本地缓存路径，不下载。
@@ -283,8 +295,7 @@ class PPFileManager: NSObject {
         let cachePath = PPDiskCache.shared.fullPath(forKey: key)
 
         // 本地服务（沙盒 Documents 里的文件）没有网络地址可流式，直接走老路返回本地路径
-        let dict = PPUserInfo.shared.pp_serverInfoList[PPUserInfo.shared.pp_lastSeverInfoIndex]
-        if dict["PPCloudServiceType"] == PPCloudServiceType.local.rawValue {
+        if isLocalService {
             getLocalURL(path: path, fileID: fileID, downloadURL: downloadURL) { local in
                 completion("", [:], local)
             }
@@ -739,11 +750,7 @@ class PPFileManager: NSObject {
 
 extension String {
     func pp_fileCachePath() -> String {
-        let dict = PPUserInfo.shared.pp_serverInfoList[PPUserInfo.shared.pp_lastSeverInfoIndex]
-        if dict["PPCloudServiceType"] == PPCloudServiceType.local.rawValue {
-            return "\(NSHomeDirectory())/Documents/\(self)"
-        }
-        let filePath = "\(PPDiskCache.shared.path)/\(PPUserInfo.shared.webDAVRemark)/\(self)"
-        return filePath
+        // 统一走 PPFileManager.localPath，避免这里和缓存写入、缩略图读取各拼一套路径
+        return PPFileManager.shared.localPath(for: self)
     }
 }

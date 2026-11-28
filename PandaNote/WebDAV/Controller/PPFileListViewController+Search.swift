@@ -278,8 +278,8 @@ extension PPFileListViewController {
             if file.path == "" {
                 file.path = "\(basePath)\(file.name)".replacingOccurrences(of: "//", with: "/") //alist api 不返回path
             }
-            let path = "\(PPDiskCache.shared.path)/\(PPUserInfo.shared.webDAVRemark)/\(file.path)"
-                .replacingOccurrences(of: "//", with: "/")
+            // 本地服务的文件本来就在 Documents 里，没有「下载完成」这个概念，统一走 localPath 免得路径对不上
+            let path = PPFileManager.shared.localPath(for: file.path)
             // debugPrint("=========",path, file)
             // 增加缓存状态显示
             if fileManager.fileExists(atPath: path) {
@@ -464,10 +464,10 @@ extension PPFileListViewController {
     }
     func popMenuDidSelectItem(_ popMenuViewController: PopMenuViewController, at index: Int) {
         debugPrint(index)
-        // 记住上次选中第几个
-        PPAppConfig.shared.setItem("pp_lastSeverInfoIndex", "\(index)")
-        PPUserInfo.shared.pp_lastSeverInfoIndex = index
-        let info = PPUserInfo.shared.pp_serverInfoList[index]
+        // 记住上次选中第几个。统一走 selectServerIndex：内部会收敛越界值并持久化，
+        // 这里再自己 setItem 一遍等于绕开了校验，删过配置就留下一个越界索引
+        PPUserInfo.shared.selectServerIndex(index)
+        let info = PPUserInfo.shared.currentServerInfo
         setNavTitle(info["PPWebDAVRemark"])
         PPUserInfo.shared.updateCurrentServerInfo(index: index)
         PPFileManager.shared.initCloudServiceSetting()

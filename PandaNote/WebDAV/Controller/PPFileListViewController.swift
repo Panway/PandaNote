@@ -188,6 +188,8 @@ class PPFileListViewController: PPBaseViewController,
             fileObj.path = pathStr + fileObj.name
         }
         cell.cellIndex = indexPath.row
+        // 图片浏览器要靠它反查「这一页对应列表里的哪一格」，用来做放大/缩小转场和滑动时刷新格子。以前只赋了 cell 自己的 cellIndex，模型上的这个字段一直是默认值 0，不管点哪张图转场都飞向第一格
+        fileObj.cellIndex = indexPath.row
         cell.updateLayout(self.cellStyle)
         cell.updateUIWithData(fileObj as AnyObject)
         cell.updateCacheStatus(self.isCachedFile)
@@ -290,7 +292,8 @@ class PPFileListViewController: PPBaseViewController,
             else if item == "在访达中显示" {
 #if targetEnvironment(macCatalyst)
                 let fileObj = self.dataSource[cellIndex]
-                let path = fileObj.path.diskCachePath
+                // 本地服务的文件就在 Documents 里，PandaCache 里没有副本，用缓存路径会打开一个空目录
+                let path = PPFileManager.shared.localPath(for: fileObj.path)
                 let fileURL = URL(fileURLWithPath: path) // 指定要打开的文件路径
                 Dynamic.NSWorkspace.sharedWorkspace.activateFileViewerSelectingURLs([fileURL])
 #endif
@@ -366,7 +369,8 @@ class PPFileListViewController: PPBaseViewController,
         collectionView.deselectItem(at: indexPath, animated: true)
         insertToRecentFiles(fileObj,isRecentFiles)
         let objIndex = Int(fileObj.associatedServerID) ?? 0
-        if(objIndex != PPUserInfo.shared.pp_lastSeverInfoIndex) {
+        if objIndex >= 0, objIndex < PPUserInfo.shared.pp_serverInfoList.count,
+           objIndex != PPUserInfo.shared.pp_lastSeverInfoIndex {
             PPUserInfo.shared.updateCurrentServerInfo(index: objIndex)
             PPFileManager.shared.initCloudServiceSetting()
         }
@@ -411,7 +415,7 @@ class PPFileListViewController: PPBaseViewController,
                     PPHUD.showHUDFromTop("图片下载失败，请检查网络后重试", isError: true)
                     return
                 }
-                self.showImage(fromView:cell.iconImage, imageName: fileObj.path, imageURL:localFilePath) {
+                self.showImage(imageURL: localFilePath) {
                     fileObj.downloadProgress = 1.0
                     collectionView.reloadItems(at: [indexPath]) //下载成功后再刷新
                 }
@@ -567,51 +571,70 @@ class PPFileListViewController: PPBaseViewController,
     // 滑动和点击左右都会执行。在滑到第index页的时候，下载当前页的图片并且让SKPhotoBrowser刷新
     func didShowPhotoAtIndex(_ browser: SKPhotoBrowser, index: Int) {
         //debugPrint("didShowPhotoAtIndex",index,browser.currentPageIndex)
+        guard index >= 0, index < imageArray.count else { return }
         if(currentImageIndex != index) {
             currentImageIndex = index
             let obj = self.imageArray[index];
-            let indexPath = IndexPath(item: obj.cellIndex, section: 0)
-            guard let cell = collectionView.cellForItem(at: indexPath) as? PPFileListCell else {
+            let targetPath = PPFileManager.shared.localPath(for: getPathNotEmpty(obj))
+            // 分享 GIF 读的是 currentImageURL，必须跟着当前页走，否则滑到第二张还去分享第一张
+            self.currentImageURL = targetPath
+            // 已经在本地（下载过，或者本来就是本地服务）就不用再下载一遍
+            if FileManager.default.fileExists(atPath: targetPath) {
+                browser.photos[index].loadUnderlyingImageAndNotify()
                 return
             }
-            cell.downloadFile(obj) { localFilePath in
-                // 下载失败就别刷新了，否则 SKPhotoBrowser 会把上一张图（列表缩略图）当成结果留着
+            let indexPath = IndexPath(item: obj.cellIndex, section: 0)
+            if let cell = collectionView.cellForItem(at: indexPath) as? PPFileListCell {
+                cell.downloadFile(obj) { localFilePath in
+                    // 下载失败就别刷新了，否则 SKPhotoBrowser 会把上一张图（列表缩略图）当成结果留着
+                    if localFilePath.isEmpty {
+                        PPHUD.showHUDFromTop("图片下载失败，请检查网络后重试", isError: true)
+                        return
+                    }
+                    obj.downloadProgress = 1.0
+                    self.collectionView.reloadItems(at: [indexPath])
+                    browser.photos[index].loadUnderlyingImageAndNotify()//刷新图像
+                }
+                return
+            }
+            // 格子已经滚出屏幕（图片多的目录很常见），这时没有 cell 可以调，直接找文件管理器下载。
+            // 原来这里 guard 失败就直接 return，滑到靠后的图会永远停在空白页
+            PPFileManager.shared.getLocalURL(path: getPathNotEmpty(obj),
+                                             fileID: obj.pathID,
+                                             downloadURL: obj.downloadURL) { localFilePath in
                 if localFilePath.isEmpty {
                     PPHUD.showHUDFromTop("图片下载失败，请检查网络后重试", isError: true)
                     return
                 }
                 obj.downloadProgress = 1.0
-                self.collectionView.reloadItems(at: [indexPath])
-                let obj2 = browser.photos[index]
-                obj2.loadUnderlyingImageAndNotify()//刷新图像
+                browser.photos[index].loadUnderlyingImageAndNotify()
             }
         }
     }
     
-    //根据参数加载显示图片 Load photo according to the parameters
-    func showImage(fromView: UIView?,imageName:String,imageURL:String,completion: (() -> Void)? = nil) -> Void {
+    /// 显示图片浏览器
+    /// - Parameter imageURL: 点中的那张图在磁盘上的路径，用来确定浏览器打开后停在第几页
+    func showImage(imageURL:String,completion: (() -> Void)? = nil) -> Void {
+        // 空数组要提前拦掉：SKPhotoBrowser 的构造器里会直接取 photos[0]，空数组会越界崩溃
+        guard imageArray.isEmpty == false else { return }
         var photos = [SKLocalPhoto]()
-        let imageToSKPhoto = imageArray.map { imageObj -> SKLocalPhoto in
-            let path2 = "\(PPDiskCache.shared.path)/\(PPUserInfo.shared.webDAVRemark)/\(getPathNotEmpty(imageObj))".replacingOccurrences(of: "//", with: "/")
-            let photo2 = SKLocalPhoto.photoWithImageURL(path2)//SKPhoto.photoWithImageURL(url2.absoluteString)
-            photo2.caption = imageObj.path
-            return photo2
+        var clickIndex = 0
+        for (index, imageObj) in imageArray.enumerated() {
+            let path = PPFileManager.shared.localPath(for: getPathNotEmpty(imageObj))
+            let photo = SKLocalPhoto.photoWithImageURL(path)
+            photo.caption = imageObj.path
+            if path == imageURL {
+                clickIndex = index
+            }
+            photos.append(photo)
         }
-        photos.append(contentsOf: imageToSKPhoto)
-//        self.photoBrowser = SKPhotoBrowser(originImage: UIImage(), photos: photos, animatedFromView: fromView)
+//        改用普通构造器，转场动画由 viewForPhoto 代理提供起点（就是用户点的那一格），效果一样且不会崩
         self.photoBrowser = SKPhotoBrowser(photos: photos)
         self.photoBrowser.shouldAutoHideControlls = false
-        var clickIndex = 0//点击的图片是第几张 The sequence number of the clicked photo
-        for i in 0..<imageArray.count {
-            let fileObj = imageArray[i]
-            if imageURL.contains(fileObj.path) {
-                clickIndex = i
-                break
-            }
-        }
-        
         self.photoBrowser.initializePageIndex(clickIndex)
         self.photoBrowser.delegate = self
+        // 分享 GIF 那一路要读 currentImageURL 的文件，这个值不赋值永远是空串，点了没反应
+        self.currentImageURL = imageURL
         SKPhotoBrowserOptions.actionButtonTitles = ["微信原图分享","微信表情(Gif)分享😄","UIActivityViewController分享"]
         
         self.present(self.photoBrowser, animated: true, completion: {})
@@ -876,7 +899,8 @@ class PPFileListViewController: PPBaseViewController,
 //                        PPHUD.showHUDFromTop(tips + "，请重新登录", isError: true)
                         PPAlertTool.showAlert(title: tips, message: "是否重新登录") { index in
                             if index == 0 {
-                                let currentConfig = PPUserInfo.shared.pp_serverInfoList[PPUserInfo.shared.pp_lastSeverInfoIndex]
+                                // 走 currentServerInfo：索引可能因为删过配置而越界，这里直接下标会崩
+                                let currentConfig = PPUserInfo.shared.currentServerInfo
                                 debugPrint(currentConfig)
                                 currentConfig.printJSON()
                                 let serviceType = PPUserInfo.shared.getCurrentServerInfo("PPCloudServiceType")
@@ -899,6 +923,14 @@ class PPFileListViewController: PPBaseViewController,
                     // WebDAV 走的是新的云盘协议，错误类型是 CloudDriveError，上面那个分支认不出来，
                     // 不单独处理的话「密码错了」「没权限」全都会显示成「请检查服务器配置」，用户不知道该改什么
                     switch driveError {
+                    case .notAuthenticated:
+                        // iCloud 的「未登录」说的是系统账号，App 里根本没有登录入口，提示必须指到系统设置去，否则用户会一直找 App 内的重新登录按钮
+                        if PPUserInfo.shared.cloudServiceType == .icloud {
+                            PPHUD.showHUDFromTop("未登录 iCloud，请到系统设置里登录 Apple ID 并打开 iCloud 云盘", isError: true)
+                        }
+                        else {
+                            PPHUD.showHUDFromTop("登录状态已失效，请重新配置", isError: true)
+                        }
                     case .authenticationFailed:
                         PPHUD.showHUDFromTop("用户名或密码错误，请重新配置", isError: true)
                     case .permissionDenied:

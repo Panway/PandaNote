@@ -7,7 +7,7 @@
 //
 
 import UIKit
-import FilesProvider
+//import FilesProvider
 
 //class Person: Codable {
 //}
@@ -106,34 +106,3 @@ class PPPFileObject: NSObject {
 //    }
 //}
 
-
-
-
-
-//MARK:NSCoding
-class PFileObject: FileObject, NSCoding {
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
-    
-    func encode(with coder: NSCoder) {
-        coder.encode(name, forKey: "name")
-        coder.encode(modifiedDate, forKey: "modifiedDate")
-        coder.encode(size, forKey: "size")
-        coder.encode(isDirectory, forKey: "isDirectory")
-    }
-//    public required convenience init?(coder : NSCoder) {
-//        let name : String = coder.decodeObject(forKey: "name") as? String ?? ""
-//        //        let modifiedDate = coder.decodeObject(forKey: "modifiedDate") as? Date ?? ""
-//        //        self.size = coder.decodeInt64(forKey: "size") as? String ?? ""
-//        //        self.isDirectory = coder.decodeBool(forKey: "isDirectory")
-//        //        coder.encode(name, forKey: "name")
-//        //        coder.encode(image, forKey: "image")
-//        self.init(url: nil, name: name, path: "")
-//    }
-//    required init?(coder: NSCoder) {
-//        super.init(coder: coder)
-    //        super.init(url: nil, name: name, path: "")
-    
-    
-}

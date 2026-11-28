@@ -483,6 +483,7 @@
 		1E526EC026B6781E0026DC67 /* PPCloudService */ = {
 			isa = PBXGroup;
 			children = (
+				3B58E21930B8889D004AD57D /* Dropbox */,
 				3B8D11E72A6D27C300EE801F /* iCoudDrive */,
 				1EEB0FEC27534498006A5E26 /* Base */,
 				1E12094029D875DC00D442A2 /* AliyunDrive */,
@@ -513,7 +514,6 @@
 		1E526ECC26B6F1DB0026DC67 /* Dropbox */ = {
 			isa = PBXGroup;
 			children = (
-				1E526ECD26B6F20B0026DC67 /* PPDropboxService.swift */,
 			);
 			path = Dropbox;
 			sourceTree = "<group>";
@@ -652,6 +652,14 @@
 				3B182B1A2F950AD0002B711B /* PPWebDAVFileService.swift */,
 			);
 			path = WebDAV;
+			sourceTree = "<group>";
+		};
+		3B58E21930B8889D004AD57D /* Dropbox */ = {
+			isa = PBXGroup;
+			children = (
+				1E526ECD26B6F20B0026DC67 /* PPDropboxService.swift */,
+			);
+			path = Dropbox;
 			sourceTree = "<group>";
 		};
 		3B594A912A908CDB00A5BC1E /* Tool */ = {

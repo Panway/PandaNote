@@ -7,14 +7,15 @@
 //
 
 import Foundation
-import FilesProvider
+//import FilesProvider
 
-
+/*
 class PPWebDAVService: NSObject, PPCloudServiceProtocol {
     var url = ""
     var baseURL: String {
         return url
     }
+    
     var webdav: WebDAVFileProvider?//未配置服务器地址时刷新可能为空
     
     init(url: String, username: String, password: String) {
@@ -115,3 +116,4 @@ class PPWebDAVService: NSObject, PPCloudServiceProtocol {
     }
     
 }
+ */

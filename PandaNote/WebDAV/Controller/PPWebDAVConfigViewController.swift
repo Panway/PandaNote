@@ -233,7 +233,8 @@ class PPWebDAVConfigViewController: PPBaseViewController {
 //        }
         debugPrint(newServer)
         if isEditMode {
-            PPUserInfo.shared.pp_serverInfoList[editIndex] = newServer
+            // editIndex 是进页面时记下的，中途配置列表被删短过就对不上了，写入前先让 PPUserInfo 自己挡一下越界
+            PPUserInfo.shared.setServerInfo(newServer, at: editIndex)
             updateConfig(editIndex, keyValue["备注"] ?? "")
         }
         else {
@@ -245,7 +246,7 @@ class PPWebDAVConfigViewController: PPBaseViewController {
                 PPAlertTool.showAlert(title: "已存在名为\"\(keyValue["备注"] ?? "")\"的配置", message: "是否更新当前配置") { aIndex in
                     debugPrint(aIndex)
                     if aIndex == 0 {
-                        PPUserInfo.shared.pp_serverInfoList[PPUserInfo.shared.pp_lastSeverInfoIndex] = newServer
+                        PPUserInfo.shared.setCurrentServerInfo(newServer)
                         self.updateConfig(PPUserInfo.shared.pp_lastSeverInfoIndex, keyValue["备注"] ?? "")
                     }
                 }
@@ -260,9 +261,8 @@ class PPWebDAVConfigViewController: PPBaseViewController {
     func updateConfig(_ index: Int, _ remark: String) {
         PPHUD.showHUDFromTop("设置成功")
         PPUserInfo.shared.initConfig()
-        //新添加的配置设为当前服务器配置（选中最后一个）
-        PPUserInfo.shared.pp_lastSeverInfoIndex = index
-        PPAppConfig.shared.setItem("pp_lastSeverInfoIndex", "\(PPUserInfo.shared.pp_lastSeverInfoIndex)")
+        // 新添加的配置设为当前服务器配置（选中最后一个）。selectServerIndex 内部会把越界值收敛掉并持久化，这里不要再直接赋值
+        PPUserInfo.shared.selectServerIndex(index)
         PPFileManager.shared.initCloudServiceSetting()
         //如果采用UISplitViewController，home是右侧的navigationController
         if let home = self.navigationController?.viewControllers[0],let vc = home as? PPFileListViewController {
